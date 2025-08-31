@@ -10,10 +10,10 @@ type Database struct {
 	database *sql.DB
 }
 
-const DatabaseName = "FavoriteGameGauntlet.db"
+const DatabasePath = "database/FavoriteGameGauntlet.db"
 
 func NewDatabase() *Database {
-	db, err := sql.Open("sqlite3", DatabaseName)
+	db, err := sql.Open("sqlite3", DatabasePath)
 
 	if err != nil {
 		panic(err)
