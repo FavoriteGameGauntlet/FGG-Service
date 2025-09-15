@@ -1,0 +1,45 @@
+openapi: 3.0.4
+info:
+  title: Favorite Game Gauntlet
+  version: 1.0.0
+paths:
+  "/users/{name}":
+    parameters:
+    - name: name
+      in: path
+      required: true
+      schema:
+        "$ref": "#/components/schemas/Username"
+    post:
+      responses:
+        '200':
+          description: User was created
+        '409':
+          description: The user already exists
+    get:
+      responses:
+        '200':
+          description: The user was found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/User"
+        '404':
+          description: The user wasn't found
+components:
+  schemas:
+    UserId:
+      type: integer
+      format: int64
+    Username:
+      type: string
+    User:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          "$ref": "#/components/schemas/UserId"
+        name:
+          "$ref": "#/components/schemas/Username"

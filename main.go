@@ -1,12 +1,21 @@
 package main
 
 import (
-	"FavoriteGameGauntlet/user"
-	"fmt"
+	"FavoriteGameGauntlet/api"
+	"FavoriteGameGauntlet/controller"
+
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
-	user := user.FindUser("Jegern")
-	timer := user.GetCurrentTimer()
-	fmt.Println(timer.GetTimerId())
+	server := controller.NewServer()
+
+	e := echo.New()
+
+	api.RegisterHandlers(e, api.NewStrictHandler(
+		server,
+		[]api.StrictMiddlewareFunc{},
+	))
+
+	e.Start("127.0.0.1:8080")
 }
