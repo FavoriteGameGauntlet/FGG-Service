@@ -19,6 +19,8 @@ func NewDatabase() *Database {
 		panic(err)
 	}
 
+	db.Exec("SELECT load_extension('uuid')")
+
 	return &Database{
 		database: db,
 	}
@@ -28,30 +30,18 @@ func (db *Database) Close() {
 	db.database.Close()
 }
 
-func Exec(query string, args ...any) sql.Result {
+func Exec(query string, args ...any) (sql.Result, error) {
 	db := NewDatabase()
 	defer db.Close()
 
-	result, err := db.database.Exec(query, args...)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return result
+	return db.database.Exec(query, args...)
 }
 
-func Query(query string, args ...any) *sql.Rows {
+func Query(query string, args ...any) (*sql.Rows, error) {
 	db := NewDatabase()
 	defer db.Close()
 
-	rows, err := db.database.Query(query, args...)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return rows
+	return db.database.Query(query, args...)
 }
 
 func QueryRow(query string, args ...any) *sql.Row {

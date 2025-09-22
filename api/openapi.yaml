@@ -13,8 +13,20 @@ paths:
       responses:
         '200':
           description: User was created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
         '409':
-          description: The user already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserAlreadyExistsException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
     get:
       responses:
         '200':
@@ -28,6 +40,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserNotFoundException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
 
 
 
@@ -48,6 +65,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserNotFoundException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
     get:
       responses:
         '200':
@@ -61,6 +83,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserNotFoundException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
 
 
 
@@ -85,6 +112,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NoAvailableRollsException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
 
 
 
@@ -106,6 +138,33 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/UserNotFoundException"
                   - $ref: "#/components/schemas/GameNotFoundException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
+
+
+
+  "/users/{userId}/games/current/finish":
+    parameters:
+      - $ref: "#/components/parameters/UserId"
+    get:
+      responses:
+        '200':
+          description: The current game was finished
+        '404':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/UserNotFoundException"
+                  - $ref: "#/components/schemas/GameNotFoundException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
 
 
 
@@ -125,6 +184,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserNotFoundException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
 
 
 
@@ -145,6 +209,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserNotFoundException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
 
 
 
@@ -165,6 +234,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserNotFoundException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
 
 
 
@@ -184,6 +258,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserNotFoundException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
 
 
 
@@ -203,6 +282,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserNotFoundException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
 
 
 
@@ -227,6 +311,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NoAvailableRollsException"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseQueryException"
         
   
 components:
@@ -319,13 +408,13 @@ components:
     Exception:
       type: object
       properties:
-        error:
-          type: string
         code:
           type: string
+        message:
+          type: string
       required:
-        - error
         - code
+        - message
     UserNotFoundException:
       allOf:
         - $ref: "#/components/schemas/Exception"
@@ -350,3 +439,19 @@ components:
             code:
               type: string
               enum: ["NO_AVAILABLE_ROLLS"]
+    UserAlreadyExistsException:
+      allOf:
+        - $ref: "#/components/schemas/Exception"
+        - type: object
+          properties:
+            code:
+              type: string
+              enum: ["USER_ALREADY_EXISTS"]
+    DatabaseQueryException:
+      allOf:
+        - $ref: "#/components/schemas/Exception"
+        - type: object
+          properties:
+            code:
+              type: string
+              enum: ["DATABASE_QUERY"]

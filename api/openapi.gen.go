@@ -4,16 +4,28 @@
 package api
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"path"
+	"strings"
 	"time"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
 	openapi_types "github.com/oapi-codegen/runtime/types"
+)
+
+// Defines values for DatabaseQueryExceptionCode.
+const (
+	DATABASEQUERY DatabaseQueryExceptionCode = "DATABASE_QUERY"
 )
 
 // Defines values for GameNotFoundExceptionCode.
@@ -34,10 +46,24 @@ const (
 	Running  TimerState = "running"
 )
 
+// Defines values for UserAlreadyExistsExceptionCode.
+const (
+	USERALREADYEXISTS UserAlreadyExistsExceptionCode = "USER_ALREADY_EXISTS"
+)
+
 // Defines values for UserNotFoundExceptionCode.
 const (
 	USERNOTFOUND UserNotFoundExceptionCode = "USER_NOT_FOUND"
 )
+
+// DatabaseQueryException defines model for DatabaseQueryException.
+type DatabaseQueryException struct {
+	Code    DatabaseQueryExceptionCode `json:"code"`
+	Message string                     `json:"message"`
+}
+
+// DatabaseQueryExceptionCode defines model for DatabaseQueryException.Code.
+type DatabaseQueryExceptionCode string
 
 // Effect defines model for Effect.
 type Effect struct {
@@ -52,8 +78,8 @@ type Effects = []Effect
 
 // Exception defines model for Exception.
 type Exception struct {
-	Code  string `json:"code"`
-	Error string `json:"error"`
+	Code    string `json:"code"`
+	Message string `json:"message"`
 }
 
 // Game defines model for Game.
@@ -64,8 +90,8 @@ type Game struct {
 
 // GameNotFoundException defines model for GameNotFoundException.
 type GameNotFoundException struct {
-	Code  GameNotFoundExceptionCode `json:"code"`
-	Error string                    `json:"error"`
+	Code    GameNotFoundExceptionCode `json:"code"`
+	Message string                    `json:"message"`
 }
 
 // GameNotFoundExceptionCode defines model for GameNotFoundException.Code.
@@ -82,8 +108,8 @@ type Name = string
 
 // NoAvailableRollsException defines model for NoAvailableRollsException.
 type NoAvailableRollsException struct {
-	Code  NoAvailableRollsExceptionCode `json:"code"`
-	Error string                        `json:"error"`
+	Code    NoAvailableRollsExceptionCode `json:"code"`
+	Message string                        `json:"message"`
 }
 
 // NoAvailableRollsExceptionCode defines model for NoAvailableRollsException.Code.
@@ -106,10 +132,19 @@ type User struct {
 	Name Name `json:"name"`
 }
 
+// UserAlreadyExistsException defines model for UserAlreadyExistsException.
+type UserAlreadyExistsException struct {
+	Code    UserAlreadyExistsExceptionCode `json:"code"`
+	Message string                         `json:"message"`
+}
+
+// UserAlreadyExistsExceptionCode defines model for UserAlreadyExistsException.Code.
+type UserAlreadyExistsExceptionCode string
+
 // UserNotFoundException defines model for UserNotFoundException.
 type UserNotFoundException struct {
-	Code  UserNotFoundExceptionCode `json:"code"`
-	Error string                    `json:"error"`
+	Code    UserNotFoundExceptionCode `json:"code"`
+	Message string                    `json:"message"`
 }
 
 // UserNotFoundExceptionCode defines model for UserNotFoundException.Code.
@@ -144,6 +179,9 @@ type ServerInterface interface {
 
 	// (GET /users/{userId}/games/current)
 	GetUsersUserIdGamesCurrent(ctx echo.Context, userId UserId) error
+
+	// (GET /users/{userId}/games/current/finish)
+	GetUsersUserIdGamesCurrentFinish(ctx echo.Context, userId UserId) error
 
 	// (GET /users/{userId}/games/roll)
 	GetUsersUserIdGamesRoll(ctx echo.Context, userId UserId) error
@@ -262,6 +300,22 @@ func (w *ServerInterfaceWrapper) GetUsersUserIdGamesCurrent(ctx echo.Context) er
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetUsersUserIdGamesCurrent(ctx, userId)
+	return err
+}
+
+// GetUsersUserIdGamesCurrentFinish converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUsersUserIdGamesCurrentFinish(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetUsersUserIdGamesCurrentFinish(ctx, userId)
 	return err
 }
 
@@ -395,6 +449,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/users/:userId/effects/history", wrapper.GetUsersUserIdEffectsHistory)
 	router.POST(baseURL+"/users/:userId/effects/roll", wrapper.PostUsersUserIdEffectsRoll)
 	router.GET(baseURL+"/users/:userId/games/current", wrapper.GetUsersUserIdGamesCurrent)
+	router.GET(baseURL+"/users/:userId/games/current/finish", wrapper.GetUsersUserIdGamesCurrentFinish)
 	router.GET(baseURL+"/users/:userId/games/roll", wrapper.GetUsersUserIdGamesRoll)
 	router.GET(baseURL+"/users/:userId/games/unplayed", wrapper.GetUsersUserIdGamesUnplayed)
 	router.POST(baseURL+"/users/:userId/games/unplayed", wrapper.PostUsersUserIdGamesUnplayed)
@@ -430,6 +485,15 @@ func (response GetUsersName404JSONResponse) VisitGetUsersNameResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetUsersName503JSONResponse DatabaseQueryException
+
+func (response GetUsersName503JSONResponse) VisitGetUsersNameResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type PostUsersNameRequestObject struct {
 	Name UserName `json:"name"`
 }
@@ -438,20 +502,31 @@ type PostUsersNameResponseObject interface {
 	VisitPostUsersNameResponse(w http.ResponseWriter) error
 }
 
-type PostUsersName200Response struct {
-}
+type PostUsersName200JSONResponse User
 
-func (response PostUsersName200Response) VisitPostUsersNameResponse(w http.ResponseWriter) error {
+func (response PostUsersName200JSONResponse) VisitPostUsersNameResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	return nil
+
+	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersName409Response struct {
-}
+type PostUsersName409JSONResponse UserAlreadyExistsException
 
-func (response PostUsersName409Response) VisitPostUsersNameResponse(w http.ResponseWriter) error {
+func (response PostUsersName409JSONResponse) VisitPostUsersNameResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(409)
-	return nil
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostUsersName503JSONResponse DatabaseQueryException
+
+func (response PostUsersName503JSONResponse) VisitPostUsersNameResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetUsersUserIdEffectsHasRollRequestObject struct {
@@ -480,6 +555,15 @@ func (response GetUsersUserIdEffectsHasRoll404JSONResponse) VisitGetUsersUserIdE
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetUsersUserIdEffectsHasRoll503JSONResponse DatabaseQueryException
+
+func (response GetUsersUserIdEffectsHasRoll503JSONResponse) VisitGetUsersUserIdEffectsHasRollResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetUsersUserIdEffectsHistoryRequestObject struct {
 	UserId UserId `json:"userId"`
 }
@@ -502,6 +586,15 @@ type GetUsersUserIdEffectsHistory404JSONResponse UserNotFoundException
 func (response GetUsersUserIdEffectsHistory404JSONResponse) VisitGetUsersUserIdEffectsHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetUsersUserIdEffectsHistory503JSONResponse DatabaseQueryException
+
+func (response GetUsersUserIdEffectsHistory503JSONResponse) VisitGetUsersUserIdEffectsHistoryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -541,6 +634,15 @@ func (response PostUsersUserIdEffectsRoll409JSONResponse) VisitPostUsersUserIdEf
 	return json.NewEncoder(w).Encode(response)
 }
 
+type PostUsersUserIdEffectsRoll503JSONResponse DatabaseQueryException
+
+func (response PostUsersUserIdEffectsRoll503JSONResponse) VisitPostUsersUserIdEffectsRollResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetUsersUserIdGamesCurrentRequestObject struct {
 	UserId UserId `json:"userId"`
 }
@@ -567,6 +669,51 @@ func (response GetUsersUserIdGamesCurrent404JSONResponse) VisitGetUsersUserIdGam
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response.union)
+}
+
+type GetUsersUserIdGamesCurrent503JSONResponse DatabaseQueryException
+
+func (response GetUsersUserIdGamesCurrent503JSONResponse) VisitGetUsersUserIdGamesCurrentResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetUsersUserIdGamesCurrentFinishRequestObject struct {
+	UserId UserId `json:"userId"`
+}
+
+type GetUsersUserIdGamesCurrentFinishResponseObject interface {
+	VisitGetUsersUserIdGamesCurrentFinishResponse(w http.ResponseWriter) error
+}
+
+type GetUsersUserIdGamesCurrentFinish200Response struct {
+}
+
+func (response GetUsersUserIdGamesCurrentFinish200Response) VisitGetUsersUserIdGamesCurrentFinishResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type GetUsersUserIdGamesCurrentFinish404JSONResponse struct {
+	union json.RawMessage
+}
+
+func (response GetUsersUserIdGamesCurrentFinish404JSONResponse) VisitGetUsersUserIdGamesCurrentFinishResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response.union)
+}
+
+type GetUsersUserIdGamesCurrentFinish503JSONResponse DatabaseQueryException
+
+func (response GetUsersUserIdGamesCurrentFinish503JSONResponse) VisitGetUsersUserIdGamesCurrentFinishResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetUsersUserIdGamesRollRequestObject struct {
@@ -604,6 +751,15 @@ func (response GetUsersUserIdGamesRoll409JSONResponse) VisitGetUsersUserIdGamesR
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetUsersUserIdGamesRoll503JSONResponse DatabaseQueryException
+
+func (response GetUsersUserIdGamesRoll503JSONResponse) VisitGetUsersUserIdGamesRollResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetUsersUserIdGamesUnplayedRequestObject struct {
 	UserId UserId `json:"userId"`
 }
@@ -626,6 +782,15 @@ type GetUsersUserIdGamesUnplayed404JSONResponse UserNotFoundException
 func (response GetUsersUserIdGamesUnplayed404JSONResponse) VisitGetUsersUserIdGamesUnplayedResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetUsersUserIdGamesUnplayed503JSONResponse DatabaseQueryException
+
+func (response GetUsersUserIdGamesUnplayed503JSONResponse) VisitGetUsersUserIdGamesUnplayedResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -656,6 +821,15 @@ func (response PostUsersUserIdGamesUnplayed404JSONResponse) VisitPostUsersUserId
 	return json.NewEncoder(w).Encode(response)
 }
 
+type PostUsersUserIdGamesUnplayed503JSONResponse DatabaseQueryException
+
+func (response PostUsersUserIdGamesUnplayed503JSONResponse) VisitPostUsersUserIdGamesUnplayedResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetUsersUserIdTimersCurrentRequestObject struct {
 	UserId UserId `json:"userId"`
 }
@@ -678,6 +852,15 @@ type GetUsersUserIdTimersCurrent404JSONResponse UserNotFoundException
 func (response GetUsersUserIdTimersCurrent404JSONResponse) VisitGetUsersUserIdTimersCurrentResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetUsersUserIdTimersCurrent503JSONResponse DatabaseQueryException
+
+func (response GetUsersUserIdTimersCurrent503JSONResponse) VisitGetUsersUserIdTimersCurrentResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -708,6 +891,15 @@ func (response PostUsersUserIdTimersCurrentPause404JSONResponse) VisitPostUsersU
 	return json.NewEncoder(w).Encode(response)
 }
 
+type PostUsersUserIdTimersCurrentPause503JSONResponse DatabaseQueryException
+
+func (response PostUsersUserIdTimersCurrentPause503JSONResponse) VisitPostUsersUserIdTimersCurrentPauseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type PostUsersUserIdTimersCurrentStartRequestObject struct {
 	UserId UserId `json:"userId"`
 }
@@ -734,6 +926,15 @@ func (response PostUsersUserIdTimersCurrentStart404JSONResponse) VisitPostUsersU
 	return json.NewEncoder(w).Encode(response)
 }
 
+type PostUsersUserIdTimersCurrentStart503JSONResponse DatabaseQueryException
+
+func (response PostUsersUserIdTimersCurrentStart503JSONResponse) VisitPostUsersUserIdTimersCurrentStartResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 
@@ -754,6 +955,9 @@ type StrictServerInterface interface {
 
 	// (GET /users/{userId}/games/current)
 	GetUsersUserIdGamesCurrent(ctx context.Context, request GetUsersUserIdGamesCurrentRequestObject) (GetUsersUserIdGamesCurrentResponseObject, error)
+
+	// (GET /users/{userId}/games/current/finish)
+	GetUsersUserIdGamesCurrentFinish(ctx context.Context, request GetUsersUserIdGamesCurrentFinishRequestObject) (GetUsersUserIdGamesCurrentFinishResponseObject, error)
 
 	// (GET /users/{userId}/games/roll)
 	GetUsersUserIdGamesRoll(ctx context.Context, request GetUsersUserIdGamesRollRequestObject) (GetUsersUserIdGamesRollResponseObject, error)
@@ -936,6 +1140,31 @@ func (sh *strictHandler) GetUsersUserIdGamesCurrent(ctx echo.Context, userId Use
 	return nil
 }
 
+// GetUsersUserIdGamesCurrentFinish operation middleware
+func (sh *strictHandler) GetUsersUserIdGamesCurrentFinish(ctx echo.Context, userId UserId) error {
+	var request GetUsersUserIdGamesCurrentFinishRequestObject
+
+	request.UserId = userId
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetUsersUserIdGamesCurrentFinish(ctx.Request().Context(), request.(GetUsersUserIdGamesCurrentFinishRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetUsersUserIdGamesCurrentFinish")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetUsersUserIdGamesCurrentFinishResponseObject); ok {
+		return validResponse.VisitGetUsersUserIdGamesCurrentFinishResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // GetUsersUserIdGamesRoll operation middleware
 func (sh *strictHandler) GetUsersUserIdGamesRoll(ctx echo.Context, userId UserId) error {
 	var request GetUsersUserIdGamesRollRequestObject
@@ -1090,4 +1319,101 @@ func (sh *strictHandler) PostUsersUserIdTimersCurrentStart(ctx echo.Context, use
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
+}
+
+// Base64 encoded, gzipped, json marshaled Swagger object
+var swaggerSpec = []string{
+
+	"H4sIAAAAAAAC/+xZ0XPithP+Vxj9fo8+TJP0oX5zGodmJiV3ATq9yTCMYi+gqy3pJDkXJuP/vaO1DQHM",
+	"YQiQ9spTgsVqd7/v29UKv5BQJFJw4EYT74VIqmgCBhR+6mtQN5H9j3HiEUnNhDiE0wSIR9J80SEKvqZM",
+	"QUQ8o1JwiA4nkFBr9X8FI+KR/7lzJ26+qt2biGSZgy46uGGlE/yzqwvcN7NeiifW4Ioa+kg1fEpBTYPn",
+	"EKRhgtsVGsd3I+I9fH/TuUnmvBCphARlGODeoYgwEeBpQrwHcuX3/Eu/Gww/9YP7z2TgEDOVNi1tFONj",
+	"BKB4Ih6/QGhINsgcEoxG9n9vefsIdKjYLN6lvRwypgmUWG7GpcS43ncVhMCeILqiBm1GQiXUEI9E1MAH",
+	"w5Cm1ezmxD2UXL7OYmnfwQocJRiYPzOQ6E0BF+DNkaVK0Snu9JrsauJWIE1AazquWltKDneYf78qk3YB",
+	"96LrmPG/UDPPNJGxtZgYI7XnutoIBU1tgCZSfAMFUTMUiUuldM9axJlTMBHaFOCuJFCf4yq21qXREeZa",
+	"pDw6cP20/d+DYeeuN7y+63euatePjbC+YNqFwpflkje+GchpyqIqgMuCW10Q/hNlMX2M4V7EsT4wVp27",
+	"of+Hf3PrX94Gw/u729tubbx6LAFV0W5SRa3zG95dQIJxc342h4JxA2NQZQPKYdvU+a3WEso442Prvb4L",
+	"bYoGVOYdKqAG8BxKud2POETSVOOjEeNMTyCqhuK13IvQSwcV8TkLgFRVhj3LVmFkNQHZuVJRl2vL1Qbl",
+	"xwpoNA2emTaH1mG/G9wP/dv7wL/6PAz+vOn26gsRh4HjtBYMc9vWYh8yPhJY78xgt76mT0IxAw3bRxpt",
+	"mnITgyEOeQKlMXzyU7PVbFkuhAROJSMeOW+2mheoVDPB+Fw7Tmn3xfKY2QdjwAnA5pCLLiIeaYOxGOlO",
+	"ORZpKbjOMzxrtfJEuQGOtlTKmIVo7X7ROZL1JidUMqa7MHOQ3gQaNtDGN6obI0uTTeuidbFXz6sSyDCW",
+	"n1vne/OzZgzMstzV6zl4jermX3FnQ2w2cIgUuoK5j0K/L3X9krayYSJxv+zV75o+c2T2MmdWTfkdJXMh",
+	"HyLdCdUflIjjjQWW33yK2fM3qu0J/lbWinbyKEQMlFdxZL00QpFyg0yVs/Gpxooaswfl4Hv0MjszT7dk",
+	"tzA6YE2Wd5gKyvOlRhH5ifZdaC8resedN7bsBbnsoxPUub+u6Q4joRpF3iiWhEZwTKHs88hYf0N6/xPD",
+	"3ge0G6ZKFa5rNBS8d/5amBxQIu3Z71qr01kRccPG/+ZuIjjUGLvXyMXZnESF1eBf3I8WNOPmd88dpHOd",
+	"G1YLqAbjs0vvifHjML7FRIk8H/oIWdcfZgcIhn06Pv65ikq5jOkUom1U1S9tDqysyjG2dF5KCxSc5ti3",
+	"TJurlH5NQZtLEU33z2ZW56ypoljTH5XfitI0LLGft5sJ8bf1YwyF+Y/4G6ZCTOF0ydymIS+y7uKrhcNf",
+	"Nhdk8xF9vlE7G9+tVCgH1VK8TPlPFrmrDVXmyHR30ed70Y0Z/6h8Z9nfAQAA//+T1s2m8SIAAA==",
+}
+
+// GetSwagger returns the content of the embedded swagger specification file
+// or error if failed to decode
+func decodeSpec() ([]byte, error) {
+	zipped, err := base64.StdEncoding.DecodeString(strings.Join(swaggerSpec, ""))
+	if err != nil {
+		return nil, fmt.Errorf("error base64 decoding spec: %w", err)
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(zipped))
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(zr)
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+
+	return buf.Bytes(), nil
+}
+
+var rawSpec = decodeSpecCached()
+
+// a naive cached of a decoded swagger spec
+func decodeSpecCached() func() ([]byte, error) {
+	data, err := decodeSpec()
+	return func() ([]byte, error) {
+		return data, err
+	}
+}
+
+// Constructs a synthetic filesystem for resolving external references when loading openapi specifications.
+func PathToRawSpec(pathToFile string) map[string]func() ([]byte, error) {
+	res := make(map[string]func() ([]byte, error))
+	if len(pathToFile) > 0 {
+		res[pathToFile] = rawSpec
+	}
+
+	return res
+}
+
+// GetSwagger returns the Swagger specification corresponding to the generated code
+// in this file. The external references of Swagger specification are resolved.
+// The logic of resolving external references is tightly connected to "import-mapping" feature.
+// Externally referenced files must be embedded in the corresponding golang packages.
+// Urls can be supported but this task was out of the scope.
+func GetSwagger() (swagger *openapi3.T, err error) {
+	resolvePath := PathToRawSpec("")
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+	loader.ReadFromURIFunc = func(loader *openapi3.Loader, url *url.URL) ([]byte, error) {
+		pathToFile := url.String()
+		pathToFile = path.Clean(pathToFile)
+		getSpec, ok := resolvePath[pathToFile]
+		if !ok {
+			err1 := fmt.Errorf("path not found: %s", pathToFile)
+			return nil, err1
+		}
+		return getSpec()
+	}
+	var specData []byte
+	specData, err = rawSpec()
+	if err != nil {
+		return
+	}
+	swagger, err = loader.LoadFromData(specData)
+	if err != nil {
+		return
+	}
+	return
 }
