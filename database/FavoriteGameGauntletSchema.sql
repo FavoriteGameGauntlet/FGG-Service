@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.17 on Mon Sep 22 00:22:42 2025
+-- File generated with SQLiteStudio v3.4.17 on Ср сен 24 02:46:47 2025
 --
 -- Text encoding used: System
 --
@@ -10,12 +10,13 @@ BEGIN TRANSACTION;
 DROP TABLE IF EXISTS EffectHistory;
 
 CREATE TABLE EffectHistory (
-    Id             INTEGER PRIMARY KEY AUTOINCREMENT
+    Id             TEXT    PRIMARY KEY
                            UNIQUE
+                           NOT NULL
+                           DEFAULT (uuid() ),
+    UserId         TEXT    REFERENCES Users (Id) 
                            NOT NULL,
-    UserId         INTEGER REFERENCES Users (Id) 
-                           NOT NULL,
-    GameId         INTEGER REFERENCES Games (Id) 
+    GameId         TEXT    REFERENCES Games (Id) 
                            NOT NULL,
     ReceivedDate   TEXT    NOT NULL
                            DEFAULT (datetime('now') ),
@@ -28,16 +29,18 @@ CREATE TABLE EffectHistory (
 DROP TABLE IF EXISTS GameHistory;
 
 CREATE TABLE GameHistory (
-    Id     INTEGER PRIMARY KEY AUTOINCREMENT
-                   NOT NULL
-                   UNIQUE,
-    UserId INTEGER REFERENCES Users (Id),
-    GameId INTEGER REFERENCES Games (Id) 
-                   NOT NULL,
-    State  TEXT    NOT NULL
-                   DEFAULT ('rolled'),
-    Date   TEXT    NOT NULL
-                   DEFAULT (datetime('now') ),
+    Id     TEXT PRIMARY KEY
+                NOT NULL
+                UNIQUE
+                DEFAULT (uuid() ),
+    UserId TEXT REFERENCES Users (Id) 
+                NOT NULL,
+    GameId TEXT REFERENCES Games (Id) 
+                NOT NULL,
+    State  TEXT NOT NULL
+                DEFAULT ('rolled'),
+    Date   TEXT NOT NULL
+                DEFAULT (datetime('now') ),
     Result TEXT
 );
 
@@ -46,10 +49,11 @@ CREATE TABLE GameHistory (
 DROP TABLE IF EXISTS Games;
 
 CREATE TABLE Games (
-    Id   INTEGER PRIMARY KEY AUTOINCREMENT
-                 UNIQUE
-                 NOT NULL,
-    Name TEXT    NOT NULL,
+    Id   TEXT PRIMARY KEY
+              UNIQUE
+              NOT NULL
+              DEFAULT (uuid() ),
+    Name TEXT NOT NULL,
     Link TEXT
 );
 
@@ -58,11 +62,12 @@ CREATE TABLE Games (
 DROP TABLE IF EXISTS RollEffects;
 
 CREATE TABLE RollEffects (
-    Id          INTEGER PRIMARY KEY
-                        NOT NULL
-                        UNIQUE,
-    Name        TEXT    NOT NULL,
-    Description TEXT    NOT NULL
+    Id          TEXT PRIMARY KEY
+                     NOT NULL
+                     UNIQUE
+                     DEFAULT (uuid() ),
+    Name        TEXT NOT NULL,
+    Description TEXT NOT NULL
 );
 
 
@@ -70,14 +75,15 @@ CREATE TABLE RollEffects (
 DROP TABLE IF EXISTS TimerActions;
 
 CREATE TABLE TimerActions (
-    Id      INTEGER PRIMARY KEY AUTOINCREMENT
-                    UNIQUE
-                    NOT NULL,
-    TimerId INTEGER REFERENCES Timers (Id) 
-                    NOT NULL,
-    Action  TEXT    NOT NULL,
-    Date    TEXT    NOT NULL
-                    DEFAULT (datetime('now') ) 
+    Id      TEXT PRIMARY KEY
+                 UNIQUE
+                 NOT NULL
+                 DEFAULT (uuid() ),
+    TimerId TEXT REFERENCES Timers (Id) 
+                 NOT NULL,
+    Action  TEXT NOT NULL,
+    Date    TEXT NOT NULL
+                 DEFAULT (datetime('now') ) 
 );
 
 
@@ -85,12 +91,14 @@ CREATE TABLE TimerActions (
 DROP TABLE IF EXISTS Timers;
 
 CREATE TABLE Timers (
-    Id          INTEGER PRIMARY KEY AUTOINCREMENT
+    Id          TEXT    PRIMARY KEY
                         UNIQUE
+                        NOT NULL
+                        DEFAULT (uuid() ),
+    UserId      TEXT    REFERENCES Users (Id) 
                         NOT NULL,
-    UserId      INTEGER REFERENCES Users (Id) 
+    GameId      TEXT    REFERENCES Games (Id) 
                         NOT NULL,
-    GameId      INTEGER REFERENCES Games (Id),
     State       TEXT    NOT NULL
                         DEFAULT ('created'),
     DurationInS INTEGER NOT NULL
@@ -102,13 +110,14 @@ CREATE TABLE Timers (
 DROP TABLE IF EXISTS UnplayedGames;
 
 CREATE TABLE UnplayedGames (
-    Id     INTEGER PRIMARY KEY AUTOINCREMENT
-                   UNIQUE
-                   NOT NULL,
-    UserId INTEGER REFERENCES Users (Id) 
-                   NOT NULL,
-    GameId INTEGER REFERENCES Games (Id) 
-                   NOT NULL
+    Id     TEXT PRIMARY KEY
+                UNIQUE
+                NOT NULL
+                DEFAULT (uuid() ),
+    UserId TEXT REFERENCES Users (Id) 
+                NOT NULL,
+    GameId TEXT REFERENCES Games (Id) 
+                NOT NULL
 );
 
 
@@ -116,11 +125,12 @@ CREATE TABLE UnplayedGames (
 DROP TABLE IF EXISTS Users;
 
 CREATE TABLE Users (
-    Id   INTEGER PRIMARY KEY AUTOINCREMENT
-                 UNIQUE
-                 NOT NULL,
-    Name TEXT    NOT NULL
-                 UNIQUE
+    Id   TEXT PRIMARY KEY
+              UNIQUE
+              NOT NULL
+              DEFAULT (uuid() ),
+    Name TEXT NOT NULL
+              UNIQUE
 );
 
 
