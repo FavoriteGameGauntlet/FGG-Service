@@ -2,6 +2,7 @@ package controller
 
 import (
 	"FGG-Service/api"
+	"FGG-Service/game_service"
 	"context"
 )
 
@@ -22,10 +23,22 @@ func (Server) MakeGameRoll(ctx context.Context, request api.MakeGameRollRequestO
 
 // (GET /users/{userId}/games/unplayed)
 func (Server) GetUnplayedGames(ctx context.Context, request api.GetUnplayedGamesRequestObject) (api.GetUnplayedGamesResponseObject, error) {
-	return api.GetUnplayedGames200JSONResponse{}, nil
+	games, err := game_service.GetUnplayedGames(request.UserId)
+
+	if err != nil {
+		return api.GetUnplayedGames503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
+	}
+
+	return api.GetUnplayedGames200JSONResponse(*games), nil
 }
 
 // (POST /users/{userId}/games/unplayed)
 func (Server) AddUnplayedGames(ctx context.Context, request api.AddUnplayedGamesRequestObject) (api.AddUnplayedGamesResponseObject, error) {
+	err := game_service.AddUnplayedGames(request.UserId, request.Body)
+
+	if err != nil {
+		return api.AddUnplayedGames503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
+	}
+
 	return api.AddUnplayedGames200Response{}, nil
 }

@@ -2,13 +2,13 @@ package controller
 
 import (
 	"FGG-Service/api"
-	"FGG-Service/user"
+	"FGG-Service/user_service"
 	"context"
 )
 
 // (GET /users/{name})
 func (Server) GetUser(ctx context.Context, request api.GetUserRequestObject) (api.GetUserResponseObject, error) {
-	doesUserExist, err := user.CheckIfUserExists(request.Name)
+	doesUserExist, err := user_service.CheckIfUserExists(request.Name)
 
 	if doesUserExist == nil {
 		return api.GetUser503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
@@ -18,7 +18,7 @@ func (Server) GetUser(ctx context.Context, request api.GetUserRequestObject) (ap
 		return api.GetUser404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
-	user, err := user.FindUser(request.Name)
+	user, err := user_service.FindUser(request.Name)
 
 	if user == nil {
 		return api.GetUser404JSONResponse{api.USERNOTFOUND, err.Error()}, nil
@@ -29,7 +29,7 @@ func (Server) GetUser(ctx context.Context, request api.GetUserRequestObject) (ap
 
 // (POST /users/{name})
 func (Server) CreateUser(ctx context.Context, request api.CreateUserRequestObject) (api.CreateUserResponseObject, error) {
-	doesUserExist, err := user.CheckIfUserExists(request.Name)
+	doesUserExist, err := user_service.CheckIfUserExists(request.Name)
 
 	if doesUserExist == nil {
 		return api.CreateUser503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
@@ -39,13 +39,13 @@ func (Server) CreateUser(ctx context.Context, request api.CreateUserRequestObjec
 		return api.CreateUser409JSONResponse{Code: api.USERALREADYEXISTS}, nil
 	}
 
-	err = user.AddUser(request.Name)
+	err = user_service.AddUser(request.Name)
 
 	if err != nil {
 		return api.CreateUser503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
 	}
 
-	user, err := user.FindUser(request.Name)
+	user, err := user_service.FindUser(request.Name)
 
 	if user == nil {
 		return api.CreateUser503JSONResponse{api.DATABASEQUERY, err.Error()}, nil

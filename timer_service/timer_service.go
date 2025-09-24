@@ -1,4 +1,4 @@
-package timer
+package timer_service
 
 import (
 	"FGG-Service/database"

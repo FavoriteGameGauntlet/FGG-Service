@@ -1,4 +1,4 @@
-package user
+package user_service
 
 import (
 	"FGG-Service/api"
@@ -10,7 +10,10 @@ import (
 const (
 	CheckIfUserExistsCommand = `
 		SELECT CASE 
-        	WHEN EXISTS (SELECT 1 FROM Users WHERE Name = $username) 
+        	WHEN EXISTS (
+				SELECT 1
+				FROM Users
+				WHERE Name = $username) 
          	THEN true
          	ELSE false
        	END AS 'DoesUserExist'`

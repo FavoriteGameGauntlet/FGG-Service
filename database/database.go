@@ -10,7 +10,7 @@ type Database struct {
 	database *sql.DB
 }
 
-const DatabasePath = "database/FavoriteGameGauntlet.db"
+const DatabasePath = "database/FGG.db"
 
 func NewDatabase() *Database {
 	db, err := sql.Open("sqlite3", DatabasePath)
@@ -18,8 +18,6 @@ func NewDatabase() *Database {
 	if err != nil {
 		panic(err)
 	}
-
-	db.Exec("SELECT load_extension('uuid')")
 
 	return &Database{
 		database: db,

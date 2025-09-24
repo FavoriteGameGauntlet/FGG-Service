@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.17 on Ср сен 24 02:46:47 2025
+-- File generated with SQLiteStudio v3.4.17 on Thu Sep 25 00:24:04 2025
 --
 -- Text encoding used: System
 --
@@ -53,7 +53,8 @@ CREATE TABLE Games (
               UNIQUE
               NOT NULL
               DEFAULT (uuid() ),
-    Name TEXT NOT NULL,
+    Name TEXT NOT NULL
+              UNIQUE,
     Link TEXT
 );
 
