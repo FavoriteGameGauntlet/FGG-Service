@@ -1,8 +1,8 @@
 package user
 
 import (
-	"FavoriteGameGauntlet/api"
-	"FavoriteGameGauntlet/database"
+	"FGG-Service/api"
+	"FGG-Service/database"
 
 	"github.com/google/uuid"
 )

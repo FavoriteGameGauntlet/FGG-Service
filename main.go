@@ -1,17 +1,15 @@
 package main
 
 import (
-	"FavoriteGameGauntlet/api"
-	"FavoriteGameGauntlet/controller"
-
+	"FGG-Service/api"
+	"FGG-Service/controller"
 	"embed"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-// go:embed api/index.html
-// go:embed api/openapi.yaml
+//go:embed api/*
 var swaggerUI embed.FS
 
 func main() {
@@ -20,7 +18,10 @@ func main() {
 
 	api.RegisterHandlers(e, api.NewStrictHandler(s, []api.StrictMiddlewareFunc{}))
 
-	e.GET("/swagger/*", echo.WrapHandler(http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerUI)))))
+	fs := http.FS(swaggerUI)
+	fileServer := http.FileServer(fs)
 
-	e.Logger.Fatal(e.Start("localhost:8080"))
+	e.GET("/swagger/*", echo.WrapHandler(http.StripPrefix("/swagger/", fileServer)))
+
+	e.Start("127.0.0.1:8080")
 }

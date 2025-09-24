@@ -1,21 +1,21 @@
 package controller
 
 import (
-	"FavoriteGameGauntlet/api"
+	"FGG-Service/api"
 	"context"
 )
 
 // (GET /users/{userId}/timers/current)
-func (Server) GetUsersUserIdTimersCurrent(ctx context.Context, request api.GetUsersUserIdTimersCurrentRequestObject) (api.GetUsersUserIdTimersCurrentResponseObject, error) {
-	return api.GetUsersUserIdTimersCurrent200JSONResponse{}, nil
+func (Server) GetCurrentTimer(ctx context.Context, request api.GetCurrentTimerRequestObject) (api.GetCurrentTimerResponseObject, error) {
+	return api.GetCurrentTimer200JSONResponse{}, nil
 }
 
 // (POST /users/{userId}/timers/current/pause)
-func (Server) PostUsersUserIdTimersCurrentPause(ctx context.Context, request api.PostUsersUserIdTimersCurrentPauseRequestObject) (api.PostUsersUserIdTimersCurrentPauseResponseObject, error) {
-	return api.PostUsersUserIdTimersCurrentPause200JSONResponse(0), nil
+func (Server) PauseCurrentTimer(ctx context.Context, request api.PauseCurrentTimerRequestObject) (api.PauseCurrentTimerResponseObject, error) {
+	return api.PauseCurrentTimer200JSONResponse(0), nil
 }
 
 // (POST /users/{userId}/timers/current/start)
-func (Server) PostUsersUserIdTimersCurrentStart(ctx context.Context, request api.PostUsersUserIdTimersCurrentStartRequestObject) (api.PostUsersUserIdTimersCurrentStartResponseObject, error) {
-	return api.PostUsersUserIdTimersCurrentStart200JSONResponse(0), nil
+func (Server) StartCurrentTimer(ctx context.Context, request api.StartCurrentTimerRequestObject) (api.StartCurrentTimerResponseObject, error) {
+	return api.StartCurrentTimer200JSONResponse(0), nil
 }

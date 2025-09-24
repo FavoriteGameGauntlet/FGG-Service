@@ -1,31 +1,31 @@
 package controller
 
 import (
-	"FavoriteGameGauntlet/api"
+	"FGG-Service/api"
 	"context"
 )
 
 // (GET /users/{userId}/games/current)
-func (Server) GetUsersUserIdGamesCurrent(ctx context.Context, request api.GetUsersUserIdGamesCurrentRequestObject) (api.GetUsersUserIdGamesCurrentResponseObject, error) {
-	return api.GetUsersUserIdGamesCurrent200JSONResponse{}, nil
+func (Server) GetCurrentGame(ctx context.Context, request api.GetCurrentGameRequestObject) (api.GetCurrentGameResponseObject, error) {
+	return api.GetCurrentGame200JSONResponse{}, nil
 }
 
 // (GET /users/{userId}/games/current/finish)
-func (Server) GetUsersUserIdGamesCurrentFinish(ctx context.Context, request api.GetUsersUserIdGamesCurrentFinishRequestObject) (api.GetUsersUserIdGamesCurrentFinishResponseObject, error) {
-	return api.GetUsersUserIdGamesCurrentFinish200Response{}, nil
+func (Server) FinishCurrentGame(ctx context.Context, request api.FinishCurrentGameRequestObject) (api.FinishCurrentGameResponseObject, error) {
+	return api.FinishCurrentGame200Response{}, nil
 }
 
 // (GET /users/{userId}/games/roll)
-func (Server) GetUsersUserIdGamesRoll(ctx context.Context, request api.GetUsersUserIdGamesRollRequestObject) (api.GetUsersUserIdGamesRollResponseObject, error) {
-	return api.GetUsersUserIdGamesRoll200JSONResponse{}, nil
+func (Server) MakeGameRoll(ctx context.Context, request api.MakeGameRollRequestObject) (api.MakeGameRollResponseObject, error) {
+	return api.MakeGameRoll200JSONResponse{}, nil
 }
 
 // (GET /users/{userId}/games/unplayed)
-func (Server) GetUsersUserIdGamesUnplayed(ctx context.Context, request api.GetUsersUserIdGamesUnplayedRequestObject) (api.GetUsersUserIdGamesUnplayedResponseObject, error) {
-	return api.GetUsersUserIdGamesUnplayed200JSONResponse{}, nil
+func (Server) GetUnplayedGames(ctx context.Context, request api.GetUnplayedGamesRequestObject) (api.GetUnplayedGamesResponseObject, error) {
+	return api.GetUnplayedGames200JSONResponse{}, nil
 }
 
 // (POST /users/{userId}/games/unplayed)
-func (Server) PostUsersUserIdGamesUnplayed(ctx context.Context, request api.PostUsersUserIdGamesUnplayedRequestObject) (api.PostUsersUserIdGamesUnplayedResponseObject, error) {
-	return api.PostUsersUserIdGamesUnplayed200Response{}, nil
+func (Server) AddUnplayedGames(ctx context.Context, request api.AddUnplayedGamesRequestObject) (api.AddUnplayedGamesResponseObject, error) {
+	return api.AddUnplayedGames200Response{}, nil
 }

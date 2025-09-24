@@ -1,4 +1,4 @@
-openapi: 3.0.4
+openapi: 3.1.2
 info:
   title: Favorite Game Gauntlet
   version: 1.0.0
@@ -6,10 +6,13 @@ paths:
 
 
 
-  "/users/{name}":
+  /users/{name}:
     parameters:
       - $ref: "#/components/parameters/UserName"
     post:
+      operationId: createUser
+      tags:
+        - Users
       responses:
         '200':
           description: User was created
@@ -28,6 +31,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/DatabaseQueryException"
     get:
+      operationId: getUser
+      tags:
+        - Users
       responses:
         '200':
           description: The user was found
@@ -48,10 +54,13 @@ paths:
 
 
 
-  "/users/{userId}/games/unplayed":
+  /users/{userId}/games/unplayed:
     parameters:
       - $ref: "#/components/parameters/UserId"
     post:
+      operationId: addUnplayedGames
+      tags:
+        - Games
       requestBody:
         content:
           application/json:
@@ -71,6 +80,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/DatabaseQueryException"
     get:
+      operationId: getUnplayedGames
+      tags:
+        - Games
       responses:
         '200':
           description: Unplayed games were received
@@ -91,10 +103,13 @@ paths:
 
 
 
-  "/users/{userId}/games/roll":
+  /users/{userId}/games/roll:
     parameters:
     - $ref: "#/components/parameters/UserId"
     get:
+      operationId: makeGameRoll
+      tags:
+        - Games
       responses:
         '200':
           description: Roll for games was made
@@ -120,10 +135,13 @@ paths:
 
 
 
-  "/users/{userId}/games/current":
+  /users/{userId}/games/current:
     parameters:
       - $ref: "#/components/parameters/UserId"
     get:
+      operationId: getCurrentGame
+      tags:
+        - Games
       responses:
         '200':
           description: The current game was received
@@ -146,10 +164,13 @@ paths:
 
 
 
-  "/users/{userId}/games/current/finish":
+  /users/{userId}/games/current/finish:
     parameters:
       - $ref: "#/components/parameters/UserId"
     get:
+      operationId: finishCurrentGame
+      tags:
+        - Games
       responses:
         '200':
           description: The current game was finished
@@ -168,10 +189,13 @@ paths:
 
 
 
-  "/users/{userId}/timers/current":
+  /users/{userId}/timers/current:
     parameters:
       - $ref: "#/components/parameters/UserId"
     get:
+      operationId: getCurrentTimer
+      tags:
+        - Timers
       responses:
         '200':
           description: The current timer was received
@@ -192,10 +216,13 @@ paths:
 
 
 
-  "/users/{userId}/timers/current/start":
+  /users/{userId}/timers/current/start:
     parameters:
       - $ref: "#/components/parameters/UserId"
     post:
+      operationId: startCurrentTimer
+      tags:
+        - Timers
       responses:
         '200':
           description: Timer started
@@ -217,10 +244,13 @@ paths:
 
 
 
-  "/users/{userId}/timers/current/pause":
+  /users/{userId}/timers/current/pause:
     parameters:
       - $ref: "#/components/parameters/UserId"
     post:
+      operationId: pauseCurrentTimer
+      tags:
+        - Timers
       responses:
         '200':
           description: Timer paused
@@ -242,10 +272,13 @@ paths:
 
 
 
-  "/users/{userId}/effects/has-roll":
+  /users/{userId}/effects/has-roll:
     parameters:
       - $ref: "#/components/parameters/UserId"
     get:
+      operationId: checkEffectRoll
+      tags:
+        - Effects
       responses:
         '200':
           description: Roll count was received
@@ -266,10 +299,13 @@ paths:
 
 
 
-  "/users/{userId}/effects/history":
+  /users/{userId}/effects/history:
     parameters:
       - $ref: "#/components/parameters/UserId"
     get:
+      operationId: getEffectHistory
+      tags:
+        - Effects
       responses:
         '200':
           description: Effect history was received
@@ -290,10 +326,13 @@ paths:
 
 
 
-  "/users/{userId}/effects/roll":
+  /users/{userId}/effects/roll:
     parameters:
       - $ref: "#/components/parameters/UserId"
     post:
+      operationId: makeEffectRoll
+      tags:
+        - Effects
       responses:
         '200':
           description: Roll for effects was made

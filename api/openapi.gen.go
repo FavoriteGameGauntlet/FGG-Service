@@ -4,19 +4,12 @@
 package api
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
-	"path"
-	"strings"
 	"time"
 
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
@@ -156,50 +149,50 @@ type UserId = Id
 // UserName defines model for UserName.
 type UserName = Name
 
-// PostUsersUserIdGamesUnplayedJSONRequestBody defines body for PostUsersUserIdGamesUnplayed for application/json ContentType.
-type PostUsersUserIdGamesUnplayedJSONRequestBody = Games
+// AddUnplayedGamesJSONRequestBody defines body for AddUnplayedGames for application/json ContentType.
+type AddUnplayedGamesJSONRequestBody = Games
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
 	// (GET /users/{name})
-	GetUsersName(ctx echo.Context, name UserName) error
+	GetUser(ctx echo.Context, name UserName) error
 
 	// (POST /users/{name})
-	PostUsersName(ctx echo.Context, name UserName) error
+	CreateUser(ctx echo.Context, name UserName) error
 
 	// (GET /users/{userId}/effects/has-roll)
-	GetUsersUserIdEffectsHasRoll(ctx echo.Context, userId UserId) error
+	CheckEffectRoll(ctx echo.Context, userId UserId) error
 
 	// (GET /users/{userId}/effects/history)
-	GetUsersUserIdEffectsHistory(ctx echo.Context, userId UserId) error
+	GetEffectHistory(ctx echo.Context, userId UserId) error
 
 	// (POST /users/{userId}/effects/roll)
-	PostUsersUserIdEffectsRoll(ctx echo.Context, userId UserId) error
+	MakeEffectRoll(ctx echo.Context, userId UserId) error
 
 	// (GET /users/{userId}/games/current)
-	GetUsersUserIdGamesCurrent(ctx echo.Context, userId UserId) error
+	GetCurrentGame(ctx echo.Context, userId UserId) error
 
 	// (GET /users/{userId}/games/current/finish)
-	GetUsersUserIdGamesCurrentFinish(ctx echo.Context, userId UserId) error
+	FinishCurrentGame(ctx echo.Context, userId UserId) error
 
 	// (GET /users/{userId}/games/roll)
-	GetUsersUserIdGamesRoll(ctx echo.Context, userId UserId) error
+	MakeGameRoll(ctx echo.Context, userId UserId) error
 
 	// (GET /users/{userId}/games/unplayed)
-	GetUsersUserIdGamesUnplayed(ctx echo.Context, userId UserId) error
+	GetUnplayedGames(ctx echo.Context, userId UserId) error
 
 	// (POST /users/{userId}/games/unplayed)
-	PostUsersUserIdGamesUnplayed(ctx echo.Context, userId UserId) error
+	AddUnplayedGames(ctx echo.Context, userId UserId) error
 
 	// (GET /users/{userId}/timers/current)
-	GetUsersUserIdTimersCurrent(ctx echo.Context, userId UserId) error
+	GetCurrentTimer(ctx echo.Context, userId UserId) error
 
 	// (POST /users/{userId}/timers/current/pause)
-	PostUsersUserIdTimersCurrentPause(ctx echo.Context, userId UserId) error
+	PauseCurrentTimer(ctx echo.Context, userId UserId) error
 
 	// (POST /users/{userId}/timers/current/start)
-	PostUsersUserIdTimersCurrentStart(ctx echo.Context, userId UserId) error
+	StartCurrentTimer(ctx echo.Context, userId UserId) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -207,8 +200,8 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// GetUsersName converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUsersName(ctx echo.Context) error {
+// GetUser converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUser(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "name" -------------
 	var name UserName
@@ -219,12 +212,12 @@ func (w *ServerInterfaceWrapper) GetUsersName(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUsersName(ctx, name)
+	err = w.Handler.GetUser(ctx, name)
 	return err
 }
 
-// PostUsersName converts echo context to params.
-func (w *ServerInterfaceWrapper) PostUsersName(ctx echo.Context) error {
+// CreateUser converts echo context to params.
+func (w *ServerInterfaceWrapper) CreateUser(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "name" -------------
 	var name UserName
@@ -235,12 +228,12 @@ func (w *ServerInterfaceWrapper) PostUsersName(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostUsersName(ctx, name)
+	err = w.Handler.CreateUser(ctx, name)
 	return err
 }
 
-// GetUsersUserIdEffectsHasRoll converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUsersUserIdEffectsHasRoll(ctx echo.Context) error {
+// CheckEffectRoll converts echo context to params.
+func (w *ServerInterfaceWrapper) CheckEffectRoll(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
 	var userId UserId
@@ -251,12 +244,12 @@ func (w *ServerInterfaceWrapper) GetUsersUserIdEffectsHasRoll(ctx echo.Context) 
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUsersUserIdEffectsHasRoll(ctx, userId)
+	err = w.Handler.CheckEffectRoll(ctx, userId)
 	return err
 }
 
-// GetUsersUserIdEffectsHistory converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUsersUserIdEffectsHistory(ctx echo.Context) error {
+// GetEffectHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetEffectHistory(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
 	var userId UserId
@@ -267,12 +260,12 @@ func (w *ServerInterfaceWrapper) GetUsersUserIdEffectsHistory(ctx echo.Context) 
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUsersUserIdEffectsHistory(ctx, userId)
+	err = w.Handler.GetEffectHistory(ctx, userId)
 	return err
 }
 
-// PostUsersUserIdEffectsRoll converts echo context to params.
-func (w *ServerInterfaceWrapper) PostUsersUserIdEffectsRoll(ctx echo.Context) error {
+// MakeEffectRoll converts echo context to params.
+func (w *ServerInterfaceWrapper) MakeEffectRoll(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
 	var userId UserId
@@ -283,12 +276,12 @@ func (w *ServerInterfaceWrapper) PostUsersUserIdEffectsRoll(ctx echo.Context) er
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostUsersUserIdEffectsRoll(ctx, userId)
+	err = w.Handler.MakeEffectRoll(ctx, userId)
 	return err
 }
 
-// GetUsersUserIdGamesCurrent converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUsersUserIdGamesCurrent(ctx echo.Context) error {
+// GetCurrentGame converts echo context to params.
+func (w *ServerInterfaceWrapper) GetCurrentGame(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
 	var userId UserId
@@ -299,12 +292,12 @@ func (w *ServerInterfaceWrapper) GetUsersUserIdGamesCurrent(ctx echo.Context) er
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUsersUserIdGamesCurrent(ctx, userId)
+	err = w.Handler.GetCurrentGame(ctx, userId)
 	return err
 }
 
-// GetUsersUserIdGamesCurrentFinish converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUsersUserIdGamesCurrentFinish(ctx echo.Context) error {
+// FinishCurrentGame converts echo context to params.
+func (w *ServerInterfaceWrapper) FinishCurrentGame(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
 	var userId UserId
@@ -315,12 +308,12 @@ func (w *ServerInterfaceWrapper) GetUsersUserIdGamesCurrentFinish(ctx echo.Conte
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUsersUserIdGamesCurrentFinish(ctx, userId)
+	err = w.Handler.FinishCurrentGame(ctx, userId)
 	return err
 }
 
-// GetUsersUserIdGamesRoll converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUsersUserIdGamesRoll(ctx echo.Context) error {
+// MakeGameRoll converts echo context to params.
+func (w *ServerInterfaceWrapper) MakeGameRoll(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
 	var userId UserId
@@ -331,12 +324,12 @@ func (w *ServerInterfaceWrapper) GetUsersUserIdGamesRoll(ctx echo.Context) error
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUsersUserIdGamesRoll(ctx, userId)
+	err = w.Handler.MakeGameRoll(ctx, userId)
 	return err
 }
 
-// GetUsersUserIdGamesUnplayed converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUsersUserIdGamesUnplayed(ctx echo.Context) error {
+// GetUnplayedGames converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUnplayedGames(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
 	var userId UserId
@@ -347,12 +340,12 @@ func (w *ServerInterfaceWrapper) GetUsersUserIdGamesUnplayed(ctx echo.Context) e
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUsersUserIdGamesUnplayed(ctx, userId)
+	err = w.Handler.GetUnplayedGames(ctx, userId)
 	return err
 }
 
-// PostUsersUserIdGamesUnplayed converts echo context to params.
-func (w *ServerInterfaceWrapper) PostUsersUserIdGamesUnplayed(ctx echo.Context) error {
+// AddUnplayedGames converts echo context to params.
+func (w *ServerInterfaceWrapper) AddUnplayedGames(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
 	var userId UserId
@@ -363,12 +356,12 @@ func (w *ServerInterfaceWrapper) PostUsersUserIdGamesUnplayed(ctx echo.Context) 
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostUsersUserIdGamesUnplayed(ctx, userId)
+	err = w.Handler.AddUnplayedGames(ctx, userId)
 	return err
 }
 
-// GetUsersUserIdTimersCurrent converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUsersUserIdTimersCurrent(ctx echo.Context) error {
+// GetCurrentTimer converts echo context to params.
+func (w *ServerInterfaceWrapper) GetCurrentTimer(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
 	var userId UserId
@@ -379,12 +372,12 @@ func (w *ServerInterfaceWrapper) GetUsersUserIdTimersCurrent(ctx echo.Context) e
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUsersUserIdTimersCurrent(ctx, userId)
+	err = w.Handler.GetCurrentTimer(ctx, userId)
 	return err
 }
 
-// PostUsersUserIdTimersCurrentPause converts echo context to params.
-func (w *ServerInterfaceWrapper) PostUsersUserIdTimersCurrentPause(ctx echo.Context) error {
+// PauseCurrentTimer converts echo context to params.
+func (w *ServerInterfaceWrapper) PauseCurrentTimer(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
 	var userId UserId
@@ -395,12 +388,12 @@ func (w *ServerInterfaceWrapper) PostUsersUserIdTimersCurrentPause(ctx echo.Cont
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostUsersUserIdTimersCurrentPause(ctx, userId)
+	err = w.Handler.PauseCurrentTimer(ctx, userId)
 	return err
 }
 
-// PostUsersUserIdTimersCurrentStart converts echo context to params.
-func (w *ServerInterfaceWrapper) PostUsersUserIdTimersCurrentStart(ctx echo.Context) error {
+// StartCurrentTimer converts echo context to params.
+func (w *ServerInterfaceWrapper) StartCurrentTimer(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
 	var userId UserId
@@ -411,7 +404,7 @@ func (w *ServerInterfaceWrapper) PostUsersUserIdTimersCurrentStart(ctx echo.Cont
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostUsersUserIdTimersCurrentStart(ctx, userId)
+	err = w.Handler.StartCurrentTimer(ctx, userId)
 	return err
 }
 
@@ -443,492 +436,492 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.GET(baseURL+"/users/:name", wrapper.GetUsersName)
-	router.POST(baseURL+"/users/:name", wrapper.PostUsersName)
-	router.GET(baseURL+"/users/:userId/effects/has-roll", wrapper.GetUsersUserIdEffectsHasRoll)
-	router.GET(baseURL+"/users/:userId/effects/history", wrapper.GetUsersUserIdEffectsHistory)
-	router.POST(baseURL+"/users/:userId/effects/roll", wrapper.PostUsersUserIdEffectsRoll)
-	router.GET(baseURL+"/users/:userId/games/current", wrapper.GetUsersUserIdGamesCurrent)
-	router.GET(baseURL+"/users/:userId/games/current/finish", wrapper.GetUsersUserIdGamesCurrentFinish)
-	router.GET(baseURL+"/users/:userId/games/roll", wrapper.GetUsersUserIdGamesRoll)
-	router.GET(baseURL+"/users/:userId/games/unplayed", wrapper.GetUsersUserIdGamesUnplayed)
-	router.POST(baseURL+"/users/:userId/games/unplayed", wrapper.PostUsersUserIdGamesUnplayed)
-	router.GET(baseURL+"/users/:userId/timers/current", wrapper.GetUsersUserIdTimersCurrent)
-	router.POST(baseURL+"/users/:userId/timers/current/pause", wrapper.PostUsersUserIdTimersCurrentPause)
-	router.POST(baseURL+"/users/:userId/timers/current/start", wrapper.PostUsersUserIdTimersCurrentStart)
+	router.GET(baseURL+"/users/:name", wrapper.GetUser)
+	router.POST(baseURL+"/users/:name", wrapper.CreateUser)
+	router.GET(baseURL+"/users/:userId/effects/has-roll", wrapper.CheckEffectRoll)
+	router.GET(baseURL+"/users/:userId/effects/history", wrapper.GetEffectHistory)
+	router.POST(baseURL+"/users/:userId/effects/roll", wrapper.MakeEffectRoll)
+	router.GET(baseURL+"/users/:userId/games/current", wrapper.GetCurrentGame)
+	router.GET(baseURL+"/users/:userId/games/current/finish", wrapper.FinishCurrentGame)
+	router.GET(baseURL+"/users/:userId/games/roll", wrapper.MakeGameRoll)
+	router.GET(baseURL+"/users/:userId/games/unplayed", wrapper.GetUnplayedGames)
+	router.POST(baseURL+"/users/:userId/games/unplayed", wrapper.AddUnplayedGames)
+	router.GET(baseURL+"/users/:userId/timers/current", wrapper.GetCurrentTimer)
+	router.POST(baseURL+"/users/:userId/timers/current/pause", wrapper.PauseCurrentTimer)
+	router.POST(baseURL+"/users/:userId/timers/current/start", wrapper.StartCurrentTimer)
 
 }
 
-type GetUsersNameRequestObject struct {
+type GetUserRequestObject struct {
 	Name UserName `json:"name"`
 }
 
-type GetUsersNameResponseObject interface {
-	VisitGetUsersNameResponse(w http.ResponseWriter) error
+type GetUserResponseObject interface {
+	VisitGetUserResponse(w http.ResponseWriter) error
 }
 
-type GetUsersName200JSONResponse User
+type GetUser200JSONResponse User
 
-func (response GetUsersName200JSONResponse) VisitGetUsersNameResponse(w http.ResponseWriter) error {
+func (response GetUser200JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersName404JSONResponse UserNotFoundException
+type GetUser404JSONResponse UserNotFoundException
 
-func (response GetUsersName404JSONResponse) VisitGetUsersNameResponse(w http.ResponseWriter) error {
+func (response GetUser404JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersName503JSONResponse DatabaseQueryException
+type GetUser503JSONResponse DatabaseQueryException
 
-func (response GetUsersName503JSONResponse) VisitGetUsersNameResponse(w http.ResponseWriter) error {
+func (response GetUser503JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersNameRequestObject struct {
+type CreateUserRequestObject struct {
 	Name UserName `json:"name"`
 }
 
-type PostUsersNameResponseObject interface {
-	VisitPostUsersNameResponse(w http.ResponseWriter) error
+type CreateUserResponseObject interface {
+	VisitCreateUserResponse(w http.ResponseWriter) error
 }
 
-type PostUsersName200JSONResponse User
+type CreateUser200JSONResponse User
 
-func (response PostUsersName200JSONResponse) VisitPostUsersNameResponse(w http.ResponseWriter) error {
+func (response CreateUser200JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersName409JSONResponse UserAlreadyExistsException
+type CreateUser409JSONResponse UserAlreadyExistsException
 
-func (response PostUsersName409JSONResponse) VisitPostUsersNameResponse(w http.ResponseWriter) error {
+func (response CreateUser409JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(409)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersName503JSONResponse DatabaseQueryException
+type CreateUser503JSONResponse DatabaseQueryException
 
-func (response PostUsersName503JSONResponse) VisitPostUsersNameResponse(w http.ResponseWriter) error {
+func (response CreateUser503JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdEffectsHasRollRequestObject struct {
+type CheckEffectRollRequestObject struct {
 	UserId UserId `json:"userId"`
 }
 
-type GetUsersUserIdEffectsHasRollResponseObject interface {
-	VisitGetUsersUserIdEffectsHasRollResponse(w http.ResponseWriter) error
+type CheckEffectRollResponseObject interface {
+	VisitCheckEffectRollResponse(w http.ResponseWriter) error
 }
 
-type GetUsersUserIdEffectsHasRoll200JSONResponse bool
+type CheckEffectRoll200JSONResponse bool
 
-func (response GetUsersUserIdEffectsHasRoll200JSONResponse) VisitGetUsersUserIdEffectsHasRollResponse(w http.ResponseWriter) error {
+func (response CheckEffectRoll200JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdEffectsHasRoll404JSONResponse UserNotFoundException
+type CheckEffectRoll404JSONResponse UserNotFoundException
 
-func (response GetUsersUserIdEffectsHasRoll404JSONResponse) VisitGetUsersUserIdEffectsHasRollResponse(w http.ResponseWriter) error {
+func (response CheckEffectRoll404JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdEffectsHasRoll503JSONResponse DatabaseQueryException
+type CheckEffectRoll503JSONResponse DatabaseQueryException
 
-func (response GetUsersUserIdEffectsHasRoll503JSONResponse) VisitGetUsersUserIdEffectsHasRollResponse(w http.ResponseWriter) error {
+func (response CheckEffectRoll503JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdEffectsHistoryRequestObject struct {
+type GetEffectHistoryRequestObject struct {
 	UserId UserId `json:"userId"`
 }
 
-type GetUsersUserIdEffectsHistoryResponseObject interface {
-	VisitGetUsersUserIdEffectsHistoryResponse(w http.ResponseWriter) error
+type GetEffectHistoryResponseObject interface {
+	VisitGetEffectHistoryResponse(w http.ResponseWriter) error
 }
 
-type GetUsersUserIdEffectsHistory200JSONResponse Effects
+type GetEffectHistory200JSONResponse Effects
 
-func (response GetUsersUserIdEffectsHistory200JSONResponse) VisitGetUsersUserIdEffectsHistoryResponse(w http.ResponseWriter) error {
+func (response GetEffectHistory200JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdEffectsHistory404JSONResponse UserNotFoundException
+type GetEffectHistory404JSONResponse UserNotFoundException
 
-func (response GetUsersUserIdEffectsHistory404JSONResponse) VisitGetUsersUserIdEffectsHistoryResponse(w http.ResponseWriter) error {
+func (response GetEffectHistory404JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdEffectsHistory503JSONResponse DatabaseQueryException
+type GetEffectHistory503JSONResponse DatabaseQueryException
 
-func (response GetUsersUserIdEffectsHistory503JSONResponse) VisitGetUsersUserIdEffectsHistoryResponse(w http.ResponseWriter) error {
+func (response GetEffectHistory503JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdEffectsRollRequestObject struct {
+type MakeEffectRollRequestObject struct {
 	UserId UserId `json:"userId"`
 }
 
-type PostUsersUserIdEffectsRollResponseObject interface {
-	VisitPostUsersUserIdEffectsRollResponse(w http.ResponseWriter) error
+type MakeEffectRollResponseObject interface {
+	VisitMakeEffectRollResponse(w http.ResponseWriter) error
 }
 
-type PostUsersUserIdEffectsRoll200JSONResponse Effect
+type MakeEffectRoll200JSONResponse Effect
 
-func (response PostUsersUserIdEffectsRoll200JSONResponse) VisitPostUsersUserIdEffectsRollResponse(w http.ResponseWriter) error {
+func (response MakeEffectRoll200JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdEffectsRoll404JSONResponse UserNotFoundException
+type MakeEffectRoll404JSONResponse UserNotFoundException
 
-func (response PostUsersUserIdEffectsRoll404JSONResponse) VisitPostUsersUserIdEffectsRollResponse(w http.ResponseWriter) error {
+func (response MakeEffectRoll404JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdEffectsRoll409JSONResponse NoAvailableRollsException
+type MakeEffectRoll409JSONResponse NoAvailableRollsException
 
-func (response PostUsersUserIdEffectsRoll409JSONResponse) VisitPostUsersUserIdEffectsRollResponse(w http.ResponseWriter) error {
+func (response MakeEffectRoll409JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(409)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdEffectsRoll503JSONResponse DatabaseQueryException
+type MakeEffectRoll503JSONResponse DatabaseQueryException
 
-func (response PostUsersUserIdEffectsRoll503JSONResponse) VisitPostUsersUserIdEffectsRollResponse(w http.ResponseWriter) error {
+func (response MakeEffectRoll503JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdGamesCurrentRequestObject struct {
+type GetCurrentGameRequestObject struct {
 	UserId UserId `json:"userId"`
 }
 
-type GetUsersUserIdGamesCurrentResponseObject interface {
-	VisitGetUsersUserIdGamesCurrentResponse(w http.ResponseWriter) error
+type GetCurrentGameResponseObject interface {
+	VisitGetCurrentGameResponse(w http.ResponseWriter) error
 }
 
-type GetUsersUserIdGamesCurrent200JSONResponse Game
+type GetCurrentGame200JSONResponse Game
 
-func (response GetUsersUserIdGamesCurrent200JSONResponse) VisitGetUsersUserIdGamesCurrentResponse(w http.ResponseWriter) error {
+func (response GetCurrentGame200JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdGamesCurrent404JSONResponse struct {
+type GetCurrentGame404JSONResponse struct {
 	union json.RawMessage
 }
 
-func (response GetUsersUserIdGamesCurrent404JSONResponse) VisitGetUsersUserIdGamesCurrentResponse(w http.ResponseWriter) error {
+func (response GetCurrentGame404JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response.union)
 }
 
-type GetUsersUserIdGamesCurrent503JSONResponse DatabaseQueryException
+type GetCurrentGame503JSONResponse DatabaseQueryException
 
-func (response GetUsersUserIdGamesCurrent503JSONResponse) VisitGetUsersUserIdGamesCurrentResponse(w http.ResponseWriter) error {
+func (response GetCurrentGame503JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdGamesCurrentFinishRequestObject struct {
+type FinishCurrentGameRequestObject struct {
 	UserId UserId `json:"userId"`
 }
 
-type GetUsersUserIdGamesCurrentFinishResponseObject interface {
-	VisitGetUsersUserIdGamesCurrentFinishResponse(w http.ResponseWriter) error
+type FinishCurrentGameResponseObject interface {
+	VisitFinishCurrentGameResponse(w http.ResponseWriter) error
 }
 
-type GetUsersUserIdGamesCurrentFinish200Response struct {
+type FinishCurrentGame200Response struct {
 }
 
-func (response GetUsersUserIdGamesCurrentFinish200Response) VisitGetUsersUserIdGamesCurrentFinishResponse(w http.ResponseWriter) error {
+func (response FinishCurrentGame200Response) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
 	return nil
 }
 
-type GetUsersUserIdGamesCurrentFinish404JSONResponse struct {
+type FinishCurrentGame404JSONResponse struct {
 	union json.RawMessage
 }
 
-func (response GetUsersUserIdGamesCurrentFinish404JSONResponse) VisitGetUsersUserIdGamesCurrentFinishResponse(w http.ResponseWriter) error {
+func (response FinishCurrentGame404JSONResponse) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response.union)
 }
 
-type GetUsersUserIdGamesCurrentFinish503JSONResponse DatabaseQueryException
+type FinishCurrentGame503JSONResponse DatabaseQueryException
 
-func (response GetUsersUserIdGamesCurrentFinish503JSONResponse) VisitGetUsersUserIdGamesCurrentFinishResponse(w http.ResponseWriter) error {
+func (response FinishCurrentGame503JSONResponse) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdGamesRollRequestObject struct {
+type MakeGameRollRequestObject struct {
 	UserId UserId `json:"userId"`
 }
 
-type GetUsersUserIdGamesRollResponseObject interface {
-	VisitGetUsersUserIdGamesRollResponse(w http.ResponseWriter) error
+type MakeGameRollResponseObject interface {
+	VisitMakeGameRollResponse(w http.ResponseWriter) error
 }
 
-type GetUsersUserIdGamesRoll200JSONResponse Game
+type MakeGameRoll200JSONResponse Game
 
-func (response GetUsersUserIdGamesRoll200JSONResponse) VisitGetUsersUserIdGamesRollResponse(w http.ResponseWriter) error {
+func (response MakeGameRoll200JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdGamesRoll404JSONResponse UserNotFoundException
+type MakeGameRoll404JSONResponse UserNotFoundException
 
-func (response GetUsersUserIdGamesRoll404JSONResponse) VisitGetUsersUserIdGamesRollResponse(w http.ResponseWriter) error {
+func (response MakeGameRoll404JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdGamesRoll409JSONResponse NoAvailableRollsException
+type MakeGameRoll409JSONResponse NoAvailableRollsException
 
-func (response GetUsersUserIdGamesRoll409JSONResponse) VisitGetUsersUserIdGamesRollResponse(w http.ResponseWriter) error {
+func (response MakeGameRoll409JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(409)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdGamesRoll503JSONResponse DatabaseQueryException
+type MakeGameRoll503JSONResponse DatabaseQueryException
 
-func (response GetUsersUserIdGamesRoll503JSONResponse) VisitGetUsersUserIdGamesRollResponse(w http.ResponseWriter) error {
+func (response MakeGameRoll503JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdGamesUnplayedRequestObject struct {
+type GetUnplayedGamesRequestObject struct {
 	UserId UserId `json:"userId"`
 }
 
-type GetUsersUserIdGamesUnplayedResponseObject interface {
-	VisitGetUsersUserIdGamesUnplayedResponse(w http.ResponseWriter) error
+type GetUnplayedGamesResponseObject interface {
+	VisitGetUnplayedGamesResponse(w http.ResponseWriter) error
 }
 
-type GetUsersUserIdGamesUnplayed200JSONResponse Games
+type GetUnplayedGames200JSONResponse Games
 
-func (response GetUsersUserIdGamesUnplayed200JSONResponse) VisitGetUsersUserIdGamesUnplayedResponse(w http.ResponseWriter) error {
+func (response GetUnplayedGames200JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdGamesUnplayed404JSONResponse UserNotFoundException
+type GetUnplayedGames404JSONResponse UserNotFoundException
 
-func (response GetUsersUserIdGamesUnplayed404JSONResponse) VisitGetUsersUserIdGamesUnplayedResponse(w http.ResponseWriter) error {
+func (response GetUnplayedGames404JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdGamesUnplayed503JSONResponse DatabaseQueryException
+type GetUnplayedGames503JSONResponse DatabaseQueryException
 
-func (response GetUsersUserIdGamesUnplayed503JSONResponse) VisitGetUsersUserIdGamesUnplayedResponse(w http.ResponseWriter) error {
+func (response GetUnplayedGames503JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdGamesUnplayedRequestObject struct {
+type AddUnplayedGamesRequestObject struct {
 	UserId UserId `json:"userId"`
-	Body   *PostUsersUserIdGamesUnplayedJSONRequestBody
+	Body   *AddUnplayedGamesJSONRequestBody
 }
 
-type PostUsersUserIdGamesUnplayedResponseObject interface {
-	VisitPostUsersUserIdGamesUnplayedResponse(w http.ResponseWriter) error
+type AddUnplayedGamesResponseObject interface {
+	VisitAddUnplayedGamesResponse(w http.ResponseWriter) error
 }
 
-type PostUsersUserIdGamesUnplayed200Response struct {
+type AddUnplayedGames200Response struct {
 }
 
-func (response PostUsersUserIdGamesUnplayed200Response) VisitPostUsersUserIdGamesUnplayedResponse(w http.ResponseWriter) error {
+func (response AddUnplayedGames200Response) VisitAddUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
 	return nil
 }
 
-type PostUsersUserIdGamesUnplayed404JSONResponse UserNotFoundException
+type AddUnplayedGames404JSONResponse UserNotFoundException
 
-func (response PostUsersUserIdGamesUnplayed404JSONResponse) VisitPostUsersUserIdGamesUnplayedResponse(w http.ResponseWriter) error {
+func (response AddUnplayedGames404JSONResponse) VisitAddUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdGamesUnplayed503JSONResponse DatabaseQueryException
+type AddUnplayedGames503JSONResponse DatabaseQueryException
 
-func (response PostUsersUserIdGamesUnplayed503JSONResponse) VisitPostUsersUserIdGamesUnplayedResponse(w http.ResponseWriter) error {
+func (response AddUnplayedGames503JSONResponse) VisitAddUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdTimersCurrentRequestObject struct {
+type GetCurrentTimerRequestObject struct {
 	UserId UserId `json:"userId"`
 }
 
-type GetUsersUserIdTimersCurrentResponseObject interface {
-	VisitGetUsersUserIdTimersCurrentResponse(w http.ResponseWriter) error
+type GetCurrentTimerResponseObject interface {
+	VisitGetCurrentTimerResponse(w http.ResponseWriter) error
 }
 
-type GetUsersUserIdTimersCurrent200JSONResponse Timer
+type GetCurrentTimer200JSONResponse Timer
 
-func (response GetUsersUserIdTimersCurrent200JSONResponse) VisitGetUsersUserIdTimersCurrentResponse(w http.ResponseWriter) error {
+func (response GetCurrentTimer200JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdTimersCurrent404JSONResponse UserNotFoundException
+type GetCurrentTimer404JSONResponse UserNotFoundException
 
-func (response GetUsersUserIdTimersCurrent404JSONResponse) VisitGetUsersUserIdTimersCurrentResponse(w http.ResponseWriter) error {
+func (response GetCurrentTimer404JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersUserIdTimersCurrent503JSONResponse DatabaseQueryException
+type GetCurrentTimer503JSONResponse DatabaseQueryException
 
-func (response GetUsersUserIdTimersCurrent503JSONResponse) VisitGetUsersUserIdTimersCurrentResponse(w http.ResponseWriter) error {
+func (response GetCurrentTimer503JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdTimersCurrentPauseRequestObject struct {
+type PauseCurrentTimerRequestObject struct {
 	UserId UserId `json:"userId"`
 }
 
-type PostUsersUserIdTimersCurrentPauseResponseObject interface {
-	VisitPostUsersUserIdTimersCurrentPauseResponse(w http.ResponseWriter) error
+type PauseCurrentTimerResponseObject interface {
+	VisitPauseCurrentTimerResponse(w http.ResponseWriter) error
 }
 
-type PostUsersUserIdTimersCurrentPause200JSONResponse int32
+type PauseCurrentTimer200JSONResponse int32
 
-func (response PostUsersUserIdTimersCurrentPause200JSONResponse) VisitPostUsersUserIdTimersCurrentPauseResponse(w http.ResponseWriter) error {
+func (response PauseCurrentTimer200JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdTimersCurrentPause404JSONResponse UserNotFoundException
+type PauseCurrentTimer404JSONResponse UserNotFoundException
 
-func (response PostUsersUserIdTimersCurrentPause404JSONResponse) VisitPostUsersUserIdTimersCurrentPauseResponse(w http.ResponseWriter) error {
+func (response PauseCurrentTimer404JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdTimersCurrentPause503JSONResponse DatabaseQueryException
+type PauseCurrentTimer503JSONResponse DatabaseQueryException
 
-func (response PostUsersUserIdTimersCurrentPause503JSONResponse) VisitPostUsersUserIdTimersCurrentPauseResponse(w http.ResponseWriter) error {
+func (response PauseCurrentTimer503JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdTimersCurrentStartRequestObject struct {
+type StartCurrentTimerRequestObject struct {
 	UserId UserId `json:"userId"`
 }
 
-type PostUsersUserIdTimersCurrentStartResponseObject interface {
-	VisitPostUsersUserIdTimersCurrentStartResponse(w http.ResponseWriter) error
+type StartCurrentTimerResponseObject interface {
+	VisitStartCurrentTimerResponse(w http.ResponseWriter) error
 }
 
-type PostUsersUserIdTimersCurrentStart200JSONResponse int32
+type StartCurrentTimer200JSONResponse int32
 
-func (response PostUsersUserIdTimersCurrentStart200JSONResponse) VisitPostUsersUserIdTimersCurrentStartResponse(w http.ResponseWriter) error {
+func (response StartCurrentTimer200JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdTimersCurrentStart404JSONResponse UserNotFoundException
+type StartCurrentTimer404JSONResponse UserNotFoundException
 
-func (response PostUsersUserIdTimersCurrentStart404JSONResponse) VisitPostUsersUserIdTimersCurrentStartResponse(w http.ResponseWriter) error {
+func (response StartCurrentTimer404JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUsersUserIdTimersCurrentStart503JSONResponse DatabaseQueryException
+type StartCurrentTimer503JSONResponse DatabaseQueryException
 
-func (response PostUsersUserIdTimersCurrentStart503JSONResponse) VisitPostUsersUserIdTimersCurrentStartResponse(w http.ResponseWriter) error {
+func (response StartCurrentTimer503JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
@@ -939,43 +932,43 @@ func (response PostUsersUserIdTimersCurrentStart503JSONResponse) VisitPostUsersU
 type StrictServerInterface interface {
 
 	// (GET /users/{name})
-	GetUsersName(ctx context.Context, request GetUsersNameRequestObject) (GetUsersNameResponseObject, error)
+	GetUser(ctx context.Context, request GetUserRequestObject) (GetUserResponseObject, error)
 
 	// (POST /users/{name})
-	PostUsersName(ctx context.Context, request PostUsersNameRequestObject) (PostUsersNameResponseObject, error)
+	CreateUser(ctx context.Context, request CreateUserRequestObject) (CreateUserResponseObject, error)
 
 	// (GET /users/{userId}/effects/has-roll)
-	GetUsersUserIdEffectsHasRoll(ctx context.Context, request GetUsersUserIdEffectsHasRollRequestObject) (GetUsersUserIdEffectsHasRollResponseObject, error)
+	CheckEffectRoll(ctx context.Context, request CheckEffectRollRequestObject) (CheckEffectRollResponseObject, error)
 
 	// (GET /users/{userId}/effects/history)
-	GetUsersUserIdEffectsHistory(ctx context.Context, request GetUsersUserIdEffectsHistoryRequestObject) (GetUsersUserIdEffectsHistoryResponseObject, error)
+	GetEffectHistory(ctx context.Context, request GetEffectHistoryRequestObject) (GetEffectHistoryResponseObject, error)
 
 	// (POST /users/{userId}/effects/roll)
-	PostUsersUserIdEffectsRoll(ctx context.Context, request PostUsersUserIdEffectsRollRequestObject) (PostUsersUserIdEffectsRollResponseObject, error)
+	MakeEffectRoll(ctx context.Context, request MakeEffectRollRequestObject) (MakeEffectRollResponseObject, error)
 
 	// (GET /users/{userId}/games/current)
-	GetUsersUserIdGamesCurrent(ctx context.Context, request GetUsersUserIdGamesCurrentRequestObject) (GetUsersUserIdGamesCurrentResponseObject, error)
+	GetCurrentGame(ctx context.Context, request GetCurrentGameRequestObject) (GetCurrentGameResponseObject, error)
 
 	// (GET /users/{userId}/games/current/finish)
-	GetUsersUserIdGamesCurrentFinish(ctx context.Context, request GetUsersUserIdGamesCurrentFinishRequestObject) (GetUsersUserIdGamesCurrentFinishResponseObject, error)
+	FinishCurrentGame(ctx context.Context, request FinishCurrentGameRequestObject) (FinishCurrentGameResponseObject, error)
 
 	// (GET /users/{userId}/games/roll)
-	GetUsersUserIdGamesRoll(ctx context.Context, request GetUsersUserIdGamesRollRequestObject) (GetUsersUserIdGamesRollResponseObject, error)
+	MakeGameRoll(ctx context.Context, request MakeGameRollRequestObject) (MakeGameRollResponseObject, error)
 
 	// (GET /users/{userId}/games/unplayed)
-	GetUsersUserIdGamesUnplayed(ctx context.Context, request GetUsersUserIdGamesUnplayedRequestObject) (GetUsersUserIdGamesUnplayedResponseObject, error)
+	GetUnplayedGames(ctx context.Context, request GetUnplayedGamesRequestObject) (GetUnplayedGamesResponseObject, error)
 
 	// (POST /users/{userId}/games/unplayed)
-	PostUsersUserIdGamesUnplayed(ctx context.Context, request PostUsersUserIdGamesUnplayedRequestObject) (PostUsersUserIdGamesUnplayedResponseObject, error)
+	AddUnplayedGames(ctx context.Context, request AddUnplayedGamesRequestObject) (AddUnplayedGamesResponseObject, error)
 
 	// (GET /users/{userId}/timers/current)
-	GetUsersUserIdTimersCurrent(ctx context.Context, request GetUsersUserIdTimersCurrentRequestObject) (GetUsersUserIdTimersCurrentResponseObject, error)
+	GetCurrentTimer(ctx context.Context, request GetCurrentTimerRequestObject) (GetCurrentTimerResponseObject, error)
 
 	// (POST /users/{userId}/timers/current/pause)
-	PostUsersUserIdTimersCurrentPause(ctx context.Context, request PostUsersUserIdTimersCurrentPauseRequestObject) (PostUsersUserIdTimersCurrentPauseResponseObject, error)
+	PauseCurrentTimer(ctx context.Context, request PauseCurrentTimerRequestObject) (PauseCurrentTimerResponseObject, error)
 
 	// (POST /users/{userId}/timers/current/start)
-	PostUsersUserIdTimersCurrentStart(ctx context.Context, request PostUsersUserIdTimersCurrentStartRequestObject) (PostUsersUserIdTimersCurrentStartResponseObject, error)
+	StartCurrentTimer(ctx context.Context, request StartCurrentTimerRequestObject) (StartCurrentTimerResponseObject, error)
 }
 
 type StrictHandlerFunc = strictecho.StrictEchoHandlerFunc
@@ -990,430 +983,333 @@ type strictHandler struct {
 	middlewares []StrictMiddlewareFunc
 }
 
-// GetUsersName operation middleware
-func (sh *strictHandler) GetUsersName(ctx echo.Context, name UserName) error {
-	var request GetUsersNameRequestObject
+// GetUser operation middleware
+func (sh *strictHandler) GetUser(ctx echo.Context, name UserName) error {
+	var request GetUserRequestObject
 
 	request.Name = name
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUsersName(ctx.Request().Context(), request.(GetUsersNameRequestObject))
+		return sh.ssi.GetUser(ctx.Request().Context(), request.(GetUserRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetUsersName")
+		handler = middleware(handler, "GetUser")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(GetUsersNameResponseObject); ok {
-		return validResponse.VisitGetUsersNameResponse(ctx.Response())
+	} else if validResponse, ok := response.(GetUserResponseObject); ok {
+		return validResponse.VisitGetUserResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// PostUsersName operation middleware
-func (sh *strictHandler) PostUsersName(ctx echo.Context, name UserName) error {
-	var request PostUsersNameRequestObject
+// CreateUser operation middleware
+func (sh *strictHandler) CreateUser(ctx echo.Context, name UserName) error {
+	var request CreateUserRequestObject
 
 	request.Name = name
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostUsersName(ctx.Request().Context(), request.(PostUsersNameRequestObject))
+		return sh.ssi.CreateUser(ctx.Request().Context(), request.(CreateUserRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostUsersName")
+		handler = middleware(handler, "CreateUser")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(PostUsersNameResponseObject); ok {
-		return validResponse.VisitPostUsersNameResponse(ctx.Response())
+	} else if validResponse, ok := response.(CreateUserResponseObject); ok {
+		return validResponse.VisitCreateUserResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// GetUsersUserIdEffectsHasRoll operation middleware
-func (sh *strictHandler) GetUsersUserIdEffectsHasRoll(ctx echo.Context, userId UserId) error {
-	var request GetUsersUserIdEffectsHasRollRequestObject
+// CheckEffectRoll operation middleware
+func (sh *strictHandler) CheckEffectRoll(ctx echo.Context, userId UserId) error {
+	var request CheckEffectRollRequestObject
 
 	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUsersUserIdEffectsHasRoll(ctx.Request().Context(), request.(GetUsersUserIdEffectsHasRollRequestObject))
+		return sh.ssi.CheckEffectRoll(ctx.Request().Context(), request.(CheckEffectRollRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetUsersUserIdEffectsHasRoll")
+		handler = middleware(handler, "CheckEffectRoll")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(GetUsersUserIdEffectsHasRollResponseObject); ok {
-		return validResponse.VisitGetUsersUserIdEffectsHasRollResponse(ctx.Response())
+	} else if validResponse, ok := response.(CheckEffectRollResponseObject); ok {
+		return validResponse.VisitCheckEffectRollResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// GetUsersUserIdEffectsHistory operation middleware
-func (sh *strictHandler) GetUsersUserIdEffectsHistory(ctx echo.Context, userId UserId) error {
-	var request GetUsersUserIdEffectsHistoryRequestObject
+// GetEffectHistory operation middleware
+func (sh *strictHandler) GetEffectHistory(ctx echo.Context, userId UserId) error {
+	var request GetEffectHistoryRequestObject
 
 	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUsersUserIdEffectsHistory(ctx.Request().Context(), request.(GetUsersUserIdEffectsHistoryRequestObject))
+		return sh.ssi.GetEffectHistory(ctx.Request().Context(), request.(GetEffectHistoryRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetUsersUserIdEffectsHistory")
+		handler = middleware(handler, "GetEffectHistory")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(GetUsersUserIdEffectsHistoryResponseObject); ok {
-		return validResponse.VisitGetUsersUserIdEffectsHistoryResponse(ctx.Response())
+	} else if validResponse, ok := response.(GetEffectHistoryResponseObject); ok {
+		return validResponse.VisitGetEffectHistoryResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// PostUsersUserIdEffectsRoll operation middleware
-func (sh *strictHandler) PostUsersUserIdEffectsRoll(ctx echo.Context, userId UserId) error {
-	var request PostUsersUserIdEffectsRollRequestObject
+// MakeEffectRoll operation middleware
+func (sh *strictHandler) MakeEffectRoll(ctx echo.Context, userId UserId) error {
+	var request MakeEffectRollRequestObject
 
 	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostUsersUserIdEffectsRoll(ctx.Request().Context(), request.(PostUsersUserIdEffectsRollRequestObject))
+		return sh.ssi.MakeEffectRoll(ctx.Request().Context(), request.(MakeEffectRollRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostUsersUserIdEffectsRoll")
+		handler = middleware(handler, "MakeEffectRoll")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(PostUsersUserIdEffectsRollResponseObject); ok {
-		return validResponse.VisitPostUsersUserIdEffectsRollResponse(ctx.Response())
+	} else if validResponse, ok := response.(MakeEffectRollResponseObject); ok {
+		return validResponse.VisitMakeEffectRollResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// GetUsersUserIdGamesCurrent operation middleware
-func (sh *strictHandler) GetUsersUserIdGamesCurrent(ctx echo.Context, userId UserId) error {
-	var request GetUsersUserIdGamesCurrentRequestObject
+// GetCurrentGame operation middleware
+func (sh *strictHandler) GetCurrentGame(ctx echo.Context, userId UserId) error {
+	var request GetCurrentGameRequestObject
 
 	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUsersUserIdGamesCurrent(ctx.Request().Context(), request.(GetUsersUserIdGamesCurrentRequestObject))
+		return sh.ssi.GetCurrentGame(ctx.Request().Context(), request.(GetCurrentGameRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetUsersUserIdGamesCurrent")
+		handler = middleware(handler, "GetCurrentGame")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(GetUsersUserIdGamesCurrentResponseObject); ok {
-		return validResponse.VisitGetUsersUserIdGamesCurrentResponse(ctx.Response())
+	} else if validResponse, ok := response.(GetCurrentGameResponseObject); ok {
+		return validResponse.VisitGetCurrentGameResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// GetUsersUserIdGamesCurrentFinish operation middleware
-func (sh *strictHandler) GetUsersUserIdGamesCurrentFinish(ctx echo.Context, userId UserId) error {
-	var request GetUsersUserIdGamesCurrentFinishRequestObject
+// FinishCurrentGame operation middleware
+func (sh *strictHandler) FinishCurrentGame(ctx echo.Context, userId UserId) error {
+	var request FinishCurrentGameRequestObject
 
 	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUsersUserIdGamesCurrentFinish(ctx.Request().Context(), request.(GetUsersUserIdGamesCurrentFinishRequestObject))
+		return sh.ssi.FinishCurrentGame(ctx.Request().Context(), request.(FinishCurrentGameRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetUsersUserIdGamesCurrentFinish")
+		handler = middleware(handler, "FinishCurrentGame")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(GetUsersUserIdGamesCurrentFinishResponseObject); ok {
-		return validResponse.VisitGetUsersUserIdGamesCurrentFinishResponse(ctx.Response())
+	} else if validResponse, ok := response.(FinishCurrentGameResponseObject); ok {
+		return validResponse.VisitFinishCurrentGameResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// GetUsersUserIdGamesRoll operation middleware
-func (sh *strictHandler) GetUsersUserIdGamesRoll(ctx echo.Context, userId UserId) error {
-	var request GetUsersUserIdGamesRollRequestObject
+// MakeGameRoll operation middleware
+func (sh *strictHandler) MakeGameRoll(ctx echo.Context, userId UserId) error {
+	var request MakeGameRollRequestObject
 
 	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUsersUserIdGamesRoll(ctx.Request().Context(), request.(GetUsersUserIdGamesRollRequestObject))
+		return sh.ssi.MakeGameRoll(ctx.Request().Context(), request.(MakeGameRollRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetUsersUserIdGamesRoll")
+		handler = middleware(handler, "MakeGameRoll")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(GetUsersUserIdGamesRollResponseObject); ok {
-		return validResponse.VisitGetUsersUserIdGamesRollResponse(ctx.Response())
+	} else if validResponse, ok := response.(MakeGameRollResponseObject); ok {
+		return validResponse.VisitMakeGameRollResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// GetUsersUserIdGamesUnplayed operation middleware
-func (sh *strictHandler) GetUsersUserIdGamesUnplayed(ctx echo.Context, userId UserId) error {
-	var request GetUsersUserIdGamesUnplayedRequestObject
+// GetUnplayedGames operation middleware
+func (sh *strictHandler) GetUnplayedGames(ctx echo.Context, userId UserId) error {
+	var request GetUnplayedGamesRequestObject
 
 	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUsersUserIdGamesUnplayed(ctx.Request().Context(), request.(GetUsersUserIdGamesUnplayedRequestObject))
+		return sh.ssi.GetUnplayedGames(ctx.Request().Context(), request.(GetUnplayedGamesRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetUsersUserIdGamesUnplayed")
+		handler = middleware(handler, "GetUnplayedGames")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(GetUsersUserIdGamesUnplayedResponseObject); ok {
-		return validResponse.VisitGetUsersUserIdGamesUnplayedResponse(ctx.Response())
+	} else if validResponse, ok := response.(GetUnplayedGamesResponseObject); ok {
+		return validResponse.VisitGetUnplayedGamesResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// PostUsersUserIdGamesUnplayed operation middleware
-func (sh *strictHandler) PostUsersUserIdGamesUnplayed(ctx echo.Context, userId UserId) error {
-	var request PostUsersUserIdGamesUnplayedRequestObject
+// AddUnplayedGames operation middleware
+func (sh *strictHandler) AddUnplayedGames(ctx echo.Context, userId UserId) error {
+	var request AddUnplayedGamesRequestObject
 
 	request.UserId = userId
 
-	var body PostUsersUserIdGamesUnplayedJSONRequestBody
+	var body AddUnplayedGamesJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
 		return err
 	}
 	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostUsersUserIdGamesUnplayed(ctx.Request().Context(), request.(PostUsersUserIdGamesUnplayedRequestObject))
+		return sh.ssi.AddUnplayedGames(ctx.Request().Context(), request.(AddUnplayedGamesRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostUsersUserIdGamesUnplayed")
+		handler = middleware(handler, "AddUnplayedGames")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(PostUsersUserIdGamesUnplayedResponseObject); ok {
-		return validResponse.VisitPostUsersUserIdGamesUnplayedResponse(ctx.Response())
+	} else if validResponse, ok := response.(AddUnplayedGamesResponseObject); ok {
+		return validResponse.VisitAddUnplayedGamesResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// GetUsersUserIdTimersCurrent operation middleware
-func (sh *strictHandler) GetUsersUserIdTimersCurrent(ctx echo.Context, userId UserId) error {
-	var request GetUsersUserIdTimersCurrentRequestObject
+// GetCurrentTimer operation middleware
+func (sh *strictHandler) GetCurrentTimer(ctx echo.Context, userId UserId) error {
+	var request GetCurrentTimerRequestObject
 
 	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUsersUserIdTimersCurrent(ctx.Request().Context(), request.(GetUsersUserIdTimersCurrentRequestObject))
+		return sh.ssi.GetCurrentTimer(ctx.Request().Context(), request.(GetCurrentTimerRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetUsersUserIdTimersCurrent")
+		handler = middleware(handler, "GetCurrentTimer")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(GetUsersUserIdTimersCurrentResponseObject); ok {
-		return validResponse.VisitGetUsersUserIdTimersCurrentResponse(ctx.Response())
+	} else if validResponse, ok := response.(GetCurrentTimerResponseObject); ok {
+		return validResponse.VisitGetCurrentTimerResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// PostUsersUserIdTimersCurrentPause operation middleware
-func (sh *strictHandler) PostUsersUserIdTimersCurrentPause(ctx echo.Context, userId UserId) error {
-	var request PostUsersUserIdTimersCurrentPauseRequestObject
+// PauseCurrentTimer operation middleware
+func (sh *strictHandler) PauseCurrentTimer(ctx echo.Context, userId UserId) error {
+	var request PauseCurrentTimerRequestObject
 
 	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostUsersUserIdTimersCurrentPause(ctx.Request().Context(), request.(PostUsersUserIdTimersCurrentPauseRequestObject))
+		return sh.ssi.PauseCurrentTimer(ctx.Request().Context(), request.(PauseCurrentTimerRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostUsersUserIdTimersCurrentPause")
+		handler = middleware(handler, "PauseCurrentTimer")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(PostUsersUserIdTimersCurrentPauseResponseObject); ok {
-		return validResponse.VisitPostUsersUserIdTimersCurrentPauseResponse(ctx.Response())
+	} else if validResponse, ok := response.(PauseCurrentTimerResponseObject); ok {
+		return validResponse.VisitPauseCurrentTimerResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// PostUsersUserIdTimersCurrentStart operation middleware
-func (sh *strictHandler) PostUsersUserIdTimersCurrentStart(ctx echo.Context, userId UserId) error {
-	var request PostUsersUserIdTimersCurrentStartRequestObject
+// StartCurrentTimer operation middleware
+func (sh *strictHandler) StartCurrentTimer(ctx echo.Context, userId UserId) error {
+	var request StartCurrentTimerRequestObject
 
 	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostUsersUserIdTimersCurrentStart(ctx.Request().Context(), request.(PostUsersUserIdTimersCurrentStartRequestObject))
+		return sh.ssi.StartCurrentTimer(ctx.Request().Context(), request.(StartCurrentTimerRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostUsersUserIdTimersCurrentStart")
+		handler = middleware(handler, "StartCurrentTimer")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(PostUsersUserIdTimersCurrentStartResponseObject); ok {
-		return validResponse.VisitPostUsersUserIdTimersCurrentStartResponse(ctx.Response())
+	} else if validResponse, ok := response.(StartCurrentTimerResponseObject); ok {
+		return validResponse.VisitStartCurrentTimerResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
-}
-
-// Base64 encoded, gzipped, json marshaled Swagger object
-var swaggerSpec = []string{
-
-	"H4sIAAAAAAAC/+xZ0XPithP+Vxj9fo8+TJP0oX5zGodmJiV3ATq9yTCMYi+gqy3pJDkXJuP/vaO1DQHM",
-	"YQiQ9spTgsVqd7/v29UKv5BQJFJw4EYT74VIqmgCBhR+6mtQN5H9j3HiEUnNhDiE0wSIR9J80SEKvqZM",
-	"QUQ8o1JwiA4nkFBr9X8FI+KR/7lzJ26+qt2biGSZgy46uGGlE/yzqwvcN7NeiifW4Ioa+kg1fEpBTYPn",
-	"EKRhgtsVGsd3I+I9fH/TuUnmvBCphARlGODeoYgwEeBpQrwHcuX3/Eu/Gww/9YP7z2TgEDOVNi1tFONj",
-	"BKB4Ih6/QGhINsgcEoxG9n9vefsIdKjYLN6lvRwypgmUWG7GpcS43ncVhMCeILqiBm1GQiXUEI9E1MAH",
-	"w5Cm1ezmxD2UXL7OYmnfwQocJRiYPzOQ6E0BF+DNkaVK0Snu9JrsauJWIE1AazquWltKDneYf78qk3YB",
-	"96LrmPG/UDPPNJGxtZgYI7XnutoIBU1tgCZSfAMFUTMUiUuldM9axJlTMBHaFOCuJFCf4yq21qXREeZa",
-	"pDw6cP20/d+DYeeuN7y+63euatePjbC+YNqFwpflkje+GchpyqIqgMuCW10Q/hNlMX2M4V7EsT4wVp27",
-	"of+Hf3PrX94Gw/u729tubbx6LAFV0W5SRa3zG95dQIJxc342h4JxA2NQZQPKYdvU+a3WEso442Prvb4L",
-	"bYoGVOYdKqAG8BxKud2POETSVOOjEeNMTyCqhuK13IvQSwcV8TkLgFRVhj3LVmFkNQHZuVJRl2vL1Qbl",
-	"xwpoNA2emTaH1mG/G9wP/dv7wL/6PAz+vOn26gsRh4HjtBYMc9vWYh8yPhJY78xgt76mT0IxAw3bRxpt",
-	"mnITgyEOeQKlMXzyU7PVbFkuhAROJSMeOW+2mheoVDPB+Fw7Tmn3xfKY2QdjwAnA5pCLLiIeaYOxGOlO",
-	"ORZpKbjOMzxrtfJEuQGOtlTKmIVo7X7ROZL1JidUMqa7MHOQ3gQaNtDGN6obI0uTTeuidbFXz6sSyDCW",
-	"n1vne/OzZgzMstzV6zl4jermX3FnQ2w2cIgUuoK5j0K/L3X9krayYSJxv+zV75o+c2T2MmdWTfkdJXMh",
-	"HyLdCdUflIjjjQWW33yK2fM3qu0J/lbWinbyKEQMlFdxZL00QpFyg0yVs/Gpxooaswfl4Hv0MjszT7dk",
-	"tzA6YE2Wd5gKyvOlRhH5ifZdaC8resedN7bsBbnsoxPUub+u6Q4joRpF3iiWhEZwTKHs88hYf0N6/xPD",
-	"3ge0G6ZKFa5rNBS8d/5amBxQIu3Z71qr01kRccPG/+ZuIjjUGLvXyMXZnESF1eBf3I8WNOPmd88dpHOd",
-	"G1YLqAbjs0vvifHjML7FRIk8H/oIWdcfZgcIhn06Pv65ikq5jOkUom1U1S9tDqysyjG2dF5KCxSc5ti3",
-	"TJurlH5NQZtLEU33z2ZW56ypoljTH5XfitI0LLGft5sJ8bf1YwyF+Y/4G6ZCTOF0ydymIS+y7uKrhcNf",
-	"Nhdk8xF9vlE7G9+tVCgH1VK8TPlPFrmrDVXmyHR30ed70Y0Z/6h8Z9nfAQAA//+T1s2m8SIAAA==",
-}
-
-// GetSwagger returns the content of the embedded swagger specification file
-// or error if failed to decode
-func decodeSpec() ([]byte, error) {
-	zipped, err := base64.StdEncoding.DecodeString(strings.Join(swaggerSpec, ""))
-	if err != nil {
-		return nil, fmt.Errorf("error base64 decoding spec: %w", err)
-	}
-	zr, err := gzip.NewReader(bytes.NewReader(zipped))
-	if err != nil {
-		return nil, fmt.Errorf("error decompressing spec: %w", err)
-	}
-	var buf bytes.Buffer
-	_, err = buf.ReadFrom(zr)
-	if err != nil {
-		return nil, fmt.Errorf("error decompressing spec: %w", err)
-	}
-
-	return buf.Bytes(), nil
-}
-
-var rawSpec = decodeSpecCached()
-
-// a naive cached of a decoded swagger spec
-func decodeSpecCached() func() ([]byte, error) {
-	data, err := decodeSpec()
-	return func() ([]byte, error) {
-		return data, err
-	}
-}
-
-// Constructs a synthetic filesystem for resolving external references when loading openapi specifications.
-func PathToRawSpec(pathToFile string) map[string]func() ([]byte, error) {
-	res := make(map[string]func() ([]byte, error))
-	if len(pathToFile) > 0 {
-		res[pathToFile] = rawSpec
-	}
-
-	return res
-}
-
-// GetSwagger returns the Swagger specification corresponding to the generated code
-// in this file. The external references of Swagger specification are resolved.
-// The logic of resolving external references is tightly connected to "import-mapping" feature.
-// Externally referenced files must be embedded in the corresponding golang packages.
-// Urls can be supported but this task was out of the scope.
-func GetSwagger() (swagger *openapi3.T, err error) {
-	resolvePath := PathToRawSpec("")
-
-	loader := openapi3.NewLoader()
-	loader.IsExternalRefsAllowed = true
-	loader.ReadFromURIFunc = func(loader *openapi3.Loader, url *url.URL) ([]byte, error) {
-		pathToFile := url.String()
-		pathToFile = path.Clean(pathToFile)
-		getSpec, ok := resolvePath[pathToFile]
-		if !ok {
-			err1 := fmt.Errorf("path not found: %s", pathToFile)
-			return nil, err1
-		}
-		return getSpec()
-	}
-	var specData []byte
-	specData, err = rawSpec()
-	if err != nil {
-		return
-	}
-	swagger, err = loader.LoadFromData(specData)
-	if err != nil {
-		return
-	}
-	return
 }

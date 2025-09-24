@@ -1,8 +1,7 @@
 package timer
 
 import (
-	"FavoriteGameGauntlet/database"
-	// "fmt"
+	"FGG-Service/database"
 	"time"
 )
 

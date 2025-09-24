@@ -1,55 +1,55 @@
 package controller
 
 import (
-	"FavoriteGameGauntlet/api"
-	"FavoriteGameGauntlet/user"
+	"FGG-Service/api"
+	"FGG-Service/user"
 	"context"
 )
 
 // (GET /users/{name})
-func (Server) GetUsersName(ctx context.Context, request api.GetUsersNameRequestObject) (api.GetUsersNameResponseObject, error) {
+func (Server) GetUser(ctx context.Context, request api.GetUserRequestObject) (api.GetUserResponseObject, error) {
 	doesUserExist, err := user.CheckIfUserExists(request.Name)
 
 	if doesUserExist == nil {
-		return api.GetUsersName503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
+		return api.GetUser503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
 	}
 
 	if !*doesUserExist {
-		return api.GetUsersName404JSONResponse{Code: api.USERNOTFOUND}, nil
+		return api.GetUser404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
 	user, err := user.FindUser(request.Name)
 
 	if user == nil {
-		return api.GetUsersName404JSONResponse{api.USERNOTFOUND, err.Error()}, nil
+		return api.GetUser404JSONResponse{api.USERNOTFOUND, err.Error()}, nil
 	}
 
-	return api.GetUsersName200JSONResponse(*user), nil
+	return api.GetUser200JSONResponse(*user), nil
 }
 
 // (POST /users/{name})
-func (Server) PostUsersName(ctx context.Context, request api.PostUsersNameRequestObject) (api.PostUsersNameResponseObject, error) {
+func (Server) CreateUser(ctx context.Context, request api.CreateUserRequestObject) (api.CreateUserResponseObject, error) {
 	doesUserExist, err := user.CheckIfUserExists(request.Name)
 
 	if doesUserExist == nil {
-		return api.PostUsersName503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
+		return api.CreateUser503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
 	}
 
 	if *doesUserExist {
-		return api.PostUsersName409JSONResponse{Code: api.USERALREADYEXISTS}, nil
+		return api.CreateUser409JSONResponse{Code: api.USERALREADYEXISTS}, nil
 	}
 
 	err = user.AddUser(request.Name)
 
 	if err != nil {
-		return api.PostUsersName503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
+		return api.CreateUser503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
 	}
 
 	user, err := user.FindUser(request.Name)
 
 	if user == nil {
-		return api.PostUsersName503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
+		return api.CreateUser503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
 	}
 
-	return api.PostUsersName200JSONResponse(*user), nil
+	return api.CreateUser200JSONResponse(*user), nil
 }
