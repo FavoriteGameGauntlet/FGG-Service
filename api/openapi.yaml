@@ -45,7 +45,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '503':
           content:
             application/json:
@@ -65,7 +65,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Games"
+              $ref: "#/components/schemas/UnplayedGames"
       responses:
         '200':
           description: Unplayed games were saved
@@ -73,7 +73,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '503':
           content:
             application/json:
@@ -89,12 +89,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Games"
+                $ref: "#/components/schemas/UnplayedGames"
         '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '503':
           content:
             application/json:
@@ -121,7 +121,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '409':
           content:
             application/json:
@@ -153,9 +153,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: "#/components/schemas/UserNotFoundException"
-                  - $ref: "#/components/schemas/GameNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '503':
           content:
             application/json:
@@ -178,9 +176,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: "#/components/schemas/UserNotFoundException"
-                  - $ref: "#/components/schemas/GameNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '503':
           content:
             application/json:
@@ -207,7 +203,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '503':
           content:
             application/json:
@@ -235,7 +231,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '503':
           content:
             application/json:
@@ -263,7 +259,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '503':
           content:
             application/json:
@@ -290,7 +286,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '503':
           content:
             application/json:
@@ -317,7 +313,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '503':
           content:
             application/json:
@@ -344,7 +340,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserNotFoundException"
+                $ref: "#/components/schemas/NotFoundException"
         '409':
           content:
             application/json:
@@ -389,7 +385,7 @@ components:
       required:
         - id
         - name
-    Game:
+    UnplayedGame:
       type: object
       properties:
         name:
@@ -400,6 +396,22 @@ components:
           example: "https://store.steampowered.com/app/20"
       required:
         - name
+    UnplayedGames:
+      type: array
+      items:
+        $ref: '#/components/schemas/UnplayedGame'
+    Game:
+      allOf:
+        - $ref: "#/components/schemas/UnplayedGame"
+        - type: object
+          properties:
+            id:
+              $ref: "#/components/schemas/Id"
+            state:
+              type: string
+              enum: ['started', 'finished']
+          required:
+            - id
     Games:
       type: array
       items:
@@ -407,8 +419,6 @@ components:
     Timer:
       type: object
       properties:
-        gameId:
-          $ref: "#/components/schemas/Id"
         state:
           type: string
           enum: ['created', 'running', 'paused', 'finished']
@@ -419,7 +429,6 @@ components:
           type: integer
           format: int32
       required:
-        - gameId
         - state
         - remainingTimeInS
         - durationInS
@@ -454,22 +463,14 @@ components:
       required:
         - code
         - message
-    UserNotFoundException:
+    NotFoundException:
       allOf:
         - $ref: "#/components/schemas/Exception"
         - type: object
           properties:
             code:
               type: string
-              enum: ["USER_NOT_FOUND"]
-    GameNotFoundException:
-      allOf:
-        - $ref: "#/components/schemas/Exception"
-        - type: object
-          properties:
-            code:
-              type: string
-              enum: ["GAME_NOT_FOUND"]
+              enum: ["USER_NOT_FOUND", "GAME_NOT_FOUND"]
     NoAvailableRollsException:
       allOf:
         - $ref: "#/components/schemas/Exception"

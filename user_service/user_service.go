@@ -8,26 +8,35 @@ import (
 )
 
 const (
-	CheckIfUserExistsCommand = `
+	CheckIfUserExistsByNameCommand = `
 		SELECT CASE 
         	WHEN EXISTS (
 				SELECT 1
 				FROM Users
-				WHERE Name = $username) 
+				WHERE Name = $userName) 
+         	THEN true
+         	ELSE false
+       	END AS 'DoesUserExist'`
+	CheckIfUserExistsByIdCommand = `
+		SELECT 
+			CASE WHEN EXISTS (
+				SELECT 1
+				FROM Users
+				WHERE Id = $userId) 
          	THEN true
          	ELSE false
        	END AS 'DoesUserExist'`
 	FindUserCommand = `
 		SELECT Id
 		FROM Users
-		WHERE Name = $username`
-	AddUserCommand = `
+		WHERE Name = $userName`
+	CreateUserCommand = `
 		INSERT INTO Users (Id, Name)
-		VALUES ($userId, $username)`
+		VALUES ($userId, $userName)`
 )
 
-func CheckIfUserExists(username string) (*bool, error) {
-	row := database.QueryRow(CheckIfUserExistsCommand, username)
+func CheckIfUserExistsByName(userName string) (*bool, error) {
+	row := database.QueryRow(CheckIfUserExistsByNameCommand, userName)
 
 	var doesUserExist bool
 	err := row.Scan(&doesUserExist)
@@ -36,11 +45,24 @@ func CheckIfUserExists(username string) (*bool, error) {
 		return nil, err
 	}
 
-	return &doesUserExist, err
+	return &doesUserExist, nil
 }
 
-func FindUser(username string) (*api.User, error) {
-	row := database.QueryRow(FindUserCommand, username)
+func CheckIfUserExistsById(userId uuid.UUID) (*bool, error) {
+	row := database.QueryRow(CheckIfUserExistsByIdCommand, userId)
+
+	var doesUserExist bool
+	err := row.Scan(&doesUserExist)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &doesUserExist, nil
+}
+
+func FindUser(userName string) (*api.User, error) {
+	row := database.QueryRow(FindUserCommand, userName)
 
 	var userId uuid.UUID
 	err := row.Scan(&userId)
@@ -49,12 +71,12 @@ func FindUser(username string) (*api.User, error) {
 		return nil, err
 	}
 
-	return &api.User{Id: userId, Name: username}, err
+	return &api.User{Id: userId, Name: userName}, err
 }
 
-func AddUser(username string) error {
+func CreateUser(userName string) error {
 	userId := uuid.New().String()
-	_, err := database.Exec(AddUserCommand, userId, username)
+	_, err := database.Exec(CreateUserCommand, userId, userName)
 
 	return err
 }

@@ -13,15 +13,16 @@ import (
 var swaggerUI embed.FS
 
 func main() {
-	s := controller.NewServer()
+	server := controller.NewServer()
 	e := echo.New()
 
-	api.RegisterHandlers(e, api.NewStrictHandler(s, []api.StrictMiddlewareFunc{}))
+	strictHandler := api.NewStrictHandler(server, []api.StrictMiddlewareFunc{})
+	api.RegisterHandlers(e, strictHandler)
 
-	fs := http.FS(swaggerUI)
-	fileServer := http.FileServer(fs)
+	fileSystem := http.FS(swaggerUI)
+	fileServer := http.FileServer(fileSystem)
+	httpHandler := http.StripPrefix("/swagger/", fileServer)
+	e.GET("/swagger/*", echo.WrapHandler(httpHandler))
 
-	e.GET("/swagger/*", echo.WrapHandler(http.StripPrefix("/swagger/", fileServer)))
-
-	e.Start("127.0.0.1:8080")
+	e.Start("localhost:8080")
 }

@@ -8,9 +8,9 @@ import (
 
 // (GET /users/{name})
 func (Server) GetUser(ctx context.Context, request api.GetUserRequestObject) (api.GetUserResponseObject, error) {
-	doesUserExist, err := user_service.CheckIfUserExists(request.Name)
+	doesUserExist, err := user_service.CheckIfUserExistsByName(request.Name)
 
-	if doesUserExist == nil {
+	if err != nil {
 		return api.GetUser503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
 	}
 
@@ -29,9 +29,9 @@ func (Server) GetUser(ctx context.Context, request api.GetUserRequestObject) (ap
 
 // (POST /users/{name})
 func (Server) CreateUser(ctx context.Context, request api.CreateUserRequestObject) (api.CreateUserResponseObject, error) {
-	doesUserExist, err := user_service.CheckIfUserExists(request.Name)
+	doesUserExist, err := user_service.CheckIfUserExistsByName(request.Name)
 
-	if doesUserExist == nil {
+	if err != nil {
 		return api.CreateUser503JSONResponse{api.DATABASEQUERY, err.Error()}, nil
 	}
 
@@ -39,7 +39,7 @@ func (Server) CreateUser(ctx context.Context, request api.CreateUserRequestObjec
 		return api.CreateUser409JSONResponse{Code: api.USERALREADYEXISTS}, nil
 	}
 
-	err = user_service.AddUser(request.Name)
+	err = user_service.CreateUser(request.Name)
 
 	if err != nil {
 		return api.CreateUser503JSONResponse{api.DATABASEQUERY, err.Error()}, nil

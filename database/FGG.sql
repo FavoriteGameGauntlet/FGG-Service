@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.17 on Thu Sep 25 00:24:04 2025
+-- File generated with SQLiteStudio v3.4.17 on Fri Sep 26 05:26:03 2025
 --
 -- Text encoding used: System
 --
@@ -38,7 +38,7 @@ CREATE TABLE GameHistory (
     GameId TEXT REFERENCES Games (Id) 
                 NOT NULL,
     State  TEXT NOT NULL
-                DEFAULT ('rolled'),
+                DEFAULT ('started'),
     Date   TEXT NOT NULL
                 DEFAULT (datetime('now') ),
     Result TEXT
@@ -76,15 +76,16 @@ CREATE TABLE RollEffects (
 DROP TABLE IF EXISTS TimerActions;
 
 CREATE TABLE TimerActions (
-    Id      TEXT PRIMARY KEY
-                 UNIQUE
-                 NOT NULL
-                 DEFAULT (uuid() ),
-    TimerId TEXT REFERENCES Timers (Id) 
-                 NOT NULL,
-    Action  TEXT NOT NULL,
-    Date    TEXT NOT NULL
-                 DEFAULT (datetime('now') ) 
+    Id               TEXT    PRIMARY KEY
+                             UNIQUE
+                             NOT NULL
+                             DEFAULT (uuid() ),
+    TimerId          TEXT    REFERENCES Timers (Id) 
+                             NOT NULL,
+    Action           TEXT    NOT NULL,
+    Date             TEXT    NOT NULL
+                             DEFAULT (datetime('now') ),
+    RemainingTimeInS INTEGER
 );
 
 
@@ -103,7 +104,7 @@ CREATE TABLE Timers (
     State       TEXT    NOT NULL
                         DEFAULT ('created'),
     DurationInS INTEGER NOT NULL
-                        DEFAULT (0) 
+                        DEFAULT (10800) 
 );
 
 

@@ -3,6 +3,7 @@ package game_service
 import (
 	"FGG-Service/api"
 	"FGG-Service/database"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -27,12 +28,12 @@ const (
 					AND g.Name = $gameName)
          	THEN true
          	ELSE false
-       	END AS 'DoesGameExist'`
+       	END AS 'DoesUnplayedGameExist'`
 	AddGameCommand = `
 		INSERT INTO Games (Id, Name, Link)
 		VALUES ($gameId, $gameName, $gameLink)`
 	GetGameCommand = `
-		SELECT Id
+		SELECT Id, Name, Link
 		FROM Games
 		WHERE Name = $gameName`
 	AddUnplayedGameCommand = `
@@ -42,10 +43,16 @@ const (
 		SELECT g.Name, g.Link
 		FROM UnplayedGames ug
 			INNER JOIN Games g ON ug.GameId = g.Id
-		WHERE UserId = $userId`
+		WHERE ug.UserId = $userId`
+	GetCurrentGameCommand = `
+		SELECT g.Id, g.Name, gh.State, g.Link
+		FROM GameHistory gh
+			INNER JOIN Games g ON gh.GameId = g.Id
+		WHERE UserId = $userId
+			AND Result IS NULL`
 )
 
-func AddUnplayedGames(userId uuid.UUID, gamesPtr *api.Games) error {
+func AddUnplayedGames(userId uuid.UUID, gamesPtr *api.UnplayedGames) error {
 	games := *gamesPtr
 	numberOfGames := len(games)
 	errorCount := 0
@@ -66,14 +73,17 @@ func AddUnplayedGames(userId uuid.UUID, gamesPtr *api.Games) error {
 	return nil
 }
 
-func AddUnplayedGame(userId uuid.UUID, game *api.Game) error {
-	doesUnplayedGameExist, err := CheckIfUnplayedGameExists(userId, game.Name)
+func AddUnplayedGame(userId uuid.UUID, unplayedGame *api.UnplayedGame) error {
+	doesUnplayedGameExist, err := CheckIfUnplayedGameExists(
+		userId,
+		unplayedGame.Name,
+	)
 
 	if err != nil || *doesUnplayedGameExist {
 		return err
 	}
 
-	gameId, err := AddOrGetGame(game)
+	game, err := AddOrGetGame(unplayedGame)
 
 	if err != nil {
 		return err
@@ -84,7 +94,8 @@ func AddUnplayedGame(userId uuid.UUID, game *api.Game) error {
 		AddUnplayedGameCommand,
 		unplayedGameId,
 		userId,
-		gameId)
+		game.Id,
+	)
 
 	return err
 }
@@ -99,37 +110,46 @@ func CheckIfUnplayedGameExists(userId uuid.UUID, gameName string) (*bool, error)
 		return nil, err
 	}
 
-	return &doesUnplayedGameExist, err
+	return &doesUnplayedGameExist, nil
 }
 
-func AddOrGetGame(game *api.Game) (*uuid.UUID, error) {
-	doesGameExist, err := CheckIfGameExists(game.Name)
+func AddOrGetGame(unplayedGame *api.UnplayedGame) (*api.Game, error) {
+	doesGameExist, err := CheckIfGameExists(unplayedGame.Name)
 
 	if err != nil {
 		return nil, err
 	}
 
 	if *doesGameExist {
-		row := database.QueryRow(GetGameCommand, game.Name)
+		row := database.QueryRow(GetGameCommand, unplayedGame.Name)
 
-		var gameId uuid.UUID
-		err = row.Scan(&gameId)
+		game := api.Game{}
+		err = row.Scan(&game.Id, &game.Name, &game.Link)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return &gameId, nil
+		return &game, nil
 	}
 
 	gameId := uuid.New()
-	_, err = database.Exec(AddGameCommand, gameId.String(), game.Name, game.Link)
+	_, err = database.Exec(
+		AddGameCommand,
+		gameId.String(),
+		unplayedGame.Name,
+		unplayedGame.Link,
+	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &gameId, nil
+	return &api.Game{
+		Id:   gameId,
+		Name: unplayedGame.Name,
+		Link: unplayedGame.Link,
+	}, nil
 }
 
 func CheckIfGameExists(gameName string) (*bool, error) {
@@ -142,27 +162,53 @@ func CheckIfGameExists(gameName string) (*bool, error) {
 		return nil, err
 	}
 
-	return &doesGameExist, err
+	return &doesGameExist, nil
 }
 
-func GetUnplayedGames(userId uuid.UUID) (*api.Games, error) {
+func GetUnplayedGames(userId uuid.UUID) (*api.UnplayedGames, error) {
 	rows, err := database.Query(GetUnplayedGamesCommand, userId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	games := api.Games{}
+	gameCount := 0
+	errorCount := 0
+	games := api.UnplayedGames{}
 	for rows.Next() {
-		g := api.Game{}
-		err := rows.Scan(&g.Name, &g.Link)
+		gameCount++
+
+		game := api.UnplayedGame{}
+		err := rows.Scan(&game.Name, &game.Link)
 
 		if err != nil {
+			errorCount++
 			continue
 		}
 
-		games = append(games, g)
+		games = append(games, game)
+	}
+
+	if errorCount > 0 && errorCount == gameCount {
+		return nil, err
 	}
 
 	return &games, nil
+}
+
+func GetCurrentGame(userId uuid.UUID) (*api.Game, error) {
+	row := database.QueryRow(GetCurrentGameCommand, userId)
+
+	game := api.Game{}
+	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &game, nil
 }

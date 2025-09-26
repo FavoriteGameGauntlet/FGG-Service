@@ -21,9 +21,10 @@ const (
 	DATABASEQUERY DatabaseQueryExceptionCode = "DATABASE_QUERY"
 )
 
-// Defines values for GameNotFoundExceptionCode.
+// Defines values for GameState.
 const (
-	GAMENOTFOUND GameNotFoundExceptionCode = "GAME_NOT_FOUND"
+	GameStateFinished GameState = "finished"
+	GameStateStarted  GameState = "started"
 )
 
 // Defines values for NoAvailableRollsExceptionCode.
@@ -31,22 +32,23 @@ const (
 	NOAVAILABLEROLLS NoAvailableRollsExceptionCode = "NO_AVAILABLE_ROLLS"
 )
 
+// Defines values for NotFoundExceptionCode.
+const (
+	GAMENOTFOUND NotFoundExceptionCode = "GAME_NOT_FOUND"
+	USERNOTFOUND NotFoundExceptionCode = "USER_NOT_FOUND"
+)
+
 // Defines values for TimerState.
 const (
-	Created  TimerState = "created"
-	Finished TimerState = "finished"
-	Paused   TimerState = "paused"
-	Running  TimerState = "running"
+	TimerStateCreated  TimerState = "created"
+	TimerStateFinished TimerState = "finished"
+	TimerStatePaused   TimerState = "paused"
+	TimerStateRunning  TimerState = "running"
 )
 
 // Defines values for UserAlreadyExistsExceptionCode.
 const (
 	USERALREADYEXISTS UserAlreadyExistsExceptionCode = "USER_ALREADY_EXISTS"
-)
-
-// Defines values for UserNotFoundExceptionCode.
-const (
-	USERNOTFOUND UserNotFoundExceptionCode = "USER_NOT_FOUND"
 )
 
 // DatabaseQueryException defines model for DatabaseQueryException.
@@ -77,21 +79,14 @@ type Exception struct {
 
 // Game defines model for Game.
 type Game struct {
-	Link *string `json:"link,omitempty"`
-	Name Name    `json:"name"`
+	Id    Id         `json:"id"`
+	Link  *string    `json:"link,omitempty"`
+	Name  Name       `json:"name"`
+	State *GameState `json:"state,omitempty"`
 }
 
-// GameNotFoundException defines model for GameNotFoundException.
-type GameNotFoundException struct {
-	Code    GameNotFoundExceptionCode `json:"code"`
-	Message string                    `json:"message"`
-}
-
-// GameNotFoundExceptionCode defines model for GameNotFoundException.Code.
-type GameNotFoundExceptionCode string
-
-// Games defines model for Games.
-type Games = []Game
+// GameState defines model for Game.State.
+type GameState string
 
 // Id defines model for Id.
 type Id = openapi_types.UUID
@@ -108,16 +103,33 @@ type NoAvailableRollsException struct {
 // NoAvailableRollsExceptionCode defines model for NoAvailableRollsException.Code.
 type NoAvailableRollsExceptionCode string
 
+// NotFoundException defines model for NotFoundException.
+type NotFoundException struct {
+	Code    NotFoundExceptionCode `json:"code"`
+	Message string                `json:"message"`
+}
+
+// NotFoundExceptionCode defines model for NotFoundException.Code.
+type NotFoundExceptionCode string
+
 // Timer defines model for Timer.
 type Timer struct {
 	DurationInS      int32      `json:"durationInS"`
-	GameId           Id         `json:"gameId"`
 	RemainingTimeInS int32      `json:"remainingTimeInS"`
 	State            TimerState `json:"state"`
 }
 
 // TimerState defines model for Timer.State.
 type TimerState string
+
+// UnplayedGame defines model for UnplayedGame.
+type UnplayedGame struct {
+	Link *string `json:"link,omitempty"`
+	Name Name    `json:"name"`
+}
+
+// UnplayedGames defines model for UnplayedGames.
+type UnplayedGames = []UnplayedGame
 
 // User defines model for User.
 type User struct {
@@ -134,15 +146,6 @@ type UserAlreadyExistsException struct {
 // UserAlreadyExistsExceptionCode defines model for UserAlreadyExistsException.Code.
 type UserAlreadyExistsExceptionCode string
 
-// UserNotFoundException defines model for UserNotFoundException.
-type UserNotFoundException struct {
-	Code    UserNotFoundExceptionCode `json:"code"`
-	Message string                    `json:"message"`
-}
-
-// UserNotFoundExceptionCode defines model for UserNotFoundException.Code.
-type UserNotFoundExceptionCode string
-
 // UserId defines model for UserId.
 type UserId = Id
 
@@ -150,7 +153,7 @@ type UserId = Id
 type UserName = Name
 
 // AddUnplayedGamesJSONRequestBody defines body for AddUnplayedGames for application/json ContentType.
-type AddUnplayedGamesJSONRequestBody = Games
+type AddUnplayedGamesJSONRequestBody = UnplayedGames
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -469,7 +472,7 @@ func (response GetUser200JSONResponse) VisitGetUserResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUser404JSONResponse UserNotFoundException
+type GetUser404JSONResponse NotFoundException
 
 func (response GetUser404JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -539,7 +542,7 @@ func (response CheckEffectRoll200JSONResponse) VisitCheckEffectRollResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CheckEffectRoll404JSONResponse UserNotFoundException
+type CheckEffectRoll404JSONResponse NotFoundException
 
 func (response CheckEffectRoll404JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -574,7 +577,7 @@ func (response GetEffectHistory200JSONResponse) VisitGetEffectHistoryResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetEffectHistory404JSONResponse UserNotFoundException
+type GetEffectHistory404JSONResponse NotFoundException
 
 func (response GetEffectHistory404JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -609,7 +612,7 @@ func (response MakeEffectRoll200JSONResponse) VisitMakeEffectRollResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeEffectRoll404JSONResponse UserNotFoundException
+type MakeEffectRoll404JSONResponse NotFoundException
 
 func (response MakeEffectRoll404JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -653,15 +656,13 @@ func (response GetCurrentGame200JSONResponse) VisitGetCurrentGameResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCurrentGame404JSONResponse struct {
-	union json.RawMessage
-}
+type GetCurrentGame404JSONResponse NotFoundException
 
 func (response GetCurrentGame404JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
-	return json.NewEncoder(w).Encode(response.union)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetCurrentGame503JSONResponse DatabaseQueryException
@@ -689,15 +690,13 @@ func (response FinishCurrentGame200Response) VisitFinishCurrentGameResponse(w ht
 	return nil
 }
 
-type FinishCurrentGame404JSONResponse struct {
-	union json.RawMessage
-}
+type FinishCurrentGame404JSONResponse NotFoundException
 
 func (response FinishCurrentGame404JSONResponse) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
-	return json.NewEncoder(w).Encode(response.union)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type FinishCurrentGame503JSONResponse DatabaseQueryException
@@ -726,7 +725,7 @@ func (response MakeGameRoll200JSONResponse) VisitMakeGameRollResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeGameRoll404JSONResponse UserNotFoundException
+type MakeGameRoll404JSONResponse NotFoundException
 
 func (response MakeGameRoll404JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -761,7 +760,7 @@ type GetUnplayedGamesResponseObject interface {
 	VisitGetUnplayedGamesResponse(w http.ResponseWriter) error
 }
 
-type GetUnplayedGames200JSONResponse Games
+type GetUnplayedGames200JSONResponse UnplayedGames
 
 func (response GetUnplayedGames200JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -770,7 +769,7 @@ func (response GetUnplayedGames200JSONResponse) VisitGetUnplayedGamesResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUnplayedGames404JSONResponse UserNotFoundException
+type GetUnplayedGames404JSONResponse NotFoundException
 
 func (response GetUnplayedGames404JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -805,7 +804,7 @@ func (response AddUnplayedGames200Response) VisitAddUnplayedGamesResponse(w http
 	return nil
 }
 
-type AddUnplayedGames404JSONResponse UserNotFoundException
+type AddUnplayedGames404JSONResponse NotFoundException
 
 func (response AddUnplayedGames404JSONResponse) VisitAddUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -840,7 +839,7 @@ func (response GetCurrentTimer200JSONResponse) VisitGetCurrentTimerResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCurrentTimer404JSONResponse UserNotFoundException
+type GetCurrentTimer404JSONResponse NotFoundException
 
 func (response GetCurrentTimer404JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -875,7 +874,7 @@ func (response PauseCurrentTimer200JSONResponse) VisitPauseCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PauseCurrentTimer404JSONResponse UserNotFoundException
+type PauseCurrentTimer404JSONResponse NotFoundException
 
 func (response PauseCurrentTimer404JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -910,7 +909,7 @@ func (response StartCurrentTimer200JSONResponse) VisitStartCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type StartCurrentTimer404JSONResponse UserNotFoundException
+type StartCurrentTimer404JSONResponse NotFoundException
 
 func (response StartCurrentTimer404JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")

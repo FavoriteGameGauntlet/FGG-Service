@@ -1,56 +1,118 @@
 package timer_service
 
 import (
+	"FGG-Service/api"
 	"FGG-Service/database"
-	"time"
-)
 
-type Timer struct {
-	id int64
-}
+	"github.com/google/uuid"
+)
 
 const (
+	CheckIfCurrentTimerExistsCommand = `
+		SELECT CASE 
+			WHEN EXISTS (
+				SELECT 1
+				FROM Timers
+				WHERE UserId = $userId)
+         	THEN true
+         	ELSE false
+       		END AS 'DoesCurrentTimerExist'`
+	GetCurrentTimerCommand = `
+		SELECT 
+			t.State, 
+			t.DurationInS, 
+			CASE ta.Action
+				WHEN $startTimerAction THEN strftime('%s', 'now') - strftime('%s', ta.Date)
+				WHEN $pauseTimerAction THEN ta.RemainingTimeInS
+				WHEN $finishTimerAction THEN 0
+				ELSE t.DurationInS
+			END AS RemainingTimeInS
+		FROM Timers t
+			LEFT JOIN TimerActions ta ON t.Id = ta.TimerId
+		WHERE UserId = $userId
+		ORDER BY ta.Date DESC`
 	CreateTimerCommand = `
-		INSERT INTO Timers (UserId, DurationInS)
-		VALUES ($userId, $duration)`
-	DoTimerActionCommand = `
-		INSERT INTO TimerActions (TimerId, Action)
-		VALUES ($timerId, $action)`
+		INSERT INTO Timers (Id, UserId, GameId, DurationInS)
+		VALUES ($timerId, $userId, $gameId, $timerDurationInS)`
 )
 
-func NewTimerFromId(timerId int64) *Timer {
-	return &Timer{
-		id: timerId,
-	}
-}
+func CheckIfCurrentTimerExists(userId uuid.UUID) (*bool, error) {
+	row := database.QueryRow(
+		CheckIfCurrentTimerExistsCommand,
+		userId,
+		api.TimerStateFinished,
+	)
 
-func NewTimer(userId int64) *Timer {
-	const threeHours = 3 * time.Hour
-	result := database.Exec(CreateTimerCommand, userId, threeHours.Seconds())
-
-	timerId, err := result.LastInsertId()
+	var doesCurrentTimerExist bool
+	err := row.Scan(&doesCurrentTimerExist)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return &Timer{
-		id: timerId,
+	return &doesCurrentTimerExist, nil
+}
+
+func GetOrCreateCurrentTimer(userId uuid.UUID, gameId uuid.UUID) (*api.Timer, error) {
+	doesCurrentTimerExist, err := CheckIfCurrentTimerExists(userId)
+
+	if err != nil {
+		return nil, err
 	}
+
+	if *doesCurrentTimerExist {
+		timer, err := GetCurrentTimer(userId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return timer, nil
+	}
+
+	timer, err := CreateCurrentTimer(userId, gameId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return timer, nil
 }
 
-func (timer *Timer) StartTimer() *Timer {
-	database.Exec(DoTimerActionCommand, timer.id, TimerActionStart)
+func GetCurrentTimer(userId uuid.UUID) (*api.Timer, error) {
+	row := database.QueryRow(
+		GetCurrentTimerCommand,
+		userId,
+		api.TimerStateFinished,
+	)
 
-	return timer
+	timer := api.Timer{}
+	err := row.Scan(&timer.DurationInS, &timer.State, &timer.RemainingTimeInS)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &timer, nil
 }
 
-func (timer *Timer) PauseTimer() *Timer {
-	database.Exec(DoTimerActionCommand, timer.id, TimerActionPause)
+func CreateCurrentTimer(userId uuid.UUID, gameId uuid.UUID) (*api.Timer, error) {
+	timerId := uuid.New().String()
+	_, err := database.Exec(
+		CreateTimerCommand,
+		timerId,
+		userId,
+		gameId,
+		10800,
+	)
 
-	return timer
-}
+	if err != nil {
+		return nil, err
+	}
 
-func (timer *Timer) GetTimerId() int64 {
-	return timer.id
+	return &api.Timer{
+		DurationInS:      10800,
+		RemainingTimeInS: 10800,
+		State:            api.TimerStateCreated,
+	}, nil
 }
