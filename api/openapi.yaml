@@ -24,7 +24,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserAlreadyExistsException"
+                $ref: "#/components/schemas/ConflictException"
         '503':
           content:
             application/json:
@@ -126,7 +126,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NoAvailableRollsException"
+                $ref: "#/components/schemas/ConflictException"
         '503':
           content:
             application/json:
@@ -221,17 +221,20 @@ paths:
         - Timers
       responses:
         '200':
-          description: Timer started
           content:
             application/json:
               schema:
-                type: integer
-                format: int32
+                $ref: "#/components/schemas/TimerAction"
         '404':
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/NotFoundException"
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictException"
         '503':
           content:
             application/json:
@@ -249,17 +252,20 @@ paths:
         - Timers
       responses:
         '200':
-          description: Timer paused
           content:
             application/json:
               schema:
-                type: integer
-                format: int32
+                $ref: "#/components/schemas/TimerAction"
         '404':
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/NotFoundException"
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictException"
         '503':
           content:
             application/json:
@@ -345,7 +351,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NoAvailableRollsException"
+                $ref: "#/components/schemas/ConflictException"
         '503':
           content:
             application/json:
@@ -419,9 +425,11 @@ components:
     Timer:
       type: object
       properties:
+        id:
+          $ref: "#/components/schemas/Id"
         state:
           type: string
-          enum: ['created', 'running', 'paused', 'finished']
+          enum: ['created', 'running', 'paused', 'finished', 'rolled']
         remainingTimeInS:
           type: integer
           format: int32
@@ -429,9 +437,22 @@ components:
           type: integer
           format: int32
       required:
+        - id
         - state
         - remainingTimeInS
         - durationInS
+    TimerAction:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: ['start', 'pause', 'stop']
+        remainingTimeInS:
+          type: integer
+          format: int32
+      required:
+        - action
+        - remainingTimeInS
     Effect:
       type: object
       properties:
@@ -470,23 +491,19 @@ components:
           properties:
             code:
               type: string
-              enum: ["USER_NOT_FOUND", "GAME_NOT_FOUND"]
-    NoAvailableRollsException:
+              enum: ["USER_NOT_FOUND", "GAME_NOT_FOUND", "TIMER_NOT_FOUND"]
+    ConflictException:
       allOf:
         - $ref: "#/components/schemas/Exception"
         - type: object
           properties:
             code:
               type: string
-              enum: ["NO_AVAILABLE_ROLLS"]
-    UserAlreadyExistsException:
-      allOf:
-        - $ref: "#/components/schemas/Exception"
-        - type: object
-          properties:
-            code:
-              type: string
-              enum: ["USER_ALREADY_EXISTS"]
+              enum: [
+                "NO_AVAILABLE_ROLLS", 
+                "USER_ALREADY_EXISTS", 
+                "TIMER_INCORRECT_STATE"
+              ]
     DatabaseQueryException:
       allOf:
         - $ref: "#/components/schemas/Exception"

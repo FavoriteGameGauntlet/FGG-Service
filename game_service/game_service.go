@@ -29,6 +29,17 @@ const (
          	THEN true
          	ELSE false
        	END AS 'DoesUnplayedGameExist'`
+	CheckIfCurrentGameExistsCommand = `
+		SELECT CASE 
+        	WHEN EXISTS (
+				SELECT 1
+				FROM GameHistory gh
+					INNER JOIN Games g ON gh.GameId = g.Id
+				WHERE gh.UserId = $userId
+					AND gh.Result IS NULL)
+         	THEN true
+         	ELSE false
+       	END AS 'DoesCurrentGameExist'`
 	AddGameCommand = `
 		INSERT INTO Games (Id, Name, Link)
 		VALUES ($gameId, $gameName, $gameLink)`
@@ -48,8 +59,8 @@ const (
 		SELECT g.Id, g.Name, gh.State, g.Link
 		FROM GameHistory gh
 			INNER JOIN Games g ON gh.GameId = g.Id
-		WHERE UserId = $userId
-			AND Result IS NULL`
+		WHERE gh.UserId = $userId
+			AND gh.Result IS NULL`
 )
 
 func AddUnplayedGames(userId uuid.UUID, gamesPtr *api.UnplayedGames) error {
@@ -211,4 +222,17 @@ func GetCurrentGame(userId uuid.UUID) (*api.Game, error) {
 	}
 
 	return &game, nil
+}
+
+func CheckIfCurrentGameExists(userId uuid.UUID) (*bool, error) {
+	row := database.QueryRow(CheckIfCurrentGameExistsCommand, userId)
+
+	var doesCurrentGameExist bool
+	err := row.Scan(&doesCurrentGameExist)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &doesCurrentGameExist, nil
 }

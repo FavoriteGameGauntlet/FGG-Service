@@ -16,6 +16,13 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for ConflictExceptionCode.
+const (
+	NOAVAILABLEROLLS    ConflictExceptionCode = "NO_AVAILABLE_ROLLS"
+	TIMERINCORRECTSTATE ConflictExceptionCode = "TIMER_INCORRECT_STATE"
+	USERALREADYEXISTS   ConflictExceptionCode = "USER_ALREADY_EXISTS"
+)
+
 // Defines values for DatabaseQueryExceptionCode.
 const (
 	DATABASEQUERY DatabaseQueryExceptionCode = "DATABASE_QUERY"
@@ -27,15 +34,11 @@ const (
 	GameStateStarted  GameState = "started"
 )
 
-// Defines values for NoAvailableRollsExceptionCode.
-const (
-	NOAVAILABLEROLLS NoAvailableRollsExceptionCode = "NO_AVAILABLE_ROLLS"
-)
-
 // Defines values for NotFoundExceptionCode.
 const (
-	GAMENOTFOUND NotFoundExceptionCode = "GAME_NOT_FOUND"
-	USERNOTFOUND NotFoundExceptionCode = "USER_NOT_FOUND"
+	GAMENOTFOUND  NotFoundExceptionCode = "GAME_NOT_FOUND"
+	TIMERNOTFOUND NotFoundExceptionCode = "TIMER_NOT_FOUND"
+	USERNOTFOUND  NotFoundExceptionCode = "USER_NOT_FOUND"
 )
 
 // Defines values for TimerState.
@@ -43,13 +46,25 @@ const (
 	TimerStateCreated  TimerState = "created"
 	TimerStateFinished TimerState = "finished"
 	TimerStatePaused   TimerState = "paused"
+	TimerStateRolled   TimerState = "rolled"
 	TimerStateRunning  TimerState = "running"
 )
 
-// Defines values for UserAlreadyExistsExceptionCode.
+// Defines values for TimerActionAction.
 const (
-	USERALREADYEXISTS UserAlreadyExistsExceptionCode = "USER_ALREADY_EXISTS"
+	Pause TimerActionAction = "pause"
+	Start TimerActionAction = "start"
+	Stop  TimerActionAction = "stop"
 )
+
+// ConflictException defines model for ConflictException.
+type ConflictException struct {
+	Code    ConflictExceptionCode `json:"code"`
+	Message string                `json:"message"`
+}
+
+// ConflictExceptionCode defines model for ConflictException.Code.
+type ConflictExceptionCode string
 
 // DatabaseQueryException defines model for DatabaseQueryException.
 type DatabaseQueryException struct {
@@ -94,15 +109,6 @@ type Id = openapi_types.UUID
 // Name defines model for Name.
 type Name = string
 
-// NoAvailableRollsException defines model for NoAvailableRollsException.
-type NoAvailableRollsException struct {
-	Code    NoAvailableRollsExceptionCode `json:"code"`
-	Message string                        `json:"message"`
-}
-
-// NoAvailableRollsExceptionCode defines model for NoAvailableRollsException.Code.
-type NoAvailableRollsExceptionCode string
-
 // NotFoundException defines model for NotFoundException.
 type NotFoundException struct {
 	Code    NotFoundExceptionCode `json:"code"`
@@ -115,12 +121,22 @@ type NotFoundExceptionCode string
 // Timer defines model for Timer.
 type Timer struct {
 	DurationInS      int32      `json:"durationInS"`
+	Id               Id         `json:"id"`
 	RemainingTimeInS int32      `json:"remainingTimeInS"`
 	State            TimerState `json:"state"`
 }
 
 // TimerState defines model for Timer.State.
 type TimerState string
+
+// TimerAction defines model for TimerAction.
+type TimerAction struct {
+	Action           TimerActionAction `json:"action"`
+	RemainingTimeInS int32             `json:"remainingTimeInS"`
+}
+
+// TimerActionAction defines model for TimerAction.Action.
+type TimerActionAction string
 
 // UnplayedGame defines model for UnplayedGame.
 type UnplayedGame struct {
@@ -136,15 +152,6 @@ type User struct {
 	Id   Id   `json:"id"`
 	Name Name `json:"name"`
 }
-
-// UserAlreadyExistsException defines model for UserAlreadyExistsException.
-type UserAlreadyExistsException struct {
-	Code    UserAlreadyExistsExceptionCode `json:"code"`
-	Message string                         `json:"message"`
-}
-
-// UserAlreadyExistsExceptionCode defines model for UserAlreadyExistsException.Code.
-type UserAlreadyExistsExceptionCode string
 
 // UserId defines model for UserId.
 type UserId = Id
@@ -507,7 +514,7 @@ func (response CreateUser200JSONResponse) VisitCreateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUser409JSONResponse UserAlreadyExistsException
+type CreateUser409JSONResponse ConflictException
 
 func (response CreateUser409JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -621,7 +628,7 @@ func (response MakeEffectRoll404JSONResponse) VisitMakeEffectRollResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeEffectRoll409JSONResponse NoAvailableRollsException
+type MakeEffectRoll409JSONResponse ConflictException
 
 func (response MakeEffectRoll409JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -734,7 +741,7 @@ func (response MakeGameRoll404JSONResponse) VisitMakeGameRollResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeGameRoll409JSONResponse NoAvailableRollsException
+type MakeGameRoll409JSONResponse ConflictException
 
 func (response MakeGameRoll409JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -865,7 +872,7 @@ type PauseCurrentTimerResponseObject interface {
 	VisitPauseCurrentTimerResponse(w http.ResponseWriter) error
 }
 
-type PauseCurrentTimer200JSONResponse int32
+type PauseCurrentTimer200JSONResponse TimerAction
 
 func (response PauseCurrentTimer200JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -879,6 +886,15 @@ type PauseCurrentTimer404JSONResponse NotFoundException
 func (response PauseCurrentTimer404JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PauseCurrentTimer409JSONResponse ConflictException
+
+func (response PauseCurrentTimer409JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -900,7 +916,7 @@ type StartCurrentTimerResponseObject interface {
 	VisitStartCurrentTimerResponse(w http.ResponseWriter) error
 }
 
-type StartCurrentTimer200JSONResponse int32
+type StartCurrentTimer200JSONResponse TimerAction
 
 func (response StartCurrentTimer200JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -914,6 +930,15 @@ type StartCurrentTimer404JSONResponse NotFoundException
 func (response StartCurrentTimer404JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type StartCurrentTimer409JSONResponse ConflictException
+
+func (response StartCurrentTimer409JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
 
 	return json.NewEncoder(w).Encode(response)
 }
