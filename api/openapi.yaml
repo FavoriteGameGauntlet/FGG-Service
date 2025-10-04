@@ -19,17 +19,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/UserDto"
         '409':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
+                $ref: "#/components/schemas/Exception"
     get:
       operationId: getUser
       tags:
@@ -40,19 +40,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/UserDto"
         '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
-
-
+                $ref: "#/components/schemas/Exception"
 
   /users/{userId}/games/unplayed:
     parameters:
@@ -65,7 +63,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UnplayedGames"
+              $ref: "#/components/schemas/UnplayedGamesDto"
       responses:
         '200':
           description: Unplayed games were saved
@@ -73,12 +71,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
+                $ref: "#/components/schemas/Exception"
     get:
       operationId: getUnplayedGames
       tags:
@@ -89,24 +87,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnplayedGames"
+                $ref: "#/components/schemas/UnplayedGamesDto"
         '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
+                $ref: "#/components/schemas/Exception"
 
 
 
   /users/{userId}/games/roll:
     parameters:
-    - $ref: "#/components/parameters/UserId"
-    get:
+      - $ref: "#/components/parameters/UserId"
+    post:
       operationId: makeGameRoll
       tags:
         - Games
@@ -116,22 +114,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Game"
+                $ref: "#/components/schemas/GameDto"
         '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '409':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
+                $ref: "#/components/schemas/Exception"
 
 
 
@@ -148,24 +146,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Game"
+                $ref: "#/components/schemas/GameDto"
         '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
+                $ref: "#/components/schemas/Exception"
 
 
 
   /users/{userId}/games/current/finish:
     parameters:
       - $ref: "#/components/parameters/UserId"
-    get:
+    post:
       operationId: finishCurrentGame
       tags:
         - Games
@@ -176,13 +174,39 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
+                $ref: "#/components/schemas/Exception"
 
+
+
+  /users/{userId}/games/history:
+    parameters:
+      - $ref: "#/components/parameters/UserId"
+    get:
+      operationId: getGameHistory
+      tags:
+        - Games
+      responses:
+        '200':
+          description: Game history was received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GamesDto"
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exception"
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exception"
 
 
   /users/{userId}/timers/current:
@@ -198,17 +222,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Timer"
+                $ref: "#/components/schemas/TimerDto"
         '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
+                $ref: "#/components/schemas/Exception"
 
 
 
@@ -224,22 +248,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TimerAction"
+                $ref: "#/components/schemas/TimerActionDto"
         '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '409':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
+                $ref: "#/components/schemas/Exception"
 
 
 
@@ -255,22 +279,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TimerAction"
+                $ref: "#/components/schemas/TimerActionDto"
         '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '409':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
+                $ref: "#/components/schemas/Exception"
 
 
 
@@ -292,12 +316,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
+                $ref: "#/components/schemas/Exception"
 
 
 
@@ -314,17 +338,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Effects"
+                $ref: "#/components/schemas/EffectsDto"
         '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
+                $ref: "#/components/schemas/Exception"
 
 
 
@@ -341,24 +365,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Effect"
+                $ref: "#/components/schemas/EffectDto"
         '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundException"
+                $ref: "#/components/schemas/Exception"
         '409':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictException"
+                $ref: "#/components/schemas/Exception"
         '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DatabaseQueryException"
-        
-  
+                $ref: "#/components/schemas/Exception"
+
+
 components:
 
   parameters:
@@ -381,7 +405,7 @@ components:
       format: uuid
     Name:
       type: string
-    User:
+    UserDto:
       type: object
       properties:
         id:
@@ -391,7 +415,7 @@ components:
       required:
         - id
         - name
-    UnplayedGame:
+    UnplayedGameDto:
       type: object
       properties:
         name:
@@ -402,31 +426,27 @@ components:
           example: "https://store.steampowered.com/app/20"
       required:
         - name
-    UnplayedGames:
+    UnplayedGamesDto:
       type: array
       items:
-        $ref: '#/components/schemas/UnplayedGame'
-    Game:
+        $ref: '#/components/schemas/UnplayedGameDto'
+    GameDto:
       allOf:
-        - $ref: "#/components/schemas/UnplayedGame"
+        - $ref: "#/components/schemas/UnplayedGameDto"
         - type: object
           properties:
-            id:
-              $ref: "#/components/schemas/Id"
             state:
               type: string
-              enum: ['started', 'finished']
+              enum: ['started', 'finished', 'cancelled']
           required:
-            - id
-    Games:
+            - state
+    GamesDto:
       type: array
       items:
-        $ref: '#/components/schemas/Game'
-    Timer:
+        $ref: '#/components/schemas/GameDto'
+    TimerDto:
       type: object
       properties:
-        id:
-          $ref: "#/components/schemas/Id"
         state:
           type: string
           enum: ['created', 'running', 'paused', 'finished', 'rolled']
@@ -436,12 +456,14 @@ components:
         durationInS:
           type: integer
           format: int32
+        timerActionDate:
+          type: string
+          format: date-time
       required:
-        - id
         - state
         - remainingTimeInS
         - durationInS
-    TimerAction:
+    TimerActionDto:
       type: object
       properties:
         action:
@@ -453,7 +475,7 @@ components:
       required:
         - action
         - remainingTimeInS
-    Effect:
+    EffectDto:
       type: object
       properties:
         name:
@@ -469,46 +491,25 @@ components:
         - name
         - description
         - receivedDate
-    Effects:
+    EffectsDto:
       type: array
       items:
-        $ref: '#/components/schemas/Effect'
-        
+        $ref: '#/components/schemas/EffectDto'
+
     Exception:
       type: object
       properties:
         code:
           type: string
+          enum: [
+              "USER_NOT_FOUND", "GAME_NOT_FOUND", "TIMER_NOT_FOUND",
+              "NO_AVAILABLE_ROLLS", "USER_ALREADY_EXISTS", "TIMER_INCORRECT_STATE",
+              "UNEXPECTED", "CHECK_USER", "CHECK_CURRENT_GAME", "CHECK_CURRENT_TIMER",
+              "GETUSER", "GET_UNPLAYED_GAMES", "GET_CURRENT_GAME", "GET_CURRENT_TIMER",
+              "CREATE_USER", "ADD_UNPLAYED_GAMES", "START_CURRENT_TIMER", "PAUSE_CURRENT_TIMER"
+            ]
         message:
           type: string
       required:
         - code
         - message
-    NotFoundException:
-      allOf:
-        - $ref: "#/components/schemas/Exception"
-        - type: object
-          properties:
-            code:
-              type: string
-              enum: ["USER_NOT_FOUND", "GAME_NOT_FOUND", "TIMER_NOT_FOUND"]
-    ConflictException:
-      allOf:
-        - $ref: "#/components/schemas/Exception"
-        - type: object
-          properties:
-            code:
-              type: string
-              enum: [
-                "NO_AVAILABLE_ROLLS", 
-                "USER_ALREADY_EXISTS", 
-                "TIMER_INCORRECT_STATE"
-              ]
-    DatabaseQueryException:
-      allOf:
-        - $ref: "#/components/schemas/Exception"
-        - type: object
-          properties:
-            code:
-              type: string
-              enum: ["DATABASE_QUERY"]

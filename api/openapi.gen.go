@@ -16,92 +16,83 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-// Defines values for ConflictExceptionCode.
+// Defines values for ExceptionCode.
 const (
-	NOAVAILABLEROLLS    ConflictExceptionCode = "NO_AVAILABLE_ROLLS"
-	TIMERINCORRECTSTATE ConflictExceptionCode = "TIMER_INCORRECT_STATE"
-	USERALREADYEXISTS   ConflictExceptionCode = "USER_ALREADY_EXISTS"
+	ADDUNPLAYEDGAMES    ExceptionCode = "ADD_UNPLAYED_GAMES"
+	CHECKCURRENTGAME    ExceptionCode = "CHECK_CURRENT_GAME"
+	CHECKCURRENTTIMER   ExceptionCode = "CHECK_CURRENT_TIMER"
+	CHECKUSER           ExceptionCode = "CHECK_USER"
+	CREATEUSER          ExceptionCode = "CREATE_USER"
+	GAMENOTFOUND        ExceptionCode = "GAME_NOT_FOUND"
+	GETCURRENTGAME      ExceptionCode = "GET_CURRENT_GAME"
+	GETCURRENTTIMER     ExceptionCode = "GET_CURRENT_TIMER"
+	GETUNPLAYEDGAMES    ExceptionCode = "GET_UNPLAYED_GAMES"
+	GETUSER             ExceptionCode = "GETUSER"
+	NOAVAILABLEROLLS    ExceptionCode = "NO_AVAILABLE_ROLLS"
+	PAUSECURRENTTIMER   ExceptionCode = "PAUSE_CURRENT_TIMER"
+	STARTCURRENTTIMER   ExceptionCode = "START_CURRENT_TIMER"
+	TIMERINCORRECTSTATE ExceptionCode = "TIMER_INCORRECT_STATE"
+	TIMERNOTFOUND       ExceptionCode = "TIMER_NOT_FOUND"
+	UNEXPECTED          ExceptionCode = "UNEXPECTED"
+	USERALREADYEXISTS   ExceptionCode = "USER_ALREADY_EXISTS"
+	USERNOTFOUND        ExceptionCode = "USER_NOT_FOUND"
 )
 
-// Defines values for DatabaseQueryExceptionCode.
+// Defines values for GameDtoState.
 const (
-	DATABASEQUERY DatabaseQueryExceptionCode = "DATABASE_QUERY"
+	GameDtoStateCancelled GameDtoState = "cancelled"
+	GameDtoStateFinished  GameDtoState = "finished"
+	GameDtoStateStarted   GameDtoState = "started"
 )
 
-// Defines values for GameState.
+// Defines values for TimerActionDtoAction.
 const (
-	GameStateFinished GameState = "finished"
-	GameStateStarted  GameState = "started"
+	Pause TimerActionDtoAction = "pause"
+	Start TimerActionDtoAction = "start"
+	Stop  TimerActionDtoAction = "stop"
 )
 
-// Defines values for NotFoundExceptionCode.
+// Defines values for TimerDtoState.
 const (
-	GAMENOTFOUND  NotFoundExceptionCode = "GAME_NOT_FOUND"
-	TIMERNOTFOUND NotFoundExceptionCode = "TIMER_NOT_FOUND"
-	USERNOTFOUND  NotFoundExceptionCode = "USER_NOT_FOUND"
+	TimerDtoStateCreated  TimerDtoState = "created"
+	TimerDtoStateFinished TimerDtoState = "finished"
+	TimerDtoStatePaused   TimerDtoState = "paused"
+	TimerDtoStateRolled   TimerDtoState = "rolled"
+	TimerDtoStateRunning  TimerDtoState = "running"
 )
 
-// Defines values for TimerState.
-const (
-	TimerStateCreated  TimerState = "created"
-	TimerStateFinished TimerState = "finished"
-	TimerStatePaused   TimerState = "paused"
-	TimerStateRolled   TimerState = "rolled"
-	TimerStateRunning  TimerState = "running"
-)
-
-// Defines values for TimerActionAction.
-const (
-	Pause TimerActionAction = "pause"
-	Start TimerActionAction = "start"
-	Stop  TimerActionAction = "stop"
-)
-
-// ConflictException defines model for ConflictException.
-type ConflictException struct {
-	Code    ConflictExceptionCode `json:"code"`
-	Message string                `json:"message"`
-}
-
-// ConflictExceptionCode defines model for ConflictException.Code.
-type ConflictExceptionCode string
-
-// DatabaseQueryException defines model for DatabaseQueryException.
-type DatabaseQueryException struct {
-	Code    DatabaseQueryExceptionCode `json:"code"`
-	Message string                     `json:"message"`
-}
-
-// DatabaseQueryExceptionCode defines model for DatabaseQueryException.Code.
-type DatabaseQueryExceptionCode string
-
-// Effect defines model for Effect.
-type Effect struct {
+// EffectDto defines model for EffectDto.
+type EffectDto struct {
 	Description  string    `json:"description"`
 	GameName     *Name     `json:"gameName,omitempty"`
 	Name         Name      `json:"name"`
 	ReceivedDate time.Time `json:"receivedDate"`
 }
 
-// Effects defines model for Effects.
-type Effects = []Effect
+// EffectsDto defines model for EffectsDto.
+type EffectsDto = []EffectDto
 
 // Exception defines model for Exception.
 type Exception struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
+	Code    ExceptionCode `json:"code"`
+	Message string        `json:"message"`
 }
 
-// Game defines model for Game.
-type Game struct {
-	Id    Id         `json:"id"`
-	Link  *string    `json:"link,omitempty"`
-	Name  Name       `json:"name"`
-	State *GameState `json:"state,omitempty"`
+// ExceptionCode defines model for Exception.Code.
+type ExceptionCode string
+
+// GameDto defines model for GameDto.
+type GameDto struct {
+	Link  *string      `json:"link,omitempty"`
+	Name  Name         `json:"name"`
+	State GameDtoState `json:"state"`
 }
 
-// GameState defines model for Game.State.
-type GameState string
+// GameDtoState defines model for GameDto.State.
+type GameDtoState string
+
+// GamesDto defines model for GamesDto.
+type GamesDto = []GameDto
 
 // Id defines model for Id.
 type Id = openapi_types.UUID
@@ -109,46 +100,37 @@ type Id = openapi_types.UUID
 // Name defines model for Name.
 type Name = string
 
-// NotFoundException defines model for NotFoundException.
-type NotFoundException struct {
-	Code    NotFoundExceptionCode `json:"code"`
-	Message string                `json:"message"`
+// TimerActionDto defines model for TimerActionDto.
+type TimerActionDto struct {
+	Action           TimerActionDtoAction `json:"action"`
+	RemainingTimeInS int32                `json:"remainingTimeInS"`
 }
 
-// NotFoundExceptionCode defines model for NotFoundException.Code.
-type NotFoundExceptionCode string
+// TimerActionDtoAction defines model for TimerActionDto.Action.
+type TimerActionDtoAction string
 
-// Timer defines model for Timer.
-type Timer struct {
-	DurationInS      int32      `json:"durationInS"`
-	Id               Id         `json:"id"`
-	RemainingTimeInS int32      `json:"remainingTimeInS"`
-	State            TimerState `json:"state"`
+// TimerDto defines model for TimerDto.
+type TimerDto struct {
+	DurationInS      int32         `json:"durationInS"`
+	RemainingTimeInS int32         `json:"remainingTimeInS"`
+	State            TimerDtoState `json:"state"`
+	TimerActionDate  *time.Time    `json:"timerActionDate,omitempty"`
 }
 
-// TimerState defines model for Timer.State.
-type TimerState string
+// TimerDtoState defines model for TimerDto.State.
+type TimerDtoState string
 
-// TimerAction defines model for TimerAction.
-type TimerAction struct {
-	Action           TimerActionAction `json:"action"`
-	RemainingTimeInS int32             `json:"remainingTimeInS"`
-}
-
-// TimerActionAction defines model for TimerAction.Action.
-type TimerActionAction string
-
-// UnplayedGame defines model for UnplayedGame.
-type UnplayedGame struct {
+// UnplayedGameDto defines model for UnplayedGameDto.
+type UnplayedGameDto struct {
 	Link *string `json:"link,omitempty"`
 	Name Name    `json:"name"`
 }
 
-// UnplayedGames defines model for UnplayedGames.
-type UnplayedGames = []UnplayedGame
+// UnplayedGamesDto defines model for UnplayedGamesDto.
+type UnplayedGamesDto = []UnplayedGameDto
 
-// User defines model for User.
-type User struct {
+// UserDto defines model for UserDto.
+type UserDto struct {
 	Id   Id   `json:"id"`
 	Name Name `json:"name"`
 }
@@ -160,7 +142,7 @@ type UserId = Id
 type UserName = Name
 
 // AddUnplayedGamesJSONRequestBody defines body for AddUnplayedGames for application/json ContentType.
-type AddUnplayedGamesJSONRequestBody = UnplayedGames
+type AddUnplayedGamesJSONRequestBody = UnplayedGamesDto
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -183,10 +165,13 @@ type ServerInterface interface {
 	// (GET /users/{userId}/games/current)
 	GetCurrentGame(ctx echo.Context, userId UserId) error
 
-	// (GET /users/{userId}/games/current/finish)
+	// (POST /users/{userId}/games/current/finish)
 	FinishCurrentGame(ctx echo.Context, userId UserId) error
 
-	// (GET /users/{userId}/games/roll)
+	// (GET /users/{userId}/games/history)
+	GetGameHistory(ctx echo.Context, userId UserId) error
+
+	// (POST /users/{userId}/games/roll)
 	MakeGameRoll(ctx echo.Context, userId UserId) error
 
 	// (GET /users/{userId}/games/unplayed)
@@ -322,6 +307,22 @@ func (w *ServerInterfaceWrapper) FinishCurrentGame(ctx echo.Context) error {
 	return err
 }
 
+// GetGameHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetGameHistory(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetGameHistory(ctx, userId)
+	return err
+}
+
 // MakeGameRoll converts echo context to params.
 func (w *ServerInterfaceWrapper) MakeGameRoll(ctx echo.Context) error {
 	var err error
@@ -452,8 +453,9 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/users/:userId/effects/history", wrapper.GetEffectHistory)
 	router.POST(baseURL+"/users/:userId/effects/roll", wrapper.MakeEffectRoll)
 	router.GET(baseURL+"/users/:userId/games/current", wrapper.GetCurrentGame)
-	router.GET(baseURL+"/users/:userId/games/current/finish", wrapper.FinishCurrentGame)
-	router.GET(baseURL+"/users/:userId/games/roll", wrapper.MakeGameRoll)
+	router.POST(baseURL+"/users/:userId/games/current/finish", wrapper.FinishCurrentGame)
+	router.GET(baseURL+"/users/:userId/games/history", wrapper.GetGameHistory)
+	router.POST(baseURL+"/users/:userId/games/roll", wrapper.MakeGameRoll)
 	router.GET(baseURL+"/users/:userId/games/unplayed", wrapper.GetUnplayedGames)
 	router.POST(baseURL+"/users/:userId/games/unplayed", wrapper.AddUnplayedGames)
 	router.GET(baseURL+"/users/:userId/timers/current", wrapper.GetCurrentTimer)
@@ -470,7 +472,7 @@ type GetUserResponseObject interface {
 	VisitGetUserResponse(w http.ResponseWriter) error
 }
 
-type GetUser200JSONResponse User
+type GetUser200JSONResponse UserDto
 
 func (response GetUser200JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -479,7 +481,7 @@ func (response GetUser200JSONResponse) VisitGetUserResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUser404JSONResponse NotFoundException
+type GetUser404JSONResponse Exception
 
 func (response GetUser404JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -488,7 +490,7 @@ func (response GetUser404JSONResponse) VisitGetUserResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUser503JSONResponse DatabaseQueryException
+type GetUser503JSONResponse Exception
 
 func (response GetUser503JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -505,7 +507,7 @@ type CreateUserResponseObject interface {
 	VisitCreateUserResponse(w http.ResponseWriter) error
 }
 
-type CreateUser200JSONResponse User
+type CreateUser200JSONResponse UserDto
 
 func (response CreateUser200JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -514,7 +516,7 @@ func (response CreateUser200JSONResponse) VisitCreateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUser409JSONResponse ConflictException
+type CreateUser409JSONResponse Exception
 
 func (response CreateUser409JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -523,7 +525,7 @@ func (response CreateUser409JSONResponse) VisitCreateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUser503JSONResponse DatabaseQueryException
+type CreateUser503JSONResponse Exception
 
 func (response CreateUser503JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -549,7 +551,7 @@ func (response CheckEffectRoll200JSONResponse) VisitCheckEffectRollResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CheckEffectRoll404JSONResponse NotFoundException
+type CheckEffectRoll404JSONResponse Exception
 
 func (response CheckEffectRoll404JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -558,7 +560,7 @@ func (response CheckEffectRoll404JSONResponse) VisitCheckEffectRollResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CheckEffectRoll503JSONResponse DatabaseQueryException
+type CheckEffectRoll503JSONResponse Exception
 
 func (response CheckEffectRoll503JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -575,7 +577,7 @@ type GetEffectHistoryResponseObject interface {
 	VisitGetEffectHistoryResponse(w http.ResponseWriter) error
 }
 
-type GetEffectHistory200JSONResponse Effects
+type GetEffectHistory200JSONResponse EffectsDto
 
 func (response GetEffectHistory200JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -584,7 +586,7 @@ func (response GetEffectHistory200JSONResponse) VisitGetEffectHistoryResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetEffectHistory404JSONResponse NotFoundException
+type GetEffectHistory404JSONResponse Exception
 
 func (response GetEffectHistory404JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -593,7 +595,7 @@ func (response GetEffectHistory404JSONResponse) VisitGetEffectHistoryResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetEffectHistory503JSONResponse DatabaseQueryException
+type GetEffectHistory503JSONResponse Exception
 
 func (response GetEffectHistory503JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -610,7 +612,7 @@ type MakeEffectRollResponseObject interface {
 	VisitMakeEffectRollResponse(w http.ResponseWriter) error
 }
 
-type MakeEffectRoll200JSONResponse Effect
+type MakeEffectRoll200JSONResponse EffectDto
 
 func (response MakeEffectRoll200JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -619,7 +621,7 @@ func (response MakeEffectRoll200JSONResponse) VisitMakeEffectRollResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeEffectRoll404JSONResponse NotFoundException
+type MakeEffectRoll404JSONResponse Exception
 
 func (response MakeEffectRoll404JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -628,7 +630,7 @@ func (response MakeEffectRoll404JSONResponse) VisitMakeEffectRollResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeEffectRoll409JSONResponse ConflictException
+type MakeEffectRoll409JSONResponse Exception
 
 func (response MakeEffectRoll409JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -637,7 +639,7 @@ func (response MakeEffectRoll409JSONResponse) VisitMakeEffectRollResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeEffectRoll503JSONResponse DatabaseQueryException
+type MakeEffectRoll503JSONResponse Exception
 
 func (response MakeEffectRoll503JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -654,7 +656,7 @@ type GetCurrentGameResponseObject interface {
 	VisitGetCurrentGameResponse(w http.ResponseWriter) error
 }
 
-type GetCurrentGame200JSONResponse Game
+type GetCurrentGame200JSONResponse GameDto
 
 func (response GetCurrentGame200JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -663,7 +665,7 @@ func (response GetCurrentGame200JSONResponse) VisitGetCurrentGameResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCurrentGame404JSONResponse NotFoundException
+type GetCurrentGame404JSONResponse Exception
 
 func (response GetCurrentGame404JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -672,7 +674,7 @@ func (response GetCurrentGame404JSONResponse) VisitGetCurrentGameResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCurrentGame503JSONResponse DatabaseQueryException
+type GetCurrentGame503JSONResponse Exception
 
 func (response GetCurrentGame503JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -697,7 +699,7 @@ func (response FinishCurrentGame200Response) VisitFinishCurrentGameResponse(w ht
 	return nil
 }
 
-type FinishCurrentGame404JSONResponse NotFoundException
+type FinishCurrentGame404JSONResponse Exception
 
 func (response FinishCurrentGame404JSONResponse) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -706,9 +708,44 @@ func (response FinishCurrentGame404JSONResponse) VisitFinishCurrentGameResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type FinishCurrentGame503JSONResponse DatabaseQueryException
+type FinishCurrentGame503JSONResponse Exception
 
 func (response FinishCurrentGame503JSONResponse) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetGameHistoryRequestObject struct {
+	UserId UserId `json:"userId"`
+}
+
+type GetGameHistoryResponseObject interface {
+	VisitGetGameHistoryResponse(w http.ResponseWriter) error
+}
+
+type GetGameHistory200JSONResponse GamesDto
+
+func (response GetGameHistory200JSONResponse) VisitGetGameHistoryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetGameHistory404JSONResponse Exception
+
+func (response GetGameHistory404JSONResponse) VisitGetGameHistoryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetGameHistory503JSONResponse Exception
+
+func (response GetGameHistory503JSONResponse) VisitGetGameHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
@@ -723,7 +760,7 @@ type MakeGameRollResponseObject interface {
 	VisitMakeGameRollResponse(w http.ResponseWriter) error
 }
 
-type MakeGameRoll200JSONResponse Game
+type MakeGameRoll200JSONResponse GameDto
 
 func (response MakeGameRoll200JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -732,7 +769,7 @@ func (response MakeGameRoll200JSONResponse) VisitMakeGameRollResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeGameRoll404JSONResponse NotFoundException
+type MakeGameRoll404JSONResponse Exception
 
 func (response MakeGameRoll404JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -741,7 +778,7 @@ func (response MakeGameRoll404JSONResponse) VisitMakeGameRollResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeGameRoll409JSONResponse ConflictException
+type MakeGameRoll409JSONResponse Exception
 
 func (response MakeGameRoll409JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -750,7 +787,7 @@ func (response MakeGameRoll409JSONResponse) VisitMakeGameRollResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeGameRoll503JSONResponse DatabaseQueryException
+type MakeGameRoll503JSONResponse Exception
 
 func (response MakeGameRoll503JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -767,7 +804,7 @@ type GetUnplayedGamesResponseObject interface {
 	VisitGetUnplayedGamesResponse(w http.ResponseWriter) error
 }
 
-type GetUnplayedGames200JSONResponse UnplayedGames
+type GetUnplayedGames200JSONResponse UnplayedGamesDto
 
 func (response GetUnplayedGames200JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -776,7 +813,7 @@ func (response GetUnplayedGames200JSONResponse) VisitGetUnplayedGamesResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUnplayedGames404JSONResponse NotFoundException
+type GetUnplayedGames404JSONResponse Exception
 
 func (response GetUnplayedGames404JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -785,7 +822,7 @@ func (response GetUnplayedGames404JSONResponse) VisitGetUnplayedGamesResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUnplayedGames503JSONResponse DatabaseQueryException
+type GetUnplayedGames503JSONResponse Exception
 
 func (response GetUnplayedGames503JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -811,7 +848,7 @@ func (response AddUnplayedGames200Response) VisitAddUnplayedGamesResponse(w http
 	return nil
 }
 
-type AddUnplayedGames404JSONResponse NotFoundException
+type AddUnplayedGames404JSONResponse Exception
 
 func (response AddUnplayedGames404JSONResponse) VisitAddUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -820,7 +857,7 @@ func (response AddUnplayedGames404JSONResponse) VisitAddUnplayedGamesResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AddUnplayedGames503JSONResponse DatabaseQueryException
+type AddUnplayedGames503JSONResponse Exception
 
 func (response AddUnplayedGames503JSONResponse) VisitAddUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -837,7 +874,7 @@ type GetCurrentTimerResponseObject interface {
 	VisitGetCurrentTimerResponse(w http.ResponseWriter) error
 }
 
-type GetCurrentTimer200JSONResponse Timer
+type GetCurrentTimer200JSONResponse TimerDto
 
 func (response GetCurrentTimer200JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -846,7 +883,7 @@ func (response GetCurrentTimer200JSONResponse) VisitGetCurrentTimerResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCurrentTimer404JSONResponse NotFoundException
+type GetCurrentTimer404JSONResponse Exception
 
 func (response GetCurrentTimer404JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -855,7 +892,7 @@ func (response GetCurrentTimer404JSONResponse) VisitGetCurrentTimerResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCurrentTimer503JSONResponse DatabaseQueryException
+type GetCurrentTimer503JSONResponse Exception
 
 func (response GetCurrentTimer503JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -872,7 +909,7 @@ type PauseCurrentTimerResponseObject interface {
 	VisitPauseCurrentTimerResponse(w http.ResponseWriter) error
 }
 
-type PauseCurrentTimer200JSONResponse TimerAction
+type PauseCurrentTimer200JSONResponse TimerActionDto
 
 func (response PauseCurrentTimer200JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -881,7 +918,7 @@ func (response PauseCurrentTimer200JSONResponse) VisitPauseCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PauseCurrentTimer404JSONResponse NotFoundException
+type PauseCurrentTimer404JSONResponse Exception
 
 func (response PauseCurrentTimer404JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -890,7 +927,7 @@ func (response PauseCurrentTimer404JSONResponse) VisitPauseCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PauseCurrentTimer409JSONResponse ConflictException
+type PauseCurrentTimer409JSONResponse Exception
 
 func (response PauseCurrentTimer409JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -899,7 +936,7 @@ func (response PauseCurrentTimer409JSONResponse) VisitPauseCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PauseCurrentTimer503JSONResponse DatabaseQueryException
+type PauseCurrentTimer503JSONResponse Exception
 
 func (response PauseCurrentTimer503JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -916,7 +953,7 @@ type StartCurrentTimerResponseObject interface {
 	VisitStartCurrentTimerResponse(w http.ResponseWriter) error
 }
 
-type StartCurrentTimer200JSONResponse TimerAction
+type StartCurrentTimer200JSONResponse TimerActionDto
 
 func (response StartCurrentTimer200JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -925,7 +962,7 @@ func (response StartCurrentTimer200JSONResponse) VisitStartCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type StartCurrentTimer404JSONResponse NotFoundException
+type StartCurrentTimer404JSONResponse Exception
 
 func (response StartCurrentTimer404JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -934,7 +971,7 @@ func (response StartCurrentTimer404JSONResponse) VisitStartCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type StartCurrentTimer409JSONResponse ConflictException
+type StartCurrentTimer409JSONResponse Exception
 
 func (response StartCurrentTimer409JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -943,7 +980,7 @@ func (response StartCurrentTimer409JSONResponse) VisitStartCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type StartCurrentTimer503JSONResponse DatabaseQueryException
+type StartCurrentTimer503JSONResponse Exception
 
 func (response StartCurrentTimer503JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -973,10 +1010,13 @@ type StrictServerInterface interface {
 	// (GET /users/{userId}/games/current)
 	GetCurrentGame(ctx context.Context, request GetCurrentGameRequestObject) (GetCurrentGameResponseObject, error)
 
-	// (GET /users/{userId}/games/current/finish)
+	// (POST /users/{userId}/games/current/finish)
 	FinishCurrentGame(ctx context.Context, request FinishCurrentGameRequestObject) (FinishCurrentGameResponseObject, error)
 
-	// (GET /users/{userId}/games/roll)
+	// (GET /users/{userId}/games/history)
+	GetGameHistory(ctx context.Context, request GetGameHistoryRequestObject) (GetGameHistoryResponseObject, error)
+
+	// (POST /users/{userId}/games/roll)
 	MakeGameRoll(ctx context.Context, request MakeGameRollRequestObject) (MakeGameRollResponseObject, error)
 
 	// (GET /users/{userId}/games/unplayed)
@@ -1176,6 +1216,31 @@ func (sh *strictHandler) FinishCurrentGame(ctx echo.Context, userId UserId) erro
 		return err
 	} else if validResponse, ok := response.(FinishCurrentGameResponseObject); ok {
 		return validResponse.VisitFinishCurrentGameResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// GetGameHistory operation middleware
+func (sh *strictHandler) GetGameHistory(ctx echo.Context, userId UserId) error {
+	var request GetGameHistoryRequestObject
+
+	request.UserId = userId
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetGameHistory(ctx.Request().Context(), request.(GetGameHistoryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetGameHistory")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetGameHistoryResponseObject); ok {
+		return validResponse.VisitGetGameHistoryResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}

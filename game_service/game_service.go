@@ -4,6 +4,7 @@ import (
 	"FGG-Service/api"
 	"FGG-Service/database"
 	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 )
@@ -61,7 +62,26 @@ const (
 			INNER JOIN Games g ON gh.GameId = g.Id
 		WHERE gh.UserId = $userId
 			AND gh.Result IS NULL`
+	FinishCurrentGameCommand = `
+		UPDATE GameHistory
+		SET State = $finishedGameState,
+			FinishDate = datetime('now')
+		WHERE UserId = $userId
+			AND GameId = $gameId;`
 )
+
+func FinishCurrentGame(userId uuid.UUID, gameId uuid.UUID, timerId uuid.UUID) error {
+
+
+	_, err := database.Exec(
+		FinishCurrentGameCommand,
+		api.GameStateFinished,
+		userId,
+		gameId,
+	)
+
+	return err
+}
 
 func AddUnplayedGames(userId uuid.UUID, gamesPtr *api.UnplayedGames) error {
 	games := *gamesPtr
@@ -213,7 +233,7 @@ func GetCurrentGame(userId uuid.UUID) (*api.Game, error) {
 	game := api.Game{}
 	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 

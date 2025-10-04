@@ -5,17 +5,17 @@ import (
 	"context"
 )
 
-// (GET /users/{userId}/effects/has-roll)
-func (Server) CheckEffectRoll(ctx context.Context, request api.CheckEffectRollRequestObject) (api.CheckEffectRollResponseObject, error) {
+// CheckEffectRoll (GET /users/{userId}/effects/has-roll)
+func (Server) CheckEffectRoll(_ context.Context, request api.CheckEffectRollRequestObject) (api.CheckEffectRollResponseObject, error) {
 	return api.CheckEffectRoll200JSONResponse(true), nil
 }
 
-// (GET /users/{userId}/effects/history)
-func (Server) GetEffectHistory(ctx context.Context, request api.GetEffectHistoryRequestObject) (api.GetEffectHistoryResponseObject, error) {
+// GetEffectHistory (GET /users/{userId}/effects/history)
+func (Server) GetEffectHistory(_ context.Context, request api.GetEffectHistoryRequestObject) (api.GetEffectHistoryResponseObject, error) {
 	return api.GetEffectHistory200JSONResponse{}, nil
 }
 
-// (POST /users/{userId}/effects/roll)
-func (Server) MakeEffectRoll(ctx context.Context, request api.MakeEffectRollRequestObject) (api.MakeEffectRollResponseObject, error) {
+// MakeEffectRoll (POST /users/{userId}/effects/roll)
+func (Server) MakeEffectRoll(_ context.Context, request api.MakeEffectRollRequestObject) (api.MakeEffectRollResponseObject, error) {
 	return api.MakeEffectRoll200JSONResponse{}, nil
 }
