@@ -20,23 +20,34 @@ func (Server) GetCurrentTimer(_ context.Context, request api.GetCurrentTimerRequ
 		return api.GetCurrentTimer404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
-	doesCurrentGameExist, err := game_service.CheckIfCurrentGameExists(request.UserId)
+	game, err := game_service.GetCurrentGame(request.UserId)
 
 	if err != nil {
 		return api.GetCurrentTimer503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
 	}
 
-	if !*doesCurrentGameExist {
+	if game == nil {
 		return api.GetCurrentTimer404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
-	timer, err := timer_service.GetOrCreateCurrentTimer(request.UserId)
+	timer, err := timer_service.GetOrCreateCurrentTimer(request.UserId, game.Id)
 
 	if err != nil {
 		return api.GetCurrentTimer503JSONResponse{Code: api.GETCURRENTTIMER, Message: err.Error()}, nil
 	}
 
-	return api.GetCurrentTimer200JSONResponse(*timer), nil
+	timerDto := ConvertTimerToDto(timer)
+
+	return api.GetCurrentTimer200JSONResponse(*timerDto), nil
+}
+
+func ConvertTimerToDto(timer *timer_service.Timer) *api.TimerDto {
+	return &api.TimerDto{
+		DurationInS:      timer.DurationInS,
+		RemainingTimeInS: timer.RemainingTimeInS,
+		State:            api.TimerDtoState(timer.State),
+		TimerActionDate:  timer.TimerActionDate,
+	}
 }
 
 // PauseCurrentTimer (POST /users/{userId}/timers/current/pause)
@@ -81,7 +92,16 @@ func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimer
 		return api.PauseCurrentTimer409JSONResponse{Code: api.TIMERINCORRECTSTATE}, nil
 	}
 
-	return api.PauseCurrentTimer200JSONResponse(*timerAction), nil
+	timerActionDto := ConvertTimerActionToDto(timerAction)
+
+	return api.PauseCurrentTimer200JSONResponse(*timerActionDto), nil
+}
+
+func ConvertTimerActionToDto(timerAction *timer_service.TimerAction) *api.TimerActionDto {
+	return &api.TimerActionDto{
+		Action:           api.TimerActionDtoAction(timerAction.Action),
+		RemainingTimeInS: timerAction.RemainingTimeInS,
+	}
 }
 
 // StartCurrentTimer (POST /users/{userId}/timers/current/start)
@@ -126,5 +146,7 @@ func (Server) StartCurrentTimer(_ context.Context, request api.StartCurrentTimer
 		return api.StartCurrentTimer409JSONResponse{Code: api.TIMERINCORRECTSTATE}, nil
 	}
 
-	return api.StartCurrentTimer200JSONResponse(*timerAction), nil
+	timerActionDto := ConvertTimerActionToDto(timerAction)
+
+	return api.StartCurrentTimer200JSONResponse(*timerActionDto), nil
 }

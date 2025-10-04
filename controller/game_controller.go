@@ -3,6 +3,7 @@ package controller
 import (
 	"FGG-Service/api"
 	"FGG-Service/game_service"
+	"FGG-Service/timer_service"
 	"FGG-Service/user_service"
 	"context"
 )
@@ -29,12 +30,57 @@ func (Server) GetCurrentGame(_ context.Context, request api.GetCurrentGameReques
 		return api.GetCurrentGame404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
-	return api.GetCurrentGame200JSONResponse(*game), nil
+	gameDto := ConvertGameToDto(game)
+
+	return api.GetCurrentGame200JSONResponse(*gameDto), nil
+}
+
+func ConvertGameToDto(game *game_service.Game) *api.GameDto {
+	return &api.GameDto{
+        Link:  game.Link,
+        Name:  game.Name,
+        State: api.GameDtoState(game.State),
+    }
 }
 
 // FinishCurrentGame (GET /users/{userId}/games/current/finish)
 func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGameRequestObject) (api.FinishCurrentGameResponseObject, error) {
+	doesUserExist, err := user_service.CheckIfUserExistsById(request.UserId)
+
+	if err != nil {
+		return api.FinishCurrentGame503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+	}
+
+	if !*doesUserExist {
+		return api.FinishCurrentGame404JSONResponse{Code: api.USERNOTFOUND}, nil
+	}
+
+	doesCurrentGameExist, err := game_service.CheckIfCurrentGameExists(request.UserId)
+
+	if err != nil {
+		return api.FinishCurrentGame503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
+	}
+
+	if !*doesCurrentGameExist {
+		return api.FinishCurrentGame404JSONResponse{Code: api.GAMENOTFOUND}, nil
+	}
+
+	doesCurrentTimerExist, err := timer_service.CheckIfCurrentTimerExists(request.UserId)
+
+	if err != nil {
+		return api.FinishCurrentGame503JSONResponse{Code: api.CHECKCURRENTTIMER, Message: err.Error()}, nil
+	}
+
+	if !*doesCurrentTimerExist {
+		return api.FinishCurrentGame404JSONResponse{Code: api.TIMERNOTFOUND}, nil
+	}
+
 	return api.FinishCurrentGame200Response{}, nil
+}
+
+// GetGameHistory (GET /users/{userId}/games/history)
+func (Server) GetGameHistory(ctx context.Context, request api.GetGameHistoryRequestObject) (api.GetGameHistoryResponseObject, error) {
+	return api.GetGameHistory200JSONResponse{}, nil
 }
 
 // MakeGameRoll (GET /users/{userId}/games/roll)
@@ -60,7 +106,22 @@ func (Server) GetUnplayedGames(_ context.Context, request api.GetUnplayedGamesRe
 		return api.GetUnplayedGames503JSONResponse{Code: api.GETUNPLAYEDGAMES, Message: err.Error()}, nil
 	}
 
-	return api.GetUnplayedGames200JSONResponse(*games), nil
+	gamesDto := ConvertUnplayedGamesToDto(games)
+
+	return api.GetUnplayedGames200JSONResponse(*gamesDto), nil
+}
+
+func ConvertUnplayedGamesToDto(games *game_service.UnplayedGames) *api.UnplayedGamesDto {
+	gamesDto := make(api.UnplayedGamesDto, len(*games))
+
+	for i, g := range *games {
+		gamesDto[i] = api.UnplayedGameDto{
+			Link: g.Link,
+			Name: g.Name,
+		}
+	}
+
+	return &gamesDto
 }
 
 // AddUnplayedGames (POST /users/{userId}/games/unplayed)
@@ -75,11 +136,26 @@ func (Server) AddUnplayedGames(_ context.Context, request api.AddUnplayedGamesRe
 		return api.AddUnplayedGames404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
-	err = game_service.AddUnplayedGames(request.UserId, request.Body)
+	games := ConvertUnplayedGamesFromDto(request.Body)
+
+	err = game_service.AddUnplayedGames(request.UserId, games)
 
 	if err != nil {
 		return api.AddUnplayedGames503JSONResponse{Code: api.ADDUNPLAYEDGAMES, Message: err.Error()}, nil
 	}
 
 	return api.AddUnplayedGames200Response{}, nil
+}
+
+func ConvertUnplayedGamesFromDto(gamesDto *api.UnplayedGamesDto) *game_service.UnplayedGames {
+	games := make(game_service.UnplayedGames, len(*gamesDto))
+
+	for i, g := range *gamesDto {
+		games[i] = game_service.UnplayedGame{
+			Link: g.Link,
+			Name: g.Name,
+		}
+	}
+
+	return &games
 }

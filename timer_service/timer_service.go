@@ -1,9 +1,7 @@
 package timer_service
 
 import (
-	"FGG-Service/api"
 	"FGG-Service/database"
-	"FGG-Service/game_service"
 	"database/sql"
 	"errors"
 
@@ -24,8 +22,9 @@ const (
 	GetCurrentTimerCommand = `
 		SELECT
 			t.Id,
-			t.State, 
-			t.DurationInS, 
+			t.State,
+			t.DurationInS,
+			ta.Date,
 			CASE ta.Action
 				WHEN $startTimerAction THEN ta.RemainingTimeInS - (strftime('%s', 'now') - strftime('%s', ta.Date))
 				WHEN $pauseTimerAction THEN ta.RemainingTimeInS
@@ -51,7 +50,7 @@ func CheckIfCurrentTimerExists(userId uuid.UUID) (*bool, error) {
 	row := database.QueryRow(
 		CheckIfCurrentTimerExistsCommand,
 		userId,
-		api.TimerStateFinished,
+		TimerStateFinished,
 	)
 
 	var doesCurrentTimerExist bool
@@ -64,7 +63,7 @@ func CheckIfCurrentTimerExists(userId uuid.UUID) (*bool, error) {
 	return &doesCurrentTimerExist, nil
 }
 
-func GetOrCreateCurrentTimer(userId uuid.UUID) (*api.Timer, error) {
+func GetOrCreateCurrentTimer(userId uuid.UUID, gameId uuid.UUID) (*Timer, error) {
 	doesCurrentTimerExist, err := CheckIfCurrentTimerExists(userId)
 
 	if err != nil {
@@ -81,7 +80,7 @@ func GetOrCreateCurrentTimer(userId uuid.UUID) (*api.Timer, error) {
 		return timer, nil
 	}
 
-	timer, err := CreateCurrentTimer(userId)
+	timer, err := CreateCurrentTimer(userId, gameId)
 
 	if err != nil {
 		return nil, err
@@ -90,21 +89,22 @@ func GetOrCreateCurrentTimer(userId uuid.UUID) (*api.Timer, error) {
 	return timer, nil
 }
 
-func GetCurrentTimer(userId uuid.UUID) (*api.Timer, error) {
+func GetCurrentTimer(userId uuid.UUID) (*Timer, error) {
 	row := database.QueryRow(
 		GetCurrentTimerCommand,
-		api.Start,
-		api.Pause,
-		api.Stop,
+		TimerActionStart,
+		TimerActionPause,
+		TimerActionStop,
 		userId,
-		api.TimerStateRolled,
+		TimerStateRolled,
 	)
 
-	timer := api.Timer{}
+	timer := Timer{}
 	err := row.Scan(
 		&timer.Id,
 		&timer.State,
 		&timer.DurationInS,
+		&timer.TimerActionDate,
 		&timer.RemainingTimeInS,
 	)
 
@@ -119,19 +119,13 @@ func GetCurrentTimer(userId uuid.UUID) (*api.Timer, error) {
 	return &timer, nil
 }
 
-func CreateCurrentTimer(userId uuid.UUID) (*api.Timer, error) {
-	game, err := game_service.GetCurrentGame(userId)
-
-	if err != nil {
-		return nil, err
-	}
-
+func CreateCurrentTimer(userId uuid.UUID, gameId uuid.UUID) (*Timer, error) {
 	timerId := uuid.New().String()
-	_, err = database.Exec(
+	_, err := database.Exec(
 		CreateTimerCommand,
 		timerId,
 		userId,
-		game.Id,
+		gameId,
 		DefaultTimerDurationInS,
 	)
 
@@ -139,27 +133,27 @@ func CreateCurrentTimer(userId uuid.UUID) (*api.Timer, error) {
 		return nil, err
 	}
 
-	return &api.Timer{
+	return &Timer{
 		DurationInS:      DefaultTimerDurationInS,
-		State:            api.TimerStateCreated,
+		State:            TimerStateCreated,
 		RemainingTimeInS: DefaultTimerDurationInS,
 	}, nil
 }
 
-func StartCurrentTimer(userId uuid.UUID) (*api.TimerAction, error) {
+func StartCurrentTimer(userId uuid.UUID) (*TimerAction, error) {
 	timer, err := GetCurrentTimer(userId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if timer.State == api.TimerStateRunning ||
-		timer.State == api.TimerStateFinished {
+	if timer.State == TimerStateRunning ||
+		timer.State == TimerStateFinished {
 		return nil, nil
 	}
 
 	timerActionId := uuid.New().String()
-	timerAction := api.Start
+	timerAction := TimerActionStart
 	remainingTimerInS := timer.RemainingTimeInS
 
 	_, err = database.Exec(
@@ -174,27 +168,27 @@ func StartCurrentTimer(userId uuid.UUID) (*api.TimerAction, error) {
 		return nil, err
 	}
 
-	return &api.TimerAction{
+	return &TimerAction{
 		Action:           timerAction,
 		RemainingTimeInS: remainingTimerInS,
 	}, nil
 }
 
-func PauseCurrentTimer(userId uuid.UUID) (*api.TimerAction, error) {
+func PauseCurrentTimer(userId uuid.UUID) (*TimerAction, error) {
 	timer, err := GetCurrentTimer(userId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if timer.State == api.TimerStateCreated ||
-		timer.State == api.TimerStatePaused ||
-		timer.State == api.TimerStateFinished {
+	if timer.State == TimerStateCreated ||
+		timer.State == TimerStatePaused ||
+		timer.State == TimerStateFinished {
 		return nil, nil
 	}
 
 	timerActionId := uuid.New().String()
-	timerAction := api.Pause
+	timerAction := TimerActionPause
 	remainingTimerInS := timer.RemainingTimeInS
 
 	_, err = database.Exec(
@@ -209,27 +203,27 @@ func PauseCurrentTimer(userId uuid.UUID) (*api.TimerAction, error) {
 		return nil, err
 	}
 
-	return &api.TimerAction{
+	return &TimerAction{
 		Action:           timerAction,
 		RemainingTimeInS: remainingTimerInS,
 	}, nil
 }
 
-func StopCurrentTimer(userId uuid.UUID) (*api.TimerAction, error) {
+func StopCurrentTimer(userId uuid.UUID) (*TimerAction, error) {
 	timer, err := GetCurrentTimer(userId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if timer.State == api.TimerStateCreated ||
-		timer.State == api.TimerStateFinished {
+	if timer.State == TimerStateCreated ||
+		timer.State == TimerStateFinished {
 		return nil, nil
 	}
 
 	timerActionId := uuid.New().String()
-	timerAction := api.Stop
-	var remainingTimerInS int32 = 0
+	timerAction := TimerActionStop
+	remainingTimerInS := int32(0)
 
 	_, err = database.Exec(
 		ActCurrentTimerCommand,
@@ -243,7 +237,7 @@ func StopCurrentTimer(userId uuid.UUID) (*api.TimerAction, error) {
 		return nil, err
 	}
 
-	return &api.TimerAction{
+	return &TimerAction{
 		Action:           timerAction,
 		RemainingTimeInS: remainingTimerInS,
 	}, nil

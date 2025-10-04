@@ -1,7 +1,6 @@
 package user_service
 
 import (
-	"FGG-Service/api"
 	"FGG-Service/database"
 
 	"github.com/google/uuid"
@@ -61,7 +60,7 @@ func CheckIfUserExistsById(userId uuid.UUID) (*bool, error) {
 	return &doesUserExist, nil
 }
 
-func FindUser(userName string) (*api.User, error) {
+func FindUser(userName string) (*User, error) {
 	row := database.QueryRow(FindUserCommand, userName)
 
 	var userId uuid.UUID
@@ -71,7 +70,7 @@ func FindUser(userName string) (*api.User, error) {
 		return nil, err
 	}
 
-	return &api.User{Id: userId, Name: userName}, err
+	return &User{Id: userId, Name: userName}, err
 }
 
 func CreateUser(userName string) error {
