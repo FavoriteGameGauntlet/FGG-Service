@@ -4,6 +4,7 @@ import (
 	"FGG-Service/database"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -100,11 +101,12 @@ func GetCurrentTimer(userId uuid.UUID) (*Timer, error) {
 	)
 
 	timer := Timer{}
+	var timerActionDateString string
 	err := row.Scan(
 		&timer.Id,
 		&timer.State,
 		&timer.DurationInS,
-		&timer.TimerActionDate,
+		&timerActionDateString,
 		&timer.RemainingTimeInS,
 	)
 
@@ -115,6 +117,14 @@ func GetCurrentTimer(userId uuid.UUID) (*Timer, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	timerActionDate, err := time.Parse(time.DateTime, timerActionDateString)
+
+	if err != nil {
+		return nil, err
+	}
+
+	timer.TimerActionDate = &timerActionDate
 
 	return &timer, nil
 }

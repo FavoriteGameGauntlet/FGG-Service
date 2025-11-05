@@ -3,7 +3,6 @@ package controller
 import (
 	"FGG-Service/api"
 	"FGG-Service/game_service"
-	"FGG-Service/timer_service"
 	"FGG-Service/user_service"
 	"context"
 )
@@ -63,16 +62,6 @@ func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGame
 
 	if !*doesCurrentGameExist {
 		return api.FinishCurrentGame404JSONResponse{Code: api.GAMENOTFOUND}, nil
-	}
-
-	doesCurrentTimerExist, err := timer_service.CheckIfCurrentTimerExists(request.UserId)
-
-	if err != nil {
-		return api.FinishCurrentGame503JSONResponse{Code: api.CHECKCURRENTTIMER, Message: err.Error()}, nil
-	}
-
-	if !*doesCurrentTimerExist {
-		return api.FinishCurrentGame404JSONResponse{Code: api.TIMERNOTFOUND}, nil
 	}
 
 	err = game_service.FinishCurrentGame(request.UserId)

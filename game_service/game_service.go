@@ -39,7 +39,7 @@ const (
 				FROM GameHistory gh
 					INNER JOIN Games g ON gh.GameId = g.Id
 				WHERE gh.UserId = $userId
-					AND gh.State = $finishedGameState)
+					AND gh.State <> $finishedGameState)
          	THEN true
          	ELSE false
        	END AS 'DoesCurrentGameExist'`
@@ -63,9 +63,9 @@ const (
 		FROM GameHistory gh
 			INNER JOIN Games g ON gh.GameId = g.Id
 		WHERE gh.UserId = $userId
-			AND gh.State = $finishedGameState`
+			AND gh.State <> $finishedGameState`
 	GetFinishedTimerCount = `
-		SELECT COUNT(*) 
+		SELECT COUNT(*) AS FinishedTimerCount
 		FROM Timers
 		WHERE UserId = $userId 
 			AND GameId = $gameId
@@ -301,7 +301,7 @@ func FinishCurrentGame(userId uuid.UUID) error {
 }
 
 func RollFinishedGameResultPoints(diceCount int) (int, error) {
-	diceFormula := fmt.Sprintf("%dx6", diceCount)
+	diceFormula := fmt.Sprintf("%dd6", diceCount)
 
 	roll, _, err := dice.Roll(diceFormula)
 	var rolledValue int
