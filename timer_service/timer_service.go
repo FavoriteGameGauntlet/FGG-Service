@@ -223,7 +223,7 @@ func StopCurrentTimer(userId uuid.UUID) (*TimerAction, error) {
 
 	timerActionId := uuid.New().String()
 	timerAction := TimerActionStop
-	remainingTimerInS := int32(0)
+	remainingTimerInS := 0
 
 	_, err = database.Exec(
 		ActCurrentTimerCommand,

@@ -452,10 +452,10 @@ components:
           enum: ['created', 'running', 'paused', 'finished', 'rolled']
         remainingTimeInS:
           type: integer
-          format: int32
+          format: int
         durationInS:
           type: integer
-          format: int32
+          format: int
         timerActionDate:
           type: string
           format: date-time
@@ -471,7 +471,7 @@ components:
           enum: ['start', 'pause', 'stop']
         remainingTimeInS:
           type: integer
-          format: int32
+          format: int
       required:
         - action
         - remainingTimeInS
@@ -505,8 +505,9 @@ components:
               "USER_NOT_FOUND", "GAME_NOT_FOUND", "TIMER_NOT_FOUND",
               "NO_AVAILABLE_ROLLS", "USER_ALREADY_EXISTS", "TIMER_INCORRECT_STATE",
               "UNEXPECTED", "CHECK_USER", "CHECK_CURRENT_GAME", "CHECK_CURRENT_TIMER",
-              "GETUSER", "GET_UNPLAYED_GAMES", "GET_CURRENT_GAME", "GET_CURRENT_TIMER",
-              "CREATE_USER", "ADD_UNPLAYED_GAMES", "START_CURRENT_TIMER", "PAUSE_CURRENT_TIMER"
+              "GET_USER", "GET_UNPLAYED_GAMES", "GET_CURRENT_GAME", "GET_CURRENT_TIMER",
+              "CREATE_USER", "ADD_UNPLAYED_GAMES", "START_CURRENT_TIMER", "PAUSE_CURRENT_TIMER",
+              "FINISH_CURRENT_GAME"
             ]
         message:
           type: string

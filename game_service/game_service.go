@@ -4,8 +4,10 @@ import (
 	"FGG-Service/database"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/justinian/dice"
 )
 
 const (
@@ -36,7 +38,7 @@ const (
 				FROM GameHistory gh
 					INNER JOIN Games g ON gh.GameId = g.Id
 				WHERE gh.UserId = $userId
-					AND gh.Result IS NULL)
+					AND gh.State = $finishedGameState)
          	THEN true
          	ELSE false
        	END AS 'DoesCurrentGameExist'`
@@ -60,13 +62,22 @@ const (
 		FROM GameHistory gh
 			INNER JOIN Games g ON gh.GameId = g.Id
 		WHERE gh.UserId = $userId
-			AND gh.Result IS NULL`
+			AND gh.State = $finishedGameState`
+	GetFinishedTimerCount = `
+		SELECT COUNT(*) 
+		FROM Timers
+		WHERE UserId = $userId 
+			AND GameId = $gameId`
 	FinishCurrentGameCommand = `
 		UPDATE GameHistory
 		SET State = $finishedGameState,
-			FinishDate = datetime('now')
+			FinishDate = datetime('now'),
+			ResultPoints = $resultPoints
 		WHERE UserId = $userId
 			AND GameId = $gameId;`
+	CreateEffectRoll = `
+		INSERT INTO EffectHistory (Id, UserId, GameId)
+		VALUES ($effectHistoryId, $gameId, $userId)`
 )
 
 func AddUnplayedGames(userId uuid.UUID, gamesPtr *UnplayedGames) error {
@@ -214,7 +225,7 @@ func GetUnplayedGames(userId uuid.UUID) (*UnplayedGames, error) {
 }
 
 func GetCurrentGame(userId uuid.UUID) (*Game, error) {
-	row := database.QueryRow(GetCurrentGameCommand, userId)
+	row := database.QueryRow(GetCurrentGameCommand, userId, GameStateFinished)
 
 	game := Game{}
 	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link)
@@ -231,7 +242,7 @@ func GetCurrentGame(userId uuid.UUID) (*Game, error) {
 }
 
 func CheckIfCurrentGameExists(userId uuid.UUID) (*bool, error) {
-	row := database.QueryRow(CheckIfCurrentGameExistsCommand, userId)
+	row := database.QueryRow(CheckIfCurrentGameExistsCommand, userId, GameStateFinished)
 
 	var doesCurrentGameExist bool
 	err := row.Scan(&doesCurrentGameExist)
@@ -241,4 +252,57 @@ func CheckIfCurrentGameExists(userId uuid.UUID) (*bool, error) {
 	}
 
 	return &doesCurrentGameExist, nil
+}
+
+func FinishCurrentGame(userId uuid.UUID) error {
+	game, err := GetCurrentGame(userId)
+
+	if err != nil {
+		return err
+	}
+
+	if game == nil {
+		return err
+	}
+
+	row := database.QueryRow(GetFinishedTimerCount, userId, game.Id)
+
+	var finishedTimerCount int
+	err = row.Scan(&finishedTimerCount)
+
+	if err != nil {
+		return err
+	}
+
+	resultPoints, err := RollFinishedGameResultPoints(finishedTimerCount)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = database.Exec(FinishCurrentGameCommand, GameStateFinished, resultPoints, userId, game.Id)
+
+	if err != nil {
+		return err
+	}
+
+	effectHistoryId := uuid.New()
+	_, err = database.Exec(CreateEffectRoll, effectHistoryId.String(), userId, game.Id)
+
+	return err
+}
+
+func RollFinishedGameResultPoints(diceCount int) (int, error) {
+	diceFormula := fmt.Sprintf("%dx6", diceCount)
+
+	roll, _, err := dice.Roll(diceFormula)
+	var rolledValue int
+
+	if err != nil {
+		return rolledValue, err
+	}
+
+	rolledValue = roll.Int()
+
+	return rolledValue, nil
 }

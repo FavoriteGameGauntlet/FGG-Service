@@ -23,11 +23,12 @@ const (
 	CHECKCURRENTTIMER   ExceptionCode = "CHECK_CURRENT_TIMER"
 	CHECKUSER           ExceptionCode = "CHECK_USER"
 	CREATEUSER          ExceptionCode = "CREATE_USER"
+	FINISHCURRENTGAME   ExceptionCode = "FINISH_CURRENT_GAME"
 	GAMENOTFOUND        ExceptionCode = "GAME_NOT_FOUND"
 	GETCURRENTGAME      ExceptionCode = "GET_CURRENT_GAME"
 	GETCURRENTTIMER     ExceptionCode = "GET_CURRENT_TIMER"
 	GETUNPLAYEDGAMES    ExceptionCode = "GET_UNPLAYED_GAMES"
-	GETUSER             ExceptionCode = "GETUSER"
+	GETUSER             ExceptionCode = "GET_USER"
 	NOAVAILABLEROLLS    ExceptionCode = "NO_AVAILABLE_ROLLS"
 	PAUSECURRENTTIMER   ExceptionCode = "PAUSE_CURRENT_TIMER"
 	STARTCURRENTTIMER   ExceptionCode = "START_CURRENT_TIMER"
@@ -103,7 +104,7 @@ type Name = string
 // TimerActionDto defines model for TimerActionDto.
 type TimerActionDto struct {
 	Action           TimerActionDtoAction `json:"action"`
-	RemainingTimeInS int32                `json:"remainingTimeInS"`
+	RemainingTimeInS int                  `json:"remainingTimeInS"`
 }
 
 // TimerActionDtoAction defines model for TimerActionDto.Action.
@@ -111,8 +112,8 @@ type TimerActionDtoAction string
 
 // TimerDto defines model for TimerDto.
 type TimerDto struct {
-	DurationInS      int32         `json:"durationInS"`
-	RemainingTimeInS int32         `json:"remainingTimeInS"`
+	DurationInS      int           `json:"durationInS"`
+	RemainingTimeInS int           `json:"remainingTimeInS"`
 	State            TimerDtoState `json:"state"`
 	TimerActionDate  *time.Time    `json:"timerActionDate,omitempty"`
 }

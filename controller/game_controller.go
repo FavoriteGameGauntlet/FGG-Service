@@ -37,10 +37,10 @@ func (Server) GetCurrentGame(_ context.Context, request api.GetCurrentGameReques
 
 func ConvertGameToDto(game *game_service.Game) *api.GameDto {
 	return &api.GameDto{
-        Link:  game.Link,
-        Name:  game.Name,
-        State: api.GameDtoState(game.State),
-    }
+		Link:  game.Link,
+		Name:  game.Name,
+		State: api.GameDtoState(game.State),
+	}
 }
 
 // FinishCurrentGame (GET /users/{userId}/games/current/finish)
@@ -75,11 +75,17 @@ func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGame
 		return api.FinishCurrentGame404JSONResponse{Code: api.TIMERNOTFOUND}, nil
 	}
 
+	err = game_service.FinishCurrentGame(request.UserId)
+
+	if err != nil {
+		return api.FinishCurrentGame503JSONResponse{Code: api.FINISHCURRENTGAME, Message: err.Error()}, nil
+	}
+
 	return api.FinishCurrentGame200Response{}, nil
 }
 
 // GetGameHistory (GET /users/{userId}/games/history)
-func (Server) GetGameHistory(ctx context.Context, request api.GetGameHistoryRequestObject) (api.GetGameHistoryResponseObject, error) {
+func (Server) GetGameHistory(_ context.Context, request api.GetGameHistoryRequestObject) (api.GetGameHistoryResponseObject, error) {
 	return api.GetGameHistory200JSONResponse{}, nil
 }
 

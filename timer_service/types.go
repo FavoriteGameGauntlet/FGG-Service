@@ -6,9 +6,9 @@ import (
 )
 
 type Timer struct {
-	DurationInS      int32
+	DurationInS      int
 	Id               uuid.UUID
-	RemainingTimeInS int32
+	RemainingTimeInS int
 	State            TimerState
 	TimerActionDate  *time.Time
 }
@@ -26,7 +26,7 @@ const (
 type TimerAction struct {
 	Action           TimerActionAction
 	Id               uuid.UUID
-	RemainingTimeInS int32
+	RemainingTimeInS int
 }
 
 type TimerActionAction string
