@@ -147,6 +147,10 @@ func StartCurrentTimer(userId uuid.UUID) (*TimerAction, error) {
 		return nil, err
 	}
 
+	if timer == nil {
+		return nil, nil
+	}
+
 	if timer.State == TimerStateRunning ||
 		timer.State == TimerStateFinished {
 		return nil, nil
@@ -179,6 +183,10 @@ func PauseCurrentTimer(userId uuid.UUID) (*TimerAction, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	if timer == nil {
+		return nil, nil
 	}
 
 	if timer.State == TimerStateCreated ||
@@ -214,6 +222,10 @@ func StopCurrentTimer(userId uuid.UUID) (*TimerAction, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	if timer == nil {
+		return nil, nil
 	}
 
 	if timer.State == TimerStateCreated ||

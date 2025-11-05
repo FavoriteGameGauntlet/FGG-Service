@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.17 on Fri Sep 26 05:26:03 2025
+-- File generated with SQLiteStudio v3.4.17 on Thu Nov 6 02:06:26 2025
 --
 -- Text encoding used: System
 --
@@ -12,8 +12,7 @@ DROP TABLE IF EXISTS EffectHistory;
 CREATE TABLE EffectHistory (
     Id             TEXT    PRIMARY KEY
                            UNIQUE
-                           NOT NULL
-                           DEFAULT (uuid() ),
+                           NOT NULL,
     UserId         TEXT    REFERENCES Users (Id) 
                            NOT NULL,
     GameId         TEXT    REFERENCES Games (Id) 
@@ -29,19 +28,19 @@ CREATE TABLE EffectHistory (
 DROP TABLE IF EXISTS GameHistory;
 
 CREATE TABLE GameHistory (
-    Id     TEXT PRIMARY KEY
-                NOT NULL
-                UNIQUE
-                DEFAULT (uuid() ),
-    UserId TEXT REFERENCES Users (Id) 
-                NOT NULL,
-    GameId TEXT REFERENCES Games (Id) 
-                NOT NULL,
-    State  TEXT NOT NULL
-                DEFAULT ('started'),
-    Date   TEXT NOT NULL
-                DEFAULT (datetime('now') ),
-    Result TEXT
+    Id           TEXT    PRIMARY KEY
+                         NOT NULL
+                         UNIQUE,
+    UserId       TEXT    REFERENCES Users (Id) 
+                         NOT NULL,
+    GameId       TEXT    REFERENCES Games (Id) 
+                         NOT NULL,
+    State        TEXT    NOT NULL
+                         DEFAULT ('started'),
+    RolledDate   TEXT    NOT NULL
+                         DEFAULT (datetime('now') ),
+    ResultPoints INTEGER,
+    FinishDate   TEXT
 );
 
 
@@ -51,8 +50,7 @@ DROP TABLE IF EXISTS Games;
 CREATE TABLE Games (
     Id   TEXT PRIMARY KEY
               UNIQUE
-              NOT NULL
-              DEFAULT (uuid() ),
+              NOT NULL,
     Name TEXT NOT NULL
               UNIQUE,
     Link TEXT
@@ -65,8 +63,7 @@ DROP TABLE IF EXISTS RollEffects;
 CREATE TABLE RollEffects (
     Id          TEXT PRIMARY KEY
                      NOT NULL
-                     UNIQUE
-                     DEFAULT (uuid() ),
+                     UNIQUE,
     Name        TEXT NOT NULL,
     Description TEXT NOT NULL
 );
@@ -78,8 +75,7 @@ DROP TABLE IF EXISTS TimerActions;
 CREATE TABLE TimerActions (
     Id               TEXT    PRIMARY KEY
                              UNIQUE
-                             NOT NULL
-                             DEFAULT (uuid() ),
+                             NOT NULL,
     TimerId          TEXT    REFERENCES Timers (Id) 
                              NOT NULL,
     Action           TEXT    NOT NULL,
@@ -95,8 +91,7 @@ DROP TABLE IF EXISTS Timers;
 CREATE TABLE Timers (
     Id          TEXT    PRIMARY KEY
                         UNIQUE
-                        NOT NULL
-                        DEFAULT (uuid() ),
+                        NOT NULL,
     UserId      TEXT    REFERENCES Users (Id) 
                         NOT NULL,
     GameId      TEXT    REFERENCES Games (Id) 
@@ -114,8 +109,7 @@ DROP TABLE IF EXISTS UnplayedGames;
 CREATE TABLE UnplayedGames (
     Id     TEXT PRIMARY KEY
                 UNIQUE
-                NOT NULL
-                DEFAULT (uuid() ),
+                NOT NULL,
     UserId TEXT REFERENCES Users (Id) 
                 NOT NULL,
     GameId TEXT REFERENCES Games (Id) 
@@ -129,8 +123,7 @@ DROP TABLE IF EXISTS Users;
 CREATE TABLE Users (
     Id   TEXT PRIMARY KEY
               UNIQUE
-              NOT NULL
-              DEFAULT (uuid() ),
+              NOT NULL,
     Name TEXT NOT NULL
               UNIQUE
 );

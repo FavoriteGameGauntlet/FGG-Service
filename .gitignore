@@ -1,3 +1,4 @@
 *.exe
 *.db
 /.idea
+/generate-oapi-codegen.bat

@@ -1,8 +1,9 @@
 package timer_service
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Timer struct {

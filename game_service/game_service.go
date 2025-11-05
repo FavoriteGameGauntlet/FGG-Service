@@ -2,6 +2,7 @@ package game_service
 
 import (
 	"FGG-Service/database"
+	"FGG-Service/timer_service"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -67,7 +68,8 @@ const (
 		SELECT COUNT(*) 
 		FROM Timers
 		WHERE UserId = $userId 
-			AND GameId = $gameId`
+			AND GameId = $gameId
+			AND State = $finishedTimerState`
 	FinishCurrentGameCommand = `
 		UPDATE GameHistory
 		SET State = $finishedGameState,
@@ -265,7 +267,13 @@ func FinishCurrentGame(userId uuid.UUID) error {
 		return err
 	}
 
-	row := database.QueryRow(GetFinishedTimerCount, userId, game.Id)
+	_, err = timer_service.StopCurrentTimer(userId)
+
+	if err != nil {
+		return err
+	}
+
+	row := database.QueryRow(GetFinishedTimerCount, userId, game.Id, timer_service.TimerStateFinished)
 
 	var finishedTimerCount int
 	err = row.Scan(&finishedTimerCount)
