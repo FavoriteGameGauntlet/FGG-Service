@@ -5,7 +5,6 @@ info:
 paths:
 
 
-
   /users/{name}:
     parameters:
       - $ref: "#/components/parameters/UserName"
@@ -15,17 +14,19 @@ paths:
         - Users
       responses:
         '200':
-          description: User was created
+          description: User was created successfully and returned in response.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserDto"
         '409':
+          description: User already exists with the same name.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while creating user.
           content:
             application/json:
               schema:
@@ -36,17 +37,19 @@ paths:
         - Users
       responses:
         '200':
-          description: The user was found
+          description: The user was found and returned successfully.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserDto"
         '404':
+          description: No user found with the given name.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while retrieving user.
           content:
             application/json:
               schema:
@@ -66,13 +69,15 @@ paths:
               $ref: "#/components/schemas/UnplayedGamesDto"
       responses:
         '200':
-          description: Unplayed games were saved
+          description: Unplayed games were saved successfully.
         '404':
+          description: User not found when saving unplayed games.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while saving unplayed games.
           content:
             application/json:
               schema:
@@ -83,17 +88,19 @@ paths:
         - Games
       responses:
         '200':
-          description: Unplayed games were received
+          description: Unplayed games were retrieved successfully.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnplayedGamesDto"
         '404':
+          description: User not found when retrieving unplayed games.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while retrieving unplayed games.
           content:
             application/json:
               schema:
@@ -110,22 +117,25 @@ paths:
         - Games
       responses:
         '200':
-          description: Roll for games was made
+          description: A game roll was performed and the selected game returned.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/GameDto"
         '404':
+          description: User not found or no unplayed games available.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '409':
+          description: Game roll not allowed due to current game state.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while rolling for a game.
           content:
             application/json:
               schema:
@@ -142,17 +152,19 @@ paths:
         - Games
       responses:
         '200':
-          description: The current game was received
+          description: The user’s current game was retrieved successfully.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/GameDto"
         '404':
+          description: Current game not found for the user.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while retrieving current game.
           content:
             application/json:
               schema:
@@ -169,13 +181,15 @@ paths:
         - Games
       responses:
         '200':
-          description: The current game was finished
+          description: Current game was marked as finished successfully.
         '404':
+          description: No current game found for the user to finish.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while finishing current game.
           content:
             application/json:
               schema:
@@ -192,17 +206,19 @@ paths:
         - Games
       responses:
         '200':
-          description: Game history was received
+          description: Game history was retrieved successfully.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/GamesDto"
         '404':
+          description: No game history found for the user.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while retrieving game history.
           content:
             application/json:
               schema:
@@ -218,17 +234,19 @@ paths:
         - Timers
       responses:
         '200':
-          description: The current timer was received
+          description: The current timer was retrieved successfully.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/TimerDto"
         '404':
+          description: No active timer found for the user.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while retrieving current timer.
           content:
             application/json:
               schema:
@@ -245,21 +263,25 @@ paths:
         - Timers
       responses:
         '200':
+          description: Timer was started or resumed successfully.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/TimerActionDto"
         '404':
+          description: No current timer found to start.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '409':
+          description: Timer cannot be started due to incorrect state.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while starting timer.
           content:
             application/json:
               schema:
@@ -276,21 +298,25 @@ paths:
         - Timers
       responses:
         '200':
+          description: Timer was paused successfully.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/TimerActionDto"
         '404':
+          description: No current timer found to pause.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '409':
+          description: Timer cannot be paused due to incorrect state.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while pausing timer.
           content:
             application/json:
               schema:
@@ -307,17 +333,19 @@ paths:
         - Effects
       responses:
         '200':
-          description: Roll count was received
+          description: Boolean indicating whether the user has available effect rolls.
           content:
             application/json:
               schema:
                 type: boolean
         '404':
+          description: User not found when checking effect roll.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while checking effect roll.
           content:
             application/json:
               schema:
@@ -334,17 +362,19 @@ paths:
         - Effects
       responses:
         '200':
-          description: Effect history was received
+          description: Effect history retrieved successfully.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/EffectsDto"
         '404':
+          description: No effect history found for the user.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while retrieving effect history.
           content:
             application/json:
               schema:
@@ -361,22 +391,25 @@ paths:
         - Effects
       responses:
         '200':
-          description: Roll for effects was made
+          description: Effect roll performed successfully and returned.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/EffectDto"
         '404':
+          description: User not found or effect roll unavailable.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '409':
+          description: Effect roll not allowed due to current game or timer state.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exception"
         '503':
+          description: Service unavailable while rolling for effects.
           content:
             application/json:
               schema:
@@ -437,7 +470,7 @@ components:
           properties:
             state:
               type: string
-              enum: ['started', 'finished', 'cancelled']
+              enum: [ 'started', 'finished', 'cancelled' ]
           required:
             - state
     GamesDto:
@@ -449,7 +482,7 @@ components:
       properties:
         state:
           type: string
-          enum: ['created', 'running', 'paused', 'finished', 'rolled']
+          enum: [ 'created', 'running', 'paused', 'finished', 'rolled' ]
         remainingTimeInS:
           type: integer
           format: int
@@ -468,7 +501,7 @@ components:
       properties:
         action:
           type: string
-          enum: ['start', 'pause', 'stop']
+          enum: [ 'start', 'pause', 'stop' ]
         remainingTimeInS:
           type: integer
           format: int
@@ -502,13 +535,13 @@ components:
         code:
           type: string
           enum: [
-              "USER_NOT_FOUND", "GAME_NOT_FOUND", "TIMER_NOT_FOUND",
-              "NO_AVAILABLE_ROLLS", "USER_ALREADY_EXISTS", "TIMER_INCORRECT_STATE",
-              "UNEXPECTED", "CHECK_USER", "CHECK_CURRENT_GAME", "CHECK_CURRENT_TIMER",
-              "GET_USER", "GET_UNPLAYED_GAMES", "GET_CURRENT_GAME", "GET_CURRENT_TIMER",
-              "CREATE_USER", "ADD_UNPLAYED_GAMES", "START_CURRENT_TIMER", "PAUSE_CURRENT_TIMER",
-              "FINISH_CURRENT_GAME"
-            ]
+            "USER_NOT_FOUND", "GAME_NOT_FOUND", "TIMER_NOT_FOUND",
+            "NO_AVAILABLE_ROLLS", "USER_ALREADY_EXISTS", "TIMER_INCORRECT_STATE",
+            "UNEXPECTED", "CHECK_USER", "CHECK_CURRENT_GAME", "CHECK_CURRENT_TIMER",
+            "GET_USER", "GET_UNPLAYED_GAMES", "GET_CURRENT_GAME", "GET_CURRENT_TIMER",
+            "CREATE_USER", "ADD_UNPLAYED_GAMES", "START_CURRENT_TIMER", "PAUSE_CURRENT_TIMER",
+            "FINISH_CURRENT_GAME"
+          ]
         message:
           type: string
       required:
