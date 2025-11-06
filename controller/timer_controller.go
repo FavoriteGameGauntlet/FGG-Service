@@ -10,13 +10,13 @@ import (
 
 // GetCurrentTimer (GET /users/{userId}/timers/current)
 func (Server) GetCurrentTimer(_ context.Context, request api.GetCurrentTimerRequestObject) (api.GetCurrentTimerResponseObject, error) {
-	doesUserExist, err := user_service.CheckIfUserExistsById(request.UserId)
+	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
 		return api.GetCurrentTimer503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !doesUserExist {
+	if !doesExist {
 		return api.GetCurrentTimer404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
@@ -52,33 +52,33 @@ func ConvertTimerToDto(timer *timer_service.Timer) *api.TimerDto {
 
 // PauseCurrentTimer (POST /users/{userId}/timers/current/pause)
 func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimerRequestObject) (api.PauseCurrentTimerResponseObject, error) {
-	doesUserExist, err := user_service.CheckIfUserExistsById(request.UserId)
+	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
 		return api.PauseCurrentTimer503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !doesUserExist {
+	if !doesExist {
 		return api.PauseCurrentTimer404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
-	doesCurrentGameExist, err := game_service.CheckIfCurrentGameExists(request.UserId)
+	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
 
 	if err != nil {
 		return api.PauseCurrentTimer503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
 	}
 
-	if !doesCurrentGameExist {
+	if !doesExist {
 		return api.PauseCurrentTimer404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
-	doesCurrentTimerExist, err := timer_service.CheckIfCurrentTimerExists(request.UserId)
+	doesExist, err = timer_service.CheckIfCurrentTimerExists(request.UserId)
 
 	if err != nil {
 		return api.PauseCurrentTimer503JSONResponse{Code: api.CHECKCURRENTTIMER, Message: err.Error()}, nil
 	}
 
-	if !doesCurrentTimerExist {
+	if !doesExist {
 		return api.PauseCurrentTimer404JSONResponse{Code: api.TIMERNOTFOUND}, nil
 	}
 
@@ -106,33 +106,33 @@ func ConvertTimerActionToDto(timerAction *timer_service.TimerAction) *api.TimerA
 
 // StartCurrentTimer (POST /users/{userId}/timers/current/start)
 func (Server) StartCurrentTimer(_ context.Context, request api.StartCurrentTimerRequestObject) (api.StartCurrentTimerResponseObject, error) {
-	doesUserExist, err := user_service.CheckIfUserExistsById(request.UserId)
+	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
 		return api.StartCurrentTimer503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !doesUserExist {
+	if !doesExist {
 		return api.StartCurrentTimer404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
-	doesCurrentGameExist, err := game_service.CheckIfCurrentGameExists(request.UserId)
+	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
 
 	if err != nil {
 		return api.StartCurrentTimer503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
 	}
 
-	if !doesCurrentGameExist {
+	if !doesExist {
 		return api.StartCurrentTimer404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
-	doesCurrentTimerExist, err := timer_service.CheckIfCurrentTimerExists(request.UserId)
+	doesExist, err = timer_service.CheckIfCurrentTimerExists(request.UserId)
 
 	if err != nil {
 		return api.StartCurrentTimer503JSONResponse{Code: api.CHECKCURRENTTIMER, Message: err.Error()}, nil
 	}
 
-	if !doesCurrentTimerExist {
+	if !doesExist {
 		return api.StartCurrentTimer404JSONResponse{Code: api.TIMERNOTFOUND}, nil
 	}
 

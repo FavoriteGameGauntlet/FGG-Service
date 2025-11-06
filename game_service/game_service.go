@@ -22,7 +22,7 @@ const (
 				WHERE Name = $gameName)
          	THEN true
          	ELSE false
-       	END AS 'DoesGameExist'`
+       	END AS 'DoesExist'`
 	CheckIfUnplayedGameExistsCommand = `
 		SELECT CASE 
         	WHEN EXISTS (
@@ -33,7 +33,7 @@ const (
 					AND g.Name = $gameName)
          	THEN true
          	ELSE false
-       	END AS 'DoesUnplayedGameExist'`
+       	END AS 'DoesExist'`
 	CheckIfCurrentGameExistsCommand = `
 		SELECT CASE 
         	WHEN EXISTS (
@@ -44,7 +44,7 @@ const (
 					AND gh.State <> $finishedGameState)
          	THEN true
          	ELSE false
-       	END AS 'DoesCurrentGameExist'`
+       	END AS 'DoesExist'`
 	AddGameCommand = `
 		INSERT INTO Games (Id, Name, Link)
 		VALUES ($gameId, $gameName, $gameLink)`
@@ -126,12 +126,12 @@ func AddUnplayedGames(userId uuid.UUID, gamesPtr *UnplayedGames) error {
 }
 
 func AddUnplayedGame(userId uuid.UUID, unplayedGame *UnplayedGame) error {
-	doesUnplayedGameExist, err := CheckIfUnplayedGameExists(
+	doesExist, err := CheckIfUnplayedGameExists(
 		userId,
 		unplayedGame.Name,
 	)
 
-	if err != nil || *doesUnplayedGameExist {
+	if err != nil || doesExist {
 		return err
 	}
 
@@ -152,27 +152,27 @@ func AddUnplayedGame(userId uuid.UUID, unplayedGame *UnplayedGame) error {
 	return err
 }
 
-func CheckIfUnplayedGameExists(userId uuid.UUID, gameName string) (*bool, error) {
+func CheckIfUnplayedGameExists(userId uuid.UUID, gameName string) (bool, error) {
 	row := database.QueryRow(CheckIfUnplayedGameExistsCommand, userId, gameName)
 
-	var doesUnplayedGameExist bool
-	err := row.Scan(&doesUnplayedGameExist)
+	var doesExist bool
+	err := row.Scan(&doesExist)
 
 	if err != nil {
-		return nil, err
+		return doesExist, err
 	}
 
-	return &doesUnplayedGameExist, nil
+	return doesExist, nil
 }
 
 func AddOrGetGame(unplayedGame *UnplayedGame) (*Game, error) {
-	doesGameExist, err := CheckIfGameExists(unplayedGame.Name)
+	doesExist, err := CheckIfGameExists(unplayedGame.Name)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if *doesGameExist {
+	if doesExist {
 		row := database.QueryRow(GetGameCommand, unplayedGame.Name)
 
 		game := Game{}
@@ -204,17 +204,17 @@ func AddOrGetGame(unplayedGame *UnplayedGame) (*Game, error) {
 	}, nil
 }
 
-func CheckIfGameExists(gameName string) (*bool, error) {
+func CheckIfGameExists(gameName string) (bool, error) {
 	row := database.QueryRow(CheckIfGameExistsCommand, gameName)
 
-	var doesGameExist bool
-	err := row.Scan(&doesGameExist)
+	var doesExist bool
+	err := row.Scan(&doesExist)
 
 	if err != nil {
-		return nil, err
+		return doesExist, err
 	}
 
-	return &doesGameExist, nil
+	return doesExist, nil
 }
 
 func GetUnplayedGames(userId uuid.UUID) (*UnplayedGames, error) {
@@ -268,14 +268,14 @@ func GetCurrentGame(userId uuid.UUID) (*Game, error) {
 func CheckIfCurrentGameExists(userId uuid.UUID) (bool, error) {
 	row := database.QueryRow(CheckIfCurrentGameExistsCommand, userId, GameStateFinished)
 
-	var doesCurrentGameExist bool
-	err := row.Scan(&doesCurrentGameExist)
+	var doesExist bool
+	err := row.Scan(&doesExist)
 
 	if err != nil {
-		return doesCurrentGameExist, err
+		return doesExist, err
 	}
 
-	return doesCurrentGameExist, nil
+	return doesExist, nil
 }
 
 func CancelCurrentGame(userId uuid.UUID) error {

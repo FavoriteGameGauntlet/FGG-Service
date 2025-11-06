@@ -8,13 +8,13 @@ import (
 
 // GetUser (GET /users/{name})
 func (Server) GetUser(_ context.Context, request api.GetUserRequestObject) (api.GetUserResponseObject, error) {
-	doesUserExist, err := user_service.CheckIfUserExistsByName(request.Name)
+	doesExist, err := user_service.CheckIfUserExistsByName(request.Name)
 
 	if err != nil {
 		return api.GetUser503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !doesUserExist {
+	if !doesExist {
 		return api.GetUser404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
@@ -29,13 +29,13 @@ func (Server) GetUser(_ context.Context, request api.GetUserRequestObject) (api.
 
 // CreateUser (POST /users/{name})
 func (Server) CreateUser(_ context.Context, request api.CreateUserRequestObject) (api.CreateUserResponseObject, error) {
-	doesUserExist, err := user_service.CheckIfUserExistsByName(request.Name)
+	doesExist, err := user_service.CheckIfUserExistsByName(request.Name)
 
 	if err != nil {
 		return api.CreateUser503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if doesUserExist {
+	if doesExist {
 		return api.CreateUser409JSONResponse{Code: api.USERALREADYEXISTS}, nil
 	}
 

@@ -8,6 +8,16 @@ import (
 )
 
 const (
+	CheckIfEffectRollExistsCommand = `
+		SELECT CASE 
+        	WHEN EXISTS (
+				SELECT 1
+				FROM EffectHistory
+				WHERE UserId = $userId
+					AND RollDate IS NULL)
+         	THEN true
+         	ELSE false
+       	END AS 'DoesExist'`
 	GetEffectHistoryCommand = `
 		SELECT e.Name, e.Description, eh.CreateDate, eh.RollDate, g.Name AS GameName 
 		FROM EffectHistory eh
@@ -16,6 +26,19 @@ const (
 		WHERE eh.UserId = $userId
 		ORDER BY eh.CreateDate, eh.RollDate`
 )
+
+func CheckIfEffectRollExists(userId uuid.UUID) (bool, error) {
+	row := database.QueryRow(CheckIfEffectRollExistsCommand, userId)
+
+	var doesExist bool
+	err := row.Scan(&doesExist)
+
+	if err != nil {
+		return doesExist, err
+	}
+
+	return doesExist, nil
+}
 
 func GetEffectHistory(userId uuid.UUID) (*Effects, error) {
 	rows, err := database.Query(GetEffectHistoryCommand, userId)

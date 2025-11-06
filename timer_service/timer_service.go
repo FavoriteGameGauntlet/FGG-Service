@@ -19,7 +19,7 @@ const (
 					AND State != $rolledTimerState)
          	THEN true
          	ELSE false
-       		END AS 'DoesCurrentTimerExist'`
+       		END AS 'DoesExist'`
 	GetCurrentTimerCommand = `
 		SELECT
 			t.Id,
@@ -54,24 +54,24 @@ func CheckIfCurrentTimerExists(userId uuid.UUID) (bool, error) {
 		TimerStateFinished,
 	)
 
-	var doesCurrentTimerExist bool
-	err := row.Scan(&doesCurrentTimerExist)
+	var doesExist bool
+	err := row.Scan(&doesExist)
 
 	if err != nil {
-		return doesCurrentTimerExist, err
+		return doesExist, err
 	}
 
-	return doesCurrentTimerExist, nil
+	return doesExist, nil
 }
 
 func GetOrCreateCurrentTimer(userId uuid.UUID, gameId uuid.UUID) (*Timer, error) {
-	doesCurrentTimerExist, err := CheckIfCurrentTimerExists(userId)
+	doesExist, err := CheckIfCurrentTimerExists(userId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if doesCurrentTimerExist {
+	if doesExist {
 		timer, err := GetCurrentTimer(userId)
 
 		if err != nil {

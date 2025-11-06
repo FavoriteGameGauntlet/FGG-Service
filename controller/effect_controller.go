@@ -9,18 +9,34 @@ import (
 
 // CheckEffectRoll (GET /users/{userId}/effects/has-roll)
 func (Server) CheckEffectRoll(_ context.Context, request api.CheckEffectRollRequestObject) (api.CheckEffectRollResponseObject, error) {
-	return api.CheckEffectRoll200JSONResponse(true), nil
+	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
+
+	if err != nil {
+		return api.CheckEffectRoll503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+	}
+
+	if !doesExist {
+		return api.CheckEffectRoll404JSONResponse{Code: api.USERNOTFOUND}, nil
+	}
+
+	doesExist, err = effect_service.CheckIfEffectRollExists(request.UserId)
+
+	if err != nil {
+		return api.CheckEffectRoll503JSONResponse{Code: api.CHECKEFFECTROLL, Message: err.Error()}, nil
+	}
+
+	return api.CheckEffectRoll200JSONResponse(doesExist), nil
 }
 
 // GetEffectHistory (GET /users/{userId}/effects/history)
 func (Server) GetEffectHistory(_ context.Context, request api.GetEffectHistoryRequestObject) (api.GetEffectHistoryResponseObject, error) {
-	doesUserExist, err := user_service.CheckIfUserExistsById(request.UserId)
+	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
 		return api.GetEffectHistory503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !doesUserExist {
+	if !doesExist {
 		return api.GetEffectHistory404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 

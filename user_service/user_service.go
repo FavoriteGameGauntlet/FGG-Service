@@ -15,7 +15,7 @@ const (
 				WHERE Name = $userName) 
          	THEN true
          	ELSE false
-       	END AS 'DoesUserExist'`
+       	END AS 'DoesExist'`
 	CheckIfUserExistsByIdCommand = `
 		SELECT 
 			CASE WHEN EXISTS (
@@ -24,7 +24,7 @@ const (
 				WHERE Id = $userId) 
          	THEN true
          	ELSE false
-       	END AS 'DoesUserExist'`
+       	END AS 'DoesExist'`
 	FindUserCommand = `
 		SELECT Id
 		FROM Users
@@ -37,27 +37,27 @@ const (
 func CheckIfUserExistsByName(userName string) (bool, error) {
 	row := database.QueryRow(CheckIfUserExistsByNameCommand, userName)
 
-	var doesUserExist bool
-	err := row.Scan(&doesUserExist)
+	var doesExist bool
+	err := row.Scan(&doesExist)
 
 	if err != nil {
-		return doesUserExist, err
+		return doesExist, err
 	}
 
-	return doesUserExist, nil
+	return doesExist, nil
 }
 
 func CheckIfUserExistsById(userId uuid.UUID) (bool, error) {
 	row := database.QueryRow(CheckIfUserExistsByIdCommand, userId)
 
-	var doesUserExist bool
-	err := row.Scan(&doesUserExist)
+	var doesExist bool
+	err := row.Scan(&doesExist)
 
 	if err != nil {
-		return doesUserExist, err
+		return doesExist, err
 	}
 
-	return doesUserExist, nil
+	return doesExist, nil
 }
 
 func FindUser(userName string) (*User, error) {
