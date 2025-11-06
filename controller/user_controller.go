@@ -35,7 +35,7 @@ func (Server) CreateUser(_ context.Context, request api.CreateUserRequestObject)
 		return api.CreateUser503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if *doesUserExist {
+	if doesUserExist {
 		return api.CreateUser409JSONResponse{Code: api.USERALREADYEXISTS}, nil
 	}
 
