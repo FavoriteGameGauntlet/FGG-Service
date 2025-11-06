@@ -47,17 +47,17 @@ func CheckIfUserExistsByName(userName string) (*bool, error) {
 	return &doesUserExist, nil
 }
 
-func CheckIfUserExistsById(userId uuid.UUID) (*bool, error) {
+func CheckIfUserExistsById(userId uuid.UUID) (bool, error) {
 	row := database.QueryRow(CheckIfUserExistsByIdCommand, userId)
 
 	var doesUserExist bool
 	err := row.Scan(&doesUserExist)
 
 	if err != nil {
-		return nil, err
+		return doesUserExist, err
 	}
 
-	return &doesUserExist, nil
+	return doesUserExist, nil
 }
 
 func FindUser(userName string) (*User, error) {

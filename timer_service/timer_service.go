@@ -47,7 +47,7 @@ const (
 
 const DefaultTimerDurationInS = 10800
 
-func CheckIfCurrentTimerExists(userId uuid.UUID) (*bool, error) {
+func CheckIfCurrentTimerExists(userId uuid.UUID) (bool, error) {
 	row := database.QueryRow(
 		CheckIfCurrentTimerExistsCommand,
 		userId,
@@ -58,10 +58,10 @@ func CheckIfCurrentTimerExists(userId uuid.UUID) (*bool, error) {
 	err := row.Scan(&doesCurrentTimerExist)
 
 	if err != nil {
-		return nil, err
+		return doesCurrentTimerExist, err
 	}
 
-	return &doesCurrentTimerExist, nil
+	return doesCurrentTimerExist, nil
 }
 
 func GetOrCreateCurrentTimer(userId uuid.UUID, gameId uuid.UUID) (*Timer, error) {
@@ -71,7 +71,7 @@ func GetOrCreateCurrentTimer(userId uuid.UUID, gameId uuid.UUID) (*Timer, error)
 		return nil, err
 	}
 
-	if *doesCurrentTimerExist {
+	if doesCurrentTimerExist {
 		timer, err := GetCurrentTimer(userId)
 
 		if err != nil {

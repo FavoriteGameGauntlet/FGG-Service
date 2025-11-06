@@ -16,7 +16,7 @@ func (Server) GetCurrentTimer(_ context.Context, request api.GetCurrentTimerRequ
 		return api.GetCurrentTimer503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !*doesUserExist {
+	if !doesUserExist {
 		return api.GetCurrentTimer404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
@@ -58,7 +58,7 @@ func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimer
 		return api.PauseCurrentTimer503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !*doesUserExist {
+	if !doesUserExist {
 		return api.PauseCurrentTimer404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
@@ -68,7 +68,7 @@ func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimer
 		return api.PauseCurrentTimer503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
 	}
 
-	if !*doesCurrentGameExist {
+	if !doesCurrentGameExist {
 		return api.PauseCurrentTimer404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
@@ -78,7 +78,7 @@ func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimer
 		return api.PauseCurrentTimer503JSONResponse{Code: api.CHECKCURRENTTIMER, Message: err.Error()}, nil
 	}
 
-	if !*doesCurrentTimerExist {
+	if !doesCurrentTimerExist {
 		return api.PauseCurrentTimer404JSONResponse{Code: api.TIMERNOTFOUND}, nil
 	}
 
@@ -112,7 +112,7 @@ func (Server) StartCurrentTimer(_ context.Context, request api.StartCurrentTimer
 		return api.StartCurrentTimer503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !*doesUserExist {
+	if !doesUserExist {
 		return api.StartCurrentTimer404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
@@ -122,7 +122,7 @@ func (Server) StartCurrentTimer(_ context.Context, request api.StartCurrentTimer
 		return api.StartCurrentTimer503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
 	}
 
-	if !*doesCurrentGameExist {
+	if !doesCurrentGameExist {
 		return api.StartCurrentTimer404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
@@ -132,7 +132,7 @@ func (Server) StartCurrentTimer(_ context.Context, request api.StartCurrentTimer
 		return api.StartCurrentTimer503JSONResponse{Code: api.CHECKCURRENTTIMER, Message: err.Error()}, nil
 	}
 
-	if !*doesCurrentTimerExist {
+	if !doesCurrentTimerExist {
 		return api.StartCurrentTimer404JSONResponse{Code: api.TIMERNOTFOUND}, nil
 	}
 

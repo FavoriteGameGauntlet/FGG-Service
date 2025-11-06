@@ -15,7 +15,7 @@ func (Server) GetCurrentGame(_ context.Context, request api.GetCurrentGameReques
 		return api.GetCurrentGame503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !*doesUserExist {
+	if !doesUserExist {
 		return api.GetCurrentGame404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
@@ -51,7 +51,7 @@ func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGame
 		return api.FinishCurrentGame503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !*doesUserExist {
+	if !doesUserExist {
 		return api.FinishCurrentGame404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
@@ -61,7 +61,7 @@ func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGame
 		return api.FinishCurrentGame503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
 	}
 
-	if !*doesCurrentGameExist {
+	if !doesCurrentGameExist {
 		return api.FinishCurrentGame404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
@@ -82,7 +82,7 @@ func (Server) GetGameHistory(_ context.Context, request api.GetGameHistoryReques
 		return api.GetGameHistory503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !*doesUserExist {
+	if !doesUserExist {
 		return api.GetGameHistory404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
@@ -120,7 +120,7 @@ func (Server) GetUnplayedGames(_ context.Context, request api.GetUnplayedGamesRe
 		return api.GetUnplayedGames503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !*doesUserExist {
+	if !doesUserExist {
 		return api.GetUnplayedGames404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
@@ -156,7 +156,7 @@ func (Server) AddUnplayedGames(_ context.Context, request api.AddUnplayedGamesRe
 		return api.AddUnplayedGames503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !*doesUserExist {
+	if !doesUserExist {
 		return api.AddUnplayedGames404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 

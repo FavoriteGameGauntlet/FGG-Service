@@ -251,17 +251,17 @@ func GetCurrentGame(userId uuid.UUID) (*Game, error) {
 	return &game, nil
 }
 
-func CheckIfCurrentGameExists(userId uuid.UUID) (*bool, error) {
+func CheckIfCurrentGameExists(userId uuid.UUID) (bool, error) {
 	row := database.QueryRow(CheckIfCurrentGameExistsCommand, userId, GameStateFinished)
 
 	var doesCurrentGameExist bool
 	err := row.Scan(&doesCurrentGameExist)
 
 	if err != nil {
-		return nil, err
+		return doesCurrentGameExist, err
 	}
 
-	return &doesCurrentGameExist, nil
+	return doesCurrentGameExist, nil
 }
 
 func FinishCurrentGame(userId uuid.UUID) error {

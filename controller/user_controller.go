@@ -14,7 +14,7 @@ func (Server) GetUser(_ context.Context, request api.GetUserRequestObject) (api.
 		return api.GetUser503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
 	}
 
-	if !*doesUserExist {
+	if !doesUserExist {
 		return api.GetUser404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
