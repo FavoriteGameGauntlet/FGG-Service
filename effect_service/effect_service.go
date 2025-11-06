@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	GetEffectRollsCommand = `
+	GetEffectHistoryCommand = `
 		SELECT e.Name, e.Description, eh.CreateDate, eh.RollDate, g.Name AS GameName 
 		FROM EffectHistory eh
 			LEFT JOIN Effects e ON eh.RolledEffectId = e.Id
@@ -17,8 +17,8 @@ const (
 		ORDER BY eh.CreateDate, eh.RollDate`
 )
 
-func GetEffectRolls(userId uuid.UUID) (*Effects, error) {
-	rows, err := database.Query(GetEffectRollsCommand, userId)
+func GetEffectHistory(userId uuid.UUID) (*Effects, error) {
+	rows, err := database.Query(GetEffectHistoryCommand, userId)
 
 	if err != nil {
 		return nil, err

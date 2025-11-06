@@ -24,7 +24,7 @@ func (Server) GetEffectHistory(_ context.Context, request api.GetEffectHistoryRe
 		return api.GetEffectHistory404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
-	effects, err := effect_service.GetEffectRolls(request.UserId)
+	effects, err := effect_service.GetEffectHistory(request.UserId)
 
 	if err != nil {
 		return api.GetEffectHistory503JSONResponse{Code: api.GETEFFECTHISTORY, Message: err.Error()}, nil

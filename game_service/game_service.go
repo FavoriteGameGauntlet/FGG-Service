@@ -89,13 +89,12 @@ const (
 	CreateEffectRollCommand = `
 		INSERT INTO EffectHistory (Id, UserId, GameId)
 		VALUES ($effectHistoryId, $gameId, $userId)`
-	GetFinishedGamesCommand = `
+	GetGameHistoryCommand = `
 		SELECT g.Id, g.Name, gh.State, g.Link, gh.FinishDate
 		FROM GameHistory gh
 			INNER JOIN Games g ON gh.GameId = g.Id
 		WHERE gh.UserId = $userId
-			AND gh.State = $finishedGameState
-		ORDER BY gh.FinishDate`
+		ORDER BY gh.FinishDate NULLS FIRST`
 	CreateCurrentGameCommand = `
 		INSERT INTO GameHistory (Id, UserId, GameId)
 		VALUES ($gameHistoryId, $userId, $gameId)`
@@ -369,8 +368,8 @@ func RollResultPoints(diceCount int) (int, error) {
 	return rolledValue, nil
 }
 
-func GetFinishedGames(userId uuid.UUID) (*Games, error) {
-	rows, err := database.Query(GetFinishedGamesCommand, userId, GameStateFinished)
+func GetGameHistory(userId uuid.UUID) (*Games, error) {
+	rows, err := database.Query(GetGameHistoryCommand, userId)
 
 	if err != nil {
 		return nil, err

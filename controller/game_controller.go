@@ -117,7 +117,7 @@ func (Server) GetGameHistory(_ context.Context, request api.GetGameHistoryReques
 		return api.GetGameHistory404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
-	games, err := game_service.GetFinishedGames(request.UserId)
+	games, err := game_service.GetGameHistory(request.UserId)
 
 	if err != nil {
 		return api.GetGameHistory503JSONResponse{Code: api.GETGAMEHISTORY, Message: err.Error()}, nil
