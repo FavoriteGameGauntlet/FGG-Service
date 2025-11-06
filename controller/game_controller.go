@@ -109,7 +109,35 @@ func ConvertGamesToDto(games *game_service.Games) *api.GamesDto {
 
 // MakeGameRoll (GET /users/{userId}/games/roll)
 func (Server) MakeGameRoll(_ context.Context, request api.MakeGameRollRequestObject) (api.MakeGameRollResponseObject, error) {
-	return api.MakeGameRoll200JSONResponse{}, nil
+	doesUserExist, err := user_service.CheckIfUserExistsById(request.UserId)
+
+	if err != nil {
+		return api.MakeGameRoll503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+	}
+
+	if !doesUserExist {
+		return api.MakeGameRoll404JSONResponse{Code: api.USERNOTFOUND}, nil
+	}
+
+	doesCurrentGameExist, err := game_service.CheckIfCurrentGameExists(request.UserId)
+
+	if err != nil {
+		return api.MakeGameRoll503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
+	}
+
+	if doesCurrentGameExist {
+		return api.MakeGameRoll409JSONResponse{Code: api.CURRENTGAMEALREADYEXISTS}, nil
+	}
+
+	game, err := game_service.MakeGameRoll(request.UserId)
+
+	if err != nil {
+		return api.MakeGameRoll503JSONResponse{Code: api.MAKEGAMEROLL, Message: err.Error()}, nil
+	}
+
+	gameDto := ConvertGameToDto(game)
+
+	return api.MakeGameRoll200JSONResponse(*gameDto), nil
 }
 
 // GetUnplayedGames (GET /users/{userId}/games/unplayed)

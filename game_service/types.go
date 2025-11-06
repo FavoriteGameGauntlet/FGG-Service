@@ -25,9 +25,9 @@ const (
 )
 
 type UnplayedGame struct {
-	Id   uuid.UUID
-	Link *string
-	Name string
+	GameId uuid.UUID
+	Link   *string
+	Name   string
 }
 
 type UnplayedGames = []UnplayedGame

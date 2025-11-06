@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -55,7 +56,7 @@ const (
 		INSERT INTO UnplayedGames (Id, UserId, GameId)
 		VALUES ($unplayedGameId, $userId, $gameId)`
 	GetUnplayedGamesCommand = `
-		SELECT ug.Id, g.Name, g.Link
+		SELECT g.Id, g.Name, g.Link
 		FROM UnplayedGames ug
 			INNER JOIN Games g ON ug.GameId = g.Id
 		WHERE ug.UserId = $userId`
@@ -88,6 +89,13 @@ const (
 		WHERE gh.UserId = $userId
 			AND gh.State = $finishedGameState
 		ORDER BY gh.FinishDate`
+	CreateCurrentGameCommand = `
+		INSERT INTO GameHistory (Id, UserId, GameId)
+		VALUES ($gameHistoryId, $userId, $gameId)`
+	DeleteUnplayedGameCommand = `
+		DELETE FROM UnplayedGames
+		WHERE UserId = $userId
+			AND GameId = $gameId`
 )
 
 func AddUnplayedGames(userId uuid.UUID, gamesPtr *UnplayedGames) error {
@@ -217,7 +225,7 @@ func GetUnplayedGames(userId uuid.UUID) (*UnplayedGames, error) {
 		gameCount++
 
 		game := UnplayedGame{}
-		err = rows.Scan(&game.Id, &game.Name, &game.Link)
+		err = rows.Scan(&game.GameId, &game.Name, &game.Link)
 
 		if err != nil {
 			errorCount++
@@ -366,4 +374,39 @@ func GetFinishedGames(userId uuid.UUID) (*Games, error) {
 	}
 
 	return &games, nil
+}
+
+func MakeGameRoll(userId uuid.UUID) (*Game, error) {
+	unplayedGames, err := GetUnplayedGames(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if unplayedGames == nil || len(*unplayedGames) == 0 {
+		return nil, err
+	}
+
+	randomNumber := rand.Intn(len(*unplayedGames))
+	randomUnplayedGame := (*unplayedGames)[randomNumber]
+
+	gameHistoryId := uuid.New()
+	_, err = database.Exec(CreateCurrentGameCommand, gameHistoryId.String(), userId, randomUnplayedGame.GameId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = database.Exec(DeleteUnplayedGameCommand, userId, randomUnplayedGame.GameId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Game{
+		Id:    randomUnplayedGame.GameId,
+		Name:  randomUnplayedGame.Name,
+		Link:  randomUnplayedGame.Link,
+		State: GameStateStarted,
+	}, nil
 }
