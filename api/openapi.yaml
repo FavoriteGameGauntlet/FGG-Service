@@ -197,6 +197,31 @@ paths:
 
 
 
+  /users/{userId}/games/current/cancel:
+    parameters:
+      - $ref: "#/components/parameters/UserId"
+    post:
+      operationId: cancelCurrentGame
+      tags:
+        - Games
+      responses:
+        '200':
+          description: Current game was marked as cancelled successfully.
+        '404':
+          description: No current game found for the user to cancel.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exception"
+        '503':
+          description: Service unavailable while cancelling current game.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exception"
+
+
+
   /users/{userId}/games/history:
     parameters:
       - $ref: "#/components/parameters/UserId"
@@ -544,7 +569,7 @@ components:
             "GET_USER", "GET_UNPLAYED_GAMES", "GET_CURRENT_GAME", "GET_CURRENT_TIMER",
             "CREATE_USER", "ADD_UNPLAYED_GAMES", "START_CURRENT_TIMER", "PAUSE_CURRENT_TIMER",
             "FINISH_CURRENT_GAME", "GET_GAME_HISTORY", "CURRENT_GAME_ALREADY_EXISTS",
-            "MAKE_GAME_ROLL"
+            "MAKE_GAME_ROLL", "CANCEL_CURRENT_GAME"
           ]
         message:
           type: string

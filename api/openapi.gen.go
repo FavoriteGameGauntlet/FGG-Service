@@ -19,6 +19,7 @@ import (
 // Defines values for ExceptionCode.
 const (
 	ADDUNPLAYEDGAMES         ExceptionCode = "ADD_UNPLAYED_GAMES"
+	CANCELCURRENTGAME        ExceptionCode = "CANCEL_CURRENT_GAME"
 	CHECKCURRENTGAME         ExceptionCode = "CHECK_CURRENT_GAME"
 	CHECKCURRENTTIMER        ExceptionCode = "CHECK_CURRENT_TIMER"
 	CHECKUSER                ExceptionCode = "CHECK_USER"
@@ -170,6 +171,9 @@ type ServerInterface interface {
 	// (GET /users/{userId}/games/current)
 	GetCurrentGame(ctx echo.Context, userId UserId) error
 
+	// (POST /users/{userId}/games/current/cancel)
+	CancelCurrentGame(ctx echo.Context, userId UserId) error
+
 	// (POST /users/{userId}/games/current/finish)
 	FinishCurrentGame(ctx echo.Context, userId UserId) error
 
@@ -293,6 +297,22 @@ func (w *ServerInterfaceWrapper) GetCurrentGame(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetCurrentGame(ctx, userId)
+	return err
+}
+
+// CancelCurrentGame converts echo context to params.
+func (w *ServerInterfaceWrapper) CancelCurrentGame(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CancelCurrentGame(ctx, userId)
 	return err
 }
 
@@ -458,6 +478,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/users/:userId/effects/history", wrapper.GetEffectHistory)
 	router.POST(baseURL+"/users/:userId/effects/roll", wrapper.MakeEffectRoll)
 	router.GET(baseURL+"/users/:userId/games/current", wrapper.GetCurrentGame)
+	router.POST(baseURL+"/users/:userId/games/current/cancel", wrapper.CancelCurrentGame)
 	router.POST(baseURL+"/users/:userId/games/current/finish", wrapper.FinishCurrentGame)
 	router.GET(baseURL+"/users/:userId/games/history", wrapper.GetGameHistory)
 	router.POST(baseURL+"/users/:userId/games/roll", wrapper.MakeGameRoll)
@@ -682,6 +703,40 @@ func (response GetCurrentGame404JSONResponse) VisitGetCurrentGameResponse(w http
 type GetCurrentGame503JSONResponse Exception
 
 func (response GetCurrentGame503JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CancelCurrentGameRequestObject struct {
+	UserId UserId `json:"userId"`
+}
+
+type CancelCurrentGameResponseObject interface {
+	VisitCancelCurrentGameResponse(w http.ResponseWriter) error
+}
+
+type CancelCurrentGame200Response struct {
+}
+
+func (response CancelCurrentGame200Response) VisitCancelCurrentGameResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type CancelCurrentGame404JSONResponse Exception
+
+func (response CancelCurrentGame404JSONResponse) VisitCancelCurrentGameResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CancelCurrentGame503JSONResponse Exception
+
+func (response CancelCurrentGame503JSONResponse) VisitCancelCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
@@ -1015,6 +1070,9 @@ type StrictServerInterface interface {
 	// (GET /users/{userId}/games/current)
 	GetCurrentGame(ctx context.Context, request GetCurrentGameRequestObject) (GetCurrentGameResponseObject, error)
 
+	// (POST /users/{userId}/games/current/cancel)
+	CancelCurrentGame(ctx context.Context, request CancelCurrentGameRequestObject) (CancelCurrentGameResponseObject, error)
+
 	// (POST /users/{userId}/games/current/finish)
 	FinishCurrentGame(ctx context.Context, request FinishCurrentGameRequestObject) (FinishCurrentGameResponseObject, error)
 
@@ -1196,6 +1254,31 @@ func (sh *strictHandler) GetCurrentGame(ctx echo.Context, userId UserId) error {
 		return err
 	} else if validResponse, ok := response.(GetCurrentGameResponseObject); ok {
 		return validResponse.VisitGetCurrentGameResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// CancelCurrentGame operation middleware
+func (sh *strictHandler) CancelCurrentGame(ctx echo.Context, userId UserId) error {
+	var request CancelCurrentGameRequestObject
+
+	request.UserId = userId
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.CancelCurrentGame(ctx.Request().Context(), request.(CancelCurrentGameRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CancelCurrentGame")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(CancelCurrentGameResponseObject); ok {
+		return validResponse.VisitCancelCurrentGameResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}

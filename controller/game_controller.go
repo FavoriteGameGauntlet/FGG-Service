@@ -43,6 +43,37 @@ func ConvertGameToDto(game *game_service.Game) *api.GameDto {
 	}
 }
 
+// CancelCurrentGame (POST /users/{userId}/games/current/cancel)
+func (Server) CancelCurrentGame(_ context.Context, request api.CancelCurrentGameRequestObject) (api.CancelCurrentGameResponseObject, error) {
+	doesUserExist, err := user_service.CheckIfUserExistsById(request.UserId)
+
+	if err != nil {
+		return api.CancelCurrentGame503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+	}
+
+	if !doesUserExist {
+		return api.CancelCurrentGame404JSONResponse{Code: api.USERNOTFOUND}, nil
+	}
+
+	doesCurrentGameExist, err := game_service.CheckIfCurrentGameExists(request.UserId)
+
+	if err != nil {
+		return api.CancelCurrentGame503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
+	}
+
+	if !doesCurrentGameExist {
+		return api.CancelCurrentGame404JSONResponse{Code: api.GAMENOTFOUND}, nil
+	}
+
+	err = game_service.CancelCurrentGame(request.UserId)
+
+	if err != nil {
+		return api.CancelCurrentGame503JSONResponse{Code: api.CANCELCURRENTGAME, Message: err.Error()}, nil
+	}
+
+	return api.CancelCurrentGame200Response{}, nil
+}
+
 // FinishCurrentGame (GET /users/{userId}/games/current/finish)
 func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGameRequestObject) (api.FinishCurrentGameResponseObject, error) {
 	doesUserExist, err := user_service.CheckIfUserExistsById(request.UserId)

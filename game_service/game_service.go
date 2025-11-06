@@ -72,10 +72,16 @@ const (
 		WHERE UserId = $userId 
 			AND GameId = $gameId
 			AND State = $finishedTimerState`
+	CancelCurrentGameCommand = `
+		UPDATE GameHistory
+		SET State = $cancelledGameState,
+			FinishDate = datetime('now', 'subsec')
+		WHERE UserId = $userId
+			AND GameId = $gameId;`
 	FinishCurrentGameCommand = `
 		UPDATE GameHistory
 		SET State = $finishedGameState,
-			FinishDate = datetime('now'),
+			FinishDate = datetime('now', 'subsec'),
 			ResultPoints = $resultPoints
 		WHERE UserId = $userId
 			AND GameId = $gameId;`
@@ -270,6 +276,28 @@ func CheckIfCurrentGameExists(userId uuid.UUID) (bool, error) {
 	}
 
 	return doesCurrentGameExist, nil
+}
+
+func CancelCurrentGame(userId uuid.UUID) error {
+	game, err := GetCurrentGame(userId)
+
+	if err != nil {
+		return err
+	}
+
+	if game == nil {
+		return err
+	}
+
+	_, err = timer_service.StopCurrentTimer(userId)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = database.Exec(CancelCurrentGameCommand, GameStateCancelled, userId, game.Id)
+
+	return err
 }
 
 func FinishCurrentGame(userId uuid.UUID) error {
