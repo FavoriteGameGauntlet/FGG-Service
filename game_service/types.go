@@ -24,6 +24,11 @@ const (
 	GameStateStarted   GameState = "started"
 )
 
+const (
+	CancellingGamePenaltyDiceCount = 2
+	HourCountForDice               = 6
+)
+
 type UnplayedGame struct {
 	GameId uuid.UUID
 	Link   *string

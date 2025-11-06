@@ -66,8 +66,8 @@ const (
 			INNER JOIN Games g ON gh.GameId = g.Id
 		WHERE gh.UserId = $userId
 			AND gh.State <> $finishedGameState`
-	GetFinishedTimerCountCommand = `
-		SELECT COUNT(*) AS FinishedTimerCount
+	GetCurrentGameSpentSecondsCommand = `
+		SELECT SUM(DurationInS) AS CurrentGameSpentSecondsSpent
 		FROM Timers
 		WHERE UserId = $userId 
 			AND GameId = $gameId
@@ -75,7 +75,8 @@ const (
 	CancelCurrentGameCommand = `
 		UPDATE GameHistory
 		SET State = $cancelledGameState,
-			FinishDate = datetime('now', 'subsec')
+			FinishDate = datetime('now', 'subsec'),
+			ResultPoints = $resultPoints
 		WHERE UserId = $userId
 			AND GameId = $gameId;`
 	FinishCurrentGameCommand = `
@@ -295,7 +296,14 @@ func CancelCurrentGame(userId uuid.UUID) error {
 		return err
 	}
 
-	_, err = database.Exec(CancelCurrentGameCommand, GameStateCancelled, userId, game.Id)
+	diceCount := CancellingGamePenaltyDiceCount
+	resultPoints, err := RollResultPoints(diceCount)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = database.Exec(CancelCurrentGameCommand, GameStateCancelled, resultPoints, userId, game.Id)
 
 	return err
 }
@@ -317,16 +325,18 @@ func FinishCurrentGame(userId uuid.UUID) error {
 		return err
 	}
 
-	row := database.QueryRow(GetFinishedTimerCountCommand, userId, game.Id, timer_service.TimerStateFinished)
+	row := database.QueryRow(GetCurrentGameSpentSecondsCommand, userId, game.Id, timer_service.TimerStateFinished)
 
-	var finishedTimerCount int
-	err = row.Scan(&finishedTimerCount)
+	var spentSeconds int
+	err = row.Scan(&spentSeconds)
 
 	if err != nil {
 		return err
 	}
 
-	resultPoints, err := RollFinishedGameResultPoints(finishedTimerCount)
+	hourCount := spentSeconds / int(time.Hour/time.Second)
+	diceCount := 1 + hourCount/HourCountForDice
+	resultPoints, err := RollResultPoints(diceCount)
 
 	if err != nil {
 		return err
@@ -344,7 +354,7 @@ func FinishCurrentGame(userId uuid.UUID) error {
 	return err
 }
 
-func RollFinishedGameResultPoints(diceCount int) (int, error) {
+func RollResultPoints(diceCount int) (int, error) {
 	diceFormula := fmt.Sprintf("%dd6", diceCount)
 
 	roll, _, err := dice.Roll(diceFormula)
