@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.17 on Thu Nov 6 02:06:26 2025
+-- File generated with SQLiteStudio v3.4.17 on Thu Nov 6 23:57:43 2025
 --
 -- Text encoding used: System
 --
@@ -18,7 +18,7 @@ CREATE TABLE EffectHistory (
     GameId         TEXT    REFERENCES Games (Id) 
                            NOT NULL,
     ReceivedDate   TEXT    NOT NULL
-                           DEFAULT (datetime('now') ),
+                           DEFAULT (datetime('now', 'subsec') ),
     RolledDate     TEXT,
     RolledEffectId INTEGER REFERENCES RollEffects (Id) 
 );
@@ -38,7 +38,7 @@ CREATE TABLE GameHistory (
     State        TEXT    NOT NULL
                          DEFAULT ('started'),
     RolledDate   TEXT    NOT NULL
-                         DEFAULT (datetime('now') ),
+                         DEFAULT (datetime('now', 'subsec') ),
     ResultPoints INTEGER,
     FinishDate   TEXT
 );
@@ -48,12 +48,14 @@ CREATE TABLE GameHistory (
 DROP TABLE IF EXISTS Games;
 
 CREATE TABLE Games (
-    Id   TEXT PRIMARY KEY
-              UNIQUE
-              NOT NULL,
-    Name TEXT NOT NULL
-              UNIQUE,
-    Link TEXT
+    Id         TEXT PRIMARY KEY
+                    UNIQUE
+                    NOT NULL,
+    Name       TEXT NOT NULL
+                    UNIQUE,
+    Link       TEXT,
+    CreateDate TEXT DEFAULT (datetime('now', 'subsec') ) 
+                    NOT NULL
 );
 
 
@@ -80,7 +82,7 @@ CREATE TABLE TimerActions (
                              NOT NULL,
     Action           TEXT    NOT NULL,
     Date             TEXT    NOT NULL
-                             DEFAULT (datetime('now') ),
+                             DEFAULT (datetime('now', 'subsec') ),
     RemainingTimeInS INTEGER
 );
 
@@ -99,7 +101,9 @@ CREATE TABLE Timers (
     State       TEXT    NOT NULL
                         DEFAULT ('created'),
     DurationInS INTEGER NOT NULL
-                        DEFAULT (10800) 
+                        DEFAULT (10800),
+    CreateDate          NOT NULL
+                        DEFAULT (datetime('now', 'subsec') ) 
 );
 
 
@@ -107,13 +111,15 @@ CREATE TABLE Timers (
 DROP TABLE IF EXISTS UnplayedGames;
 
 CREATE TABLE UnplayedGames (
-    Id     TEXT PRIMARY KEY
-                UNIQUE
-                NOT NULL,
-    UserId TEXT REFERENCES Users (Id) 
-                NOT NULL,
-    GameId TEXT REFERENCES Games (Id) 
-                NOT NULL
+    Id         TEXT PRIMARY KEY
+                    UNIQUE
+                    NOT NULL,
+    UserId     TEXT REFERENCES Users (Id) 
+                    NOT NULL,
+    GameId     TEXT REFERENCES Games (Id) 
+                    NOT NULL,
+    CreateDate      NOT NULL
+                    DEFAULT (datetime('now', 'subsec') ) 
 );
 
 
@@ -121,11 +127,13 @@ CREATE TABLE UnplayedGames (
 DROP TABLE IF EXISTS Users;
 
 CREATE TABLE Users (
-    Id   TEXT PRIMARY KEY
-              UNIQUE
-              NOT NULL,
-    Name TEXT NOT NULL
-              UNIQUE
+    Id       TEXT PRIMARY KEY
+                  UNIQUE
+                  NOT NULL,
+    Name     TEXT NOT NULL
+                  UNIQUE,
+    JoinDate TEXT DEFAULT (datetime('now', 'subsec') ) 
+                  NOT NULL
 );
 
 

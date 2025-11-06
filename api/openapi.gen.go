@@ -27,6 +27,7 @@ const (
 	GAMENOTFOUND        ExceptionCode = "GAME_NOT_FOUND"
 	GETCURRENTGAME      ExceptionCode = "GET_CURRENT_GAME"
 	GETCURRENTTIMER     ExceptionCode = "GET_CURRENT_TIMER"
+	GETGAMEHISTORY      ExceptionCode = "GET_GAME_HISTORY"
 	GETUNPLAYEDGAMES    ExceptionCode = "GET_UNPLAYED_GAMES"
 	GETUSER             ExceptionCode = "GET_USER"
 	NOAVAILABLEROLLS    ExceptionCode = "NO_AVAILABLE_ROLLS"
@@ -84,9 +85,10 @@ type ExceptionCode string
 
 // GameDto defines model for GameDto.
 type GameDto struct {
-	Link  *string      `json:"link,omitempty"`
-	Name  Name         `json:"name"`
-	State GameDtoState `json:"state"`
+	FinishDate *time.Time   `json:"finishDate,omitempty"`
+	Link       *string      `json:"link,omitempty"`
+	Name       Name         `json:"name"`
+	State      GameDtoState `json:"state"`
 }
 
 // GameDtoState defines model for GameDto.State.

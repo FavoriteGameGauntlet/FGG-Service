@@ -36,9 +36,10 @@ func (Server) GetCurrentGame(_ context.Context, request api.GetCurrentGameReques
 
 func ConvertGameToDto(game *game_service.Game) *api.GameDto {
 	return &api.GameDto{
-		Link:  game.Link,
-		Name:  game.Name,
-		State: api.GameDtoState(game.State),
+		Link:       game.Link,
+		Name:       game.Name,
+		State:      api.GameDtoState(game.State),
+		FinishDate: game.FinishDate,
 	}
 }
 
@@ -75,7 +76,35 @@ func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGame
 
 // GetGameHistory (GET /users/{userId}/games/history)
 func (Server) GetGameHistory(_ context.Context, request api.GetGameHistoryRequestObject) (api.GetGameHistoryResponseObject, error) {
-	return api.GetGameHistory200JSONResponse{}, nil
+	doesUserExist, err := user_service.CheckIfUserExistsById(request.UserId)
+
+	if err != nil {
+		return api.GetGameHistory503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+	}
+
+	if !*doesUserExist {
+		return api.GetGameHistory404JSONResponse{Code: api.USERNOTFOUND}, nil
+	}
+
+	games, err := game_service.GetFinishedGames(request.UserId)
+
+	if err != nil {
+		return api.GetGameHistory503JSONResponse{Code: api.GETGAMEHISTORY, Message: err.Error()}, nil
+	}
+
+	gamesDto := ConvertGamesToDto(games)
+
+	return api.GetGameHistory200JSONResponse(*gamesDto), nil
+}
+
+func ConvertGamesToDto(games *game_service.Games) *api.GamesDto {
+	gamesDto := make(api.GamesDto, len(*games))
+
+	for i, g := range *games {
+		gamesDto[i] = *ConvertGameToDto(&g)
+	}
+
+	return &gamesDto
 }
 
 // MakeGameRoll (GET /users/{userId}/games/roll)

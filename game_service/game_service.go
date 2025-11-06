@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/justinian/dice"
@@ -59,12 +60,12 @@ const (
 			INNER JOIN Games g ON ug.GameId = g.Id
 		WHERE ug.UserId = $userId`
 	GetCurrentGameCommand = `
-		SELECT g.Id, g.Name, gh.State, g.Link
+		SELECT g.Id, g.Name, gh.State, g.Link, gh.FinishDate
 		FROM GameHistory gh
 			INNER JOIN Games g ON gh.GameId = g.Id
 		WHERE gh.UserId = $userId
 			AND gh.State <> $finishedGameState`
-	GetFinishedTimerCount = `
+	GetFinishedTimerCountCommand = `
 		SELECT COUNT(*) AS FinishedTimerCount
 		FROM Timers
 		WHERE UserId = $userId 
@@ -77,9 +78,16 @@ const (
 			ResultPoints = $resultPoints
 		WHERE UserId = $userId
 			AND GameId = $gameId;`
-	CreateEffectRoll = `
+	CreateEffectRollCommand = `
 		INSERT INTO EffectHistory (Id, UserId, GameId)
 		VALUES ($effectHistoryId, $gameId, $userId)`
+	GetFinishedGamesCommand = `
+		SELECT g.Id, g.Name, gh.State, g.Link, gh.FinishDate
+		FROM GameHistory gh
+			INNER JOIN Games g ON gh.GameId = g.Id
+		WHERE gh.UserId = $userId
+			AND gh.State = $finishedGameState
+		ORDER BY gh.FinishDate`
 )
 
 func AddUnplayedGames(userId uuid.UUID, gamesPtr *UnplayedGames) error {
@@ -209,7 +217,7 @@ func GetUnplayedGames(userId uuid.UUID) (*UnplayedGames, error) {
 		gameCount++
 
 		game := UnplayedGame{}
-		err := rows.Scan(&game.Id, &game.Name, &game.Link)
+		err = rows.Scan(&game.Id, &game.Name, &game.Link)
 
 		if err != nil {
 			errorCount++
@@ -230,7 +238,7 @@ func GetCurrentGame(userId uuid.UUID) (*Game, error) {
 	row := database.QueryRow(GetCurrentGameCommand, userId, GameStateFinished)
 
 	game := Game{}
-	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link)
+	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link, &game.FinishDate)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -273,7 +281,7 @@ func FinishCurrentGame(userId uuid.UUID) error {
 		return err
 	}
 
-	row := database.QueryRow(GetFinishedTimerCount, userId, game.Id, timer_service.TimerStateFinished)
+	row := database.QueryRow(GetFinishedTimerCountCommand, userId, game.Id, timer_service.TimerStateFinished)
 
 	var finishedTimerCount int
 	err = row.Scan(&finishedTimerCount)
@@ -295,7 +303,7 @@ func FinishCurrentGame(userId uuid.UUID) error {
 	}
 
 	effectHistoryId := uuid.New()
-	_, err = database.Exec(CreateEffectRoll, effectHistoryId.String(), userId, game.Id)
+	_, err = database.Exec(CreateEffectRollCommand, effectHistoryId.String(), userId, game.Id)
 
 	return err
 }
@@ -313,4 +321,49 @@ func RollFinishedGameResultPoints(diceCount int) (int, error) {
 	rolledValue = roll.Int()
 
 	return rolledValue, nil
+}
+
+func GetFinishedGames(userId uuid.UUID) (*Games, error) {
+	rows, err := database.Query(GetFinishedGamesCommand, userId, GameStateFinished)
+
+	if err != nil {
+		return nil, err
+	}
+
+	gameCount := 0
+	errorCount := 0
+	games := Games{}
+	for rows.Next() {
+		gameCount++
+
+		game := Game{}
+		var finishDateString string
+		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.Link, &finishDateString)
+
+		if err != nil {
+			errorCount++
+			continue
+		}
+
+		var finishDate time.Time
+
+		if finishDateString != "" {
+			finishDate, err = time.Parse(database.ISO8601, finishDateString)
+
+			if err != nil {
+				errorCount++
+				continue
+			}
+		}
+
+		game.FinishDate = &finishDate
+
+		games = append(games, game)
+	}
+
+	if errorCount > 0 && errorCount == gameCount {
+		return nil, err
+	}
+
+	return &games, nil
 }

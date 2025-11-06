@@ -118,7 +118,7 @@ func GetCurrentTimer(userId uuid.UUID) (*Timer, error) {
 		return nil, err
 	}
 
-	timerActionDate, err := time.Parse(time.DateTime, timerActionDateString)
+	timerActionDate, err := time.Parse(database.ISO8601, timerActionDateString)
 
 	if err != nil {
 		return nil, err
