@@ -383,7 +383,7 @@ func GetFinishedGames(userId uuid.UUID) (*Games, error) {
 		gameCount++
 
 		game := Game{}
-		var finishDateString string
+		var finishDateString *string
 		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.Link, &finishDateString)
 
 		if err != nil {
@@ -391,18 +391,21 @@ func GetFinishedGames(userId uuid.UUID) (*Games, error) {
 			continue
 		}
 
-		var finishDate time.Time
+		var finishDate *time.Time
 
-		if finishDateString != "" {
-			finishDate, err = time.Parse(database.ISO8601, finishDateString)
+		if finishDateString != nil {
+			var notNilFinishDate time.Time
+			notNilFinishDate, err = time.Parse(database.ISO8601, *finishDateString)
 
 			if err != nil {
 				errorCount++
 				continue
 			}
+
+			finishDate = &notNilFinishDate
 		}
 
-		game.FinishDate = &finishDate
+		game.FinishDate = finishDate
 
 		games = append(games, game)
 	}

@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.17 on Thu Nov 6 23:57:43 2025
+-- File generated with SQLiteStudio v3.4.17 on Fri Nov 7 02:41:26 2025
 --
 -- Text encoding used: System
 --
@@ -15,12 +15,23 @@ CREATE TABLE EffectHistory (
                            NOT NULL,
     UserId         TEXT    REFERENCES Users (Id) 
                            NOT NULL,
-    GameId         TEXT    REFERENCES Games (Id) 
-                           NOT NULL,
-    ReceivedDate   TEXT    NOT NULL
+    GameId         TEXT    REFERENCES Games (Id),
+    CreateDate     TEXT    NOT NULL
                            DEFAULT (datetime('now', 'subsec') ),
-    RolledDate     TEXT,
-    RolledEffectId INTEGER REFERENCES RollEffects (Id) 
+    RollDate       TEXT,
+    RolledEffectId INTEGER REFERENCES Effects (Id) 
+);
+
+
+-- Table: Effects
+DROP TABLE IF EXISTS Effects;
+
+CREATE TABLE Effects (
+    Id          TEXT PRIMARY KEY
+                     NOT NULL
+                     UNIQUE,
+    Name        TEXT NOT NULL,
+    Description TEXT NOT NULL
 );
 
 
@@ -37,7 +48,7 @@ CREATE TABLE GameHistory (
                          NOT NULL,
     State        TEXT    NOT NULL
                          DEFAULT ('started'),
-    RolledDate   TEXT    NOT NULL
+    CreateDate   TEXT    NOT NULL
                          DEFAULT (datetime('now', 'subsec') ),
     ResultPoints INTEGER,
     FinishDate   TEXT
@@ -56,18 +67,6 @@ CREATE TABLE Games (
     Link       TEXT,
     CreateDate TEXT DEFAULT (datetime('now', 'subsec') ) 
                     NOT NULL
-);
-
-
--- Table: RollEffects
-DROP TABLE IF EXISTS RollEffects;
-
-CREATE TABLE RollEffects (
-    Id          TEXT PRIMARY KEY
-                     NOT NULL
-                     UNIQUE,
-    Name        TEXT NOT NULL,
-    Description TEXT NOT NULL
 );
 
 

@@ -131,8 +131,8 @@ func (Server) GetGameHistory(_ context.Context, request api.GetGameHistoryReques
 func ConvertGamesToDto(games *game_service.Games) *api.GamesDto {
 	gamesDto := make(api.GamesDto, len(*games))
 
-	for i, g := range *games {
-		gamesDto[i] = *ConvertGameToDto(&g)
+	for i, game := range *games {
+		gamesDto[i] = *ConvertGameToDto(&game)
 	}
 
 	return &gamesDto
@@ -197,10 +197,10 @@ func (Server) GetUnplayedGames(_ context.Context, request api.GetUnplayedGamesRe
 func ConvertUnplayedGamesToDto(games *game_service.UnplayedGames) *api.UnplayedGamesDto {
 	gamesDto := make(api.UnplayedGamesDto, len(*games))
 
-	for i, g := range *games {
+	for i, game := range *games {
 		gamesDto[i] = api.UnplayedGameDto{
-			Link: g.Link,
-			Name: g.Name,
+			Link: game.Link,
+			Name: game.Name,
 		}
 	}
 

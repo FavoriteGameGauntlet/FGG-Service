@@ -29,6 +29,7 @@ const (
 	GAMENOTFOUND             ExceptionCode = "GAME_NOT_FOUND"
 	GETCURRENTGAME           ExceptionCode = "GET_CURRENT_GAME"
 	GETCURRENTTIMER          ExceptionCode = "GET_CURRENT_TIMER"
+	GETEFFECTHISTORY         ExceptionCode = "GET_EFFECT_HISTORY"
 	GETGAMEHISTORY           ExceptionCode = "GET_GAME_HISTORY"
 	GETUNPLAYEDGAMES         ExceptionCode = "GET_UNPLAYED_GAMES"
 	GETUSER                  ExceptionCode = "GET_USER"
@@ -68,10 +69,11 @@ const (
 
 // EffectDto defines model for EffectDto.
 type EffectDto struct {
-	Description  string    `json:"description"`
-	GameName     *Name     `json:"gameName,omitempty"`
-	Name         Name      `json:"name"`
-	ReceivedDate time.Time `json:"receivedDate"`
+	CreateDate  time.Time  `json:"createDate"`
+	Description *string    `json:"description,omitempty"`
+	GameName    *Name      `json:"gameName,omitempty"`
+	Name        *Name      `json:"name,omitempty"`
+	RollDate    *time.Time `json:"rollDate,omitempty"`
 }
 
 // EffectsDto defines model for EffectsDto.

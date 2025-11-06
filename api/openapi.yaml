@@ -543,15 +543,16 @@ components:
           $ref: "#/components/schemas/Name"
         description:
           type: string
-        receivedDate:
+        createDate:
+          type: string
+          format: date-time
+        rollDate:
           type: string
           format: date-time
         gameName:
           $ref: "#/components/schemas/Name"
       required:
-        - name
-        - description
-        - receivedDate
+        - createDate
     EffectsDto:
       type: array
       items:
@@ -569,7 +570,7 @@ components:
             "GET_USER", "GET_UNPLAYED_GAMES", "GET_CURRENT_GAME", "GET_CURRENT_TIMER",
             "CREATE_USER", "ADD_UNPLAYED_GAMES", "START_CURRENT_TIMER", "PAUSE_CURRENT_TIMER",
             "FINISH_CURRENT_GAME", "GET_GAME_HISTORY", "CURRENT_GAME_ALREADY_EXISTS",
-            "MAKE_GAME_ROLL", "CANCEL_CURRENT_GAME"
+            "MAKE_GAME_ROLL", "CANCEL_CURRENT_GAME", "GET_EFFECT_HISTORY"
           ]
         message:
           type: string
