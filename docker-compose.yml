@@ -1,0 +1,12 @@
+services:
+  fgg:
+    container_name: fgg-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fgg-service:latest
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    volumes:
+      - ./database/FGG.db:/app/database/FGG.db
