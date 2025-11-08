@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.17 on Fri Nov 7 02:41:26 2025
+-- File generated with SQLiteStudio v3.4.17 on Sat Nov 8 22:29:34 2025
 --
 -- Text encoding used: System
 --
@@ -7,9 +7,7 @@ PRAGMA foreign_keys = off;
 BEGIN TRANSACTION;
 
 -- Table: EffectHistory
-DROP TABLE IF EXISTS EffectHistory;
-
-CREATE TABLE EffectHistory (
+CREATE TABLE IF NOT EXISTS EffectHistory (
     Id             TEXT    PRIMARY KEY
                            UNIQUE
                            NOT NULL,
@@ -24,9 +22,7 @@ CREATE TABLE EffectHistory (
 
 
 -- Table: Effects
-DROP TABLE IF EXISTS Effects;
-
-CREATE TABLE Effects (
+CREATE TABLE IF NOT EXISTS Effects (
     Id          TEXT PRIMARY KEY
                      NOT NULL
                      UNIQUE,
@@ -36,9 +32,7 @@ CREATE TABLE Effects (
 
 
 -- Table: GameHistory
-DROP TABLE IF EXISTS GameHistory;
-
-CREATE TABLE GameHistory (
+CREATE TABLE IF NOT EXISTS GameHistory (
     Id           TEXT    PRIMARY KEY
                          NOT NULL
                          UNIQUE,
@@ -56,9 +50,7 @@ CREATE TABLE GameHistory (
 
 
 -- Table: Games
-DROP TABLE IF EXISTS Games;
-
-CREATE TABLE Games (
+CREATE TABLE IF NOT EXISTS Games (
     Id         TEXT PRIMARY KEY
                     UNIQUE
                     NOT NULL,
@@ -71,9 +63,7 @@ CREATE TABLE Games (
 
 
 -- Table: TimerActions
-DROP TABLE IF EXISTS TimerActions;
-
-CREATE TABLE TimerActions (
+CREATE TABLE IF NOT EXISTS TimerActions (
     Id               TEXT    PRIMARY KEY
                              UNIQUE
                              NOT NULL,
@@ -87,9 +77,7 @@ CREATE TABLE TimerActions (
 
 
 -- Table: Timers
-DROP TABLE IF EXISTS Timers;
-
-CREATE TABLE Timers (
+CREATE TABLE IF NOT EXISTS Timers (
     Id          TEXT    PRIMARY KEY
                         UNIQUE
                         NOT NULL,
@@ -107,9 +95,7 @@ CREATE TABLE Timers (
 
 
 -- Table: UnplayedGames
-DROP TABLE IF EXISTS UnplayedGames;
-
-CREATE TABLE UnplayedGames (
+CREATE TABLE IF NOT EXISTS UnplayedGames (
     Id         TEXT PRIMARY KEY
                     UNIQUE
                     NOT NULL,
@@ -123,9 +109,7 @@ CREATE TABLE UnplayedGames (
 
 
 -- Table: Users
-DROP TABLE IF EXISTS Users;
-
-CREATE TABLE Users (
+CREATE TABLE IF NOT EXISTS Users (
     Id       TEXT PRIMARY KEY
                   UNIQUE
                   NOT NULL,
@@ -137,11 +121,10 @@ CREATE TABLE Users (
 
 
 -- Trigger: UpdateTimerState
-DROP TRIGGER IF EXISTS UpdateTimerState;
-CREATE TRIGGER UpdateTimerState
-         AFTER INSERT
-            ON TimerActions
-      FOR EACH ROW
+CREATE TRIGGER IF NOT EXISTS UpdateTimerState
+                       AFTER INSERT
+                          ON TimerActions
+                    FOR EACH ROW
 BEGIN
     UPDATE Timers
        SET State = CASE new.Action WHEN 'start' THEN 'running' WHEN 'pause' THEN 'paused' WHEN 'stop' THEN 'finished' END

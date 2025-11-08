@@ -1,0 +1,9 @@
+Dockerfile
+docker-compose.yml
+.dockerignore
+.idea
+.gitignore
+.git
+generate-oapi-codegen.bat
+
+database/FGG.db
