@@ -10,7 +10,7 @@ type Database struct {
 	database *sql.DB
 }
 
-const Path = "database/FGG.db"
+const Path = "FGG.db"
 
 func NewDatabase() *Database {
 	db, err := sql.Open("sqlite3", Path)

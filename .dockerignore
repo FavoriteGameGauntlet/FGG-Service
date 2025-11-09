@@ -6,4 +6,4 @@ docker-compose.yml
 .git
 generate-oapi-codegen.bat
 
-database/FGG.db
+FGG.db

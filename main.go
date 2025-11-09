@@ -24,7 +24,7 @@ func main() {
 	httpHandler := http.StripPrefix("/swagger/", fileServer)
 	e.GET("/swagger/*", echo.WrapHandler(httpHandler))
 
-	err := e.Start(":8080")
+	err := e.Start(":8181")
 
 	if err != nil {
 		panic(err)

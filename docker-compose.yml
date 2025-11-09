@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     image: fgg-service:latest
     ports:
-      - "8080:8080"
+      - "8181:8181"
     restart: unless-stopped
     volumes:
-      - ./database/FGG.db:/app/database/FGG.db
+      - ./FGG.db:/app/FGG.db
