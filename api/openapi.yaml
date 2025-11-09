@@ -1,7 +1,7 @@
 openapi: 3.1.2
 info:
   title: Favorite Game Gauntlet
-  version: 1.0.0
+  version: 0.1.0
 paths:
 
 
@@ -12,6 +12,9 @@ paths:
       operationId: createUser
       tags:
         - Users
+      summary: Create user
+      description: |
+        Create a user and get an ID that must be passed in order to execute commands.
       responses:
         '200':
           description: User was created successfully and returned in response.
@@ -35,6 +38,9 @@ paths:
       operationId: getUser
       tags:
         - Users
+      summary: Get user ID
+      description: |
+        Enter your username to get the ID that you need to pass in order to execute commands.
       responses:
         '200':
           description: The user was found and returned successfully.
@@ -62,6 +68,10 @@ paths:
       operationId: addUnplayedGames
       tags:
         - Games
+      summary: Add game wishlist
+      description: |
+        Add the games you want to play here.<br>
+        You can use another command to get a random game from this list.
       requestBody:
         content:
           application/json:
@@ -86,6 +96,10 @@ paths:
       operationId: getUnplayedGames
       tags:
         - Games
+      summary: Get game wishlist
+      description: |
+        You can see the games you might get here.<br>
+        You can use another command to get a random game from this list.
       responses:
         '200':
           description: Unplayed games were retrieved successfully.
@@ -115,6 +129,11 @@ paths:
       operationId: makeGameRoll
       tags:
         - Games
+      summary: Select a random game from the wishlist
+      description: | 
+        Select a random game from your unplayed list.<br>
+        The selected game will become the current game.<br>
+        You will then be able to start the timer.
       responses:
         '200':
           description: A game roll was performed and the selected game returned.
@@ -150,6 +169,9 @@ paths:
       operationId: getCurrentGame
       tags:
         - Games
+      summary: Get the current game
+      description: |
+        You can find out information and status of the current game.
       responses:
         '200':
           description: The user’s current game was retrieved successfully.
@@ -179,6 +201,10 @@ paths:
       operationId: finishCurrentGame
       tags:
         - Games
+      summary: Complete the current game
+      description: |
+        You can complete the current game if you have completed it according to the FGG rules.<br>
+        When you complete the game, you will receive a bonus that depends on the number of hours spent playing.
       responses:
         '200':
           description: Current game was marked as finished successfully.
@@ -204,6 +230,10 @@ paths:
       operationId: cancelCurrentGame
       tags:
         - Games
+      summary: Cancel the current game
+      description: |
+        You can cancel the current game if you do not intend to complete it for any reason.<br>
+        If you cancel a game, you will receive a fixed penalty.
       responses:
         '200':
           description: Current game was marked as cancelled successfully.
@@ -229,6 +259,10 @@ paths:
       operationId: getGameHistory
       tags:
         - Games
+      summary: Get a list of all games played
+      description: |
+        You can get a complete list of all the games that were randomly selected from your wishlist,<br>
+        as well as all the information about them.
       responses:
         '200':
           description: Game history was retrieved successfully.
@@ -257,6 +291,10 @@ paths:
       operationId: getCurrentTimer
       tags:
         - Timers
+      summary: Get a timer for the current game
+      description: |
+        If you don't have a timer, one will be created.<br>
+        If you already have one, you'll receive it.
       responses:
         '200':
           description: The current timer was retrieved successfully.
@@ -286,6 +324,10 @@ paths:
       operationId: startCurrentTimer
       tags:
         - Timers
+      summary: Start or continue the current timer
+      description: |
+        Start or continue the timer from the current game.<br>
+        If the timer is already running, nothing will happen.
       responses:
         '200':
           description: Timer was started or resumed successfully.
@@ -321,6 +363,10 @@ paths:
       operationId: pauseCurrentTimer
       tags:
         - Timers
+      summary: Pause the current timer
+      description: |
+        Pause the timer from the current game.<br>
+        If the timer is already paused, nothing will happen.
       responses:
         '200':
           description: Timer was paused successfully.
@@ -356,6 +402,11 @@ paths:
       operationId: checkEffectRoll
       tags:
         - Effects
+      summary: Check if there are any effect rolls available
+      description: |
+        You can find out if you have any available effect rolls.<br>
+        If the value is "true," you have one.<br>
+        If the value is "false," you don't.
       responses:
         '200':
           description: Boolean indicating whether the user has available effect rolls.
@@ -385,6 +436,10 @@ paths:
       operationId: getEffectHistory
       tags:
         - Effects
+      summary: Get a list of all effect rolls
+      description: |
+        You can get a list of all effect rolls that have been received or rolled,
+        as well as all the information about them.
       responses:
         '200':
           description: Effect history retrieved successfully.
@@ -414,6 +469,12 @@ paths:
       operationId: makeEffectRoll
       tags:
         - Effects
+      summary: Make the roll of the effect available
+      description: |
+        The function is currently not working.<br>
+        <br>
+        Allows you to obtain a random effect from those that haven't dropped yet.<br>
+        A list of available effects can be obtained using another command.
       responses:
         '200':
           description: Effect roll performed successfully and returned.
@@ -435,6 +496,40 @@ paths:
                 $ref: "#/components/schemas/Exception"
         '503':
           description: Service unavailable while rolling for effects.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exception"
+
+
+
+  /users/{userId}/effects/available:
+    parameters:
+      - $ref: "#/components/parameters/UserId"
+    post:
+      operationId: getAvailableEffects
+      tags:
+        - Effects
+      summary: Get a list of effects available for rolling
+      description: |
+        The function is currently not working.<br>
+        <br>
+        You can get a list of effects that are available to drop using the throw effects command.
+      responses:
+        '200':
+          description: List of available effects successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvailableEffect"
+        '404':
+          description: User not found or available effects data missing.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exception"
+        '503':
+          description: Service unavailable while retrieving available effects.
           content:
             application/json:
               schema:
@@ -557,6 +652,15 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Effect'
+    AvailableEffect:
+      type: object
+      properties:
+        name:
+          $ref: "#/components/schemas/Name"
+        description:
+          type: string
+      required:
+        - name
 
     Exception:
       type: object
