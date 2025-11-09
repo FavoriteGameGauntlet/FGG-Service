@@ -9,7 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-//go:embed api/*
+//go:embed index.html
+//go:embed api/openapi.yaml
 var swaggerUI embed.FS
 
 func main() {
@@ -24,7 +25,7 @@ func main() {
 	httpHandler := http.StripPrefix("/swagger/", fileServer)
 	e.GET("/swagger/*", echo.WrapHandler(httpHandler))
 
-	err := e.Start(":8181")
+	err := e.Start(":8080")
 
 	if err != nil {
 		panic(err)
