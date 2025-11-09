@@ -51,8 +51,8 @@ func (Server) GetEffectHistory(_ context.Context, request api.GetEffectHistoryRe
 	return api.GetEffectHistory200JSONResponse(*effectsDto), nil
 }
 
-func ConvertEffectsToDto(effects *effect_service.Effects) *api.EffectsDto {
-	effectsDto := make(api.EffectsDto, len(*effects))
+func ConvertEffectsToDto(effects *effect_service.Effects) *api.Effects {
+	effectsDto := make(api.Effects, len(*effects))
 
 	for i, effect := range *effects {
 		effectsDto[i] = *ConvertEffectToDto(&effect)
@@ -66,8 +66,8 @@ func (Server) MakeEffectRoll(_ context.Context, request api.MakeEffectRollReques
 	return api.MakeEffectRoll200JSONResponse{}, nil
 }
 
-func ConvertEffectToDto(effect *effect_service.Effect) *api.EffectDto {
-	return &api.EffectDto{
+func ConvertEffectToDto(effect *effect_service.Effect) *api.Effect {
+	return &api.Effect{
 		CreateDate:  effect.CreateDate,
 		Description: effect.Description,
 		GameName:    effect.GameName,

@@ -34,11 +34,11 @@ func (Server) GetCurrentGame(_ context.Context, request api.GetCurrentGameReques
 	return api.GetCurrentGame200JSONResponse(*gameDto), nil
 }
 
-func ConvertGameToDto(game *game_service.Game) *api.GameDto {
-	return &api.GameDto{
+func ConvertGameToDto(game *game_service.Game) *api.Game {
+	return &api.Game{
 		Link:       game.Link,
 		Name:       game.Name,
-		State:      api.GameDtoState(game.State),
+		State:      api.GameState(game.State),
 		FinishDate: game.FinishDate,
 	}
 }
@@ -128,8 +128,8 @@ func (Server) GetGameHistory(_ context.Context, request api.GetGameHistoryReques
 	return api.GetGameHistory200JSONResponse(*gamesDto), nil
 }
 
-func ConvertGamesToDto(games *game_service.Games) *api.GamesDto {
-	gamesDto := make(api.GamesDto, len(*games))
+func ConvertGamesToDto(games *game_service.Games) *api.Games {
+	gamesDto := make(api.Games, len(*games))
 
 	for i, game := range *games {
 		gamesDto[i] = *ConvertGameToDto(&game)
@@ -194,11 +194,11 @@ func (Server) GetUnplayedGames(_ context.Context, request api.GetUnplayedGamesRe
 	return api.GetUnplayedGames200JSONResponse(*gamesDto), nil
 }
 
-func ConvertUnplayedGamesToDto(games *game_service.UnplayedGames) *api.UnplayedGamesDto {
-	gamesDto := make(api.UnplayedGamesDto, len(*games))
+func ConvertUnplayedGamesToDto(games *game_service.UnplayedGames) *api.UnplayedGames {
+	gamesDto := make(api.UnplayedGames, len(*games))
 
 	for i, game := range *games {
-		gamesDto[i] = api.UnplayedGameDto{
+		gamesDto[i] = api.UnplayedGame{
 			Link: game.Link,
 			Name: game.Name,
 		}
@@ -219,7 +219,7 @@ func (Server) AddUnplayedGames(_ context.Context, request api.AddUnplayedGamesRe
 		return api.AddUnplayedGames404JSONResponse{Code: api.USERNOTFOUND}, nil
 	}
 
-	games := ConvertUnplayedGamesFromDto(request.Body)
+	games := ConvertUnplayedGamesFrom(request.Body)
 
 	err = game_service.AddUnplayedGames(request.UserId, games)
 
@@ -230,15 +230,15 @@ func (Server) AddUnplayedGames(_ context.Context, request api.AddUnplayedGamesRe
 	return api.AddUnplayedGames200Response{}, nil
 }
 
-func ConvertUnplayedGamesFromDto(gamesDto *api.UnplayedGamesDto) *game_service.UnplayedGames {
-	games := make(game_service.UnplayedGames, len(*gamesDto))
+func ConvertUnplayedGamesFrom(games *api.UnplayedGames) *game_service.UnplayedGames {
+	gamesDto := make(game_service.UnplayedGames, len(*games))
 
-	for i, g := range *gamesDto {
-		games[i] = game_service.UnplayedGame{
+	for i, g := range *games {
+		gamesDto[i] = game_service.UnplayedGame{
 			Link: g.Link,
 			Name: g.Name,
 		}
 	}
 
-	return &games
+	return &gamesDto
 }

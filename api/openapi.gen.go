@@ -45,31 +45,31 @@ const (
 	USERNOTFOUND             ExceptionCode = "USER_NOT_FOUND"
 )
 
-// Defines values for GameDtoState.
+// Defines values for GameState.
 const (
-	GameDtoStateCancelled GameDtoState = "cancelled"
-	GameDtoStateFinished  GameDtoState = "finished"
-	GameDtoStateStarted   GameDtoState = "started"
+	GameStateCancelled GameState = "cancelled"
+	GameStateFinished  GameState = "finished"
+	GameStateStarted   GameState = "started"
 )
 
-// Defines values for TimerActionDtoAction.
+// Defines values for TimerState.
 const (
-	Pause TimerActionDtoAction = "pause"
-	Start TimerActionDtoAction = "start"
-	Stop  TimerActionDtoAction = "stop"
+	TimerStateCreated  TimerState = "created"
+	TimerStateFinished TimerState = "finished"
+	TimerStatePaused   TimerState = "paused"
+	TimerStateRolled   TimerState = "rolled"
+	TimerStateRunning  TimerState = "running"
 )
 
-// Defines values for TimerDtoState.
+// Defines values for TimerActionAction.
 const (
-	TimerDtoStateCreated  TimerDtoState = "created"
-	TimerDtoStateFinished TimerDtoState = "finished"
-	TimerDtoStatePaused   TimerDtoState = "paused"
-	TimerDtoStateRolled   TimerDtoState = "rolled"
-	TimerDtoStateRunning  TimerDtoState = "running"
+	Pause TimerActionAction = "pause"
+	Start TimerActionAction = "start"
+	Stop  TimerActionAction = "stop"
 )
 
-// EffectDto defines model for EffectDto.
-type EffectDto struct {
+// Effect defines model for Effect.
+type Effect struct {
 	CreateDate  time.Time  `json:"createDate"`
 	Description *string    `json:"description,omitempty"`
 	GameName    *Name      `json:"gameName,omitempty"`
@@ -77,8 +77,8 @@ type EffectDto struct {
 	RollDate    *time.Time `json:"rollDate,omitempty"`
 }
 
-// EffectsDto defines model for EffectsDto.
-type EffectsDto = []EffectDto
+// Effects defines model for Effects.
+type Effects = []Effect
 
 // Exception defines model for Exception.
 type Exception struct {
@@ -89,19 +89,19 @@ type Exception struct {
 // ExceptionCode defines model for Exception.Code.
 type ExceptionCode string
 
-// GameDto defines model for GameDto.
-type GameDto struct {
-	FinishDate *time.Time   `json:"finishDate,omitempty"`
-	Link       *string      `json:"link,omitempty"`
-	Name       Name         `json:"name"`
-	State      GameDtoState `json:"state"`
+// Game defines model for Game.
+type Game struct {
+	FinishDate *time.Time `json:"finishDate,omitempty"`
+	Link       *string    `json:"link,omitempty"`
+	Name       Name       `json:"name"`
+	State      GameState  `json:"state"`
 }
 
-// GameDtoState defines model for GameDto.State.
-type GameDtoState string
+// GameState defines model for Game.State.
+type GameState string
 
-// GamesDto defines model for GamesDto.
-type GamesDto = []GameDto
+// Games defines model for Games.
+type Games = []Game
 
 // Id defines model for Id.
 type Id = openapi_types.UUID
@@ -109,37 +109,37 @@ type Id = openapi_types.UUID
 // Name defines model for Name.
 type Name = string
 
-// TimerActionDto defines model for TimerActionDto.
-type TimerActionDto struct {
-	Action           TimerActionDtoAction `json:"action"`
-	RemainingTimeInS int                  `json:"remainingTimeInS"`
+// Timer defines model for Timer.
+type Timer struct {
+	DurationInS      int        `json:"durationInS"`
+	RemainingTimeInS int        `json:"remainingTimeInS"`
+	State            TimerState `json:"state"`
+	TimerActionDate  *time.Time `json:"timerActionDate,omitempty"`
 }
 
-// TimerActionDtoAction defines model for TimerActionDto.Action.
-type TimerActionDtoAction string
+// TimerState defines model for Timer.State.
+type TimerState string
 
-// TimerDto defines model for TimerDto.
-type TimerDto struct {
-	DurationInS      int           `json:"durationInS"`
-	RemainingTimeInS int           `json:"remainingTimeInS"`
-	State            TimerDtoState `json:"state"`
-	TimerActionDate  *time.Time    `json:"timerActionDate,omitempty"`
+// TimerAction defines model for TimerAction.
+type TimerAction struct {
+	Action           TimerActionAction `json:"action"`
+	RemainingTimeInS int               `json:"remainingTimeInS"`
 }
 
-// TimerDtoState defines model for TimerDto.State.
-type TimerDtoState string
+// TimerActionAction defines model for TimerAction.Action.
+type TimerActionAction string
 
-// UnplayedGameDto defines model for UnplayedGameDto.
-type UnplayedGameDto struct {
+// UnplayedGame defines model for UnplayedGame.
+type UnplayedGame struct {
 	Link *string `json:"link,omitempty"`
 	Name Name    `json:"name"`
 }
 
-// UnplayedGamesDto defines model for UnplayedGamesDto.
-type UnplayedGamesDto = []UnplayedGameDto
+// UnplayedGames defines model for UnplayedGames.
+type UnplayedGames = []UnplayedGame
 
-// UserDto defines model for UserDto.
-type UserDto struct {
+// User defines model for User.
+type User struct {
 	Id   Id   `json:"id"`
 	Name Name `json:"name"`
 }
@@ -151,7 +151,7 @@ type UserId = Id
 type UserName = Name
 
 // AddUnplayedGamesJSONRequestBody defines body for AddUnplayedGames for application/json ContentType.
-type AddUnplayedGamesJSONRequestBody = UnplayedGamesDto
+type AddUnplayedGamesJSONRequestBody = UnplayedGames
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -501,7 +501,7 @@ type GetUserResponseObject interface {
 	VisitGetUserResponse(w http.ResponseWriter) error
 }
 
-type GetUser200JSONResponse UserDto
+type GetUser200JSONResponse User
 
 func (response GetUser200JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -536,7 +536,7 @@ type CreateUserResponseObject interface {
 	VisitCreateUserResponse(w http.ResponseWriter) error
 }
 
-type CreateUser200JSONResponse UserDto
+type CreateUser200JSONResponse User
 
 func (response CreateUser200JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -606,7 +606,7 @@ type GetEffectHistoryResponseObject interface {
 	VisitGetEffectHistoryResponse(w http.ResponseWriter) error
 }
 
-type GetEffectHistory200JSONResponse EffectsDto
+type GetEffectHistory200JSONResponse Effects
 
 func (response GetEffectHistory200JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -641,7 +641,7 @@ type MakeEffectRollResponseObject interface {
 	VisitMakeEffectRollResponse(w http.ResponseWriter) error
 }
 
-type MakeEffectRoll200JSONResponse EffectDto
+type MakeEffectRoll200JSONResponse Effect
 
 func (response MakeEffectRoll200JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -685,7 +685,7 @@ type GetCurrentGameResponseObject interface {
 	VisitGetCurrentGameResponse(w http.ResponseWriter) error
 }
 
-type GetCurrentGame200JSONResponse GameDto
+type GetCurrentGame200JSONResponse Game
 
 func (response GetCurrentGame200JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -788,7 +788,7 @@ type GetGameHistoryResponseObject interface {
 	VisitGetGameHistoryResponse(w http.ResponseWriter) error
 }
 
-type GetGameHistory200JSONResponse GamesDto
+type GetGameHistory200JSONResponse Games
 
 func (response GetGameHistory200JSONResponse) VisitGetGameHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -823,7 +823,7 @@ type MakeGameRollResponseObject interface {
 	VisitMakeGameRollResponse(w http.ResponseWriter) error
 }
 
-type MakeGameRoll200JSONResponse GameDto
+type MakeGameRoll200JSONResponse Game
 
 func (response MakeGameRoll200JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -867,7 +867,7 @@ type GetUnplayedGamesResponseObject interface {
 	VisitGetUnplayedGamesResponse(w http.ResponseWriter) error
 }
 
-type GetUnplayedGames200JSONResponse UnplayedGamesDto
+type GetUnplayedGames200JSONResponse UnplayedGames
 
 func (response GetUnplayedGames200JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -937,7 +937,7 @@ type GetCurrentTimerResponseObject interface {
 	VisitGetCurrentTimerResponse(w http.ResponseWriter) error
 }
 
-type GetCurrentTimer200JSONResponse TimerDto
+type GetCurrentTimer200JSONResponse Timer
 
 func (response GetCurrentTimer200JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -972,7 +972,7 @@ type PauseCurrentTimerResponseObject interface {
 	VisitPauseCurrentTimerResponse(w http.ResponseWriter) error
 }
 
-type PauseCurrentTimer200JSONResponse TimerActionDto
+type PauseCurrentTimer200JSONResponse TimerAction
 
 func (response PauseCurrentTimer200JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -1016,7 +1016,7 @@ type StartCurrentTimerResponseObject interface {
 	VisitStartCurrentTimerResponse(w http.ResponseWriter) error
 }
 
-type StartCurrentTimer200JSONResponse TimerActionDto
+type StartCurrentTimer200JSONResponse TimerAction
 
 func (response StartCurrentTimer200JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")

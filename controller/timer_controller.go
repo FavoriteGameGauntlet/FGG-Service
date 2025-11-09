@@ -41,11 +41,11 @@ func (Server) GetCurrentTimer(_ context.Context, request api.GetCurrentTimerRequ
 	return api.GetCurrentTimer200JSONResponse(*timerDto), nil
 }
 
-func ConvertTimerToDto(timer *timer_service.Timer) *api.TimerDto {
-	return &api.TimerDto{
+func ConvertTimerToDto(timer *timer_service.Timer) *api.Timer {
+	return &api.Timer{
 		DurationInS:      timer.DurationInS,
 		RemainingTimeInS: timer.RemainingTimeInS,
-		State:            api.TimerDtoState(timer.State),
+		State:            api.TimerState(timer.State),
 		TimerActionDate:  timer.TimerActionDate,
 	}
 }
@@ -92,14 +92,14 @@ func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimer
 		return api.PauseCurrentTimer409JSONResponse{Code: api.TIMERINCORRECTSTATE}, nil
 	}
 
-	timerActionDto := ConvertTimerActionToDto(timerAction)
+	timerActionDto := ConvertTimerActionTo(timerAction)
 
 	return api.PauseCurrentTimer200JSONResponse(*timerActionDto), nil
 }
 
-func ConvertTimerActionToDto(timerAction *timer_service.TimerAction) *api.TimerActionDto {
-	return &api.TimerActionDto{
-		Action:           api.TimerActionDtoAction(timerAction.Action),
+func ConvertTimerActionTo(timerAction *timer_service.TimerAction) *api.TimerAction {
+	return &api.TimerAction{
+		Action:           api.TimerActionAction(timerAction.Action),
 		RemainingTimeInS: timerAction.RemainingTimeInS,
 	}
 }
@@ -146,7 +146,7 @@ func (Server) StartCurrentTimer(_ context.Context, request api.StartCurrentTimer
 		return api.StartCurrentTimer409JSONResponse{Code: api.TIMERINCORRECTSTATE}, nil
 	}
 
-	timerActionDto := ConvertTimerActionToDto(timerAction)
+	timerActionDto := ConvertTimerActionTo(timerAction)
 
 	return api.StartCurrentTimer200JSONResponse(*timerActionDto), nil
 }

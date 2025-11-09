@@ -18,7 +18,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserDto"
+                $ref: "#/components/schemas/User"
         '409':
           description: User already exists with the same name.
           content:
@@ -41,7 +41,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserDto"
+                $ref: "#/components/schemas/User"
         '404':
           description: No user found with the given name.
           content:
@@ -66,7 +66,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UnplayedGamesDto"
+              $ref: "#/components/schemas/UnplayedGames"
       responses:
         '200':
           description: Unplayed games were saved successfully.
@@ -92,7 +92,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnplayedGamesDto"
+                $ref: "#/components/schemas/UnplayedGames"
         '404':
           description: User not found when retrieving unplayed games.
           content:
@@ -121,7 +121,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GameDto"
+                $ref: "#/components/schemas/Game"
         '404':
           description: User not found or no unplayed games available.
           content:
@@ -156,7 +156,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GameDto"
+                $ref: "#/components/schemas/Game"
         '404':
           description: Current game not found for the user.
           content:
@@ -235,7 +235,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GamesDto"
+                $ref: "#/components/schemas/Games"
         '404':
           description: No game history found for the user.
           content:
@@ -263,7 +263,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TimerDto"
+                $ref: "#/components/schemas/Timer"
         '404':
           description: No active timer found for the user.
           content:
@@ -292,7 +292,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TimerActionDto"
+                $ref: "#/components/schemas/TimerAction"
         '404':
           description: No current timer found to start.
           content:
@@ -327,7 +327,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TimerActionDto"
+                $ref: "#/components/schemas/TimerAction"
         '404':
           description: No current timer found to pause.
           content:
@@ -391,7 +391,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EffectsDto"
+                $ref: "#/components/schemas/Effects"
         '404':
           description: No effect history found for the user.
           content:
@@ -420,7 +420,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EffectDto"
+                $ref: "#/components/schemas/Effect"
         '404':
           description: User not found or effect roll unavailable.
           content:
@@ -463,7 +463,7 @@ components:
       format: uuid
     Name:
       type: string
-    UserDto:
+    User:
       type: object
       properties:
         id:
@@ -473,7 +473,7 @@ components:
       required:
         - id
         - name
-    UnplayedGameDto:
+    UnplayedGame:
       type: object
       properties:
         name:
@@ -484,13 +484,13 @@ components:
           example: "https://store.steampowered.com/app/20"
       required:
         - name
-    UnplayedGamesDto:
+    UnplayedGames:
       type: array
       items:
-        $ref: '#/components/schemas/UnplayedGameDto'
-    GameDto:
+        $ref: '#/components/schemas/UnplayedGame'
+    Game:
       allOf:
-        - $ref: "#/components/schemas/UnplayedGameDto"
+        - $ref: "#/components/schemas/UnplayedGame"
         - type: object
           properties:
             state:
@@ -501,11 +501,11 @@ components:
               format: date-time
           required:
             - state
-    GamesDto:
+    Games:
       type: array
       items:
-        $ref: '#/components/schemas/GameDto'
-    TimerDto:
+        $ref: '#/components/schemas/Game'
+    Timer:
       type: object
       properties:
         state:
@@ -524,7 +524,7 @@ components:
         - state
         - remainingTimeInS
         - durationInS
-    TimerActionDto:
+    TimerAction:
       type: object
       properties:
         action:
@@ -536,7 +536,7 @@ components:
       required:
         - action
         - remainingTimeInS
-    EffectDto:
+    Effect:
       type: object
       properties:
         name:
@@ -553,10 +553,10 @@ components:
           $ref: "#/components/schemas/Name"
       required:
         - createDate
-    EffectsDto:
+    Effects:
       type: array
       items:
-        $ref: '#/components/schemas/EffectDto'
+        $ref: '#/components/schemas/Effect'
 
     Exception:
       type: object
