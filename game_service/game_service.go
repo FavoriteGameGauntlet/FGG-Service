@@ -389,12 +389,19 @@ func GetGameHistory(userId uuid.UUID) (*Games, error) {
 		gameCount++
 
 		game := Game{}
+		var spentSeconds *int
 		var finishDateString *string
-		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.Link, &finishDateString)
+		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.Link, &spentSeconds, &finishDateString)
 
 		if err != nil {
 			errorCount++
 			continue
+		}
+
+		if spentSeconds != nil {
+			hourCount := *spentSeconds / int(time.Hour/time.Second)
+
+			game.HourCount = &hourCount
 		}
 
 		var finishDate *time.Time
