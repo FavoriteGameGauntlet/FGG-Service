@@ -11,7 +11,7 @@ func (Server) GetUser(_ context.Context, request api.GetUserRequestObject) (api.
 	doesExist, err := user_service.CheckIfUserExistsByName(request.Name)
 
 	if err != nil {
-		return api.GetUser503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.GetUser500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -21,7 +21,7 @@ func (Server) GetUser(_ context.Context, request api.GetUserRequestObject) (api.
 	user, err := user_service.FindUser(request.Name)
 
 	if err != nil {
-		return api.GetUser503JSONResponse{Code: api.GETUSER, Message: err.Error()}, nil
+		return api.GetUser500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	return api.GetUser200JSONResponse(*user), nil
@@ -32,7 +32,7 @@ func (Server) CreateUser(_ context.Context, request api.CreateUserRequestObject)
 	doesExist, err := user_service.CheckIfUserExistsByName(request.Name)
 
 	if err != nil {
-		return api.CreateUser503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.CreateUser500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if doesExist {
@@ -42,13 +42,13 @@ func (Server) CreateUser(_ context.Context, request api.CreateUserRequestObject)
 	err = user_service.CreateUser(request.Name)
 
 	if err != nil {
-		return api.CreateUser503JSONResponse{Code: api.CREATEUSER, Message: err.Error()}, nil
+		return api.CreateUser500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	user, err := user_service.FindUser(request.Name)
 
 	if err != nil {
-		return api.CreateUser503JSONResponse{Code: api.GETUSER, Message: err.Error()}, nil
+		return api.CreateUser500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	return api.CreateUser200JSONResponse(*user), nil

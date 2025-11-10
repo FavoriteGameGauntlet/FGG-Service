@@ -17,7 +17,7 @@ func (Server) CheckEffectRoll(_ context.Context, request api.CheckEffectRollRequ
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.CheckEffectRoll503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.CheckEffectRoll500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -27,7 +27,7 @@ func (Server) CheckEffectRoll(_ context.Context, request api.CheckEffectRollRequ
 	doesExist, err = effect_service.CheckIfEffectRollExists(request.UserId)
 
 	if err != nil {
-		return api.CheckEffectRoll503JSONResponse{Code: api.CHECKEFFECTROLL, Message: err.Error()}, nil
+		return api.CheckEffectRoll500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	return api.CheckEffectRoll200JSONResponse(doesExist), nil
@@ -38,7 +38,7 @@ func (Server) GetEffectHistory(_ context.Context, request api.GetEffectHistoryRe
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.GetEffectHistory503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.GetEffectHistory500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -48,7 +48,7 @@ func (Server) GetEffectHistory(_ context.Context, request api.GetEffectHistoryRe
 	effects, err := effect_service.GetEffectHistory(request.UserId)
 
 	if err != nil {
-		return api.GetEffectHistory503JSONResponse{Code: api.GETEFFECTHISTORY, Message: err.Error()}, nil
+		return api.GetEffectHistory500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	effectsDto := ConvertEffectsToDto(effects)

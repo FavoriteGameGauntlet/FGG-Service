@@ -13,7 +13,7 @@ func (Server) GetCurrentTimer(_ context.Context, request api.GetCurrentTimerRequ
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.GetCurrentTimer503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.GetCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -23,7 +23,7 @@ func (Server) GetCurrentTimer(_ context.Context, request api.GetCurrentTimerRequ
 	game, err := game_service.GetCurrentGame(request.UserId)
 
 	if err != nil {
-		return api.GetCurrentTimer503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
+		return api.GetCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if game == nil {
@@ -33,7 +33,7 @@ func (Server) GetCurrentTimer(_ context.Context, request api.GetCurrentTimerRequ
 	timer, err := timer_service.GetOrCreateCurrentTimer(request.UserId, game.Id)
 
 	if err != nil {
-		return api.GetCurrentTimer503JSONResponse{Code: api.GETCURRENTTIMER, Message: err.Error()}, nil
+		return api.GetCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	timerDto := ConvertTimerToDto(timer)
@@ -55,7 +55,7 @@ func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimer
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.PauseCurrentTimer503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -65,7 +65,7 @@ func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimer
 	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
 
 	if err != nil {
-		return api.PauseCurrentTimer503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
+		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -75,7 +75,7 @@ func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimer
 	doesExist, err = timer_service.CheckIfCurrentTimerExists(request.UserId)
 
 	if err != nil {
-		return api.PauseCurrentTimer503JSONResponse{Code: api.CHECKCURRENTTIMER, Message: err.Error()}, nil
+		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -85,7 +85,7 @@ func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimer
 	timerAction, err := timer_service.PauseCurrentTimer(request.UserId)
 
 	if err != nil {
-		return api.PauseCurrentTimer503JSONResponse{Code: api.PAUSECURRENTTIMER, Message: err.Error()}, nil
+		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if timerAction == nil {
@@ -109,7 +109,7 @@ func (Server) StartCurrentTimer(_ context.Context, request api.StartCurrentTimer
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.StartCurrentTimer503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -119,7 +119,7 @@ func (Server) StartCurrentTimer(_ context.Context, request api.StartCurrentTimer
 	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
 
 	if err != nil {
-		return api.StartCurrentTimer503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
+		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -129,7 +129,7 @@ func (Server) StartCurrentTimer(_ context.Context, request api.StartCurrentTimer
 	doesExist, err = timer_service.CheckIfCurrentTimerExists(request.UserId)
 
 	if err != nil {
-		return api.StartCurrentTimer503JSONResponse{Code: api.CHECKCURRENTTIMER, Message: err.Error()}, nil
+		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -139,7 +139,7 @@ func (Server) StartCurrentTimer(_ context.Context, request api.StartCurrentTimer
 	timerAction, err := timer_service.StartCurrentTimer(request.UserId)
 
 	if err != nil {
-		return api.StartCurrentTimer503JSONResponse{Code: api.STARTCURRENTTIMER, Message: err.Error()}, nil
+		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if timerAction == nil {

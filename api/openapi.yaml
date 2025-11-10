@@ -27,13 +27,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/ConflictError"
+        '500':
           description: Service unavailable while creating user.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
     get:
       operationId: getUser
       tags:
@@ -53,13 +53,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/NotFoundError"
+        '500':
           description: Service unavailable while retrieving user.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
   /users/{userId}/games/unplayed:
     parameters:
@@ -85,13 +85,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/NotFoundError"
+        '500':
           description: Service unavailable while saving unplayed games.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
     get:
       operationId: getUnplayedGames
       tags:
@@ -112,13 +112,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/NotFoundError"
+        '500':
           description: Service unavailable while retrieving unplayed games.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 
@@ -130,7 +130,7 @@ paths:
       tags:
         - Games
       summary: Select a random game from the wishlist
-      description: | 
+      description: |
         Select a random game from your unplayed list.<br>
         The selected game will become the current game.<br>
         You will then be able to start the timer.
@@ -146,19 +146,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/NotFoundError"
         '409':
           description: Game roll not allowed due to current game state.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/ConflictError"
+        '500':
           description: Service unavailable while rolling for a game.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 
@@ -184,13 +184,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/NotFoundError"
+        '500':
           description: Service unavailable while retrieving current game.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 
@@ -213,13 +213,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/NotFoundError"
+        '500':
           description: Service unavailable while finishing current game.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 
@@ -242,13 +242,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/NotFoundError"
+        '500':
           description: Service unavailable while cancelling current game.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 
@@ -275,13 +275,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/NotFoundError"
+        '500':
           description: Service unavailable while retrieving game history.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
   /users/{userId}/timers/current:
@@ -307,13 +307,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/NotFoundError"
+        '500':
           description: Service unavailable while retrieving current timer.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 
@@ -340,19 +340,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/NotFoundError"
         '409':
           description: Timer cannot be started due to incorrect state.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/ConflictError"
+        '500':
           description: Service unavailable while starting timer.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 
@@ -379,19 +379,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/NotFoundError"
         '409':
           description: Timer cannot be paused due to incorrect state.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/ConflictError"
+        '500':
           description: Service unavailable while pausing timer.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 
@@ -419,13 +419,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/NotFoundError"
+        '500':
           description: Service unavailable while checking effect roll.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 
@@ -452,13 +452,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/NotFoundError"
+        '500':
           description: Service unavailable while retrieving effect history.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 
@@ -487,19 +487,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/NotFoundError"
         '409':
           description: Effect roll not allowed due to current game or timer state.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/ConflictError"
+        '500':
           description: Service unavailable while rolling for effects.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 
@@ -527,13 +527,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
-        '503':
+                $ref: "#/components/schemas/ConflictError"
+        '500':
           description: Service unavailable while retrieving available effects.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exception"
+                $ref: "#/components/schemas/InternalServerError"
 
 
 components:
@@ -565,9 +565,7 @@ components:
           $ref: "#/components/schemas/Id"
         name:
           $ref: "#/components/schemas/Name"
-      required:
-        - id
-        - name
+      required: [ id, name]
     UnplayedGame:
       type: object
       properties:
@@ -577,8 +575,7 @@ components:
           type: string
           format: hostname
           example: "https://store.steampowered.com/app/20"
-      required:
-        - name
+      required: [ name ]
     UnplayedGames:
       type: array
       items:
@@ -597,8 +594,7 @@ components:
             finishDate:
               type: string
               format: date-time
-          required:
-            - state
+          required: [ state ]
     Games:
       type: array
       items:
@@ -618,10 +614,7 @@ components:
         timerActionDate:
           type: string
           format: date-time
-      required:
-        - state
-        - remainingTimeInS
-        - durationInS
+      required: [ state, remainingTimeInS, durationInS ]
     TimerAction:
       type: object
       properties:
@@ -631,9 +624,7 @@ components:
         remainingTimeInS:
           type: integer
           format: int
-      required:
-        - type
-        - remainingTimeInS
+      required: [ type, remainingTimeInS ]
     Effect:
       type: object
       properties:
@@ -649,8 +640,7 @@ components:
           format: date-time
         gameName:
           $ref: "#/components/schemas/Name"
-      required:
-        - createDate
+      required: [ createDate ]
     Effects:
       type: array
       items:
@@ -662,25 +652,46 @@ components:
           $ref: "#/components/schemas/Name"
         description:
           type: string
-      required:
-        - name
+      required: [ name ]
 
-    Exception:
+    NotFoundError:
       type: object
       properties:
         code:
           type: string
           enum: [
-            "USER_NOT_FOUND", "GAME_NOT_FOUND", "TIMER_NOT_FOUND",
-            "NO_AVAILABLE_ROLLS", "USER_ALREADY_EXISTS", "TIMER_INCORRECT_STATE",
-            "UNEXPECTED", "CHECK_USER", "CHECK_CURRENT_GAME", "CHECK_CURRENT_TIMER",
-            "GET_USER", "GET_UNPLAYED_GAMES", "GET_CURRENT_GAME", "GET_CURRENT_TIMER",
-            "CREATE_USER", "ADD_UNPLAYED_GAMES", "START_CURRENT_TIMER", "PAUSE_CURRENT_TIMER",
-            "FINISH_CURRENT_GAME", "GET_GAME_HISTORY", "CURRENT_GAME_ALREADY_EXISTS",
-            "MAKE_GAME_ROLL", "CANCEL_CURRENT_GAME", "GET_EFFECT_HISTORY", "CHECK_EFFECT_ROLL"
+            "GAME_NOT_FOUND",
+            "TIMER_NOT_FOUND",
+            "USER_NOT_FOUND"
           ]
         message:
           type: string
-      required:
-        - code
-        - message
+      required: [ code, message ]
+      example:
+        code: "USER_NOT_FOUND"
+        message: ""
+    ConflictError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum: [
+            "CURRENT_GAME_ALREADY_EXISTS",
+            "NO_AVAILABLE_ROLLS",
+            "TIMER_INCORRECT_STATE",
+            "USER_ALREADY_EXISTS"
+          ]
+        message:
+          type: string
+      required: [ code, message ]
+    InternalServerError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum: [
+            "UNEXPECTED_DATABASE"
+          ]
+        message:
+          type: string
+      required: [ code, message ]

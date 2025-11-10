@@ -12,7 +12,7 @@ func (Server) GetCurrentGame(_ context.Context, request api.GetCurrentGameReques
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.GetCurrentGame503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.GetCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -22,7 +22,7 @@ func (Server) GetCurrentGame(_ context.Context, request api.GetCurrentGameReques
 	game, err := game_service.GetCurrentGame(request.UserId)
 
 	if err != nil {
-		return api.GetCurrentGame503JSONResponse{Code: api.GETCURRENTGAME, Message: err.Error()}, nil
+		return api.GetCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if game == nil {
@@ -49,7 +49,7 @@ func (Server) CancelCurrentGame(_ context.Context, request api.CancelCurrentGame
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.CancelCurrentGame503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -59,7 +59,7 @@ func (Server) CancelCurrentGame(_ context.Context, request api.CancelCurrentGame
 	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
 
 	if err != nil {
-		return api.CancelCurrentGame503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
+		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -69,7 +69,7 @@ func (Server) CancelCurrentGame(_ context.Context, request api.CancelCurrentGame
 	err = game_service.CancelCurrentGame(request.UserId)
 
 	if err != nil {
-		return api.CancelCurrentGame503JSONResponse{Code: api.CANCELCURRENTGAME, Message: err.Error()}, nil
+		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	return api.CancelCurrentGame200Response{}, nil
@@ -80,7 +80,7 @@ func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGame
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.FinishCurrentGame503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -90,7 +90,7 @@ func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGame
 	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
 
 	if err != nil {
-		return api.FinishCurrentGame503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
+		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -100,7 +100,7 @@ func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGame
 	err = game_service.FinishCurrentGame(request.UserId)
 
 	if err != nil {
-		return api.FinishCurrentGame503JSONResponse{Code: api.FINISHCURRENTGAME, Message: err.Error()}, nil
+		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	return api.FinishCurrentGame200Response{}, nil
@@ -111,7 +111,7 @@ func (Server) GetGameHistory(_ context.Context, request api.GetGameHistoryReques
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.GetGameHistory503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.GetGameHistory500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -121,7 +121,7 @@ func (Server) GetGameHistory(_ context.Context, request api.GetGameHistoryReques
 	games, err := game_service.GetGameHistory(request.UserId)
 
 	if err != nil {
-		return api.GetGameHistory503JSONResponse{Code: api.GETGAMEHISTORY, Message: err.Error()}, nil
+		return api.GetGameHistory500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	gamesDto := ConvertGamesToDto(games)
@@ -144,7 +144,7 @@ func (Server) MakeGameRoll(_ context.Context, request api.MakeGameRollRequestObj
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.MakeGameRoll503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -154,7 +154,7 @@ func (Server) MakeGameRoll(_ context.Context, request api.MakeGameRollRequestObj
 	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
 
 	if err != nil {
-		return api.MakeGameRoll503JSONResponse{Code: api.CHECKCURRENTGAME, Message: err.Error()}, nil
+		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if doesExist {
@@ -164,7 +164,7 @@ func (Server) MakeGameRoll(_ context.Context, request api.MakeGameRollRequestObj
 	game, err := game_service.MakeGameRoll(request.UserId)
 
 	if err != nil {
-		return api.MakeGameRoll503JSONResponse{Code: api.MAKEGAMEROLL, Message: err.Error()}, nil
+		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	gameDto := ConvertGameToDto(game)
@@ -177,7 +177,7 @@ func (Server) GetUnplayedGames(_ context.Context, request api.GetUnplayedGamesRe
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.GetUnplayedGames503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.GetUnplayedGames500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -187,7 +187,7 @@ func (Server) GetUnplayedGames(_ context.Context, request api.GetUnplayedGamesRe
 	games, err := game_service.GetUnplayedGames(request.UserId)
 
 	if err != nil {
-		return api.GetUnplayedGames503JSONResponse{Code: api.GETUNPLAYEDGAMES, Message: err.Error()}, nil
+		return api.GetUnplayedGames500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	gamesDto := ConvertUnplayedGamesToDto(games)
@@ -213,7 +213,7 @@ func (Server) AddUnplayedGames(_ context.Context, request api.AddUnplayedGamesRe
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
 
 	if err != nil {
-		return api.AddUnplayedGames503JSONResponse{Code: api.CHECKUSER, Message: err.Error()}, nil
+		return api.AddUnplayedGames500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
@@ -225,7 +225,7 @@ func (Server) AddUnplayedGames(_ context.Context, request api.AddUnplayedGamesRe
 	err = game_service.AddUnplayedGames(request.UserId, games)
 
 	if err != nil {
-		return api.AddUnplayedGames503JSONResponse{Code: api.ADDUNPLAYEDGAMES, Message: err.Error()}, nil
+		return api.AddUnplayedGames500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
 	return api.AddUnplayedGames200Response{}, nil

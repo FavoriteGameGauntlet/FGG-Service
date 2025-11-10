@@ -16,33 +16,12 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-// Defines values for ExceptionCode.
+// Defines values for ConflictErrorCode.
 const (
-	ADDUNPLAYEDGAMES         ExceptionCode = "ADD_UNPLAYED_GAMES"
-	CANCELCURRENTGAME        ExceptionCode = "CANCEL_CURRENT_GAME"
-	CHECKCURRENTGAME         ExceptionCode = "CHECK_CURRENT_GAME"
-	CHECKCURRENTTIMER        ExceptionCode = "CHECK_CURRENT_TIMER"
-	CHECKEFFECTROLL          ExceptionCode = "CHECK_EFFECT_ROLL"
-	CHECKUSER                ExceptionCode = "CHECK_USER"
-	CREATEUSER               ExceptionCode = "CREATE_USER"
-	CURRENTGAMEALREADYEXISTS ExceptionCode = "CURRENT_GAME_ALREADY_EXISTS"
-	FINISHCURRENTGAME        ExceptionCode = "FINISH_CURRENT_GAME"
-	GAMENOTFOUND             ExceptionCode = "GAME_NOT_FOUND"
-	GETCURRENTGAME           ExceptionCode = "GET_CURRENT_GAME"
-	GETCURRENTTIMER          ExceptionCode = "GET_CURRENT_TIMER"
-	GETEFFECTHISTORY         ExceptionCode = "GET_EFFECT_HISTORY"
-	GETGAMEHISTORY           ExceptionCode = "GET_GAME_HISTORY"
-	GETUNPLAYEDGAMES         ExceptionCode = "GET_UNPLAYED_GAMES"
-	GETUSER                  ExceptionCode = "GET_USER"
-	MAKEGAMEROLL             ExceptionCode = "MAKE_GAME_ROLL"
-	NOAVAILABLEROLLS         ExceptionCode = "NO_AVAILABLE_ROLLS"
-	PAUSECURRENTTIMER        ExceptionCode = "PAUSE_CURRENT_TIMER"
-	STARTCURRENTTIMER        ExceptionCode = "START_CURRENT_TIMER"
-	TIMERINCORRECTSTATE      ExceptionCode = "TIMER_INCORRECT_STATE"
-	TIMERNOTFOUND            ExceptionCode = "TIMER_NOT_FOUND"
-	UNEXPECTED               ExceptionCode = "UNEXPECTED"
-	USERALREADYEXISTS        ExceptionCode = "USER_ALREADY_EXISTS"
-	USERNOTFOUND             ExceptionCode = "USER_NOT_FOUND"
+	CURRENTGAMEALREADYEXISTS ConflictErrorCode = "CURRENT_GAME_ALREADY_EXISTS"
+	NOAVAILABLEROLLS         ConflictErrorCode = "NO_AVAILABLE_ROLLS"
+	TIMERINCORRECTSTATE      ConflictErrorCode = "TIMER_INCORRECT_STATE"
+	USERALREADYEXISTS        ConflictErrorCode = "USER_ALREADY_EXISTS"
 )
 
 // Defines values for GameState.
@@ -50,6 +29,18 @@ const (
 	GameStateCancelled GameState = "cancelled"
 	GameStateFinished  GameState = "finished"
 	GameStateStarted   GameState = "started"
+)
+
+// Defines values for InternalServerErrorCode.
+const (
+	UNEXPECTEDDATABASE InternalServerErrorCode = "UNEXPECTED_DATABASE"
+)
+
+// Defines values for NotFoundErrorCode.
+const (
+	GAMENOTFOUND  NotFoundErrorCode = "GAME_NOT_FOUND"
+	TIMERNOTFOUND NotFoundErrorCode = "TIMER_NOT_FOUND"
+	USERNOTFOUND  NotFoundErrorCode = "USER_NOT_FOUND"
 )
 
 // Defines values for TimerState.
@@ -73,6 +64,15 @@ type AvailableEffect struct {
 	Name        Name    `json:"name"`
 }
 
+// ConflictError defines model for ConflictError.
+type ConflictError struct {
+	Code    ConflictErrorCode `json:"code"`
+	Message string            `json:"message"`
+}
+
+// ConflictErrorCode defines model for ConflictError.Code.
+type ConflictErrorCode string
+
 // Effect defines model for Effect.
 type Effect struct {
 	CreateDate  time.Time  `json:"createDate"`
@@ -84,15 +84,6 @@ type Effect struct {
 
 // Effects defines model for Effects.
 type Effects = []Effect
-
-// Exception defines model for Exception.
-type Exception struct {
-	Code    ExceptionCode `json:"code"`
-	Message string        `json:"message"`
-}
-
-// ExceptionCode defines model for Exception.Code.
-type ExceptionCode string
 
 // Game defines model for Game.
 type Game struct {
@@ -112,8 +103,26 @@ type Games = []Game
 // Id defines model for Id.
 type Id = openapi_types.UUID
 
+// InternalServerError defines model for InternalServerError.
+type InternalServerError struct {
+	Code    InternalServerErrorCode `json:"code"`
+	Message string                  `json:"message"`
+}
+
+// InternalServerErrorCode defines model for InternalServerError.Code.
+type InternalServerErrorCode string
+
 // Name defines model for Name.
 type Name = string
+
+// NotFoundError defines model for NotFoundError.
+type NotFoundError struct {
+	Code    NotFoundErrorCode `json:"code"`
+	Message string            `json:"message"`
+}
+
+// NotFoundErrorCode defines model for NotFoundError.Code.
+type NotFoundErrorCode string
 
 // Timer defines model for Timer.
 type Timer struct {
@@ -536,7 +545,7 @@ func (response GetUser200JSONResponse) VisitGetUserResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUser404JSONResponse Exception
+type GetUser404JSONResponse NotFoundError
 
 func (response GetUser404JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -545,11 +554,11 @@ func (response GetUser404JSONResponse) VisitGetUserResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUser503JSONResponse Exception
+type GetUser500JSONResponse InternalServerError
 
-func (response GetUser503JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
+func (response GetUser500JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -571,7 +580,7 @@ func (response CreateUser200JSONResponse) VisitCreateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUser409JSONResponse Exception
+type CreateUser409JSONResponse ConflictError
 
 func (response CreateUser409JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -580,11 +589,11 @@ func (response CreateUser409JSONResponse) VisitCreateUserResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUser503JSONResponse Exception
+type CreateUser500JSONResponse InternalServerError
 
-func (response CreateUser503JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
+func (response CreateUser500JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -606,7 +615,7 @@ func (response GetAvailableEffects200JSONResponse) VisitGetAvailableEffectsRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetAvailableEffects404JSONResponse Exception
+type GetAvailableEffects404JSONResponse ConflictError
 
 func (response GetAvailableEffects404JSONResponse) VisitGetAvailableEffectsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -615,11 +624,11 @@ func (response GetAvailableEffects404JSONResponse) VisitGetAvailableEffectsRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetAvailableEffects503JSONResponse Exception
+type GetAvailableEffects500JSONResponse InternalServerError
 
-func (response GetAvailableEffects503JSONResponse) VisitGetAvailableEffectsResponse(w http.ResponseWriter) error {
+func (response GetAvailableEffects500JSONResponse) VisitGetAvailableEffectsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -641,7 +650,7 @@ func (response CheckEffectRoll200JSONResponse) VisitCheckEffectRollResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CheckEffectRoll404JSONResponse Exception
+type CheckEffectRoll404JSONResponse NotFoundError
 
 func (response CheckEffectRoll404JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -650,11 +659,11 @@ func (response CheckEffectRoll404JSONResponse) VisitCheckEffectRollResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CheckEffectRoll503JSONResponse Exception
+type CheckEffectRoll500JSONResponse InternalServerError
 
-func (response CheckEffectRoll503JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
+func (response CheckEffectRoll500JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -676,7 +685,7 @@ func (response GetEffectHistory200JSONResponse) VisitGetEffectHistoryResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetEffectHistory404JSONResponse Exception
+type GetEffectHistory404JSONResponse NotFoundError
 
 func (response GetEffectHistory404JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -685,11 +694,11 @@ func (response GetEffectHistory404JSONResponse) VisitGetEffectHistoryResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetEffectHistory503JSONResponse Exception
+type GetEffectHistory500JSONResponse InternalServerError
 
-func (response GetEffectHistory503JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
+func (response GetEffectHistory500JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -711,7 +720,7 @@ func (response MakeEffectRoll200JSONResponse) VisitMakeEffectRollResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeEffectRoll404JSONResponse Exception
+type MakeEffectRoll404JSONResponse NotFoundError
 
 func (response MakeEffectRoll404JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -720,7 +729,7 @@ func (response MakeEffectRoll404JSONResponse) VisitMakeEffectRollResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeEffectRoll409JSONResponse Exception
+type MakeEffectRoll409JSONResponse ConflictError
 
 func (response MakeEffectRoll409JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -729,11 +738,11 @@ func (response MakeEffectRoll409JSONResponse) VisitMakeEffectRollResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeEffectRoll503JSONResponse Exception
+type MakeEffectRoll500JSONResponse InternalServerError
 
-func (response MakeEffectRoll503JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
+func (response MakeEffectRoll500JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -755,7 +764,7 @@ func (response GetCurrentGame200JSONResponse) VisitGetCurrentGameResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCurrentGame404JSONResponse Exception
+type GetCurrentGame404JSONResponse NotFoundError
 
 func (response GetCurrentGame404JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -764,11 +773,11 @@ func (response GetCurrentGame404JSONResponse) VisitGetCurrentGameResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCurrentGame503JSONResponse Exception
+type GetCurrentGame500JSONResponse InternalServerError
 
-func (response GetCurrentGame503JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
+func (response GetCurrentGame500JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -789,7 +798,7 @@ func (response CancelCurrentGame200Response) VisitCancelCurrentGameResponse(w ht
 	return nil
 }
 
-type CancelCurrentGame404JSONResponse Exception
+type CancelCurrentGame404JSONResponse NotFoundError
 
 func (response CancelCurrentGame404JSONResponse) VisitCancelCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -798,11 +807,11 @@ func (response CancelCurrentGame404JSONResponse) VisitCancelCurrentGameResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CancelCurrentGame503JSONResponse Exception
+type CancelCurrentGame500JSONResponse InternalServerError
 
-func (response CancelCurrentGame503JSONResponse) VisitCancelCurrentGameResponse(w http.ResponseWriter) error {
+func (response CancelCurrentGame500JSONResponse) VisitCancelCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -823,7 +832,7 @@ func (response FinishCurrentGame200Response) VisitFinishCurrentGameResponse(w ht
 	return nil
 }
 
-type FinishCurrentGame404JSONResponse Exception
+type FinishCurrentGame404JSONResponse NotFoundError
 
 func (response FinishCurrentGame404JSONResponse) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -832,11 +841,11 @@ func (response FinishCurrentGame404JSONResponse) VisitFinishCurrentGameResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type FinishCurrentGame503JSONResponse Exception
+type FinishCurrentGame500JSONResponse InternalServerError
 
-func (response FinishCurrentGame503JSONResponse) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
+func (response FinishCurrentGame500JSONResponse) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -858,7 +867,7 @@ func (response GetGameHistory200JSONResponse) VisitGetGameHistoryResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetGameHistory404JSONResponse Exception
+type GetGameHistory404JSONResponse NotFoundError
 
 func (response GetGameHistory404JSONResponse) VisitGetGameHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -867,11 +876,11 @@ func (response GetGameHistory404JSONResponse) VisitGetGameHistoryResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetGameHistory503JSONResponse Exception
+type GetGameHistory500JSONResponse InternalServerError
 
-func (response GetGameHistory503JSONResponse) VisitGetGameHistoryResponse(w http.ResponseWriter) error {
+func (response GetGameHistory500JSONResponse) VisitGetGameHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -893,7 +902,7 @@ func (response MakeGameRoll200JSONResponse) VisitMakeGameRollResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeGameRoll404JSONResponse Exception
+type MakeGameRoll404JSONResponse NotFoundError
 
 func (response MakeGameRoll404JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -902,7 +911,7 @@ func (response MakeGameRoll404JSONResponse) VisitMakeGameRollResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeGameRoll409JSONResponse Exception
+type MakeGameRoll409JSONResponse ConflictError
 
 func (response MakeGameRoll409JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -911,11 +920,11 @@ func (response MakeGameRoll409JSONResponse) VisitMakeGameRollResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MakeGameRoll503JSONResponse Exception
+type MakeGameRoll500JSONResponse InternalServerError
 
-func (response MakeGameRoll503JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
+func (response MakeGameRoll500JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -937,7 +946,7 @@ func (response GetUnplayedGames200JSONResponse) VisitGetUnplayedGamesResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUnplayedGames404JSONResponse Exception
+type GetUnplayedGames404JSONResponse NotFoundError
 
 func (response GetUnplayedGames404JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -946,11 +955,11 @@ func (response GetUnplayedGames404JSONResponse) VisitGetUnplayedGamesResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUnplayedGames503JSONResponse Exception
+type GetUnplayedGames500JSONResponse InternalServerError
 
-func (response GetUnplayedGames503JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
+func (response GetUnplayedGames500JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -972,7 +981,7 @@ func (response AddUnplayedGames200Response) VisitAddUnplayedGamesResponse(w http
 	return nil
 }
 
-type AddUnplayedGames404JSONResponse Exception
+type AddUnplayedGames404JSONResponse NotFoundError
 
 func (response AddUnplayedGames404JSONResponse) VisitAddUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -981,11 +990,11 @@ func (response AddUnplayedGames404JSONResponse) VisitAddUnplayedGamesResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AddUnplayedGames503JSONResponse Exception
+type AddUnplayedGames500JSONResponse InternalServerError
 
-func (response AddUnplayedGames503JSONResponse) VisitAddUnplayedGamesResponse(w http.ResponseWriter) error {
+func (response AddUnplayedGames500JSONResponse) VisitAddUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1007,7 +1016,7 @@ func (response GetCurrentTimer200JSONResponse) VisitGetCurrentTimerResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCurrentTimer404JSONResponse Exception
+type GetCurrentTimer404JSONResponse NotFoundError
 
 func (response GetCurrentTimer404JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -1016,11 +1025,11 @@ func (response GetCurrentTimer404JSONResponse) VisitGetCurrentTimerResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCurrentTimer503JSONResponse Exception
+type GetCurrentTimer500JSONResponse InternalServerError
 
-func (response GetCurrentTimer503JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
+func (response GetCurrentTimer500JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1042,7 +1051,7 @@ func (response PauseCurrentTimer200JSONResponse) VisitPauseCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PauseCurrentTimer404JSONResponse Exception
+type PauseCurrentTimer404JSONResponse NotFoundError
 
 func (response PauseCurrentTimer404JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -1051,7 +1060,7 @@ func (response PauseCurrentTimer404JSONResponse) VisitPauseCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PauseCurrentTimer409JSONResponse Exception
+type PauseCurrentTimer409JSONResponse ConflictError
 
 func (response PauseCurrentTimer409JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -1060,11 +1069,11 @@ func (response PauseCurrentTimer409JSONResponse) VisitPauseCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PauseCurrentTimer503JSONResponse Exception
+type PauseCurrentTimer500JSONResponse InternalServerError
 
-func (response PauseCurrentTimer503JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
+func (response PauseCurrentTimer500JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1086,7 +1095,7 @@ func (response StartCurrentTimer200JSONResponse) VisitStartCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type StartCurrentTimer404JSONResponse Exception
+type StartCurrentTimer404JSONResponse NotFoundError
 
 func (response StartCurrentTimer404JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -1095,7 +1104,7 @@ func (response StartCurrentTimer404JSONResponse) VisitStartCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type StartCurrentTimer409JSONResponse Exception
+type StartCurrentTimer409JSONResponse ConflictError
 
 func (response StartCurrentTimer409JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -1104,11 +1113,11 @@ func (response StartCurrentTimer409JSONResponse) VisitStartCurrentTimerResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type StartCurrentTimer503JSONResponse Exception
+type StartCurrentTimer500JSONResponse InternalServerError
 
-func (response StartCurrentTimer503JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
+func (response StartCurrentTimer500JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(503)
+	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
