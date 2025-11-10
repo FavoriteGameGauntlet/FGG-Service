@@ -7,6 +7,11 @@ import (
 	"context"
 )
 
+// GetAvailableEffects (POST /users/{userId}/effects/available)
+func (Server) GetAvailableEffects(_ context.Context, request api.GetAvailableEffectsRequestObject) (api.GetAvailableEffectsResponseObject, error) {
+	return api.GetAvailableEffects200JSONResponse{}, nil
+}
+
 // CheckEffectRoll (GET /users/{userId}/effects/has-roll)
 func (Server) CheckEffectRoll(_ context.Context, request api.CheckEffectRollRequestObject) (api.CheckEffectRollResponseObject, error) {
 	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)

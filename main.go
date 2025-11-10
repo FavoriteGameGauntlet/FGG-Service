@@ -3,9 +3,13 @@ package main
 import (
 	"FGG-Service/api"
 	"FGG-Service/controller"
+	"FGG-Service/db_access"
+	"FGG-Service/timer_service"
 	"embed"
 	"net/http"
+	"time"
 
+	"github.com/go-co-op/gocron/v2"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,9 +29,34 @@ func main() {
 	httpHandler := http.StripPrefix("/swagger/", fileServer)
 	e.GET("/swagger/*", echo.WrapHandler(httpHandler))
 
+	db_access.Init()
+	defer db_access.Close()
+	StartScheduler()
+
+	e.HideBanner = true
 	err := e.Start(":8080")
 
 	if err != nil {
 		panic(err)
 	}
+}
+
+func StartScheduler() {
+	scheduler, err := gocron.NewScheduler()
+
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = scheduler.NewJob(
+		gocron.DurationJob(1*time.Second),
+		gocron.NewTask(timer_service.StopAllCompletedTimers),
+		gocron.WithSingletonMode(gocron.LimitModeReschedule),
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	scheduler.Start()
 }

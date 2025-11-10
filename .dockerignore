@@ -4,6 +4,6 @@ docker-compose.yml
 .idea
 .gitignore
 .git
-generate-oapi-codegen.bat
+api/generate-oapi-codegen.bat
 
-FGG.db
+data

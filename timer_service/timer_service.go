@@ -1,7 +1,7 @@
 package timer_service
 
 import (
-	"FGG-Service/database"
+	"FGG-Service/db_access"
 	"database/sql"
 	"errors"
 	"time"
@@ -16,7 +16,7 @@ const (
 				SELECT 1
 				FROM Timers
 				WHERE UserId = $userId
-					AND State != $rolledTimerState)
+					AND State != $finishedTimerState)
          	THEN true
          	ELSE false
        		END AS 'DoesExist'`
@@ -35,20 +35,28 @@ const (
 		FROM Timers t
 			LEFT JOIN TimerActions ta ON t.Id = ta.TimerId
 		WHERE UserId = $userId
-			AND State != $rolledTimerState
-		ORDER BY ta.Date DESC`
+			AND t.State != $finishedTimerState
+		ORDER BY ta.Date
+		LIMIT 1`
 	CreateTimerCommand = `
 		INSERT INTO Timers (Id, UserId, GameId, DurationInS)
 		VALUES ($timerId, $userId, $gameId, $timerDurationInS)`
 	ActCurrentTimerCommand = `
 		INSERT INTO TimerActions (Id, TimerId, Action, RemainingTimeInS)
 		VALUES ($timerActionId, $timerId, $timerAction, $remainingTimeInS)`
+	GetCompletedTimerUsersCommand = `
+		SELECT t.UserId
+		FROM Timers t
+			LEFT JOIN TimerActions ta ON t.Id = ta.TimerId
+		WHERE t.State IN ($runningTimerState, $pausedTimerState)
+	  	    AND CASE t.State
+				WHEN $runningTimerState THEN ta.RemainingTimeInS - (strftime('%s', 'now') - strftime('%s', ta.Date))
+				WHEN $pausedTimerState THEN ta.RemainingTimeInS
+			END <= 0`
 )
 
-const DefaultTimerDurationInS = 10800
-
 func CheckIfCurrentTimerExists(userId uuid.UUID) (bool, error) {
-	row := database.QueryRow(
+	row := db_access.QueryRow(
 		CheckIfCurrentTimerExistsCommand,
 		userId,
 		TimerStateFinished,
@@ -91,17 +99,17 @@ func GetOrCreateCurrentTimer(userId uuid.UUID, gameId uuid.UUID) (*Timer, error)
 }
 
 func GetCurrentTimer(userId uuid.UUID) (*Timer, error) {
-	row := database.QueryRow(
+	row := db_access.QueryRow(
 		GetCurrentTimerCommand,
 		TimerActionStart,
 		TimerActionPause,
 		TimerActionStop,
 		userId,
-		TimerStateRolled,
+		TimerStateFinished,
 	)
 
 	timer := Timer{}
-	var timerActionDateString string
+	var timerActionDateString *string
 	err := row.Scan(
 		&timer.Id,
 		&timer.State,
@@ -118,20 +126,27 @@ func GetCurrentTimer(userId uuid.UUID) (*Timer, error) {
 		return nil, err
 	}
 
-	timerActionDate, err := time.Parse(database.ISO8601, timerActionDateString)
+	var timerActionDate *time.Time
 
-	if err != nil {
-		return nil, err
+	if timerActionDateString != nil {
+		var notNilDate time.Time
+		notNilDate, err = time.Parse(db_access.ISO8601, *timerActionDateString)
+
+		if err != nil {
+			return nil, err
+		}
+
+		timerActionDate = &notNilDate
 	}
 
-	timer.TimerActionDate = &timerActionDate
+	timer.TimerActionDate = timerActionDate
 
 	return &timer, nil
 }
 
 func CreateCurrentTimer(userId uuid.UUID, gameId uuid.UUID) (*Timer, error) {
 	timerId := uuid.New().String()
-	_, err := database.Exec(
+	_, err := db_access.Exec(
 		CreateTimerCommand,
 		timerId,
 		userId,
@@ -170,7 +185,7 @@ func StartCurrentTimer(userId uuid.UUID) (*TimerAction, error) {
 	timerAction := TimerActionStart
 	remainingTimerInS := timer.RemainingTimeInS
 
-	_, err = database.Exec(
+	_, err = db_access.Exec(
 		ActCurrentTimerCommand,
 		timerActionId,
 		timer.Id,
@@ -209,7 +224,7 @@ func PauseCurrentTimer(userId uuid.UUID) (*TimerAction, error) {
 	timerAction := TimerActionPause
 	remainingTimerInS := timer.RemainingTimeInS
 
-	_, err = database.Exec(
+	_, err = db_access.Exec(
 		ActCurrentTimerCommand,
 		timerActionId,
 		timer.Id,
@@ -247,7 +262,7 @@ func StopCurrentTimer(userId uuid.UUID) (*TimerAction, error) {
 	timerAction := TimerActionStop
 	remainingTimerInS := 0
 
-	_, err = database.Exec(
+	_, err = db_access.Exec(
 		ActCurrentTimerCommand,
 		timerActionId,
 		timer.Id,
@@ -263,4 +278,39 @@ func StopCurrentTimer(userId uuid.UUID) (*TimerAction, error) {
 		Action:           timerAction,
 		RemainingTimeInS: remainingTimerInS,
 	}, nil
+}
+
+func StopAllCompletedTimers() error {
+	rows, err := db_access.Query(GetCompletedTimerUsersCommand, TimerStateRunning, TimerStatePaused)
+
+	if err != nil {
+		return err
+	}
+
+	timerCount := 0
+	errorCount := 0
+	for rows.Next() {
+		timerCount++
+
+		var userId uuid.UUID
+		err = rows.Scan(&userId)
+
+		if err != nil {
+			errorCount++
+			continue
+		}
+
+		_, err = StopCurrentTimer(userId)
+
+		if err != nil {
+			errorCount++
+			continue
+		}
+	}
+
+	if errorCount > 0 && errorCount == timerCount {
+		return err
+	}
+
+	return nil
 }

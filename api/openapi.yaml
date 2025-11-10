@@ -591,6 +591,9 @@ components:
             state:
               type: string
               enum: [ 'started', 'finished', 'cancelled' ]
+            hourCount:
+              type: integer
+              format: int
             finishDate:
               type: string
               format: date-time
@@ -605,7 +608,7 @@ components:
       properties:
         state:
           type: string
-          enum: [ 'created', 'running', 'paused', 'finished', 'rolled' ]
+          enum: [ 'created', 'running', 'paused', 'finished' ]
         remainingTimeInS:
           type: integer
           format: int
@@ -622,14 +625,14 @@ components:
     TimerAction:
       type: object
       properties:
-        action:
+        type:
           type: string
           enum: [ 'start', 'pause', 'stop' ]
         remainingTimeInS:
           type: integer
           format: int
       required:
-        - action
+        - type
         - remainingTimeInS
     Effect:
       type: object

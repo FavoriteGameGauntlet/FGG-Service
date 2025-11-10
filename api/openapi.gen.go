@@ -57,16 +57,21 @@ const (
 	TimerStateCreated  TimerState = "created"
 	TimerStateFinished TimerState = "finished"
 	TimerStatePaused   TimerState = "paused"
-	TimerStateRolled   TimerState = "rolled"
 	TimerStateRunning  TimerState = "running"
 )
 
-// Defines values for TimerActionAction.
+// Defines values for TimerActionType.
 const (
-	Pause TimerActionAction = "pause"
-	Start TimerActionAction = "start"
-	Stop  TimerActionAction = "stop"
+	Pause TimerActionType = "pause"
+	Start TimerActionType = "start"
+	Stop  TimerActionType = "stop"
 )
+
+// AvailableEffect defines model for AvailableEffect.
+type AvailableEffect struct {
+	Description *string `json:"description,omitempty"`
+	Name        Name    `json:"name"`
+}
 
 // Effect defines model for Effect.
 type Effect struct {
@@ -92,6 +97,7 @@ type ExceptionCode string
 // Game defines model for Game.
 type Game struct {
 	FinishDate *time.Time `json:"finishDate,omitempty"`
+	HourCount  *int       `json:"hourCount,omitempty"`
 	Link       *string    `json:"link,omitempty"`
 	Name       Name       `json:"name"`
 	State      GameState  `json:"state"`
@@ -122,12 +128,12 @@ type TimerState string
 
 // TimerAction defines model for TimerAction.
 type TimerAction struct {
-	Action           TimerActionAction `json:"action"`
-	RemainingTimeInS int               `json:"remainingTimeInS"`
+	RemainingTimeInS int             `json:"remainingTimeInS"`
+	Type             TimerActionType `json:"type"`
 }
 
-// TimerActionAction defines model for TimerAction.Action.
-type TimerActionAction string
+// TimerActionType defines model for TimerAction.Type.
+type TimerActionType string
 
 // UnplayedGame defines model for UnplayedGame.
 type UnplayedGame struct {
@@ -155,49 +161,52 @@ type AddUnplayedGamesJSONRequestBody = UnplayedGames
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-
+	// Get user ID
 	// (GET /users/{name})
 	GetUser(ctx echo.Context, name UserName) error
-
+	// Create user
 	// (POST /users/{name})
 	CreateUser(ctx echo.Context, name UserName) error
-
+	// Get a list of effects available for rolling
+	// (POST /users/{userId}/effects/available)
+	GetAvailableEffects(ctx echo.Context, userId UserId) error
+	// Check if there are any effect rolls available
 	// (GET /users/{userId}/effects/has-roll)
 	CheckEffectRoll(ctx echo.Context, userId UserId) error
-
+	// Get a list of all effect rolls
 	// (GET /users/{userId}/effects/history)
 	GetEffectHistory(ctx echo.Context, userId UserId) error
-
+	// Make the roll of the effect available
 	// (POST /users/{userId}/effects/roll)
 	MakeEffectRoll(ctx echo.Context, userId UserId) error
-
+	// Get the current game
 	// (GET /users/{userId}/games/current)
 	GetCurrentGame(ctx echo.Context, userId UserId) error
-
+	// Cancel the current game
 	// (POST /users/{userId}/games/current/cancel)
 	CancelCurrentGame(ctx echo.Context, userId UserId) error
-
+	// Complete the current game
 	// (POST /users/{userId}/games/current/finish)
 	FinishCurrentGame(ctx echo.Context, userId UserId) error
-
+	// Get a list of all games played
 	// (GET /users/{userId}/games/history)
 	GetGameHistory(ctx echo.Context, userId UserId) error
-
+	// Select a random game from the wishlist
 	// (POST /users/{userId}/games/roll)
 	MakeGameRoll(ctx echo.Context, userId UserId) error
-
+	// Get game wishlist
 	// (GET /users/{userId}/games/unplayed)
 	GetUnplayedGames(ctx echo.Context, userId UserId) error
-
+	// Add game wishlist
 	// (POST /users/{userId}/games/unplayed)
 	AddUnplayedGames(ctx echo.Context, userId UserId) error
-
+	// Get a timer for the current game
 	// (GET /users/{userId}/timers/current)
 	GetCurrentTimer(ctx echo.Context, userId UserId) error
-
+	// Pause the current timer
 	// (POST /users/{userId}/timers/current/pause)
 	PauseCurrentTimer(ctx echo.Context, userId UserId) error
-
+	// Start or continue the current timer
 	// (POST /users/{userId}/timers/current/start)
 	StartCurrentTimer(ctx echo.Context, userId UserId) error
 }
@@ -236,6 +245,22 @@ func (w *ServerInterfaceWrapper) CreateUser(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CreateUser(ctx, name)
+	return err
+}
+
+// GetAvailableEffects converts echo context to params.
+func (w *ServerInterfaceWrapper) GetAvailableEffects(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId UserId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetAvailableEffects(ctx, userId)
 	return err
 }
 
@@ -477,6 +502,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/users/:name", wrapper.GetUser)
 	router.POST(baseURL+"/users/:name", wrapper.CreateUser)
+	router.POST(baseURL+"/users/:userId/effects/available", wrapper.GetAvailableEffects)
 	router.GET(baseURL+"/users/:userId/effects/has-roll", wrapper.CheckEffectRoll)
 	router.GET(baseURL+"/users/:userId/effects/history", wrapper.GetEffectHistory)
 	router.POST(baseURL+"/users/:userId/effects/roll", wrapper.MakeEffectRoll)
@@ -557,6 +583,41 @@ func (response CreateUser409JSONResponse) VisitCreateUserResponse(w http.Respons
 type CreateUser503JSONResponse Exception
 
 func (response CreateUser503JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAvailableEffectsRequestObject struct {
+	UserId UserId `json:"userId"`
+}
+
+type GetAvailableEffectsResponseObject interface {
+	VisitGetAvailableEffectsResponse(w http.ResponseWriter) error
+}
+
+type GetAvailableEffects200JSONResponse AvailableEffect
+
+func (response GetAvailableEffects200JSONResponse) VisitGetAvailableEffectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAvailableEffects404JSONResponse Exception
+
+func (response GetAvailableEffects404JSONResponse) VisitGetAvailableEffectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAvailableEffects503JSONResponse Exception
+
+func (response GetAvailableEffects503JSONResponse) VisitGetAvailableEffectsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
 
@@ -1054,49 +1115,52 @@ func (response StartCurrentTimer503JSONResponse) VisitStartCurrentTimerResponse(
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-
+	// Get user ID
 	// (GET /users/{name})
 	GetUser(ctx context.Context, request GetUserRequestObject) (GetUserResponseObject, error)
-
+	// Create user
 	// (POST /users/{name})
 	CreateUser(ctx context.Context, request CreateUserRequestObject) (CreateUserResponseObject, error)
-
+	// Get a list of effects available for rolling
+	// (POST /users/{userId}/effects/available)
+	GetAvailableEffects(ctx context.Context, request GetAvailableEffectsRequestObject) (GetAvailableEffectsResponseObject, error)
+	// Check if there are any effect rolls available
 	// (GET /users/{userId}/effects/has-roll)
 	CheckEffectRoll(ctx context.Context, request CheckEffectRollRequestObject) (CheckEffectRollResponseObject, error)
-
+	// Get a list of all effect rolls
 	// (GET /users/{userId}/effects/history)
 	GetEffectHistory(ctx context.Context, request GetEffectHistoryRequestObject) (GetEffectHistoryResponseObject, error)
-
+	// Make the roll of the effect available
 	// (POST /users/{userId}/effects/roll)
 	MakeEffectRoll(ctx context.Context, request MakeEffectRollRequestObject) (MakeEffectRollResponseObject, error)
-
+	// Get the current game
 	// (GET /users/{userId}/games/current)
 	GetCurrentGame(ctx context.Context, request GetCurrentGameRequestObject) (GetCurrentGameResponseObject, error)
-
+	// Cancel the current game
 	// (POST /users/{userId}/games/current/cancel)
 	CancelCurrentGame(ctx context.Context, request CancelCurrentGameRequestObject) (CancelCurrentGameResponseObject, error)
-
+	// Complete the current game
 	// (POST /users/{userId}/games/current/finish)
 	FinishCurrentGame(ctx context.Context, request FinishCurrentGameRequestObject) (FinishCurrentGameResponseObject, error)
-
+	// Get a list of all games played
 	// (GET /users/{userId}/games/history)
 	GetGameHistory(ctx context.Context, request GetGameHistoryRequestObject) (GetGameHistoryResponseObject, error)
-
+	// Select a random game from the wishlist
 	// (POST /users/{userId}/games/roll)
 	MakeGameRoll(ctx context.Context, request MakeGameRollRequestObject) (MakeGameRollResponseObject, error)
-
+	// Get game wishlist
 	// (GET /users/{userId}/games/unplayed)
 	GetUnplayedGames(ctx context.Context, request GetUnplayedGamesRequestObject) (GetUnplayedGamesResponseObject, error)
-
+	// Add game wishlist
 	// (POST /users/{userId}/games/unplayed)
 	AddUnplayedGames(ctx context.Context, request AddUnplayedGamesRequestObject) (AddUnplayedGamesResponseObject, error)
-
+	// Get a timer for the current game
 	// (GET /users/{userId}/timers/current)
 	GetCurrentTimer(ctx context.Context, request GetCurrentTimerRequestObject) (GetCurrentTimerResponseObject, error)
-
+	// Pause the current timer
 	// (POST /users/{userId}/timers/current/pause)
 	PauseCurrentTimer(ctx context.Context, request PauseCurrentTimerRequestObject) (PauseCurrentTimerResponseObject, error)
-
+	// Start or continue the current timer
 	// (POST /users/{userId}/timers/current/start)
 	StartCurrentTimer(ctx context.Context, request StartCurrentTimerRequestObject) (StartCurrentTimerResponseObject, error)
 }
@@ -1157,6 +1221,31 @@ func (sh *strictHandler) CreateUser(ctx echo.Context, name UserName) error {
 		return err
 	} else if validResponse, ok := response.(CreateUserResponseObject); ok {
 		return validResponse.VisitCreateUserResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// GetAvailableEffects operation middleware
+func (sh *strictHandler) GetAvailableEffects(ctx echo.Context, userId UserId) error {
+	var request GetAvailableEffectsRequestObject
+
+	request.UserId = userId
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetAvailableEffects(ctx.Request().Context(), request.(GetAvailableEffectsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetAvailableEffects")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetAvailableEffectsResponseObject); ok {
+		return validResponse.VisitGetAvailableEffectsResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}

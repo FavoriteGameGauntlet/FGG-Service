@@ -1,7 +1,7 @@
 package game_service
 
 import (
-	"FGG-Service/database"
+	"FGG-Service/db_access"
 	"FGG-Service/timer_service"
 	"database/sql"
 	"errors"
@@ -61,17 +61,19 @@ const (
 			INNER JOIN Games g ON ug.GameId = g.Id
 		WHERE ug.UserId = $userId`
 	GetCurrentGameCommand = `
-		SELECT g.Id, g.Name, gh.State, g.Link, gh.FinishDate
+		SELECT 
+		  g.Id,
+		  g.Name,
+		  gh.State,
+		  g.Link,
+		  SUM(t.DurationInS) AS SpentSeconds,
+		  gh.FinishDate
 		FROM GameHistory gh
 			INNER JOIN Games g ON gh.GameId = g.Id
+			LEFT JOIN Timers t ON t.UserId = gh.UserId AND t.GameId = gh.GameId
 		WHERE gh.UserId = $userId
-			AND gh.State <> $finishedGameState`
-	GetCurrentGameSpentSecondsCommand = `
-		SELECT SUM(DurationInS) AS CurrentGameSpentSecondsSpent
-		FROM Timers
-		WHERE UserId = $userId 
-			AND GameId = $gameId
-			AND State = $finishedTimerState`
+			AND gh.State <> $finishedGameState
+		GROUP BY g.Id, g.Name, gh.State, g.Link, gh.FinishDate`
 	CancelCurrentGameCommand = `
 		UPDATE GameHistory
 		SET State = $cancelledGameState,
@@ -90,10 +92,18 @@ const (
 		INSERT INTO EffectHistory (Id, UserId, GameId)
 		VALUES ($effectHistoryId, $gameId, $userId)`
 	GetGameHistoryCommand = `
-		SELECT g.Id, g.Name, gh.State, g.Link, gh.FinishDate
+		SELECT 
+		  g.Id,
+		  g.Name,
+		  gh.State,
+		  g.Link,
+		  SUM(t.DurationInS) AS SpentSeconds,
+		  gh.FinishDate
 		FROM GameHistory gh
 			INNER JOIN Games g ON gh.GameId = g.Id
+			LEFT JOIN Timers t ON t.UserId = gh.UserId AND t.GameId = gh.GameId
 		WHERE gh.UserId = $userId
+		GROUP BY g.Id, g.Name, gh.State, g.Link, gh.FinishDate
 		ORDER BY gh.FinishDate NULLS FIRST`
 	CreateCurrentGameCommand = `
 		INSERT INTO GameHistory (Id, UserId, GameId)
@@ -142,7 +152,7 @@ func AddUnplayedGame(userId uuid.UUID, unplayedGame *UnplayedGame) error {
 	}
 
 	unplayedGameId := uuid.New().String()
-	_, err = database.Exec(
+	_, err = db_access.Exec(
 		AddUnplayedGameCommand,
 		unplayedGameId,
 		userId,
@@ -153,7 +163,7 @@ func AddUnplayedGame(userId uuid.UUID, unplayedGame *UnplayedGame) error {
 }
 
 func CheckIfUnplayedGameExists(userId uuid.UUID, gameName string) (bool, error) {
-	row := database.QueryRow(CheckIfUnplayedGameExistsCommand, userId, gameName)
+	row := db_access.QueryRow(CheckIfUnplayedGameExistsCommand, userId, gameName)
 
 	var doesExist bool
 	err := row.Scan(&doesExist)
@@ -173,7 +183,7 @@ func AddOrGetGame(unplayedGame *UnplayedGame) (*Game, error) {
 	}
 
 	if doesExist {
-		row := database.QueryRow(GetGameCommand, unplayedGame.Name)
+		row := db_access.QueryRow(GetGameCommand, unplayedGame.Name)
 
 		game := Game{}
 		err = row.Scan(&game.Id, &game.Name, &game.Link)
@@ -186,7 +196,7 @@ func AddOrGetGame(unplayedGame *UnplayedGame) (*Game, error) {
 	}
 
 	gameId := uuid.New()
-	_, err = database.Exec(
+	_, err = db_access.Exec(
 		AddGameCommand,
 		gameId.String(),
 		unplayedGame.Name,
@@ -205,7 +215,7 @@ func AddOrGetGame(unplayedGame *UnplayedGame) (*Game, error) {
 }
 
 func CheckIfGameExists(gameName string) (bool, error) {
-	row := database.QueryRow(CheckIfGameExistsCommand, gameName)
+	row := db_access.QueryRow(CheckIfGameExistsCommand, gameName)
 
 	var doesExist bool
 	err := row.Scan(&doesExist)
@@ -218,7 +228,7 @@ func CheckIfGameExists(gameName string) (bool, error) {
 }
 
 func GetUnplayedGames(userId uuid.UUID) (*UnplayedGames, error) {
-	rows, err := database.Query(GetUnplayedGamesCommand, userId)
+	rows, err := db_access.Query(GetUnplayedGamesCommand, userId)
 
 	if err != nil {
 		return nil, err
@@ -249,10 +259,11 @@ func GetUnplayedGames(userId uuid.UUID) (*UnplayedGames, error) {
 }
 
 func GetCurrentGame(userId uuid.UUID) (*Game, error) {
-	row := database.QueryRow(GetCurrentGameCommand, userId, GameStateFinished)
+	row := db_access.QueryRow(GetCurrentGameCommand, userId, GameStateFinished)
 
 	game := Game{}
-	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link, &game.FinishDate)
+	var spentSeconds *int
+	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link, &spentSeconds, &game.FinishDate)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -262,11 +273,17 @@ func GetCurrentGame(userId uuid.UUID) (*Game, error) {
 		return nil, err
 	}
 
+	if spentSeconds != nil {
+		hourCount := *spentSeconds / int(time.Hour/time.Second)
+
+		game.HourCount = &hourCount
+	}
+
 	return &game, nil
 }
 
 func CheckIfCurrentGameExists(userId uuid.UUID) (bool, error) {
-	row := database.QueryRow(CheckIfCurrentGameExistsCommand, userId, GameStateFinished)
+	row := db_access.QueryRow(CheckIfCurrentGameExistsCommand, userId, GameStateFinished)
 
 	var doesExist bool
 	err := row.Scan(&doesExist)
@@ -302,12 +319,18 @@ func CancelCurrentGame(userId uuid.UUID) error {
 		return err
 	}
 
-	_, err = database.Exec(CancelCurrentGameCommand, GameStateCancelled, resultPoints, userId, game.Id)
+	_, err = db_access.Exec(CancelCurrentGameCommand, GameStateCancelled, resultPoints, userId, game.Id)
 
 	return err
 }
 
 func FinishCurrentGame(userId uuid.UUID) error {
+	_, err := timer_service.StopCurrentTimer(userId)
+
+	if err != nil {
+		return err
+	}
+
 	game, err := GetCurrentGame(userId)
 
 	if err != nil {
@@ -318,37 +341,21 @@ func FinishCurrentGame(userId uuid.UUID) error {
 		return err
 	}
 
-	_, err = timer_service.StopCurrentTimer(userId)
-
-	if err != nil {
-		return err
-	}
-
-	row := database.QueryRow(GetCurrentGameSpentSecondsCommand, userId, game.Id, timer_service.TimerStateFinished)
-
-	var spentSeconds int
-	err = row.Scan(&spentSeconds)
-
-	if err != nil {
-		return err
-	}
-
-	hourCount := spentSeconds / int(time.Hour/time.Second)
-	diceCount := 1 + hourCount/HourCountForDice
+	diceCount := 1 + *game.HourCount/HourCountForDice
 	resultPoints, err := RollResultPoints(diceCount)
 
 	if err != nil {
 		return err
 	}
 
-	_, err = database.Exec(FinishCurrentGameCommand, GameStateFinished, resultPoints, userId, game.Id)
+	_, err = db_access.Exec(FinishCurrentGameCommand, GameStateFinished, resultPoints, userId, game.Id)
 
 	if err != nil {
 		return err
 	}
 
 	effectHistoryId := uuid.New()
-	_, err = database.Exec(CreateEffectRollCommand, effectHistoryId.String(), userId, game.Id)
+	_, err = db_access.Exec(CreateEffectRollCommand, effectHistoryId.String(), userId, game.Id)
 
 	return err
 }
@@ -369,7 +376,7 @@ func RollResultPoints(diceCount int) (int, error) {
 }
 
 func GetGameHistory(userId uuid.UUID) (*Games, error) {
-	rows, err := database.Query(GetGameHistoryCommand, userId)
+	rows, err := db_access.Query(GetGameHistoryCommand, userId)
 
 	if err != nil {
 		return nil, err
@@ -394,7 +401,7 @@ func GetGameHistory(userId uuid.UUID) (*Games, error) {
 
 		if finishDateString != nil {
 			var notNilFinishDate time.Time
-			notNilFinishDate, err = time.Parse(database.ISO8601, *finishDateString)
+			notNilFinishDate, err = time.Parse(db_access.ISO8601, *finishDateString)
 
 			if err != nil {
 				errorCount++
@@ -431,13 +438,13 @@ func MakeGameRoll(userId uuid.UUID) (*Game, error) {
 	randomUnplayedGame := (*unplayedGames)[randomNumber]
 
 	gameHistoryId := uuid.New()
-	_, err = database.Exec(CreateCurrentGameCommand, gameHistoryId.String(), userId, randomUnplayedGame.GameId)
+	_, err = db_access.Exec(CreateCurrentGameCommand, gameHistoryId.String(), userId, randomUnplayedGame.GameId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = database.Exec(DeleteUnplayedGameCommand, userId, randomUnplayedGame.GameId)
+	_, err = db_access.Exec(DeleteUnplayedGameCommand, userId, randomUnplayedGame.GameId)
 
 	if err != nil {
 		return nil, err

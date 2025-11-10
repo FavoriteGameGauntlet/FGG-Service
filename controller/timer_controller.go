@@ -99,7 +99,7 @@ func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimer
 
 func ConvertTimerActionTo(timerAction *timer_service.TimerAction) *api.TimerAction {
 	return &api.TimerAction{
-		Action:           api.TimerActionAction(timerAction.Action),
+		Type:             api.TimerActionType(timerAction.Action),
 		RemainingTimeInS: timerAction.RemainingTimeInS,
 	}
 }

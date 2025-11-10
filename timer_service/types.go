@@ -10,18 +10,19 @@ type Timer struct {
 	DurationInS      int
 	Id               uuid.UUID
 	RemainingTimeInS int
-	State            TimerState
+	State            TimerStateType
 	TimerActionDate  *time.Time
 }
 
-type TimerState string
+const DefaultTimerDurationInS = 30
+
+type TimerStateType string
 
 const (
-	TimerStateCreated  TimerState = "created"
-	TimerStateFinished TimerState = "finished"
-	TimerStatePaused   TimerState = "paused"
-	TimerStateRolled   TimerState = "rolled"
-	TimerStateRunning  TimerState = "running"
+	TimerStateCreated  TimerStateType = "created"
+	TimerStateFinished TimerStateType = "finished"
+	TimerStatePaused   TimerStateType = "paused"
+	TimerStateRunning  TimerStateType = "running"
 )
 
 type TimerAction struct {

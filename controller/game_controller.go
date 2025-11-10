@@ -39,6 +39,7 @@ func ConvertGameToDto(game *game_service.Game) *api.Game {
 		Link:       game.Link,
 		Name:       game.Name,
 		State:      api.GameState(game.State),
+		HourCount:  game.HourCount,
 		FinishDate: game.FinishDate,
 	}
 }

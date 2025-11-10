@@ -1,7 +1,7 @@
 package user_service
 
 import (
-	"FGG-Service/database"
+	"FGG-Service/db_access"
 
 	"github.com/google/uuid"
 )
@@ -35,7 +35,7 @@ const (
 )
 
 func CheckIfUserExistsByName(userName string) (bool, error) {
-	row := database.QueryRow(CheckIfUserExistsByNameCommand, userName)
+	row := db_access.QueryRow(CheckIfUserExistsByNameCommand, userName)
 
 	var doesExist bool
 	err := row.Scan(&doesExist)
@@ -48,7 +48,7 @@ func CheckIfUserExistsByName(userName string) (bool, error) {
 }
 
 func CheckIfUserExistsById(userId uuid.UUID) (bool, error) {
-	row := database.QueryRow(CheckIfUserExistsByIdCommand, userId)
+	row := db_access.QueryRow(CheckIfUserExistsByIdCommand, userId)
 
 	var doesExist bool
 	err := row.Scan(&doesExist)
@@ -61,7 +61,7 @@ func CheckIfUserExistsById(userId uuid.UUID) (bool, error) {
 }
 
 func FindUser(userName string) (*User, error) {
-	row := database.QueryRow(FindUserCommand, userName)
+	row := db_access.QueryRow(FindUserCommand, userName)
 
 	var userId uuid.UUID
 	err := row.Scan(&userId)
@@ -75,7 +75,7 @@ func FindUser(userName string) (*User, error) {
 
 func CreateUser(userName string) error {
 	userId := uuid.New().String()
-	_, err := database.Exec(CreateUserCommand, userId, userName)
+	_, err := db_access.Exec(CreateUserCommand, userId, userName)
 
 	return err
 }

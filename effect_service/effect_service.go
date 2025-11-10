@@ -1,7 +1,7 @@
 package effect_service
 
 import (
-	"FGG-Service/database"
+	"FGG-Service/db_access"
 	"time"
 
 	"github.com/google/uuid"
@@ -28,7 +28,7 @@ const (
 )
 
 func CheckIfEffectRollExists(userId uuid.UUID) (bool, error) {
-	row := database.QueryRow(CheckIfEffectRollExistsCommand, userId)
+	row := db_access.QueryRow(CheckIfEffectRollExistsCommand, userId)
 
 	var doesExist bool
 	err := row.Scan(&doesExist)
@@ -41,7 +41,7 @@ func CheckIfEffectRollExists(userId uuid.UUID) (bool, error) {
 }
 
 func GetEffectHistory(userId uuid.UUID) (*Effects, error) {
-	rows, err := database.Query(GetEffectHistoryCommand, userId)
+	rows, err := db_access.Query(GetEffectHistoryCommand, userId)
 
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func GetEffectHistory(userId uuid.UUID) (*Effects, error) {
 		}
 
 		var createDate time.Time
-		createDate, err = time.Parse(database.ISO8601, createDateString)
+		createDate, err = time.Parse(db_access.ISO8601, createDateString)
 
 		if err != nil {
 			errorCount++
@@ -76,7 +76,7 @@ func GetEffectHistory(userId uuid.UUID) (*Effects, error) {
 
 		if rollDateString != nil {
 			var notNilRollDate time.Time
-			notNilRollDate, err = time.Parse(database.ISO8601, *rollDateString)
+			notNilRollDate, err = time.Parse(db_access.ISO8601, *rollDateString)
 
 			if err != nil {
 				errorCount++

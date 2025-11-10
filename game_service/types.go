@@ -11,6 +11,7 @@ type Game struct {
 	Link       *string
 	Name       string
 	State      GameState
+	HourCount  *int
 	FinishDate *time.Time
 }
 

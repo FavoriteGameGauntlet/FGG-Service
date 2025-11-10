@@ -9,4 +9,4 @@ services:
       - "8080:8080"
     restart: unless-stopped
     volumes:
-      - ./FGG.db:/app/FGG.db
+      - ./data:/app/data
