@@ -8,17 +8,37 @@
 
 <body>
 <div id="app"></div>
-<!-- Load the Script -->
 <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
 
-<!-- Initialize the Scalar API Reference -->
 <script>
     Scalar.createApiReference('#app', {
-      // The URL of the OpenAPI/Swagger document
       url: 'api/openapi.yaml',
       showToolbar: 'always',
       defaultOpenAllTags: true,
       hideClientButton: true,
+      hiddenClients: {
+        c: true,
+        clojure: true,
+        csharp: true,
+        dart: true,
+        fsharp: true,
+        go: true,
+        http: true,
+        java: true,
+        js: ['axios', 'ofetch', 'jquery', 'xhr'],
+        node: ['axios', 'ofetch', 'undici'],
+        kotlin: true,
+        objc: true,
+        ocaml: true,
+        php: true,
+        powershell: true,
+        python: true,
+        r: true,
+        ruby: true,
+        rust: true,
+        shell: ['httpie', 'wget'],
+        swift: true,
+      },
     })
 </script>
 </body>
