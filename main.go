@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-co-op/gocron/v2"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 //go:embed index.html
@@ -28,6 +29,7 @@ func main() {
 	fileServer := http.FileServer(fileSystem)
 	httpHandler := http.StripPrefix("/swagger/", fileServer)
 	e.GET("/swagger/*", echo.WrapHandler(httpHandler))
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{AllowOrigins: []string{"*"}}))
 
 	db_access.Init()
 	defer db_access.Close()

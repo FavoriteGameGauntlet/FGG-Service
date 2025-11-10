@@ -5,6 +5,6 @@ WORKDIR /app
 COPY . .
 RUN apk add build-base sqlite
 RUN CGO_ENABLED=1 go build
-RUN sqlite3 ./data/FGG.db < ./db_access/FGG.sql
+RUN mkdir -p data && sqlite3 ./data/FGG.db < ./db_access/FGG.sql
 
 ENTRYPOINT ["./FGG-Service"]
