@@ -686,7 +686,8 @@ components:
             "NO_AVAILABLE_ROLLS",
             "TIMER_INCORRECT_STATE",
             "USER_ALREADY_EXISTS",
-            "NO_COMPLETED_TIMERS"
+            "NO_COMPLETED_TIMERS",
+            "NO_UNPLAYED_GAMES"
           ]
         message:
           type: string

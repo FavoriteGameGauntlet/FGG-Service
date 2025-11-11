@@ -171,6 +171,10 @@ func (Server) MakeGameRoll(_ context.Context, request api.MakeGameRollRequestObj
 		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
 	}
 
+	if game == nil {
+		return api.MakeGameRoll409JSONResponse{Code: api.NOUNPLAYEDGAMES}, nil
+	}
+
 	gameDto := ConvertGameToDto(game)
 
 	return api.MakeGameRoll200JSONResponse(*gameDto), nil
