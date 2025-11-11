@@ -90,7 +90,7 @@ type Effects = []Effect
 // Game defines model for Game.
 type Game struct {
 	FinishDate *time.Time `json:"finishDate,omitempty"`
-	HourCount  *int       `json:"hourCount,omitempty"`
+	HourCount  int        `json:"hourCount"`
 	Link       *string    `json:"link,omitempty"`
 	Name       Name       `json:"name"`
 	State      GameState  `json:"state"`

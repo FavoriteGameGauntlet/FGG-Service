@@ -276,7 +276,7 @@ func GetCurrentGame(userId uuid.UUID) (*Game, error) {
 	if spentSeconds != nil {
 		hourCount := *spentSeconds / int(time.Hour/time.Second)
 
-		game.HourCount = &hourCount
+		game.HourCount = hourCount
 	}
 
 	return &game, nil
@@ -341,11 +341,11 @@ func FinishCurrentGame(userId uuid.UUID) (bool, error) {
 		return false, err
 	}
 
-	if game.HourCount == nil {
+	if game.HourCount == 0 {
 		return false, nil
 	}
 
-	additionalDiceCount := *game.HourCount / HourCountForDice
+	additionalDiceCount := game.HourCount / HourCountForDice
 	diceCount := 1 + additionalDiceCount
 	resultPoints, err := RollResultPoints(diceCount)
 
@@ -406,7 +406,7 @@ func GetGameHistory(userId uuid.UUID) (*Games, error) {
 		if spentSeconds != nil {
 			hourCount := *spentSeconds / int(time.Hour/time.Second)
 
-			game.HourCount = &hourCount
+			game.HourCount = hourCount
 		}
 
 		var finishDate *time.Time

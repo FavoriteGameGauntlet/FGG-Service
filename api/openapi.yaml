@@ -600,7 +600,7 @@ components:
             finishDate:
               type: string
               format: date-time
-          required: [ state ]
+          required: [ state, hourCount ]
     Games:
       type: array
       items:
