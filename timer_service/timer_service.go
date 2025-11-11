@@ -36,7 +36,7 @@ const (
 			LEFT JOIN TimerActions ta ON t.Id = ta.TimerId
 		WHERE UserId = $userId
 			AND t.State != $finishedTimerState
-		ORDER BY ta.Date
+		ORDER BY ta.Date DESC
 		LIMIT 1`
 	CreateTimerCommand = `
 		INSERT INTO Timers (Id, UserId, GameId, DurationInS)
@@ -45,7 +45,7 @@ const (
 		INSERT INTO TimerActions (Id, TimerId, Action, RemainingTimeInS)
 		VALUES ($timerActionId, $timerId, $timerAction, $remainingTimeInS)`
 	GetCompletedTimerUsersCommand = `
-		SELECT t.UserId
+		SELECT DISTINCT t.UserId
 		FROM Timers t
 			LEFT JOIN TimerActions ta ON t.Id = ta.TimerId
 		WHERE t.State IN ($runningTimerState, $pausedTimerState)
