@@ -97,10 +97,14 @@ func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGame
 		return api.FinishCurrentGame404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
-	err = game_service.FinishCurrentGame(request.UserId)
+	isSuccess, err := game_service.FinishCurrentGame(request.UserId)
 
 	if err != nil {
 		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+	}
+
+	if !isSuccess {
+		return api.FinishCurrentGame409JSONResponse{Code: api.NOCOMPLETEDTIMERS}, nil
 	}
 
 	return api.FinishCurrentGame200Response{}, nil

@@ -20,6 +20,7 @@ import (
 const (
 	CURRENTGAMEALREADYEXISTS ConflictErrorCode = "CURRENT_GAME_ALREADY_EXISTS"
 	NOAVAILABLEROLLS         ConflictErrorCode = "NO_AVAILABLE_ROLLS"
+	NOCOMPLETEDTIMERS        ConflictErrorCode = "NO_COMPLETED_TIMERS"
 	TIMERINCORRECTSTATE      ConflictErrorCode = "TIMER_INCORRECT_STATE"
 	USERALREADYEXISTS        ConflictErrorCode = "USER_ALREADY_EXISTS"
 )
@@ -837,6 +838,15 @@ type FinishCurrentGame404JSONResponse NotFoundError
 func (response FinishCurrentGame404JSONResponse) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type FinishCurrentGame409JSONResponse ConflictError
+
+func (response FinishCurrentGame409JSONResponse) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
 
 	return json.NewEncoder(w).Encode(response)
 }

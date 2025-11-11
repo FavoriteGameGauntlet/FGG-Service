@@ -324,45 +324,45 @@ func CancelCurrentGame(userId uuid.UUID) error {
 	return err
 }
 
-func FinishCurrentGame(userId uuid.UUID) error {
+func FinishCurrentGame(userId uuid.UUID) (bool, error) {
 	_, err := timer_service.StopCurrentTimer(userId)
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	game, err := GetCurrentGame(userId)
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if game == nil {
-		return err
+		return false, err
 	}
 
-	var additionalDiceCount int
-	if game.HourCount != nil {
-		additionalDiceCount = *game.HourCount / HourCountForDice
+	if game.HourCount == nil {
+		return false, nil
 	}
 
+	additionalDiceCount := *game.HourCount / HourCountForDice
 	diceCount := 1 + additionalDiceCount
 	resultPoints, err := RollResultPoints(diceCount)
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	_, err = db_access.Exec(FinishCurrentGameCommand, GameStateFinished, resultPoints, userId, game.Id)
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	effectHistoryId := uuid.New()
 	_, err = db_access.Exec(CreateEffectRollCommand, effectHistoryId.String(), userId, game.Id)
 
-	return err
+	return true, err
 }
 
 func RollResultPoints(diceCount int) (int, error) {
