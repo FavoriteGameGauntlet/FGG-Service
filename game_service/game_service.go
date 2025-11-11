@@ -341,7 +341,12 @@ func FinishCurrentGame(userId uuid.UUID) error {
 		return err
 	}
 
-	diceCount := 1 + *game.HourCount/HourCountForDice
+	var additionalDiceCount int
+	if game.HourCount != nil {
+		additionalDiceCount = *game.HourCount / HourCountForDice
+	}
+
+	diceCount := 1 + additionalDiceCount
 	resultPoints, err := RollResultPoints(diceCount)
 
 	if err != nil {
