@@ -33,7 +33,7 @@ func main() {
 
 	db_access.Init()
 	defer db_access.Close()
-	StartScheduler()
+	StartTimerFinisherScheduler()
 
 	e.HideBanner = true
 	err := e.Start(":8080")
@@ -43,7 +43,7 @@ func main() {
 	}
 }
 
-func StartScheduler() {
+func StartTimerFinisherScheduler() {
 	scheduler, err := gocron.NewScheduler()
 
 	if err != nil {

@@ -2,27 +2,29 @@ package controller
 
 import (
 	"FGG-Service/api"
+	"FGG-Service/auth_service"
 	"FGG-Service/game_service"
-	"FGG-Service/user_service"
 	"context"
 )
 
 // GetCurrentGame (GET /users/{userId}/games/current)
-func (Server) GetCurrentGame(_ context.Context, request api.GetCurrentGameRequestObject) (api.GetCurrentGameResponseObject, error) {
-	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
+func (Server) GetCurrentGame(ctx context.Context, _ api.GetCurrentGameRequestObject) (api.GetCurrentGameResponseObject, error) {
+	sessionId, ok := ctx.Value("session_id").(string)
 
-	if err != nil {
-		return api.GetCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+	if !ok {
+		return api.GetCurrentGame401JSONResponse{Code: api.NOACTIVESESSION}, nil
 	}
 
-	if !doesExist {
-		return api.GetCurrentGame404JSONResponse{Code: api.USERNOTFOUND}, nil
-	}
-
-	game, err := game_service.GetCurrentGame(request.UserId)
+	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.GetCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.GetCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+	}
+
+	game, err := game_service.GetCurrentGame(userId)
+
+	if err != nil {
+		return api.GetCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if game == nil {
@@ -45,62 +47,66 @@ func ConvertGameToDto(game *game_service.Game) *api.Game {
 }
 
 // CancelCurrentGame (POST /users/{userId}/games/current/cancel)
-func (Server) CancelCurrentGame(_ context.Context, request api.CancelCurrentGameRequestObject) (api.CancelCurrentGameResponseObject, error) {
-	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
+func (Server) CancelCurrentGame(ctx context.Context, _ api.CancelCurrentGameRequestObject) (api.CancelCurrentGameResponseObject, error) {
+	sessionId, ok := ctx.Value("session_id").(string)
 
-	if err != nil {
-		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+	if !ok {
+		return api.CancelCurrentGame401JSONResponse{Code: api.NOACTIVESESSION}, nil
 	}
 
-	if !doesExist {
-		return api.CancelCurrentGame404JSONResponse{Code: api.USERNOTFOUND}, nil
-	}
-
-	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
+	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+	}
+
+	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
+
+	if err != nil {
+		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
 		return api.CancelCurrentGame404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
-	err = game_service.CancelCurrentGame(request.UserId)
+	err = game_service.CancelCurrentGame(userId)
 
 	if err != nil {
-		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	return api.CancelCurrentGame200Response{}, nil
 }
 
 // FinishCurrentGame (GET /users/{userId}/games/current/finish)
-func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGameRequestObject) (api.FinishCurrentGameResponseObject, error) {
-	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
+func (Server) FinishCurrentGame(ctx context.Context, _ api.FinishCurrentGameRequestObject) (api.FinishCurrentGameResponseObject, error) {
+	sessionId, ok := ctx.Value("session_id").(string)
 
-	if err != nil {
-		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+	if !ok {
+		return api.FinishCurrentGame401JSONResponse{Code: api.NOACTIVESESSION}, nil
 	}
 
-	if !doesExist {
-		return api.FinishCurrentGame404JSONResponse{Code: api.USERNOTFOUND}, nil
-	}
-
-	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
+	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+	}
+
+	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
+
+	if err != nil {
+		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
 		return api.FinishCurrentGame404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
-	isSuccess, err := game_service.FinishCurrentGame(request.UserId)
+	isSuccess, err := game_service.FinishCurrentGame(userId)
 
 	if err != nil {
-		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if !isSuccess {
@@ -111,21 +117,23 @@ func (Server) FinishCurrentGame(_ context.Context, request api.FinishCurrentGame
 }
 
 // GetGameHistory (GET /users/{userId}/games/history)
-func (Server) GetGameHistory(_ context.Context, request api.GetGameHistoryRequestObject) (api.GetGameHistoryResponseObject, error) {
-	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
+func (Server) GetGameHistory(ctx context.Context, _ api.GetGameHistoryRequestObject) (api.GetGameHistoryResponseObject, error) {
+	sessionId, ok := ctx.Value("session_id").(string)
 
-	if err != nil {
-		return api.GetGameHistory500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+	if !ok {
+		return api.GetGameHistory401JSONResponse{Code: api.NOACTIVESESSION}, nil
 	}
 
-	if !doesExist {
-		return api.GetGameHistory404JSONResponse{Code: api.USERNOTFOUND}, nil
-	}
-
-	games, err := game_service.GetGameHistory(request.UserId)
+	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.GetGameHistory500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.GetGameHistory500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+	}
+
+	games, err := game_service.GetGameHistory(userId)
+
+	if err != nil {
+		return api.GetGameHistory500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	gamesDto := ConvertGamesToDto(games)
@@ -144,31 +152,33 @@ func ConvertGamesToDto(games *game_service.Games) *api.Games {
 }
 
 // MakeGameRoll (GET /users/{userId}/games/roll)
-func (Server) MakeGameRoll(_ context.Context, request api.MakeGameRollRequestObject) (api.MakeGameRollResponseObject, error) {
-	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
+func (Server) MakeGameRoll(ctx context.Context, _ api.MakeGameRollRequestObject) (api.MakeGameRollResponseObject, error) {
+	sessionId, ok := ctx.Value("session_id").(string)
 
-	if err != nil {
-		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+	if !ok {
+		return api.MakeGameRoll401JSONResponse{Code: api.NOACTIVESESSION}, nil
 	}
 
-	if !doesExist {
-		return api.MakeGameRoll404JSONResponse{Code: api.USERNOTFOUND}, nil
-	}
-
-	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
+	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+	}
+
+	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
+
+	if err != nil {
+		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if doesExist {
 		return api.MakeGameRoll409JSONResponse{Code: api.CURRENTGAMEALREADYEXISTS}, nil
 	}
 
-	game, err := game_service.MakeGameRoll(request.UserId)
+	game, err := game_service.MakeGameRoll(userId)
 
 	if err != nil {
-		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if game == nil {
@@ -181,21 +191,23 @@ func (Server) MakeGameRoll(_ context.Context, request api.MakeGameRollRequestObj
 }
 
 // GetUnplayedGames (GET /users/{userId}/games/unplayed)
-func (Server) GetUnplayedGames(_ context.Context, request api.GetUnplayedGamesRequestObject) (api.GetUnplayedGamesResponseObject, error) {
-	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
+func (Server) GetUnplayedGames(ctx context.Context, _ api.GetUnplayedGamesRequestObject) (api.GetUnplayedGamesResponseObject, error) {
+	sessionId, ok := ctx.Value("session_id").(string)
 
-	if err != nil {
-		return api.GetUnplayedGames500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+	if !ok {
+		return api.GetUnplayedGames401JSONResponse{Code: api.NOACTIVESESSION}, nil
 	}
 
-	if !doesExist {
-		return api.GetUnplayedGames404JSONResponse{Code: api.USERNOTFOUND}, nil
-	}
-
-	games, err := game_service.GetUnplayedGames(request.UserId)
+	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.GetUnplayedGames500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.GetUnplayedGames500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+	}
+
+	games, err := game_service.GetUnplayedGames(userId)
+
+	if err != nil {
+		return api.GetUnplayedGames500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	gamesDto := ConvertUnplayedGamesToDto(games)
@@ -217,23 +229,25 @@ func ConvertUnplayedGamesToDto(games *game_service.UnplayedGames) *api.UnplayedG
 }
 
 // AddUnplayedGames (POST /users/{userId}/games/unplayed)
-func (Server) AddUnplayedGames(_ context.Context, request api.AddUnplayedGamesRequestObject) (api.AddUnplayedGamesResponseObject, error) {
-	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
+func (Server) AddUnplayedGames(ctx context.Context, request api.AddUnplayedGamesRequestObject) (api.AddUnplayedGamesResponseObject, error) {
+	sessionId, ok := ctx.Value("session_id").(string)
 
-	if err != nil {
-		return api.AddUnplayedGames500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+	if !ok {
+		return api.AddUnplayedGames401JSONResponse{Code: api.NOACTIVESESSION}, nil
 	}
 
-	if !doesExist {
-		return api.AddUnplayedGames404JSONResponse{Code: api.USERNOTFOUND}, nil
+	userId, err := auth_service.GetUserId(sessionId)
+
+	if err != nil {
+		return api.AddUnplayedGames500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	games := ConvertUnplayedGamesFrom(request.Body)
 
-	err = game_service.AddUnplayedGames(request.UserId, games)
+	err = game_service.AddUnplayedGames(userId, games)
 
 	if err != nil {
-		return api.AddUnplayedGames500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.AddUnplayedGames500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	return api.AddUnplayedGames200Response{}, nil

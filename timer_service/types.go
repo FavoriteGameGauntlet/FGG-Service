@@ -2,13 +2,11 @@ package timer_service
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Timer struct {
 	DurationInS      int
-	Id               uuid.UUID
+	Id               int
 	RemainingTimeInS int
 	State            TimerStateType
 	TimerActionDate  *time.Time
@@ -27,7 +25,7 @@ const (
 
 type TimerAction struct {
 	Action           TimerActionAction
-	Id               uuid.UUID
+	Id               int
 	RemainingTimeInS int
 }
 

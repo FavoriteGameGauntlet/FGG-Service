@@ -11,19 +11,18 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/oapi-codegen/runtime"
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // Defines values for ConflictErrorCode.
 const (
 	CURRENTGAMEALREADYEXISTS ConflictErrorCode = "CURRENT_GAME_ALREADY_EXISTS"
+	EMAILALREADYEXISTS       ConflictErrorCode = "EMAIL_ALREADY_EXISTS"
 	NOAVAILABLEROLLS         ConflictErrorCode = "NO_AVAILABLE_ROLLS"
 	NOCOMPLETEDTIMERS        ConflictErrorCode = "NO_COMPLETED_TIMERS"
 	NOUNPLAYEDGAMES          ConflictErrorCode = "NO_UNPLAYED_GAMES"
 	TIMERINCORRECTSTATE      ConflictErrorCode = "TIMER_INCORRECT_STATE"
-	USERALREADYEXISTS        ConflictErrorCode = "USER_ALREADY_EXISTS"
+	USERNAMEALREADYEXISTS    ConflictErrorCode = "USERNAME_ALREADY_EXISTS"
 )
 
 // Defines values for GameState.
@@ -35,7 +34,13 @@ const (
 
 // Defines values for InternalServerErrorCode.
 const (
-	UNEXPECTEDDATABASE InternalServerErrorCode = "UNEXPECTED_DATABASE"
+	UNEXPECTED InternalServerErrorCode = "UNEXPECTED"
+)
+
+// Defines values for NotAuthorizedErrorCode.
+const (
+	NOACTIVESESSION NotAuthorizedErrorCode = "NO_ACTIVE_SESSION"
+	WRONGAUTHDATA   NotAuthorizedErrorCode = "WRONG_AUTH_DATA"
 )
 
 // Defines values for NotFoundErrorCode.
@@ -87,6 +92,9 @@ type Effect struct {
 // Effects defines model for Effects.
 type Effects = []Effect
 
+// Email defines model for Email.
+type Email = string
+
 // Game defines model for Game.
 type Game struct {
 	FinishDate *time.Time `json:"finishDate,omitempty"`
@@ -102,9 +110,6 @@ type GameState string
 // Games defines model for Games.
 type Games = []Game
 
-// Id defines model for Id.
-type Id = openapi_types.UUID
-
 // InternalServerError defines model for InternalServerError.
 type InternalServerError struct {
 	Code    InternalServerErrorCode `json:"code"`
@@ -117,6 +122,15 @@ type InternalServerErrorCode string
 // Name defines model for Name.
 type Name = string
 
+// NotAuthorizedError defines model for NotAuthorizedError.
+type NotAuthorizedError struct {
+	Code    NotAuthorizedErrorCode `json:"code"`
+	Message string                 `json:"message"`
+}
+
+// NotAuthorizedErrorCode defines model for NotAuthorizedError.Code.
+type NotAuthorizedErrorCode string
+
 // NotFoundError defines model for NotFoundError.
 type NotFoundError struct {
 	Code    NotFoundErrorCode `json:"code"`
@@ -125,6 +139,9 @@ type NotFoundError struct {
 
 // NotFoundErrorCode defines model for NotFoundError.Code.
 type NotFoundErrorCode string
+
+// Password defines model for Password.
+type Password = string
 
 // Timer defines model for Timer.
 type Timer struct {
@@ -155,71 +172,81 @@ type UnplayedGame struct {
 // UnplayedGames defines model for UnplayedGames.
 type UnplayedGames = []UnplayedGame
 
-// User defines model for User.
-type User struct {
-	Id   Id   `json:"id"`
-	Name Name `json:"name"`
+// LoginJSONBody defines parameters for Login.
+type LoginJSONBody struct {
+	Name     Name     `json:"name"`
+	Password Password `json:"password"`
 }
 
-// UserId defines model for UserId.
-type UserId = Id
+// SignUpJSONBody defines parameters for SignUp.
+type SignUpJSONBody struct {
+	Email    Email    `json:"email"`
+	Name     Name     `json:"name"`
+	Password Password `json:"password"`
+}
 
-// UserName defines model for UserName.
-type UserName = Name
+// LoginJSONRequestBody defines body for Login for application/json ContentType.
+type LoginJSONRequestBody LoginJSONBody
+
+// SignUpJSONRequestBody defines body for SignUp for application/json ContentType.
+type SignUpJSONRequestBody SignUpJSONBody
 
 // AddUnplayedGamesJSONRequestBody defines body for AddUnplayedGames for application/json ContentType.
 type AddUnplayedGamesJSONRequestBody = UnplayedGames
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Get user ID
-	// (GET /users/{name})
-	GetUser(ctx echo.Context, name UserName) error
-	// Create user
-	// (POST /users/{name})
-	CreateUser(ctx echo.Context, name UserName) error
+	// .
+	// (POST /auth/login)
+	Login(ctx echo.Context) error
+	// .
+	// (POST /auth/logout)
+	Logout(ctx echo.Context) error
+	// .
+	// (POST /auth/signup)
+	SignUp(ctx echo.Context) error
 	// Get a list of effects available for rolling
-	// (POST /users/{userId}/effects/available)
-	GetAvailableEffects(ctx echo.Context, userId UserId) error
+	// (POST /effects/available)
+	GetAvailableEffects(ctx echo.Context) error
 	// Check if there are any effect rolls available
-	// (GET /users/{userId}/effects/has-roll)
-	CheckEffectRoll(ctx echo.Context, userId UserId) error
+	// (GET /effects/has-roll)
+	CheckAvailableEffectRoll(ctx echo.Context) error
 	// Get a list of all effect rolls
-	// (GET /users/{userId}/effects/history)
-	GetEffectHistory(ctx echo.Context, userId UserId) error
+	// (GET /effects/history)
+	GetEffectHistory(ctx echo.Context) error
 	// Make the roll of the effect available
-	// (POST /users/{userId}/effects/roll)
-	MakeEffectRoll(ctx echo.Context, userId UserId) error
+	// (POST /effects/roll)
+	MakeEffectRoll(ctx echo.Context) error
 	// Get the current game
-	// (GET /users/{userId}/games/current)
-	GetCurrentGame(ctx echo.Context, userId UserId) error
+	// (GET /games/current)
+	GetCurrentGame(ctx echo.Context) error
 	// Cancel the current game
-	// (POST /users/{userId}/games/current/cancel)
-	CancelCurrentGame(ctx echo.Context, userId UserId) error
+	// (POST /games/current/cancel)
+	CancelCurrentGame(ctx echo.Context) error
 	// Complete the current game
-	// (POST /users/{userId}/games/current/finish)
-	FinishCurrentGame(ctx echo.Context, userId UserId) error
+	// (POST /games/current/finish)
+	FinishCurrentGame(ctx echo.Context) error
 	// Get a list of all games played
-	// (GET /users/{userId}/games/history)
-	GetGameHistory(ctx echo.Context, userId UserId) error
+	// (GET /games/history)
+	GetGameHistory(ctx echo.Context) error
 	// Select a random game from the wishlist
-	// (POST /users/{userId}/games/roll)
-	MakeGameRoll(ctx echo.Context, userId UserId) error
+	// (POST /games/roll)
+	MakeGameRoll(ctx echo.Context) error
 	// Get game wishlist
-	// (GET /users/{userId}/games/unplayed)
-	GetUnplayedGames(ctx echo.Context, userId UserId) error
+	// (GET /games/unplayed)
+	GetUnplayedGames(ctx echo.Context) error
 	// Add game wishlist
-	// (POST /users/{userId}/games/unplayed)
-	AddUnplayedGames(ctx echo.Context, userId UserId) error
+	// (POST /games/unplayed)
+	AddUnplayedGames(ctx echo.Context) error
 	// Get a timer for the current game
-	// (GET /users/{userId}/timers/current)
-	GetCurrentTimer(ctx echo.Context, userId UserId) error
+	// (GET /timers/current)
+	GetCurrentTimer(ctx echo.Context) error
 	// Pause the current timer
-	// (POST /users/{userId}/timers/current/pause)
-	PauseCurrentTimer(ctx echo.Context, userId UserId) error
+	// (POST /timers/current/pause)
+	PauseCurrentTimer(ctx echo.Context) error
 	// Start or continue the current timer
-	// (POST /users/{userId}/timers/current/start)
-	StartCurrentTimer(ctx echo.Context, userId UserId) error
+	// (POST /timers/current/start)
+	StartCurrentTimer(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -227,259 +254,156 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// GetUser converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUser(ctx echo.Context) error {
+// Login converts echo context to params.
+func (w *ServerInterfaceWrapper) Login(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "name" -------------
-	var name UserName
-
-	err = runtime.BindStyledParameterWithOptions("simple", "name", ctx.Param("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter name: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUser(ctx, name)
+	err = w.Handler.Login(ctx)
 	return err
 }
 
-// CreateUser converts echo context to params.
-func (w *ServerInterfaceWrapper) CreateUser(ctx echo.Context) error {
+// Logout converts echo context to params.
+func (w *ServerInterfaceWrapper) Logout(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "name" -------------
-	var name UserName
-
-	err = runtime.BindStyledParameterWithOptions("simple", "name", ctx.Param("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter name: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.CreateUser(ctx, name)
+	err = w.Handler.Logout(ctx)
+	return err
+}
+
+// SignUp converts echo context to params.
+func (w *ServerInterfaceWrapper) SignUp(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SignUp(ctx)
 	return err
 }
 
 // GetAvailableEffects converts echo context to params.
 func (w *ServerInterfaceWrapper) GetAvailableEffects(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetAvailableEffects(ctx, userId)
+	err = w.Handler.GetAvailableEffects(ctx)
 	return err
 }
 
-// CheckEffectRoll converts echo context to params.
-func (w *ServerInterfaceWrapper) CheckEffectRoll(ctx echo.Context) error {
+// CheckAvailableEffectRoll converts echo context to params.
+func (w *ServerInterfaceWrapper) CheckAvailableEffectRoll(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.CheckEffectRoll(ctx, userId)
+	err = w.Handler.CheckAvailableEffectRoll(ctx)
 	return err
 }
 
 // GetEffectHistory converts echo context to params.
 func (w *ServerInterfaceWrapper) GetEffectHistory(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetEffectHistory(ctx, userId)
+	err = w.Handler.GetEffectHistory(ctx)
 	return err
 }
 
 // MakeEffectRoll converts echo context to params.
 func (w *ServerInterfaceWrapper) MakeEffectRoll(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.MakeEffectRoll(ctx, userId)
+	err = w.Handler.MakeEffectRoll(ctx)
 	return err
 }
 
 // GetCurrentGame converts echo context to params.
 func (w *ServerInterfaceWrapper) GetCurrentGame(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetCurrentGame(ctx, userId)
+	err = w.Handler.GetCurrentGame(ctx)
 	return err
 }
 
 // CancelCurrentGame converts echo context to params.
 func (w *ServerInterfaceWrapper) CancelCurrentGame(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.CancelCurrentGame(ctx, userId)
+	err = w.Handler.CancelCurrentGame(ctx)
 	return err
 }
 
 // FinishCurrentGame converts echo context to params.
 func (w *ServerInterfaceWrapper) FinishCurrentGame(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.FinishCurrentGame(ctx, userId)
+	err = w.Handler.FinishCurrentGame(ctx)
 	return err
 }
 
 // GetGameHistory converts echo context to params.
 func (w *ServerInterfaceWrapper) GetGameHistory(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetGameHistory(ctx, userId)
+	err = w.Handler.GetGameHistory(ctx)
 	return err
 }
 
 // MakeGameRoll converts echo context to params.
 func (w *ServerInterfaceWrapper) MakeGameRoll(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.MakeGameRoll(ctx, userId)
+	err = w.Handler.MakeGameRoll(ctx)
 	return err
 }
 
 // GetUnplayedGames converts echo context to params.
 func (w *ServerInterfaceWrapper) GetUnplayedGames(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUnplayedGames(ctx, userId)
+	err = w.Handler.GetUnplayedGames(ctx)
 	return err
 }
 
 // AddUnplayedGames converts echo context to params.
 func (w *ServerInterfaceWrapper) AddUnplayedGames(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AddUnplayedGames(ctx, userId)
+	err = w.Handler.AddUnplayedGames(ctx)
 	return err
 }
 
 // GetCurrentTimer converts echo context to params.
 func (w *ServerInterfaceWrapper) GetCurrentTimer(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetCurrentTimer(ctx, userId)
+	err = w.Handler.GetCurrentTimer(ctx)
 	return err
 }
 
 // PauseCurrentTimer converts echo context to params.
 func (w *ServerInterfaceWrapper) PauseCurrentTimer(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PauseCurrentTimer(ctx, userId)
+	err = w.Handler.PauseCurrentTimer(ctx)
 	return err
 }
 
 // StartCurrentTimer converts echo context to params.
 func (w *ServerInterfaceWrapper) StartCurrentTimer(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "userId" -------------
-	var userId UserId
-
-	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
-	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.StartCurrentTimer(ctx, userId)
+	err = w.Handler.StartCurrentTimer(ctx)
 	return err
 }
 
@@ -511,89 +435,130 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.GET(baseURL+"/users/:name", wrapper.GetUser)
-	router.POST(baseURL+"/users/:name", wrapper.CreateUser)
-	router.POST(baseURL+"/users/:userId/effects/available", wrapper.GetAvailableEffects)
-	router.GET(baseURL+"/users/:userId/effects/has-roll", wrapper.CheckEffectRoll)
-	router.GET(baseURL+"/users/:userId/effects/history", wrapper.GetEffectHistory)
-	router.POST(baseURL+"/users/:userId/effects/roll", wrapper.MakeEffectRoll)
-	router.GET(baseURL+"/users/:userId/games/current", wrapper.GetCurrentGame)
-	router.POST(baseURL+"/users/:userId/games/current/cancel", wrapper.CancelCurrentGame)
-	router.POST(baseURL+"/users/:userId/games/current/finish", wrapper.FinishCurrentGame)
-	router.GET(baseURL+"/users/:userId/games/history", wrapper.GetGameHistory)
-	router.POST(baseURL+"/users/:userId/games/roll", wrapper.MakeGameRoll)
-	router.GET(baseURL+"/users/:userId/games/unplayed", wrapper.GetUnplayedGames)
-	router.POST(baseURL+"/users/:userId/games/unplayed", wrapper.AddUnplayedGames)
-	router.GET(baseURL+"/users/:userId/timers/current", wrapper.GetCurrentTimer)
-	router.POST(baseURL+"/users/:userId/timers/current/pause", wrapper.PauseCurrentTimer)
-	router.POST(baseURL+"/users/:userId/timers/current/start", wrapper.StartCurrentTimer)
+	router.POST(baseURL+"/auth/login", wrapper.Login)
+	router.POST(baseURL+"/auth/logout", wrapper.Logout)
+	router.POST(baseURL+"/auth/signup", wrapper.SignUp)
+	router.POST(baseURL+"/effects/available", wrapper.GetAvailableEffects)
+	router.GET(baseURL+"/effects/has-roll", wrapper.CheckAvailableEffectRoll)
+	router.GET(baseURL+"/effects/history", wrapper.GetEffectHistory)
+	router.POST(baseURL+"/effects/roll", wrapper.MakeEffectRoll)
+	router.GET(baseURL+"/games/current", wrapper.GetCurrentGame)
+	router.POST(baseURL+"/games/current/cancel", wrapper.CancelCurrentGame)
+	router.POST(baseURL+"/games/current/finish", wrapper.FinishCurrentGame)
+	router.GET(baseURL+"/games/history", wrapper.GetGameHistory)
+	router.POST(baseURL+"/games/roll", wrapper.MakeGameRoll)
+	router.GET(baseURL+"/games/unplayed", wrapper.GetUnplayedGames)
+	router.POST(baseURL+"/games/unplayed", wrapper.AddUnplayedGames)
+	router.GET(baseURL+"/timers/current", wrapper.GetCurrentTimer)
+	router.POST(baseURL+"/timers/current/pause", wrapper.PauseCurrentTimer)
+	router.POST(baseURL+"/timers/current/start", wrapper.StartCurrentTimer)
 
 }
 
-type GetUserRequestObject struct {
-	Name UserName `json:"name"`
+type LoginRequestObject struct {
+	Body *LoginJSONRequestBody
 }
 
-type GetUserResponseObject interface {
-	VisitGetUserResponse(w http.ResponseWriter) error
+type LoginResponseObject interface {
+	VisitLoginResponse(w http.ResponseWriter) error
 }
 
-type GetUser200JSONResponse User
+type Login200Response struct {
+}
 
-func (response GetUser200JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response Login200Response) VisitLoginResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
-type GetUser404JSONResponse NotFoundError
+type Login401JSONResponse NotAuthorizedError
 
-func (response GetUser404JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
+func (response Login401JSONResponse) VisitLoginResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUser500JSONResponse InternalServerError
+type Login500JSONResponse InternalServerError
 
-func (response GetUser500JSONResponse) VisitGetUserResponse(w http.ResponseWriter) error {
+func (response Login500JSONResponse) VisitLoginResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUserRequestObject struct {
-	Name UserName `json:"name"`
+type LogoutRequestObject struct {
 }
 
-type CreateUserResponseObject interface {
-	VisitCreateUserResponse(w http.ResponseWriter) error
+type LogoutResponseObject interface {
+	VisitLogoutResponse(w http.ResponseWriter) error
 }
 
-type CreateUser200JSONResponse User
+type Logout200Response struct {
+}
 
-func (response CreateUser200JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response Logout200Response) VisitLogoutResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
+	return nil
+}
+
+type Logout401JSONResponse NotAuthorizedError
+
+func (response Logout401JSONResponse) VisitLogoutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUser409JSONResponse ConflictError
+type Logout500JSONResponse InternalServerError
 
-func (response CreateUser409JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
+func (response Logout500JSONResponse) VisitLogoutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SignUpRequestObject struct {
+	Body *SignUpJSONRequestBody
+}
+
+type SignUpResponseObject interface {
+	VisitSignUpResponse(w http.ResponseWriter) error
+}
+
+type SignUp200Response struct {
+}
+
+func (response SignUp200Response) VisitSignUpResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type SignUp401JSONResponse NotAuthorizedError
+
+func (response SignUp401JSONResponse) VisitSignUpResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SignUp409JSONResponse ConflictError
+
+func (response SignUp409JSONResponse) VisitSignUpResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(409)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateUser500JSONResponse InternalServerError
+type SignUp500JSONResponse InternalServerError
 
-func (response CreateUser500JSONResponse) VisitCreateUserResponse(w http.ResponseWriter) error {
+func (response SignUp500JSONResponse) VisitSignUpResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
@@ -601,7 +566,6 @@ func (response CreateUser500JSONResponse) VisitCreateUserResponse(w http.Respons
 }
 
 type GetAvailableEffectsRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type GetAvailableEffectsResponseObject interface {
@@ -613,6 +577,15 @@ type GetAvailableEffects200JSONResponse AvailableEffect
 func (response GetAvailableEffects200JSONResponse) VisitGetAvailableEffectsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAvailableEffects401JSONResponse NotAuthorizedError
+
+func (response GetAvailableEffects401JSONResponse) VisitGetAvailableEffectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -635,35 +608,43 @@ func (response GetAvailableEffects500JSONResponse) VisitGetAvailableEffectsRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CheckEffectRollRequestObject struct {
-	UserId UserId `json:"userId"`
+type CheckAvailableEffectRollRequestObject struct {
 }
 
-type CheckEffectRollResponseObject interface {
-	VisitCheckEffectRollResponse(w http.ResponseWriter) error
+type CheckAvailableEffectRollResponseObject interface {
+	VisitCheckAvailableEffectRollResponse(w http.ResponseWriter) error
 }
 
-type CheckEffectRoll200JSONResponse bool
+type CheckAvailableEffectRoll200JSONResponse bool
 
-func (response CheckEffectRoll200JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
+func (response CheckAvailableEffectRoll200JSONResponse) VisitCheckAvailableEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CheckEffectRoll404JSONResponse NotFoundError
+type CheckAvailableEffectRoll401JSONResponse NotAuthorizedError
 
-func (response CheckEffectRoll404JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
+func (response CheckAvailableEffectRoll401JSONResponse) VisitCheckAvailableEffectRollResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CheckAvailableEffectRoll404JSONResponse NotFoundError
+
+func (response CheckAvailableEffectRoll404JSONResponse) VisitCheckAvailableEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CheckEffectRoll500JSONResponse InternalServerError
+type CheckAvailableEffectRoll500JSONResponse InternalServerError
 
-func (response CheckEffectRoll500JSONResponse) VisitCheckEffectRollResponse(w http.ResponseWriter) error {
+func (response CheckAvailableEffectRoll500JSONResponse) VisitCheckAvailableEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
@@ -671,7 +652,6 @@ func (response CheckEffectRoll500JSONResponse) VisitCheckEffectRollResponse(w ht
 }
 
 type GetEffectHistoryRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type GetEffectHistoryResponseObject interface {
@@ -683,6 +663,15 @@ type GetEffectHistory200JSONResponse Effects
 func (response GetEffectHistory200JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetEffectHistory401JSONResponse NotAuthorizedError
+
+func (response GetEffectHistory401JSONResponse) VisitGetEffectHistoryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -706,7 +695,6 @@ func (response GetEffectHistory500JSONResponse) VisitGetEffectHistoryResponse(w 
 }
 
 type MakeEffectRollRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type MakeEffectRollResponseObject interface {
@@ -718,6 +706,15 @@ type MakeEffectRoll200JSONResponse Effect
 func (response MakeEffectRoll200JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type MakeEffectRoll401JSONResponse NotAuthorizedError
+
+func (response MakeEffectRoll401JSONResponse) VisitMakeEffectRollResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -750,7 +747,6 @@ func (response MakeEffectRoll500JSONResponse) VisitMakeEffectRollResponse(w http
 }
 
 type GetCurrentGameRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type GetCurrentGameResponseObject interface {
@@ -762,6 +758,15 @@ type GetCurrentGame200JSONResponse Game
 func (response GetCurrentGame200JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetCurrentGame401JSONResponse NotAuthorizedError
+
+func (response GetCurrentGame401JSONResponse) VisitGetCurrentGameResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -785,7 +790,6 @@ func (response GetCurrentGame500JSONResponse) VisitGetCurrentGameResponse(w http
 }
 
 type CancelCurrentGameRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type CancelCurrentGameResponseObject interface {
@@ -798,6 +802,15 @@ type CancelCurrentGame200Response struct {
 func (response CancelCurrentGame200Response) VisitCancelCurrentGameResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
 	return nil
+}
+
+type CancelCurrentGame401JSONResponse NotAuthorizedError
+
+func (response CancelCurrentGame401JSONResponse) VisitCancelCurrentGameResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type CancelCurrentGame404JSONResponse NotFoundError
@@ -819,7 +832,6 @@ func (response CancelCurrentGame500JSONResponse) VisitCancelCurrentGameResponse(
 }
 
 type FinishCurrentGameRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type FinishCurrentGameResponseObject interface {
@@ -832,6 +844,15 @@ type FinishCurrentGame200Response struct {
 func (response FinishCurrentGame200Response) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
 	return nil
+}
+
+type FinishCurrentGame401JSONResponse NotAuthorizedError
+
+func (response FinishCurrentGame401JSONResponse) VisitFinishCurrentGameResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type FinishCurrentGame404JSONResponse NotFoundError
@@ -862,7 +883,6 @@ func (response FinishCurrentGame500JSONResponse) VisitFinishCurrentGameResponse(
 }
 
 type GetGameHistoryRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type GetGameHistoryResponseObject interface {
@@ -874,6 +894,15 @@ type GetGameHistory200JSONResponse Games
 func (response GetGameHistory200JSONResponse) VisitGetGameHistoryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetGameHistory401JSONResponse NotAuthorizedError
+
+func (response GetGameHistory401JSONResponse) VisitGetGameHistoryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -897,7 +926,6 @@ func (response GetGameHistory500JSONResponse) VisitGetGameHistoryResponse(w http
 }
 
 type MakeGameRollRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type MakeGameRollResponseObject interface {
@@ -909,6 +937,15 @@ type MakeGameRoll200JSONResponse Game
 func (response MakeGameRoll200JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type MakeGameRoll401JSONResponse NotAuthorizedError
+
+func (response MakeGameRoll401JSONResponse) VisitMakeGameRollResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -941,7 +978,6 @@ func (response MakeGameRoll500JSONResponse) VisitMakeGameRollResponse(w http.Res
 }
 
 type GetUnplayedGamesRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type GetUnplayedGamesResponseObject interface {
@@ -953,6 +989,15 @@ type GetUnplayedGames200JSONResponse UnplayedGames
 func (response GetUnplayedGames200JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetUnplayedGames401JSONResponse NotAuthorizedError
+
+func (response GetUnplayedGames401JSONResponse) VisitGetUnplayedGamesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -976,8 +1021,7 @@ func (response GetUnplayedGames500JSONResponse) VisitGetUnplayedGamesResponse(w 
 }
 
 type AddUnplayedGamesRequestObject struct {
-	UserId UserId `json:"userId"`
-	Body   *AddUnplayedGamesJSONRequestBody
+	Body *AddUnplayedGamesJSONRequestBody
 }
 
 type AddUnplayedGamesResponseObject interface {
@@ -990,6 +1034,15 @@ type AddUnplayedGames200Response struct {
 func (response AddUnplayedGames200Response) VisitAddUnplayedGamesResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
 	return nil
+}
+
+type AddUnplayedGames401JSONResponse NotAuthorizedError
+
+func (response AddUnplayedGames401JSONResponse) VisitAddUnplayedGamesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type AddUnplayedGames404JSONResponse NotFoundError
@@ -1011,7 +1064,6 @@ func (response AddUnplayedGames500JSONResponse) VisitAddUnplayedGamesResponse(w 
 }
 
 type GetCurrentTimerRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type GetCurrentTimerResponseObject interface {
@@ -1023,6 +1075,15 @@ type GetCurrentTimer200JSONResponse Timer
 func (response GetCurrentTimer200JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetCurrentTimer401JSONResponse NotAuthorizedError
+
+func (response GetCurrentTimer401JSONResponse) VisitGetCurrentTimerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1046,7 +1107,6 @@ func (response GetCurrentTimer500JSONResponse) VisitGetCurrentTimerResponse(w ht
 }
 
 type PauseCurrentTimerRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type PauseCurrentTimerResponseObject interface {
@@ -1058,6 +1118,15 @@ type PauseCurrentTimer200JSONResponse TimerAction
 func (response PauseCurrentTimer200JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PauseCurrentTimer401JSONResponse NotAuthorizedError
+
+func (response PauseCurrentTimer401JSONResponse) VisitPauseCurrentTimerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1090,7 +1159,6 @@ func (response PauseCurrentTimer500JSONResponse) VisitPauseCurrentTimerResponse(
 }
 
 type StartCurrentTimerRequestObject struct {
-	UserId UserId `json:"userId"`
 }
 
 type StartCurrentTimerResponseObject interface {
@@ -1102,6 +1170,15 @@ type StartCurrentTimer200JSONResponse TimerAction
 func (response StartCurrentTimer200JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type StartCurrentTimer401JSONResponse NotAuthorizedError
+
+func (response StartCurrentTimer401JSONResponse) VisitStartCurrentTimerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1135,53 +1212,56 @@ func (response StartCurrentTimer500JSONResponse) VisitStartCurrentTimerResponse(
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// Get user ID
-	// (GET /users/{name})
-	GetUser(ctx context.Context, request GetUserRequestObject) (GetUserResponseObject, error)
-	// Create user
-	// (POST /users/{name})
-	CreateUser(ctx context.Context, request CreateUserRequestObject) (CreateUserResponseObject, error)
+	// .
+	// (POST /auth/login)
+	Login(ctx context.Context, request LoginRequestObject) (LoginResponseObject, error)
+	// .
+	// (POST /auth/logout)
+	Logout(ctx context.Context, request LogoutRequestObject) (LogoutResponseObject, error)
+	// .
+	// (POST /auth/signup)
+	SignUp(ctx context.Context, request SignUpRequestObject) (SignUpResponseObject, error)
 	// Get a list of effects available for rolling
-	// (POST /users/{userId}/effects/available)
+	// (POST /effects/available)
 	GetAvailableEffects(ctx context.Context, request GetAvailableEffectsRequestObject) (GetAvailableEffectsResponseObject, error)
 	// Check if there are any effect rolls available
-	// (GET /users/{userId}/effects/has-roll)
-	CheckEffectRoll(ctx context.Context, request CheckEffectRollRequestObject) (CheckEffectRollResponseObject, error)
+	// (GET /effects/has-roll)
+	CheckAvailableEffectRoll(ctx context.Context, request CheckAvailableEffectRollRequestObject) (CheckAvailableEffectRollResponseObject, error)
 	// Get a list of all effect rolls
-	// (GET /users/{userId}/effects/history)
+	// (GET /effects/history)
 	GetEffectHistory(ctx context.Context, request GetEffectHistoryRequestObject) (GetEffectHistoryResponseObject, error)
 	// Make the roll of the effect available
-	// (POST /users/{userId}/effects/roll)
+	// (POST /effects/roll)
 	MakeEffectRoll(ctx context.Context, request MakeEffectRollRequestObject) (MakeEffectRollResponseObject, error)
 	// Get the current game
-	// (GET /users/{userId}/games/current)
+	// (GET /games/current)
 	GetCurrentGame(ctx context.Context, request GetCurrentGameRequestObject) (GetCurrentGameResponseObject, error)
 	// Cancel the current game
-	// (POST /users/{userId}/games/current/cancel)
+	// (POST /games/current/cancel)
 	CancelCurrentGame(ctx context.Context, request CancelCurrentGameRequestObject) (CancelCurrentGameResponseObject, error)
 	// Complete the current game
-	// (POST /users/{userId}/games/current/finish)
+	// (POST /games/current/finish)
 	FinishCurrentGame(ctx context.Context, request FinishCurrentGameRequestObject) (FinishCurrentGameResponseObject, error)
 	// Get a list of all games played
-	// (GET /users/{userId}/games/history)
+	// (GET /games/history)
 	GetGameHistory(ctx context.Context, request GetGameHistoryRequestObject) (GetGameHistoryResponseObject, error)
 	// Select a random game from the wishlist
-	// (POST /users/{userId}/games/roll)
+	// (POST /games/roll)
 	MakeGameRoll(ctx context.Context, request MakeGameRollRequestObject) (MakeGameRollResponseObject, error)
 	// Get game wishlist
-	// (GET /users/{userId}/games/unplayed)
+	// (GET /games/unplayed)
 	GetUnplayedGames(ctx context.Context, request GetUnplayedGamesRequestObject) (GetUnplayedGamesResponseObject, error)
 	// Add game wishlist
-	// (POST /users/{userId}/games/unplayed)
+	// (POST /games/unplayed)
 	AddUnplayedGames(ctx context.Context, request AddUnplayedGamesRequestObject) (AddUnplayedGamesResponseObject, error)
 	// Get a timer for the current game
-	// (GET /users/{userId}/timers/current)
+	// (GET /timers/current)
 	GetCurrentTimer(ctx context.Context, request GetCurrentTimerRequestObject) (GetCurrentTimerResponseObject, error)
 	// Pause the current timer
-	// (POST /users/{userId}/timers/current/pause)
+	// (POST /timers/current/pause)
 	PauseCurrentTimer(ctx context.Context, request PauseCurrentTimerRequestObject) (PauseCurrentTimerResponseObject, error)
 	// Start or continue the current timer
-	// (POST /users/{userId}/timers/current/start)
+	// (POST /timers/current/start)
 	StartCurrentTimer(ctx context.Context, request StartCurrentTimerRequestObject) (StartCurrentTimerResponseObject, error)
 }
 
@@ -1197,50 +1277,81 @@ type strictHandler struct {
 	middlewares []StrictMiddlewareFunc
 }
 
-// GetUser operation middleware
-func (sh *strictHandler) GetUser(ctx echo.Context, name UserName) error {
-	var request GetUserRequestObject
+// Login operation middleware
+func (sh *strictHandler) Login(ctx echo.Context) error {
+	var request LoginRequestObject
 
-	request.Name = name
+	var body LoginJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUser(ctx.Request().Context(), request.(GetUserRequestObject))
+		return sh.ssi.Login(ctx.Request().Context(), request.(LoginRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetUser")
+		handler = middleware(handler, "Login")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(GetUserResponseObject); ok {
-		return validResponse.VisitGetUserResponse(ctx.Response())
+	} else if validResponse, ok := response.(LoginResponseObject); ok {
+		return validResponse.VisitLoginResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// CreateUser operation middleware
-func (sh *strictHandler) CreateUser(ctx echo.Context, name UserName) error {
-	var request CreateUserRequestObject
-
-	request.Name = name
+// Logout operation middleware
+func (sh *strictHandler) Logout(ctx echo.Context) error {
+	var request LogoutRequestObject
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.CreateUser(ctx.Request().Context(), request.(CreateUserRequestObject))
+		return sh.ssi.Logout(ctx.Request().Context(), request.(LogoutRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "CreateUser")
+		handler = middleware(handler, "Logout")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(CreateUserResponseObject); ok {
-		return validResponse.VisitCreateUserResponse(ctx.Response())
+	} else if validResponse, ok := response.(LogoutResponseObject); ok {
+		return validResponse.VisitLogoutResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// SignUp operation middleware
+func (sh *strictHandler) SignUp(ctx echo.Context) error {
+	var request SignUpRequestObject
+
+	var body SignUpJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.SignUp(ctx.Request().Context(), request.(SignUpRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SignUp")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(SignUpResponseObject); ok {
+		return validResponse.VisitSignUpResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -1248,10 +1359,8 @@ func (sh *strictHandler) CreateUser(ctx echo.Context, name UserName) error {
 }
 
 // GetAvailableEffects operation middleware
-func (sh *strictHandler) GetAvailableEffects(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) GetAvailableEffects(ctx echo.Context) error {
 	var request GetAvailableEffectsRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.GetAvailableEffects(ctx.Request().Context(), request.(GetAvailableEffectsRequestObject))
@@ -1272,25 +1381,23 @@ func (sh *strictHandler) GetAvailableEffects(ctx echo.Context, userId UserId) er
 	return nil
 }
 
-// CheckEffectRoll operation middleware
-func (sh *strictHandler) CheckEffectRoll(ctx echo.Context, userId UserId) error {
-	var request CheckEffectRollRequestObject
-
-	request.UserId = userId
+// CheckAvailableEffectRoll operation middleware
+func (sh *strictHandler) CheckAvailableEffectRoll(ctx echo.Context) error {
+	var request CheckAvailableEffectRollRequestObject
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.CheckEffectRoll(ctx.Request().Context(), request.(CheckEffectRollRequestObject))
+		return sh.ssi.CheckAvailableEffectRoll(ctx.Request().Context(), request.(CheckAvailableEffectRollRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "CheckEffectRoll")
+		handler = middleware(handler, "CheckAvailableEffectRoll")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(CheckEffectRollResponseObject); ok {
-		return validResponse.VisitCheckEffectRollResponse(ctx.Response())
+	} else if validResponse, ok := response.(CheckAvailableEffectRollResponseObject); ok {
+		return validResponse.VisitCheckAvailableEffectRollResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -1298,10 +1405,8 @@ func (sh *strictHandler) CheckEffectRoll(ctx echo.Context, userId UserId) error 
 }
 
 // GetEffectHistory operation middleware
-func (sh *strictHandler) GetEffectHistory(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) GetEffectHistory(ctx echo.Context) error {
 	var request GetEffectHistoryRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.GetEffectHistory(ctx.Request().Context(), request.(GetEffectHistoryRequestObject))
@@ -1323,10 +1428,8 @@ func (sh *strictHandler) GetEffectHistory(ctx echo.Context, userId UserId) error
 }
 
 // MakeEffectRoll operation middleware
-func (sh *strictHandler) MakeEffectRoll(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) MakeEffectRoll(ctx echo.Context) error {
 	var request MakeEffectRollRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.MakeEffectRoll(ctx.Request().Context(), request.(MakeEffectRollRequestObject))
@@ -1348,10 +1451,8 @@ func (sh *strictHandler) MakeEffectRoll(ctx echo.Context, userId UserId) error {
 }
 
 // GetCurrentGame operation middleware
-func (sh *strictHandler) GetCurrentGame(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) GetCurrentGame(ctx echo.Context) error {
 	var request GetCurrentGameRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.GetCurrentGame(ctx.Request().Context(), request.(GetCurrentGameRequestObject))
@@ -1373,10 +1474,8 @@ func (sh *strictHandler) GetCurrentGame(ctx echo.Context, userId UserId) error {
 }
 
 // CancelCurrentGame operation middleware
-func (sh *strictHandler) CancelCurrentGame(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) CancelCurrentGame(ctx echo.Context) error {
 	var request CancelCurrentGameRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.CancelCurrentGame(ctx.Request().Context(), request.(CancelCurrentGameRequestObject))
@@ -1398,10 +1497,8 @@ func (sh *strictHandler) CancelCurrentGame(ctx echo.Context, userId UserId) erro
 }
 
 // FinishCurrentGame operation middleware
-func (sh *strictHandler) FinishCurrentGame(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) FinishCurrentGame(ctx echo.Context) error {
 	var request FinishCurrentGameRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.FinishCurrentGame(ctx.Request().Context(), request.(FinishCurrentGameRequestObject))
@@ -1423,10 +1520,8 @@ func (sh *strictHandler) FinishCurrentGame(ctx echo.Context, userId UserId) erro
 }
 
 // GetGameHistory operation middleware
-func (sh *strictHandler) GetGameHistory(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) GetGameHistory(ctx echo.Context) error {
 	var request GetGameHistoryRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.GetGameHistory(ctx.Request().Context(), request.(GetGameHistoryRequestObject))
@@ -1448,10 +1543,8 @@ func (sh *strictHandler) GetGameHistory(ctx echo.Context, userId UserId) error {
 }
 
 // MakeGameRoll operation middleware
-func (sh *strictHandler) MakeGameRoll(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) MakeGameRoll(ctx echo.Context) error {
 	var request MakeGameRollRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.MakeGameRoll(ctx.Request().Context(), request.(MakeGameRollRequestObject))
@@ -1473,10 +1566,8 @@ func (sh *strictHandler) MakeGameRoll(ctx echo.Context, userId UserId) error {
 }
 
 // GetUnplayedGames operation middleware
-func (sh *strictHandler) GetUnplayedGames(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) GetUnplayedGames(ctx echo.Context) error {
 	var request GetUnplayedGamesRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.GetUnplayedGames(ctx.Request().Context(), request.(GetUnplayedGamesRequestObject))
@@ -1498,10 +1589,8 @@ func (sh *strictHandler) GetUnplayedGames(ctx echo.Context, userId UserId) error
 }
 
 // AddUnplayedGames operation middleware
-func (sh *strictHandler) AddUnplayedGames(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) AddUnplayedGames(ctx echo.Context) error {
 	var request AddUnplayedGamesRequestObject
-
-	request.UserId = userId
 
 	var body AddUnplayedGamesJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
@@ -1529,10 +1618,8 @@ func (sh *strictHandler) AddUnplayedGames(ctx echo.Context, userId UserId) error
 }
 
 // GetCurrentTimer operation middleware
-func (sh *strictHandler) GetCurrentTimer(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) GetCurrentTimer(ctx echo.Context) error {
 	var request GetCurrentTimerRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.GetCurrentTimer(ctx.Request().Context(), request.(GetCurrentTimerRequestObject))
@@ -1554,10 +1641,8 @@ func (sh *strictHandler) GetCurrentTimer(ctx echo.Context, userId UserId) error 
 }
 
 // PauseCurrentTimer operation middleware
-func (sh *strictHandler) PauseCurrentTimer(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) PauseCurrentTimer(ctx echo.Context) error {
 	var request PauseCurrentTimerRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.PauseCurrentTimer(ctx.Request().Context(), request.(PauseCurrentTimerRequestObject))
@@ -1579,10 +1664,8 @@ func (sh *strictHandler) PauseCurrentTimer(ctx echo.Context, userId UserId) erro
 }
 
 // StartCurrentTimer operation middleware
-func (sh *strictHandler) StartCurrentTimer(ctx echo.Context, userId UserId) error {
+func (sh *strictHandler) StartCurrentTimer(ctx echo.Context) error {
 	var request StartCurrentTimerRequestObject
-
-	request.UserId = userId
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.StartCurrentTimer(ctx.Request().Context(), request.(StartCurrentTimerRequestObject))

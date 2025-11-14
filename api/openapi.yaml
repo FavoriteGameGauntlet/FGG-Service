@@ -4,66 +4,112 @@ info:
   version: 0.1.0
 paths:
 
-
-  /users/{name}:
-    parameters:
-      - $ref: "#/components/parameters/UserName"
+  /auth/signup:
     post:
-      operationId: createUser
-      tags:
-        - Users
-      summary: Create user
+      operationId: signUp
+      tags: [ Auth ]
+      summary: .
       description: |
-        Create a user and get an ID that must be passed in order to execute commands.
+        .
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/Name'
+                email:
+                  $ref: '#/components/schemas/Email'
+                password:
+                  $ref: '#/components/schemas/Password'
+              required: [ name, email, password ]
       responses:
         '200':
-          description: User was created successfully and returned in response.
+          description: .
+        '401':
+          description: .
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/NotAuthorizedError'
         '409':
-          description: User already exists with the same name.
+          description: .
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictError"
+                $ref: '#/components/schemas/ConflictError'
         '500':
-          description: Service unavailable while creating user.
+          description: .
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
-    get:
-      operationId: getUser
-      tags:
-        - Users
-      summary: Get user ID
+                $ref: '#/components/schemas/InternalServerError'
+
+
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [ Auth ]
+      summary: .
       description: |
-        Enter your username to get the ID that you need to pass in order to execute commands.
+        .
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/Name'
+                password:
+                  $ref: '#/components/schemas/Password'
+              required: [ name, password ]
       responses:
         '200':
-          description: The user was found and returned successfully.
+          description: .
+        '401':
+          description: .
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
-        '404':
-          description: No user found with the given name.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotAuthorizedError'
         '500':
-          description: Service unavailable while retrieving user.
+          description: .
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
-  /users/{userId}/games/unplayed:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [ Auth ]
+      summary: .
+      description: |
+        .
+      responses:
+        '200':
+          description: .
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
+        '500':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+
+
+  /games/unplayed:
     post:
       operationId: addUnplayedGames
       tags:
@@ -76,22 +122,28 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UnplayedGames"
+              $ref: '#/components/schemas/UnplayedGames'
       responses:
         '200':
           description: Unplayed games were saved successfully.
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: User not found when saving unplayed games.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '500':
           description: Service unavailable while saving unplayed games.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
     get:
       operationId: getUnplayedGames
       tags:
@@ -106,25 +158,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnplayedGames"
+                $ref: '#/components/schemas/UnplayedGames'
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: User not found when retrieving unplayed games.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '500':
           description: Service unavailable while retrieving unplayed games.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
 
-  /users/{userId}/games/roll:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /games/roll:
     post:
       operationId: makeGameRoll
       tags:
@@ -140,31 +196,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Game"
+                $ref: '#/components/schemas/Game'
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: User not found or no unplayed games available.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '409':
           description: Game roll not allowed due to current game state.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictError"
+                $ref: '#/components/schemas/ConflictError'
         '500':
           description: Service unavailable while rolling for a game.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
 
-  /users/{userId}/games/current:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /games/current:
     get:
       operationId: getCurrentGame
       tags:
@@ -178,25 +238,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Game"
+                $ref: '#/components/schemas/Game'
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: Current game not found for the user.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '500':
           description: Service unavailable while retrieving current game.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
 
-  /users/{userId}/games/current/finish:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /games/current/finish:
     post:
       operationId: finishCurrentGame
       tags:
@@ -213,25 +277,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '409':
           description: Game finishing not allowed due to lack of completed timers for the game.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictError"
+                $ref: '#/components/schemas/ConflictError'
         '500':
           description: Service unavailable while finishing current game.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
 
-  /users/{userId}/games/current/cancel:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /games/current/cancel:
     post:
       operationId: cancelCurrentGame
       tags:
@@ -243,24 +311,28 @@ paths:
       responses:
         '200':
           description: Current game was marked as cancelled successfully.
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: No current game found for the user to cancel.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '500':
           description: Service unavailable while cancelling current game.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
 
-  /users/{userId}/games/history:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /games/history:
     get:
       operationId: getGameHistory
       tags:
@@ -275,24 +347,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Games"
+                $ref: '#/components/schemas/Games'
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: No game history found for the user.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '500':
           description: Service unavailable while retrieving game history.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
-  /users/{userId}/timers/current:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /timers/current:
     get:
       operationId: getCurrentTimer
       tags:
@@ -307,25 +383,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Timer"
+                $ref: '#/components/schemas/Timer'
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: No active timer found for the user.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '500':
           description: Service unavailable while retrieving current timer.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
 
-  /users/{userId}/timers/current/start:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /timers/current/start:
     post:
       operationId: startCurrentTimer
       tags:
@@ -340,31 +420,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TimerAction"
+                $ref: '#/components/schemas/TimerAction'
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: No current timer found to start.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '409':
           description: Timer cannot be started due to incorrect state.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictError"
+                $ref: '#/components/schemas/ConflictError'
         '500':
           description: Service unavailable while starting timer.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
 
-  /users/{userId}/timers/current/pause:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /timers/current/pause:
     post:
       operationId: pauseCurrentTimer
       tags:
@@ -379,40 +463,44 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TimerAction"
+                $ref: '#/components/schemas/TimerAction'
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: No current timer found to pause.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '409':
           description: Timer cannot be paused due to incorrect state.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictError"
+                $ref: '#/components/schemas/ConflictError'
         '500':
           description: Service unavailable while pausing timer.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
 
-  /users/{userId}/effects/has-roll:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /effects/has-roll:
     get:
-      operationId: checkEffectRoll
+      operationId: checkAvailableEffectRoll
       tags:
         - Effects
       summary: Check if there are any effect rolls available
       description: |
         You can find out if you have any available effect rolls.<br>
-        If the value is "true," you have one.<br>
-        If the value is "false," you don't.
+        If the value is 'true,' you have one.<br>
+        If the value is 'false,' you don't.
       responses:
         '200':
           description: Boolean indicating whether the user has available effect rolls.
@@ -420,24 +508,28 @@ paths:
             application/json:
               schema:
                 type: boolean
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: User not found when checking effect roll.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '500':
           description: Service unavailable while checking effect roll.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
 
-  /users/{userId}/effects/history:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /effects/history:
     get:
       operationId: getEffectHistory
       tags:
@@ -452,25 +544,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Effects"
+                $ref: '#/components/schemas/Effects'
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: No effect history found for the user.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '500':
           description: Service unavailable while retrieving effect history.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
 
-  /users/{userId}/effects/roll:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /effects/roll:
     post:
       operationId: makeEffectRoll
       tags:
@@ -487,31 +583,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Effect"
+                $ref: '#/components/schemas/Effect'
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: User not found or effect roll unavailable.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/NotFoundError"
+                $ref: '#/components/schemas/NotFoundError'
         '409':
           description: Effect roll not allowed due to current game or timer state.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictError"
+                $ref: '#/components/schemas/ConflictError'
         '500':
           description: Service unavailable while rolling for effects.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
 
 
 
-  /users/{userId}/effects/available:
-    parameters:
-      - $ref: "#/components/parameters/UserId"
+  /effects/available:
     post:
       operationId: getAvailableEffects
       tags:
@@ -527,19 +627,26 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AvailableEffect"
+                $ref: '#/components/schemas/AvailableEffect'
+        '401':
+          description: .
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAuthorizedError'
         '404':
           description: User not found or available effects data missing.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConflictError"
+                $ref: '#/components/schemas/ConflictError'
         '500':
           description: Service unavailable while retrieving available effects.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InternalServerError"
+                $ref: '#/components/schemas/InternalServerError'
+
 
 
 components:
@@ -550,37 +657,50 @@ components:
       in: path
       required: true
       schema:
-        $ref: "#/components/schemas/Id"
+        $ref: '#/components/schemas/Id'
     UserName:
       name: name
       in: path
       required: true
       schema:
-        $ref: "#/components/schemas/Name"
+        $ref: '#/components/schemas/Name'
 
   schemas:
     Id:
-      type: string
-      format: uuid
+      type: integer
+      format: int
     Name:
       type: string
+      pattern: '^[A-Za-z0-9_]+$'
+      minLength: 3
+      maxLength: 35
+    Password:
+      type: string
+      pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]$'
+      minLength: 8
+      maxLength: 35
+    Email:
+      type: string
+      pattern: '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+      minLength: 6
+      maxLength: 35
     User:
       type: object
       properties:
         id:
-          $ref: "#/components/schemas/Id"
+          $ref: '#/components/schemas/Id'
         name:
-          $ref: "#/components/schemas/Name"
-      required: [ id, name]
+          $ref: '#/components/schemas/Name'
+      required: [ id, name ]
     UnplayedGame:
       type: object
       properties:
         name:
-          $ref: "#/components/schemas/Name"
+          $ref: '#/components/schemas/Name'
         link:
           type: string
           format: hostname
-          example: "https://store.steampowered.com/app/20"
+          example: 'https://store.steampowered.com/app/20'
       required: [ name ]
     UnplayedGames:
       type: array
@@ -588,7 +708,7 @@ components:
         $ref: '#/components/schemas/UnplayedGame'
     Game:
       allOf:
-        - $ref: "#/components/schemas/UnplayedGame"
+        - $ref: '#/components/schemas/UnplayedGame'
         - type: object
           properties:
             state:
@@ -635,7 +755,7 @@ components:
       type: object
       properties:
         name:
-          $ref: "#/components/schemas/Name"
+          $ref: '#/components/schemas/Name'
         description:
           type: string
         createDate:
@@ -645,7 +765,7 @@ components:
           type: string
           format: date-time
         gameName:
-          $ref: "#/components/schemas/Name"
+          $ref: '#/components/schemas/Name'
       required: [ createDate ]
     Effects:
       type: array
@@ -655,39 +775,52 @@ components:
       type: object
       properties:
         name:
-          $ref: "#/components/schemas/Name"
+          $ref: '#/components/schemas/Name'
         description:
           type: string
       required: [ name ]
 
+    NotAuthorizedError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum: [
+            'NO_ACTIVE_SESSION',
+            'WRONG_AUTH_DATA'
+          ]
+        message:
+          type: string
+      required: [ code, message ]
     NotFoundError:
       type: object
       properties:
         code:
           type: string
           enum: [
-            "GAME_NOT_FOUND",
-            "TIMER_NOT_FOUND",
-            "USER_NOT_FOUND"
+            'GAME_NOT_FOUND',
+            'TIMER_NOT_FOUND',
+            'USER_NOT_FOUND'
           ]
         message:
           type: string
       required: [ code, message ]
       example:
-        code: "USER_NOT_FOUND"
-        message: ""
+        code: 'USER_NOT_FOUND'
+        message: ''
     ConflictError:
       type: object
       properties:
         code:
           type: string
           enum: [
-            "CURRENT_GAME_ALREADY_EXISTS",
-            "NO_AVAILABLE_ROLLS",
-            "TIMER_INCORRECT_STATE",
-            "USER_ALREADY_EXISTS",
-            "NO_COMPLETED_TIMERS",
-            "NO_UNPLAYED_GAMES"
+            'CURRENT_GAME_ALREADY_EXISTS',
+            'EMAIL_ALREADY_EXISTS',
+            'NO_AVAILABLE_ROLLS',
+            'NO_COMPLETED_TIMERS',
+            'NO_UNPLAYED_GAMES',
+            'TIMER_INCORRECT_STATE',
+            'USERNAME_ALREADY_EXISTS'
           ]
         message:
           type: string
@@ -698,7 +831,7 @@ components:
         code:
           type: string
           enum: [
-            "UNEXPECTED_DATABASE"
+            'UNEXPECTED'
           ]
         message:
           type: string

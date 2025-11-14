@@ -15,7 +15,7 @@ import (
 
 const (
 	CheckIfGameExistsCommand = `
-		SELECT CASE 
+		SELECT CASE
         	WHEN EXISTS (
 				SELECT 1
 				FROM Games
@@ -24,18 +24,18 @@ const (
          	ELSE false
        	END AS 'DoesExist'`
 	CheckIfUnplayedGameExistsCommand = `
-		SELECT CASE 
+		SELECT CASE
         	WHEN EXISTS (
 				SELECT 1
 				FROM UnplayedGames ug
 					INNER JOIN Games g ON ug.GameId = g.Id
-				WHERE ug.UserId = $userId 
+				WHERE ug.UserId = $userId
 					AND g.Name = $gameName)
          	THEN true
          	ELSE false
        	END AS 'DoesExist'`
 	CheckIfCurrentGameExistsCommand = `
-		SELECT CASE 
+		SELECT CASE
         	WHEN EXISTS (
 				SELECT 1
 				FROM GameHistory gh
@@ -46,22 +46,22 @@ const (
          	ELSE false
        	END AS 'DoesExist'`
 	AddGameCommand = `
-		INSERT INTO Games (Id, Name, Link)
-		VALUES ($gameId, $gameName, $gameLink)`
+		INSERT INTO Games (Name, Link)
+		VALUES ($gameName, $gameLink)`
 	GetGameCommand = `
 		SELECT Id, Name, Link
 		FROM Games
 		WHERE Name = $gameName`
 	AddUnplayedGameCommand = `
-		INSERT INTO UnplayedGames (Id, UserId, GameId)
-		VALUES ($unplayedGameId, $userId, $gameId)`
+		INSERT INTO UnplayedGames (UserId, GameId)
+		VALUES ($userId, $gameId)`
 	GetUnplayedGamesCommand = `
 		SELECT g.Id, g.Name, g.Link
 		FROM UnplayedGames ug
 			INNER JOIN Games g ON ug.GameId = g.Id
 		WHERE ug.UserId = $userId`
 	GetCurrentGameCommand = `
-		SELECT 
+		SELECT
 		  g.Id,
 		  g.Name,
 		  gh.State,
@@ -78,19 +78,19 @@ const (
 		UPDATE GameHistory
 		SET State = $cancelledGameState,
 			FinishDate = datetime('now', 'subsec'),
-			ResultPoints = $resultPoints
+			MapPoints = $mapPoints
 		WHERE UserId = $userId
 			AND GameId = $gameId;`
 	FinishCurrentGameCommand = `
 		UPDATE GameHistory
 		SET State = $finishedGameState,
 			FinishDate = datetime('now', 'subsec'),
-			ResultPoints = $resultPoints
+			MapPoints = $mapPoints
 		WHERE UserId = $userId
 			AND GameId = $gameId;`
 	CreateEffectRollCommand = `
-		INSERT INTO EffectHistory (Id, UserId, GameId)
-		VALUES ($effectHistoryId, $gameId, $userId)`
+		INSERT INTO AvailableRolls (UserId)
+		VALUES ($userId)`
 	GetGameHistoryCommand = `
 		SELECT 
 		  g.Id,
@@ -114,7 +114,7 @@ const (
 			AND GameId = $gameId`
 )
 
-func AddUnplayedGames(userId uuid.UUID, gamesPtr *UnplayedGames) error {
+func AddUnplayedGames(userId int, gamesPtr *UnplayedGames) error {
 	games := *gamesPtr
 	numberOfGames := len(games)
 	errorCount := 0
@@ -135,7 +135,7 @@ func AddUnplayedGames(userId uuid.UUID, gamesPtr *UnplayedGames) error {
 	return nil
 }
 
-func AddUnplayedGame(userId uuid.UUID, unplayedGame *UnplayedGame) error {
+func AddUnplayedGame(userId int, unplayedGame *UnplayedGame) error {
 	doesExist, err := CheckIfUnplayedGameExists(
 		userId,
 		unplayedGame.Name,
@@ -162,7 +162,7 @@ func AddUnplayedGame(userId uuid.UUID, unplayedGame *UnplayedGame) error {
 	return err
 }
 
-func CheckIfUnplayedGameExists(userId uuid.UUID, gameName string) (bool, error) {
+func CheckIfUnplayedGameExists(userId int, gameName string) (bool, error) {
 	row := db_access.QueryRow(CheckIfUnplayedGameExistsCommand, userId, gameName)
 
 	var doesExist bool
@@ -183,22 +183,18 @@ func AddOrGetGame(unplayedGame *UnplayedGame) (*Game, error) {
 	}
 
 	if doesExist {
-		row := db_access.QueryRow(GetGameCommand, unplayedGame.Name)
-
-		game := Game{}
-		err = row.Scan(&game.Id, &game.Name, &game.Link)
+		var game *Game
+		game, err = GetGame(unplayedGame.Name)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return &game, nil
+		return game, nil
 	}
 
-	gameId := uuid.New()
 	_, err = db_access.Exec(
 		AddGameCommand,
-		gameId.String(),
 		unplayedGame.Name,
 		unplayedGame.Link,
 	)
@@ -207,11 +203,27 @@ func AddOrGetGame(unplayedGame *UnplayedGame) (*Game, error) {
 		return nil, err
 	}
 
-	return &Game{
-		Id:   gameId,
-		Name: unplayedGame.Name,
-		Link: unplayedGame.Link,
-	}, nil
+	var game *Game
+	game, err = GetGame(unplayedGame.Name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return game, nil
+}
+
+func GetGame(gameName string) (*Game, error) {
+	row := db_access.QueryRow(GetGameCommand, gameName)
+
+	game := Game{}
+	err := row.Scan(&game.Id, &game.Name, &game.Link)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &game, nil
 }
 
 func CheckIfGameExists(gameName string) (bool, error) {
@@ -227,7 +239,7 @@ func CheckIfGameExists(gameName string) (bool, error) {
 	return doesExist, nil
 }
 
-func GetUnplayedGames(userId uuid.UUID) (*UnplayedGames, error) {
+func GetUnplayedGames(userId int) (*UnplayedGames, error) {
 	rows, err := db_access.Query(GetUnplayedGamesCommand, userId)
 
 	if err != nil {
@@ -258,7 +270,7 @@ func GetUnplayedGames(userId uuid.UUID) (*UnplayedGames, error) {
 	return &games, nil
 }
 
-func GetCurrentGame(userId uuid.UUID) (*Game, error) {
+func GetCurrentGame(userId int) (*Game, error) {
 	row := db_access.QueryRow(GetCurrentGameCommand, userId, GameStateFinished)
 
 	game := Game{}
@@ -282,7 +294,7 @@ func GetCurrentGame(userId uuid.UUID) (*Game, error) {
 	return &game, nil
 }
 
-func CheckIfCurrentGameExists(userId uuid.UUID) (bool, error) {
+func CheckIfCurrentGameExists(userId int) (bool, error) {
 	row := db_access.QueryRow(CheckIfCurrentGameExistsCommand, userId, GameStateFinished)
 
 	var doesExist bool
@@ -295,7 +307,7 @@ func CheckIfCurrentGameExists(userId uuid.UUID) (bool, error) {
 	return doesExist, nil
 }
 
-func CancelCurrentGame(userId uuid.UUID) error {
+func CancelCurrentGame(userId int) error {
 	game, err := GetCurrentGame(userId)
 
 	if err != nil {
@@ -324,7 +336,7 @@ func CancelCurrentGame(userId uuid.UUID) error {
 	return err
 }
 
-func FinishCurrentGame(userId uuid.UUID) (bool, error) {
+func FinishCurrentGame(userId int) (bool, error) {
 	_, err := timer_service.StopCurrentTimer(userId)
 
 	if err != nil {
@@ -380,7 +392,7 @@ func RollResultPoints(diceCount int) (int, error) {
 	return rolledValue, nil
 }
 
-func GetGameHistory(userId uuid.UUID) (*Games, error) {
+func GetGameHistory(userId int) (*Games, error) {
 	rows, err := db_access.Query(GetGameHistoryCommand, userId)
 
 	if err != nil {
@@ -435,7 +447,7 @@ func GetGameHistory(userId uuid.UUID) (*Games, error) {
 	return &games, nil
 }
 
-func MakeGameRoll(userId uuid.UUID) (*Game, error) {
+func MakeGameRoll(userId int) (*Game, error) {
 	unplayedGames, err := GetUnplayedGames(userId)
 
 	if err != nil {

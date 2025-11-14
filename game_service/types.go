@@ -2,12 +2,10 @@ package game_service
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Game struct {
-	Id         uuid.UUID
+	Id         int
 	Link       *string
 	Name       string
 	State      GameState
@@ -31,7 +29,7 @@ const (
 )
 
 type UnplayedGame struct {
-	GameId uuid.UUID
+	GameId int
 	Link   *string
 	Name   string
 }

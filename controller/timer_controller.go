@@ -2,38 +2,40 @@ package controller
 
 import (
 	"FGG-Service/api"
+	"FGG-Service/auth_service"
 	"FGG-Service/game_service"
 	"FGG-Service/timer_service"
-	"FGG-Service/user_service"
 	"context"
 )
 
 // GetCurrentTimer (GET /users/{userId}/timers/current)
-func (Server) GetCurrentTimer(_ context.Context, request api.GetCurrentTimerRequestObject) (api.GetCurrentTimerResponseObject, error) {
-	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
+func (Server) GetCurrentTimer(ctx context.Context, _ api.GetCurrentTimerRequestObject) (api.GetCurrentTimerResponseObject, error) {
+	sessionId, ok := ctx.Value("session_id").(string)
 
-	if err != nil {
-		return api.GetCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+	if !ok {
+		return api.GetCurrentTimer401JSONResponse{Code: api.NOACTIVESESSION}, nil
 	}
 
-	if !doesExist {
-		return api.GetCurrentTimer404JSONResponse{Code: api.USERNOTFOUND}, nil
-	}
-
-	game, err := game_service.GetCurrentGame(request.UserId)
+	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.GetCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.GetCurrentTimer500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+	}
+
+	game, err := game_service.GetCurrentGame(userId)
+
+	if err != nil {
+		return api.GetCurrentTimer500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if game == nil {
 		return api.GetCurrentTimer404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
-	timer, err := timer_service.GetOrCreateCurrentTimer(request.UserId, game.Id)
+	timer, err := timer_service.GetOrCreateCurrentTimer(userId, game.Id)
 
 	if err != nil {
-		return api.GetCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.GetCurrentTimer500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	timerDto := ConvertTimerToDto(timer)
@@ -51,41 +53,43 @@ func ConvertTimerToDto(timer *timer_service.Timer) *api.Timer {
 }
 
 // PauseCurrentTimer (POST /users/{userId}/timers/current/pause)
-func (Server) PauseCurrentTimer(_ context.Context, request api.PauseCurrentTimerRequestObject) (api.PauseCurrentTimerResponseObject, error) {
-	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
+func (Server) PauseCurrentTimer(ctx context.Context, _ api.PauseCurrentTimerRequestObject) (api.PauseCurrentTimerResponseObject, error) {
+	sessionId, ok := ctx.Value("session_id").(string)
 
-	if err != nil {
-		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+	if !ok {
+		return api.PauseCurrentTimer401JSONResponse{Code: api.NOACTIVESESSION}, nil
 	}
 
-	if !doesExist {
-		return api.PauseCurrentTimer404JSONResponse{Code: api.USERNOTFOUND}, nil
-	}
-
-	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
+	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+	}
+
+	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
+
+	if err != nil {
+		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
 		return api.PauseCurrentTimer404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
-	doesExist, err = timer_service.CheckIfCurrentTimerExists(request.UserId)
+	doesExist, err = timer_service.CheckIfCurrentTimerExists(userId)
 
 	if err != nil {
-		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
 		return api.PauseCurrentTimer404JSONResponse{Code: api.TIMERNOTFOUND}, nil
 	}
 
-	timerAction, err := timer_service.PauseCurrentTimer(request.UserId)
+	timerAction, err := timer_service.PauseCurrentTimer(userId)
 
 	if err != nil {
-		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.PauseCurrentTimer500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if timerAction == nil {
@@ -105,41 +109,43 @@ func ConvertTimerActionTo(timerAction *timer_service.TimerAction) *api.TimerActi
 }
 
 // StartCurrentTimer (POST /users/{userId}/timers/current/start)
-func (Server) StartCurrentTimer(_ context.Context, request api.StartCurrentTimerRequestObject) (api.StartCurrentTimerResponseObject, error) {
-	doesExist, err := user_service.CheckIfUserExistsById(request.UserId)
+func (Server) StartCurrentTimer(ctx context.Context, _ api.StartCurrentTimerRequestObject) (api.StartCurrentTimerResponseObject, error) {
+	sessionId, ok := ctx.Value("session_id").(string)
 
-	if err != nil {
-		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+	if !ok {
+		return api.StartCurrentTimer401JSONResponse{Code: api.NOACTIVESESSION}, nil
 	}
 
-	if !doesExist {
-		return api.StartCurrentTimer404JSONResponse{Code: api.USERNOTFOUND}, nil
-	}
-
-	doesExist, err = game_service.CheckIfCurrentGameExists(request.UserId)
+	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+	}
+
+	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
+
+	if err != nil {
+		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
 		return api.StartCurrentTimer404JSONResponse{Code: api.GAMENOTFOUND}, nil
 	}
 
-	doesExist, err = timer_service.CheckIfCurrentTimerExists(request.UserId)
+	doesExist, err = timer_service.CheckIfCurrentTimerExists(userId)
 
 	if err != nil {
-		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if !doesExist {
 		return api.StartCurrentTimer404JSONResponse{Code: api.TIMERNOTFOUND}, nil
 	}
 
-	timerAction, err := timer_service.StartCurrentTimer(request.UserId)
+	timerAction, err := timer_service.StartCurrentTimer(userId)
 
 	if err != nil {
-		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTEDDATABASE, Message: err.Error()}, nil
+		return api.StartCurrentTimer500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
 	}
 
 	if timerAction == nil {
