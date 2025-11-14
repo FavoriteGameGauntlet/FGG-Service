@@ -8,9 +8,9 @@ paths:
     post:
       operationId: signUp
       tags: [ Auth ]
-      summary: .
+      summary: Register a new user account
       description: |
-        .
+        Creates a new user by providing a unique name, valid email address, and password.
       requestBody:
         content:
           application/json:
@@ -26,21 +26,21 @@ paths:
               required: [ name, email, password ]
       responses:
         '200':
-          description: .
+          description: User account successfully created.
         '401':
-          description: .
+          description: Invalid authentication data provided.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '409':
-          description: .
+          description: A user with the given email or name already exists.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConflictError'
         '500':
-          description: .
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -52,9 +52,9 @@ paths:
     post:
       operationId: login
       tags: [ Auth ]
-      summary: .
+      summary: Log in an existing user
       description: |
-        .
+        Authenticates a user using their name and password and returns an active session.
       requestBody:
         content:
           application/json:
@@ -68,15 +68,15 @@ paths:
               required: [ name, password ]
       responses:
         '200':
-          description: .
+          description: User successfully authenticated.
         '401':
-          description: .
+          description: Incorrect name or password.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '500':
-          description: .
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -88,20 +88,20 @@ paths:
     post:
       operationId: logout
       tags: [ Auth ]
-      summary: .
+      summary: Log out the current user
       description: |
-        .
+        Ends the active user session and invalidates authentication.
       responses:
         '200':
-          description: .
+          description: User successfully logged out.
         '401':
-          description: .
+          description: No active session found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '500':
-          description: .
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -127,19 +127,19 @@ paths:
         '200':
           description: Unplayed games were saved successfully.
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: User not found when saving unplayed games.
+          description: Unplayed games data not found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundError'
         '500':
-          description: Service unavailable while saving unplayed games.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -160,19 +160,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/UnplayedGames'
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: User not found when retrieving unplayed games.
+          description: Unplayed games data not found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundError'
         '500':
-          description: Service unavailable while retrieving unplayed games.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -198,13 +198,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Game'
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: User not found or no unplayed games available.
+          description: No unplayed games available for rolling.
           content:
             application/json:
               schema:
@@ -216,7 +216,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConflictError'
         '500':
-          description: Service unavailable while rolling for a game.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -240,19 +240,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/Game'
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: Current game not found for the user.
+          description: Current game not found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundError'
         '500':
-          description: Service unavailable while retrieving current game.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -272,18 +272,18 @@ paths:
       responses:
         '200':
           description: Current game was marked as finished successfully.
-        '404':
-          description: No current game found for the user to finish.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NotFoundError'
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
+        '404':
+          description: No current game available to finish.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
         '409':
           description: Game finishing not allowed due to lack of completed timers for the game.
           content:
@@ -291,7 +291,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConflictError'
         '500':
-          description: Service unavailable while finishing current game.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -312,19 +312,19 @@ paths:
         '200':
           description: Current game was marked as cancelled successfully.
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: No current game found for the user to cancel.
+          description: No current game available to cancel.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundError'
         '500':
-          description: Service unavailable while cancelling current game.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -349,19 +349,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/Games'
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: No game history found for the user.
+          description: Game history not found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundError'
         '500':
-          description: Service unavailable while retrieving game history.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -385,19 +385,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/Timer'
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: No active timer found for the user.
+          description: No active timer found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundError'
         '500':
-          description: Service unavailable while retrieving current timer.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -422,13 +422,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/TimerAction'
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: No current timer found to start.
+          description: No timer available to start.
           content:
             application/json:
               schema:
@@ -440,7 +440,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConflictError'
         '500':
-          description: Service unavailable while starting timer.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -465,13 +465,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/TimerAction'
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: No current timer found to pause.
+          description: No timer available to pause.
           content:
             application/json:
               schema:
@@ -483,7 +483,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConflictError'
         '500':
-          description: Service unavailable while pausing timer.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -509,19 +509,19 @@ paths:
               schema:
                 type: boolean
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: User not found when checking effect roll.
+          description: Effect roll information not found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundError'
         '500':
-          description: Service unavailable while checking effect roll.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -536,6 +536,8 @@ paths:
         - Effects
       summary: Get a list of all effect rolls
       description: |
+        The function is currently not working.<br>
+        <br>
         You can get a list of all effect rolls that have been received or rolled,
         as well as all the information about them.
       responses:
@@ -546,19 +548,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/Effects'
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: No effect history found for the user.
+          description: Effect history not found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundError'
         '500':
-          description: Service unavailable while retrieving effect history.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -585,13 +587,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Effect'
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: User not found or effect roll unavailable.
+          description: No available effects to roll.
           content:
             application/json:
               schema:
@@ -603,7 +605,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConflictError'
         '500':
-          description: Service unavailable while rolling for effects.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -629,19 +631,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/AvailableEffect'
         '401':
-          description: .
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotAuthorizedError'
         '404':
-          description: User not found or available effects data missing.
+          description: Available effects data not found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConflictError'
         '500':
-          description: Service unavailable while retrieving available effects.
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -669,21 +671,25 @@ components:
     Id:
       type: integer
       format: int
+
     Name:
       type: string
       pattern: '^[A-Za-z0-9_]+$'
       minLength: 3
       maxLength: 35
+
     Password:
       type: string
       pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]$'
       minLength: 8
       maxLength: 35
+
     Email:
       type: string
       pattern: '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
       minLength: 6
       maxLength: 35
+
     User:
       type: object
       properties:
@@ -692,6 +698,7 @@ components:
         name:
           $ref: '#/components/schemas/Name'
       required: [ id, name ]
+
     UnplayedGame:
       type: object
       properties:
@@ -702,10 +709,12 @@ components:
           format: hostname
           example: 'https://store.steampowered.com/app/20'
       required: [ name ]
+
     UnplayedGames:
       type: array
       items:
         $ref: '#/components/schemas/UnplayedGame'
+
     Game:
       allOf:
         - $ref: '#/components/schemas/UnplayedGame'
@@ -721,10 +730,12 @@ components:
               type: string
               format: date-time
           required: [ state, hourCount ]
+
     Games:
       type: array
       items:
         $ref: '#/components/schemas/Game'
+
     Timer:
       type: object
       properties:
@@ -741,6 +752,7 @@ components:
           type: string
           format: date-time
       required: [ state, remainingTimeInS, durationInS ]
+
     TimerAction:
       type: object
       properties:
@@ -751,6 +763,7 @@ components:
           type: integer
           format: int
       required: [ type, remainingTimeInS ]
+
     Effect:
       type: object
       properties:
@@ -767,10 +780,12 @@ components:
         gameName:
           $ref: '#/components/schemas/Name'
       required: [ createDate ]
+
     Effects:
       type: array
       items:
         $ref: '#/components/schemas/Effect'
+
     AvailableEffect:
       type: object
       properties:
@@ -779,6 +794,8 @@ components:
         description:
           type: string
       required: [ name ]
+
+
 
     NotAuthorizedError:
       type: object
@@ -792,6 +809,7 @@ components:
         message:
           type: string
       required: [ code, message ]
+
     NotFoundError:
       type: object
       properties:
@@ -808,6 +826,7 @@ components:
       example:
         code: 'USER_NOT_FOUND'
         message: ''
+
     ConflictError:
       type: object
       properties:
@@ -825,6 +844,7 @@ components:
         message:
           type: string
       required: [ code, message ]
+
     InternalServerError:
       type: object
       properties:

@@ -196,13 +196,13 @@ type AddUnplayedGamesJSONRequestBody = UnplayedGames
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// .
+	// Log in an existing user
 	// (POST /auth/login)
 	Login(ctx echo.Context) error
-	// .
+	// Log out the current user
 	// (POST /auth/logout)
 	Logout(ctx echo.Context) error
-	// .
+	// Register a new user account
 	// (POST /auth/signup)
 	SignUp(ctx echo.Context) error
 	// Get a list of effects available for rolling
@@ -1212,13 +1212,13 @@ func (response StartCurrentTimer500JSONResponse) VisitStartCurrentTimerResponse(
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// .
+	// Log in an existing user
 	// (POST /auth/login)
 	Login(ctx context.Context, request LoginRequestObject) (LoginResponseObject, error)
-	// .
+	// Log out the current user
 	// (POST /auth/logout)
 	Logout(ctx context.Context, request LogoutRequestObject) (LogoutResponseObject, error)
-	// .
+	// Register a new user account
 	// (POST /auth/signup)
 	SignUp(ctx context.Context, request SignUpRequestObject) (SignUpResponseObject, error)
 	// Get a list of effects available for rolling
