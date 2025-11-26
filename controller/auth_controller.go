@@ -56,6 +56,8 @@ func (Server) Login(ctx echo.Context) error {
 	cookie.Value = *sessionId
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	cookie.HttpOnly = true
+	cookie.Path = "/"
+	cookie.Secure = false
 
 	ctx.SetCookie(cookie)
 
