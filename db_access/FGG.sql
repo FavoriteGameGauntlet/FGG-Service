@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.17 on Thu Nov 27 00:43:14 2025
+-- File generated with SQLiteStudio v3.4.17 on Thu Nov 27 00:54:51 2025
 --
 -- Text encoding used: System
 --
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS Users (
                      NOT NULL,
     Name     TEXT    NOT NULL
                      UNIQUE,
-    Email            UNIQUE
+    Email    TEXT    UNIQUE
                      NOT NULL,
     Password TEXT    NOT NULL,
     JoinDate TEXT    DEFAULT (datetime('now', 'subsec') ) 
