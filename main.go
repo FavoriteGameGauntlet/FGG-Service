@@ -22,6 +22,7 @@ func main() {
 	server := controller.NewServer()
 	e := echo.New()
 
+	e.Pre(middleware.RemoveTrailingSlash())
 	api.RegisterHandlers(e, server)
 
 	fileSystem := http.FS(swaggerUI)
