@@ -4,43 +4,89 @@ import (
 	"FGG-Service/api"
 	"FGG-Service/auth_service"
 	"FGG-Service/effect_service"
-	"context"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
-// GetAvailableEffects (POST /users/{userId}/effects/available)
-func (Server) GetAvailableEffects(_ context.Context, _ api.GetAvailableEffectsRequestObject) (api.GetAvailableEffectsResponseObject, error) {
-	return api.GetAvailableEffects200JSONResponse{}, nil
+// GetAvailableEffects (POST /effects/available)
+func (Server) GetAvailableEffects(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("sessionId")
+
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
+	}
+
+	sessionId := cookie.Value
+
+	_, err = auth_service.GetUserId(sessionId)
+
+	if err != nil {
+		return err
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }
 
-// CheckAvailableEffectRoll CheckEffectRoll (GET /users/{userId}/effects/has-roll)
-func (Server) CheckAvailableEffectRoll(ctx context.Context, _ api.CheckAvailableEffectRollRequestObject) (api.CheckAvailableEffectRollResponseObject, error) {
-	sessionId, ok := ctx.Value("session_id").(string)
+// CheckAvailableEffectRoll CheckEffectRoll (GET /effects/has-roll)
+func (Server) CheckAvailableEffectRoll(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("sessionId")
 
-	if !ok {
-		return api.CheckAvailableEffectRoll401JSONResponse{Code: api.NOACTIVESESSION}, nil
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
 	}
+
+	sessionId := cookie.Value
 
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.CheckAvailableEffectRoll500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	doesExist, err := effect_service.CheckIfAvailableRollExists(userId)
 
 	if err != nil {
-		return api.CheckAvailableEffectRoll500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
-	return api.CheckAvailableEffectRoll200JSONResponse(doesExist), nil
+	return ctx.JSON(http.StatusOK, doesExist)
 }
 
-// GetEffectHistory (GET /users/{userId}/effects/history)
-func (Server) GetEffectHistory(_ context.Context, _ api.GetEffectHistoryRequestObject) (api.GetEffectHistoryResponseObject, error) {
-	return api.GetEffectHistory200JSONResponse{}, nil
+// GetEffectHistory (GET /effects/history)
+func (Server) GetEffectHistory(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("sessionId")
+
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
+	}
+
+	sessionId := cookie.Value
+
+	_, err = auth_service.GetUserId(sessionId)
+
+	if err != nil {
+		return err
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }
 
-// MakeEffectRoll (POST /users/{userId}/effects/roll)
-func (Server) MakeEffectRoll(_ context.Context, _ api.MakeEffectRollRequestObject) (api.MakeEffectRollResponseObject, error) {
-	return api.MakeEffectRoll200JSONResponse{}, nil
+// MakeEffectRoll (POST /effects/roll)
+func (Server) MakeEffectRoll(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("sessionId")
+
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
+	}
+
+	sessionId := cookie.Value
+
+	_, err = auth_service.GetUserId(sessionId)
+
+	if err != nil {
+		return err
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }

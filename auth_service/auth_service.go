@@ -120,22 +120,22 @@ func DeleteSession(sessionId string) error {
 	return err
 }
 
-func CreateSession(userName string, userPassword string) (bool, error) {
+func CreateSession(userName string, userPassword string) (*string, error) {
 	row := db_access.QueryRow(GetUserIdByUserNameAndPasswordCommand, userName, userPassword)
 
 	var userId int
 	err := row.Scan(&userId)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return false, nil
+		return nil, nil
 	}
 
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	sessionId := uuid.New()
-	_, err = db_access.Exec(CreateSessionCommand, sessionId.String(), userId)
+	sessionId := uuid.New().String()
+	_, err = db_access.Exec(CreateSessionCommand, sessionId, userId)
 
-	return true, err
+	return &sessionId, err
 }

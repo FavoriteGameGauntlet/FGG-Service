@@ -1,7 +1,7 @@
 openapi: 3.1.2
 info:
   title: Favorite Game Gauntlet
-  version: 0.1.0
+  version: 0.2.0
 paths:
 
   /auth/signup:
@@ -15,15 +15,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  $ref: '#/components/schemas/Name'
-                email:
-                  $ref: '#/components/schemas/Email'
-                password:
-                  $ref: '#/components/schemas/Password'
-              required: [ name, email, password ]
+              $ref: '#/components/schemas/NewUser'
       responses:
         '200':
           description: User account successfully created.
@@ -59,16 +51,15 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  $ref: '#/components/schemas/Name'
-                password:
-                  $ref: '#/components/schemas/Password'
-              required: [ name, password ]
+              $ref: '#/components/schemas/User'
       responses:
         '200':
           description: User successfully authenticated.
+          headers:
+            Set-Cookie:
+             schema:
+               type: string
+             description: Session cookie
         '401':
           description: Incorrect name or password.
           content:
@@ -94,6 +85,11 @@ paths:
       responses:
         '200':
           description: User successfully logged out.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Session cookie
         '401':
           description: No active session found.
           content:
@@ -690,14 +686,25 @@ components:
       minLength: 6
       maxLength: 35
 
+    NewUser:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+        email:
+          $ref: '#/components/schemas/Email'
+        password:
+          $ref: '#/components/schemas/Password'
+      required: [ name, email, password ]
+
     User:
       type: object
       properties:
-        id:
-          $ref: '#/components/schemas/Id'
         name:
           $ref: '#/components/schemas/Name'
-      required: [ id, name ]
+        password:
+          $ref: '#/components/schemas/Password'
+      required: [ name, password ]
 
     UnplayedGame:
       type: object
@@ -838,6 +845,7 @@ components:
             'NO_AVAILABLE_ROLLS',
             'NO_COMPLETED_TIMERS',
             'NO_UNPLAYED_GAMES',
+            'SESSION_ALREADY_EXISTS',
             'TIMER_INCORRECT_STATE',
             'USERNAME_ALREADY_EXISTS'
           ]

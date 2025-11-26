@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/justinian/dice"
 )
 
@@ -106,8 +105,8 @@ const (
 		GROUP BY g.Id, g.Name, gh.State, g.Link, gh.FinishDate
 		ORDER BY gh.FinishDate NULLS FIRST`
 	CreateCurrentGameCommand = `
-		INSERT INTO GameHistory (Id, UserId, GameId)
-		VALUES ($gameHistoryId, $userId, $gameId)`
+		INSERT INTO GameHistory (UserId, GameId)
+		VALUES ($userId, $gameId)`
 	DeleteUnplayedGameCommand = `
 		DELETE FROM UnplayedGames
 		WHERE UserId = $userId
@@ -151,10 +150,8 @@ func AddUnplayedGame(userId int, unplayedGame *UnplayedGame) error {
 		return err
 	}
 
-	unplayedGameId := uuid.New().String()
 	_, err = db_access.Exec(
 		AddUnplayedGameCommand,
-		unplayedGameId,
 		userId,
 		game.Id,
 	)
@@ -371,8 +368,7 @@ func FinishCurrentGame(userId int) (bool, error) {
 		return false, err
 	}
 
-	effectHistoryId := uuid.New()
-	_, err = db_access.Exec(CreateEffectRollCommand, effectHistoryId.String(), userId, game.Id)
+	_, err = db_access.Exec(CreateEffectRollCommand, userId, game.Id)
 
 	return true, err
 }
@@ -461,8 +457,7 @@ func MakeGameRoll(userId int) (*Game, error) {
 	randomNumber := rand.Intn(len(*unplayedGames))
 	randomUnplayedGame := (*unplayedGames)[randomNumber]
 
-	gameHistoryId := uuid.New()
-	_, err = db_access.Exec(CreateCurrentGameCommand, gameHistoryId.String(), userId, randomUnplayedGame.GameId)
+	_, err = db_access.Exec(CreateCurrentGameCommand, userId, randomUnplayedGame.GameId)
 
 	if err != nil {
 		return nil, err

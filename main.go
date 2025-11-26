@@ -22,8 +22,7 @@ func main() {
 	server := controller.NewServer()
 	e := echo.New()
 
-	strictHandler := api.NewStrictHandler(server, []api.StrictMiddlewareFunc{})
-	api.RegisterHandlers(e, strictHandler)
+	api.RegisterHandlers(e, server)
 
 	fileSystem := http.FS(swaggerUI)
 	fileServer := http.FileServer(fileSystem)

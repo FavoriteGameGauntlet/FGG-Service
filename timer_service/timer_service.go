@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const (
@@ -39,11 +37,11 @@ const (
 		ORDER BY ta.CreateDate DESC
 		LIMIT 1`
 	CreateTimerCommand = `
-		INSERT INTO Timers (Id, UserId, GameId, DurationInS)
-		VALUES ($timerId, $userId, $gameId, $timerDurationInS)`
+		INSERT INTO Timers (UserId, GameId, DurationInS)
+		VALUES ($userId, $gameId, $timerDurationInS)`
 	ActCurrentTimerCommand = `
-		INSERT INTO TimerActions (Id, TimerId, Action, RemainingTimeInS)
-		VALUES ($timerActionId, $timerId, $timerAction, $remainingTimeInS)`
+		INSERT INTO TimerActions (TimerId, Action, RemainingTimeInS)
+		VALUES ($timerId, $timerAction, $remainingTimeInS)`
 	GetCompletedTimerUsersCommand = `
 		SELECT DISTINCT t.UserId
 		FROM Timers t
@@ -145,10 +143,8 @@ func GetCurrentTimer(userId int) (*Timer, error) {
 }
 
 func CreateCurrentTimer(userId int, gameId int) (*Timer, error) {
-	timerId := uuid.New().String()
 	_, err := db_access.Exec(
 		CreateTimerCommand,
-		timerId,
 		userId,
 		gameId,
 		DefaultTimerDurationInS,
@@ -181,13 +177,11 @@ func StartCurrentTimer(userId int) (*TimerAction, error) {
 		return nil, nil
 	}
 
-	timerActionId := uuid.New().String()
 	timerAction := TimerActionStart
 	remainingTimerInS := timer.RemainingTimeInS
 
 	_, err = db_access.Exec(
 		ActCurrentTimerCommand,
-		timerActionId,
 		timer.Id,
 		timerAction,
 		remainingTimerInS,
@@ -220,13 +214,11 @@ func PauseCurrentTimer(userId int) (*TimerAction, error) {
 		return nil, nil
 	}
 
-	timerActionId := uuid.New().String()
 	timerAction := TimerActionPause
 	remainingTimerInS := timer.RemainingTimeInS
 
 	_, err = db_access.Exec(
 		ActCurrentTimerCommand,
-		timerActionId,
 		timer.Id,
 		timerAction,
 		remainingTimerInS,
@@ -258,13 +250,11 @@ func StopCurrentTimer(userId int) (*TimerAction, error) {
 		return nil, nil
 	}
 
-	timerActionId := uuid.New().String()
 	timerAction := TimerActionStop
 	remainingTimerInS := 0
 
 	_, err = db_access.Exec(
 		ActCurrentTimerCommand,
-		timerActionId,
 		timer.Id,
 		timerAction,
 		remainingTimerInS,

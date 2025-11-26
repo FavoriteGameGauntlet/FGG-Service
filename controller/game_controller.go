@@ -4,36 +4,40 @@ import (
 	"FGG-Service/api"
 	"FGG-Service/auth_service"
 	"FGG-Service/game_service"
-	"context"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
-// GetCurrentGame (GET /users/{userId}/games/current)
-func (Server) GetCurrentGame(ctx context.Context, _ api.GetCurrentGameRequestObject) (api.GetCurrentGameResponseObject, error) {
-	sessionId, ok := ctx.Value("session_id").(string)
+// GetCurrentGame (GET /games/current)
+func (Server) GetCurrentGame(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("sessionId")
 
-	if !ok {
-		return api.GetCurrentGame401JSONResponse{Code: api.NOACTIVESESSION}, nil
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
 	}
+
+	sessionId := cookie.Value
 
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.GetCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	game, err := game_service.GetCurrentGame(userId)
 
 	if err != nil {
-		return api.GetCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	if game == nil {
-		return api.GetCurrentGame404JSONResponse{Code: api.GAMENOTFOUND}, nil
+		return ctx.JSON(http.StatusNotFound, api.NotFoundError{Code: api.GAMENOTFOUND})
 	}
 
 	gameDto := ConvertGameToDto(game)
 
-	return api.GetCurrentGame200JSONResponse(*gameDto), nil
+	return ctx.JSON(http.StatusOK, *gameDto)
 }
 
 func ConvertGameToDto(game *game_service.Game) *api.Game {
@@ -46,99 +50,105 @@ func ConvertGameToDto(game *game_service.Game) *api.Game {
 	}
 }
 
-// CancelCurrentGame (POST /users/{userId}/games/current/cancel)
-func (Server) CancelCurrentGame(ctx context.Context, _ api.CancelCurrentGameRequestObject) (api.CancelCurrentGameResponseObject, error) {
-	sessionId, ok := ctx.Value("session_id").(string)
+// CancelCurrentGame (POST /games/current/cancel)
+func (Server) CancelCurrentGame(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("sessionId")
 
-	if !ok {
-		return api.CancelCurrentGame401JSONResponse{Code: api.NOACTIVESESSION}, nil
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
 	}
+
+	sessionId := cookie.Value
 
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
 
 	if err != nil {
-		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
-	if !doesExist {
-		return api.CancelCurrentGame404JSONResponse{Code: api.GAMENOTFOUND}, nil
+	if doesExist {
+		return ctx.JSON(http.StatusNotFound, api.NotFoundError{Code: api.GAMENOTFOUND})
 	}
 
 	err = game_service.CancelCurrentGame(userId)
 
 	if err != nil {
-		return api.CancelCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
-	return api.CancelCurrentGame200Response{}, nil
+	return ctx.NoContent(http.StatusOK)
 }
 
-// FinishCurrentGame (GET /users/{userId}/games/current/finish)
-func (Server) FinishCurrentGame(ctx context.Context, _ api.FinishCurrentGameRequestObject) (api.FinishCurrentGameResponseObject, error) {
-	sessionId, ok := ctx.Value("session_id").(string)
+// FinishCurrentGame (GET /games/current/finish)
+func (Server) FinishCurrentGame(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("sessionId")
 
-	if !ok {
-		return api.FinishCurrentGame401JSONResponse{Code: api.NOACTIVESESSION}, nil
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
 	}
+
+	sessionId := cookie.Value
 
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
 
 	if err != nil {
-		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	if !doesExist {
-		return api.FinishCurrentGame404JSONResponse{Code: api.GAMENOTFOUND}, nil
+		return ctx.JSON(http.StatusNotFound, api.NotFoundError{Code: api.GAMENOTFOUND})
 	}
 
 	isSuccess, err := game_service.FinishCurrentGame(userId)
 
 	if err != nil {
-		return api.FinishCurrentGame500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	if !isSuccess {
-		return api.FinishCurrentGame409JSONResponse{Code: api.NOCOMPLETEDTIMERS}, nil
+		return ctx.JSON(http.StatusConflict, api.ConflictError{Code: api.NOCOMPLETEDTIMERS})
 	}
 
-	return api.FinishCurrentGame200Response{}, nil
+	return ctx.NoContent(http.StatusOK)
 }
 
-// GetGameHistory (GET /users/{userId}/games/history)
-func (Server) GetGameHistory(ctx context.Context, _ api.GetGameHistoryRequestObject) (api.GetGameHistoryResponseObject, error) {
-	sessionId, ok := ctx.Value("session_id").(string)
+// GetGameHistory (GET /games/history)
+func (Server) GetGameHistory(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("sessionId")
 
-	if !ok {
-		return api.GetGameHistory401JSONResponse{Code: api.NOACTIVESESSION}, nil
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
 	}
+
+	sessionId := cookie.Value
 
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.GetGameHistory500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	games, err := game_service.GetGameHistory(userId)
 
 	if err != nil {
-		return api.GetGameHistory500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	gamesDto := ConvertGamesToDto(games)
 
-	return api.GetGameHistory200JSONResponse(*gamesDto), nil
+	return ctx.JSON(http.StatusOK, *gamesDto)
 }
 
 func ConvertGamesToDto(games *game_service.Games) *api.Games {
@@ -151,68 +161,72 @@ func ConvertGamesToDto(games *game_service.Games) *api.Games {
 	return &gamesDto
 }
 
-// MakeGameRoll (GET /users/{userId}/games/roll)
-func (Server) MakeGameRoll(ctx context.Context, _ api.MakeGameRollRequestObject) (api.MakeGameRollResponseObject, error) {
-	sessionId, ok := ctx.Value("session_id").(string)
+// MakeGameRoll (GET /games/roll)
+func (Server) MakeGameRoll(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("sessionId")
 
-	if !ok {
-		return api.MakeGameRoll401JSONResponse{Code: api.NOACTIVESESSION}, nil
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
 	}
+
+	sessionId := cookie.Value
 
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
 
 	if err != nil {
-		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	if doesExist {
-		return api.MakeGameRoll409JSONResponse{Code: api.CURRENTGAMEALREADYEXISTS}, nil
+		return ctx.JSON(http.StatusConflict, api.ConflictError{Code: api.CURRENTGAMEALREADYEXISTS})
 	}
 
 	game, err := game_service.MakeGameRoll(userId)
 
 	if err != nil {
-		return api.MakeGameRoll500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	if game == nil {
-		return api.MakeGameRoll409JSONResponse{Code: api.NOUNPLAYEDGAMES}, nil
+		return ctx.JSON(http.StatusConflict, api.ConflictError{Code: api.NOUNPLAYEDGAMES})
 	}
 
 	gameDto := ConvertGameToDto(game)
 
-	return api.MakeGameRoll200JSONResponse(*gameDto), nil
+	return ctx.JSON(http.StatusOK, *gameDto)
 }
 
-// GetUnplayedGames (GET /users/{userId}/games/unplayed)
-func (Server) GetUnplayedGames(ctx context.Context, _ api.GetUnplayedGamesRequestObject) (api.GetUnplayedGamesResponseObject, error) {
-	sessionId, ok := ctx.Value("session_id").(string)
+// GetUnplayedGames (GET /games/unplayed)
+func (Server) GetUnplayedGames(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("sessionId")
 
-	if !ok {
-		return api.GetUnplayedGames401JSONResponse{Code: api.NOACTIVESESSION}, nil
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
 	}
+
+	sessionId := cookie.Value
 
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.GetUnplayedGames500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	games, err := game_service.GetUnplayedGames(userId)
 
 	if err != nil {
-		return api.GetUnplayedGames500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
 	gamesDto := ConvertUnplayedGamesToDto(games)
 
-	return api.GetUnplayedGames200JSONResponse(*gamesDto), nil
+	return ctx.JSON(http.StatusOK, *gamesDto)
 }
 
 func ConvertUnplayedGamesToDto(games *game_service.UnplayedGames) *api.UnplayedGames {
@@ -228,29 +242,34 @@ func ConvertUnplayedGamesToDto(games *game_service.UnplayedGames) *api.UnplayedG
 	return &gamesDto
 }
 
-// AddUnplayedGames (POST /users/{userId}/games/unplayed)
-func (Server) AddUnplayedGames(ctx context.Context, request api.AddUnplayedGamesRequestObject) (api.AddUnplayedGamesResponseObject, error) {
-	sessionId, ok := ctx.Value("session_id").(string)
+// AddUnplayedGames (POST /games/unplayed)
+func (Server) AddUnplayedGames(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("sessionId")
 
-	if !ok {
-		return api.AddUnplayedGames401JSONResponse{Code: api.NOACTIVESESSION}, nil
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
 	}
+
+	sessionId := cookie.Value
 
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return api.AddUnplayedGames500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+		return err
 	}
 
-	games := ConvertUnplayedGamesFrom(request.Body)
-
-	err = game_service.AddUnplayedGames(userId, games)
-
-	if err != nil {
-		return api.AddUnplayedGames500JSONResponse{Code: api.UNEXPECTED, Message: err.Error()}, nil
+	var gamesDto api.UnplayedGames
+	if err = ctx.Bind(&gamesDto); err != nil {
+		return err
 	}
 
-	return api.AddUnplayedGames200Response{}, nil
+	games := ConvertUnplayedGamesFrom(&gamesDto)
+
+	if err = game_service.AddUnplayedGames(userId, games); err != nil {
+		return err
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }
 
 func ConvertUnplayedGamesFrom(games *api.UnplayedGames) *game_service.UnplayedGames {
