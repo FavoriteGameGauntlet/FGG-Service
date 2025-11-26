@@ -22,13 +22,15 @@ func main() {
 	server := controller.NewServer()
 	e := echo.New()
 
-	e.Pre(middleware.AddTrailingSlash())
 	api.RegisterHandlers(e, server)
 
 	fileSystem := http.FS(swaggerUI)
 	fileServer := http.FileServer(fileSystem)
 	httpHandler := http.StripPrefix("/swagger/", fileServer)
 	e.GET("/swagger/*", echo.WrapHandler(httpHandler))
+	e.GET("/swagger", func(c echo.Context) error {
+		return c.Redirect(http.StatusMovedPermanently, "/swagger/")
+	})
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{AllowOrigins: []string{"*"}}))
 
 	db_access.Init()
