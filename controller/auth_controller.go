@@ -13,13 +13,13 @@ import (
 func (Server) Login(ctx echo.Context) error {
 	var user api.User
 	if err := ctx.Bind(&user); err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	doesExist, err := auth_service.CheckIfUserNameExists(user.Name)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if !doesExist {
@@ -33,7 +33,7 @@ func (Server) Login(ctx echo.Context) error {
 		doesExist, err = auth_service.CheckIfUserSessionExists(sessionId)
 
 		if err != nil {
-			return err
+			return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 		}
 
 		if doesExist {
@@ -44,7 +44,7 @@ func (Server) Login(ctx echo.Context) error {
 	sessionId, err := auth_service.CreateSession(user.Name, user.Password)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if sessionId == nil {
@@ -54,10 +54,8 @@ func (Server) Login(ctx echo.Context) error {
 	cookie = new(http.Cookie)
 	cookie.Name = "sessionId"
 	cookie.Value = *sessionId
-	cookie.Path = "/"
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	cookie.HttpOnly = true
-	cookie.Secure = false
 
 	ctx.SetCookie(cookie)
 
@@ -77,7 +75,7 @@ func (Server) Logout(ctx echo.Context) error {
 	doesExist, err := auth_service.CheckIfUserSessionExists(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if !doesExist {
@@ -85,7 +83,7 @@ func (Server) Logout(ctx echo.Context) error {
 	}
 
 	if err = auth_service.DeleteSession(sessionId); err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	cookie.MaxAge = -1
@@ -98,13 +96,13 @@ func (Server) Logout(ctx echo.Context) error {
 func (Server) SignUp(ctx echo.Context) error {
 	var user api.NewUser
 	if err := ctx.Bind(&user); err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	doesExist, err := auth_service.CheckIfUserNameExists(user.Name)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if doesExist {
@@ -114,7 +112,7 @@ func (Server) SignUp(ctx echo.Context) error {
 	doesExist, err = auth_service.CheckIfUserEmailExists(user.Email)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if doesExist {
@@ -124,7 +122,7 @@ func (Server) SignUp(ctx echo.Context) error {
 	err = auth_service.CreateUser(user.Name, user.Email, user.Password)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	return ctx.NoContent(http.StatusOK)

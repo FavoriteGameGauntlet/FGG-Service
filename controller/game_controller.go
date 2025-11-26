@@ -22,13 +22,13 @@ func (Server) GetCurrentGame(ctx echo.Context) error {
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	game, err := game_service.GetCurrentGame(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if game == nil {
@@ -63,13 +63,13 @@ func (Server) CancelCurrentGame(ctx echo.Context) error {
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if doesExist {
@@ -79,7 +79,7 @@ func (Server) CancelCurrentGame(ctx echo.Context) error {
 	err = game_service.CancelCurrentGame(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	return ctx.NoContent(http.StatusOK)
@@ -98,13 +98,13 @@ func (Server) FinishCurrentGame(ctx echo.Context) error {
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if !doesExist {
@@ -114,7 +114,7 @@ func (Server) FinishCurrentGame(ctx echo.Context) error {
 	isSuccess, err := game_service.FinishCurrentGame(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if !isSuccess {
@@ -137,13 +137,13 @@ func (Server) GetGameHistory(ctx echo.Context) error {
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	games, err := game_service.GetGameHistory(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	gamesDto := ConvertGamesToDto(games)
@@ -174,13 +174,13 @@ func (Server) MakeGameRoll(ctx echo.Context) error {
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if doesExist {
@@ -190,7 +190,7 @@ func (Server) MakeGameRoll(ctx echo.Context) error {
 	game, err := game_service.MakeGameRoll(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if game == nil {
@@ -215,13 +215,13 @@ func (Server) GetUnplayedGames(ctx echo.Context) error {
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	games, err := game_service.GetUnplayedGames(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	gamesDto := ConvertUnplayedGamesToDto(games)
@@ -255,18 +255,18 @@ func (Server) AddUnplayedGames(ctx echo.Context) error {
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	var gamesDto api.UnplayedGames
 	if err = ctx.Bind(&gamesDto); err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	games := ConvertUnplayedGamesFrom(&gamesDto)
 
 	if err = game_service.AddUnplayedGames(userId, games); err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	return ctx.NoContent(http.StatusOK)

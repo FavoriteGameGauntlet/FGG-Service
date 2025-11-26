@@ -22,7 +22,7 @@ func (Server) GetAvailableEffects(ctx echo.Context) error {
 	_, err = auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	return ctx.NoContent(http.StatusOK)
@@ -41,13 +41,13 @@ func (Server) CheckAvailableEffectRoll(ctx echo.Context) error {
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	doesExist, err := effect_service.CheckIfAvailableRollExists(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	return ctx.JSON(http.StatusOK, doesExist)
@@ -66,7 +66,7 @@ func (Server) GetEffectHistory(ctx echo.Context) error {
 	_, err = auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	return ctx.NoContent(http.StatusOK)
@@ -85,7 +85,7 @@ func (Server) MakeEffectRoll(ctx echo.Context) error {
 	_, err = auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	return ctx.NoContent(http.StatusOK)

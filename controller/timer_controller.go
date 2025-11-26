@@ -23,13 +23,13 @@ func (Server) GetCurrentTimer(ctx echo.Context) error {
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	game, err := game_service.GetCurrentGame(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if game == nil {
@@ -39,7 +39,7 @@ func (Server) GetCurrentTimer(ctx echo.Context) error {
 	timer, err := timer_service.GetOrCreateCurrentTimer(userId, game.Id)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	timerDto := ConvertTimerToDto(timer)
@@ -69,13 +69,13 @@ func (Server) PauseCurrentTimer(ctx echo.Context) error {
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if !doesExist {
@@ -85,7 +85,7 @@ func (Server) PauseCurrentTimer(ctx echo.Context) error {
 	doesExist, err = timer_service.CheckIfCurrentTimerExists(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if !doesExist {
@@ -95,7 +95,7 @@ func (Server) PauseCurrentTimer(ctx echo.Context) error {
 	timerAction, err := timer_service.PauseCurrentTimer(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if timerAction == nil {
@@ -127,13 +127,13 @@ func (Server) StartCurrentTimer(ctx echo.Context) error {
 	userId, err := auth_service.GetUserId(sessionId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if !doesExist {
@@ -143,7 +143,7 @@ func (Server) StartCurrentTimer(ctx echo.Context) error {
 	doesExist, err = timer_service.CheckIfCurrentTimerExists(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if !doesExist {
@@ -153,7 +153,7 @@ func (Server) StartCurrentTimer(ctx echo.Context) error {
 	timerAction, err := timer_service.StartCurrentTimer(userId)
 
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
 	if timerAction == nil {
