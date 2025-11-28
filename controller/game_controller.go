@@ -263,7 +263,7 @@ func (Server) AddUnplayedGames(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
 	}
 
-	games := ConvertUnplayedGamesFrom(&gamesDto)
+	games := ConvertUnplayedGamesFromDto(&gamesDto)
 
 	if err = game_service.AddUnplayedGames(userId, games); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
@@ -272,7 +272,7 @@ func (Server) AddUnplayedGames(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func ConvertUnplayedGamesFrom(games *api.UnplayedGames) *game_service.UnplayedGames {
+func ConvertUnplayedGamesFromDto(games *api.UnplayedGames) *game_service.UnplayedGames {
 	gamesDto := make(game_service.UnplayedGames, len(*games))
 
 	for i, g := range *games {

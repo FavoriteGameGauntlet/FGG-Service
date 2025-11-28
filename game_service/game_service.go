@@ -87,7 +87,7 @@ const (
 			MapPoints = $mapPoints
 		WHERE UserId = $userId
 			AND GameId = $gameId;`
-	CreateEffectRollCommand = `
+	CreateAvailableRollCommand = `
 		INSERT INTO AvailableRolls (UserId)
 		VALUES ($userId)`
 	GetGameHistoryCommand = `
@@ -368,7 +368,7 @@ func FinishCurrentGame(userId int) (bool, error) {
 		return false, err
 	}
 
-	_, err = db_access.Exec(CreateEffectRollCommand, userId, game.Id)
+	_, err = db_access.Exec(CreateAvailableRollCommand, userId, game.Id)
 
 	return true, err
 }

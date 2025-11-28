@@ -61,12 +61,6 @@ const (
 	Stop  TimerActionType = "stop"
 )
 
-// AvailableEffect defines model for AvailableEffect.
-type AvailableEffect struct {
-	Description *string `json:"description,omitempty"`
-	Name        Name    `json:"name"`
-}
-
 // ConflictError defines model for ConflictError.
 type ConflictError struct {
 	Code    ConflictErrorCode `json:"code"`
@@ -78,11 +72,8 @@ type ConflictErrorCode string
 
 // Effect defines model for Effect.
 type Effect struct {
-	CreateDate  time.Time  `json:"createDate"`
-	Description *string    `json:"description,omitempty"`
-	GameName    *Name      `json:"gameName,omitempty"`
-	Name        *Name      `json:"name,omitempty"`
-	RollDate    *time.Time `json:"rollDate,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Name        Name    `json:"name"`
 }
 
 // Effects defines model for Effects.
@@ -145,6 +136,16 @@ type NotFoundErrorCode string
 
 // Password defines model for Password.
 type Password = string
+
+// RolledEffect defines model for RolledEffect.
+type RolledEffect struct {
+	Description *string   `json:"description,omitempty"`
+	Name        Name      `json:"name"`
+	RollDate    time.Time `json:"rollDate"`
+}
+
+// RolledEffects defines model for RolledEffects.
+type RolledEffects = []RolledEffect
 
 // Timer defines model for Timer.
 type Timer struct {

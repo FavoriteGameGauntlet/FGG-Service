@@ -1,7 +1,7 @@
 openapi: 3.1.2
 info:
   title: Favorite Game Gauntlet
-  version: 0.2.0
+  version: 0.3.0
 paths:
 
   /auth/signup:
@@ -532,8 +532,6 @@ paths:
         - Effects
       summary: Get a list of all effect rolls
       description: |
-        The function is currently not working.<br>
-        <br>
         You can get a list of all effect rolls that have been received or rolled,
         as well as all the information about them.
       responses:
@@ -542,7 +540,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Effects'
+                $ref: '#/components/schemas/RolledEffects'
         '401':
           description: Authentication required.
           content:
@@ -581,7 +579,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Effect'
+                $ref: '#/components/schemas/RolledEffects'
         '401':
           description: Authentication required.
           content:
@@ -616,8 +614,6 @@ paths:
         - Effects
       summary: Get a list of effects available for rolling
       description: |
-        The function is currently not working.<br>
-        <br>
         You can get a list of effects that are available to drop using the throw effects command.
       responses:
         '200':
@@ -625,7 +621,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AvailableEffect'
+                $ref: '#/components/schemas/Effects'
         '401':
           description: Authentication required.
           content:
@@ -778,29 +774,27 @@ components:
           $ref: '#/components/schemas/Name'
         description:
           type: string
-        createDate:
-          type: string
-          format: date-time
-        rollDate:
-          type: string
-          format: date-time
-        gameName:
-          $ref: '#/components/schemas/Name'
-      required: [ createDate ]
+      required: [ name ]
 
     Effects:
       type: array
       items:
         $ref: '#/components/schemas/Effect'
 
-    AvailableEffect:
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/Name'
-        description:
-          type: string
-      required: [ name ]
+    RolledEffect:
+      allOf:
+        - $ref: '#/components/schemas/Effect'
+        - type: object
+          properties:
+            rollDate:
+              type: string
+              format: date-time
+          required: [ rollDate ]
+
+    RolledEffects:
+      type: array
+      items:
+        $ref: '#/components/schemas/RolledEffect'
 
 
 

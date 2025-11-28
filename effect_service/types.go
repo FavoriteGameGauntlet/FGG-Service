@@ -1,15 +1,19 @@
 package effect_service
 
-import (
-	"time"
-)
+import "time"
 
 type Effect struct {
-	Name        *string
+	Id          int
+	Name        string
 	Description *string
-	CreateDate  time.Time
-	RollDate    *time.Time
-	GameName    *string
 }
 
 type Effects = []Effect
+
+type RolledEffect struct {
+	Name        string
+	Description *string
+	RollDate    time.Time
+}
+
+type RolledEffects = []RolledEffect
