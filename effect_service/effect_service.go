@@ -2,6 +2,7 @@ package effect_service
 
 import (
 	"FGG-Service/db_access"
+	"time"
 )
 
 const (
@@ -15,7 +16,7 @@ const (
          	ELSE false
        	END AS 'DoesExist'`
 	GetAvailableEffectsCommand = `
-		SELECT e.Name, e.Description
+		SELECT e.Id, e.Name, e.Description
 		FROM Effects e
 			LEFT JOIN (
 				SELECT EffectId
@@ -74,7 +75,7 @@ func GetAvailableEffects(userId int) (*Effects, error) {
 		effectCount++
 
 		effect := Effect{}
-		err = rows.Scan(&effect.Name, &effect.Description)
+		err = rows.Scan(&effect.Id, &effect.Name, &effect.Description)
 
 		if err != nil {
 			errorCount++
@@ -105,12 +106,23 @@ func GetEffectHistory(userId int) (*RolledEffects, error) {
 		effectCount++
 
 		effect := RolledEffect{}
-		err = rows.Scan(&effect.Name, &effect.Description)
+		var rollDateString string
+		err = rows.Scan(&effect.Name, &effect.Description, &rollDateString)
 
 		if err != nil {
 			errorCount++
 			continue
 		}
+
+		var rollDate time.Time
+		rollDate, err = time.Parse(db_access.ISO8601, rollDateString)
+
+		if err != nil {
+			errorCount++
+			continue
+		}
+
+		effect.RollDate = rollDate
 
 		effects = append(effects, effect)
 	}

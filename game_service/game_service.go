@@ -272,7 +272,8 @@ func GetCurrentGame(userId int) (*Game, error) {
 
 	game := Game{}
 	var spentSeconds *int
-	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link, &spentSeconds, &game.FinishDate)
+	var finishDateString *string
+	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link, &spentSeconds, &finishDateString)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -287,6 +288,21 @@ func GetCurrentGame(userId int) (*Game, error) {
 
 		game.HourCount = hourCount
 	}
+
+	var finishDate *time.Time
+
+	if finishDateString != nil {
+		var notNilFinishDate time.Time
+		notNilFinishDate, err = time.Parse(db_access.ISO8601, *finishDateString)
+
+		if err != nil {
+			return nil, err
+		}
+
+		finishDate = &notNilFinishDate
+	}
+
+	game.FinishDate = finishDate
 
 	return &game, nil
 }
