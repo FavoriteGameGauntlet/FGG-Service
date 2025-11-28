@@ -495,8 +495,8 @@ paths:
       summary: Check if there are any effect rolls available
       description: |
         You can find out if you have any available effect rolls.<br>
-        If the value is 'true,' you have one.<br>
-        If the value is 'false,' you don't.
+        If the value is 'true', you have one.<br>
+        If the value is 'false', you don't.
       responses:
         '200':
           description: Boolean indicating whether the user has available effect rolls.
