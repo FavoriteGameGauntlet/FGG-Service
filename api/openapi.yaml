@@ -1,7 +1,7 @@
 openapi: 3.1.2
 info:
   title: Favorite Game Gauntlet
-  version: 0.3.0
+  version: 0.3.1
 paths:
 
   /auth/signup:
@@ -569,8 +569,6 @@ paths:
         - Effects
       summary: Make the roll of the effect available
       description: |
-        The function is currently not working.<br>
-        <br>
         Allows you to obtain a random effect from those that haven't dropped yet.<br>
         A list of available effects can be obtained using another command.
       responses:
