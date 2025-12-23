@@ -2,8 +2,7 @@ package controller
 
 import (
 	"FGG-Service/api"
-	"FGG-Service/auth_service"
-	"FGG-Service/game_service"
+	"FGG-Service/common"
 	"FGG-Service/timer_service"
 	"net/http"
 
@@ -12,34 +11,16 @@ import (
 
 // GetCurrentTimer (GET /timers/current)
 func (Server) GetCurrentTimer(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("sessionId")
+	userId, err := GetUserId(ctx)
 
 	if err != nil {
-		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
-	sessionId := cookie.Value
-
-	userId, err := auth_service.GetUserId(sessionId)
+	timer, err := timer_service.GetOrCreateCurrentTimer(userId)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	game, err := game_service.GetCurrentGame(userId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	if game == nil {
-		return ctx.JSON(http.StatusNotFound, api.NotFoundError{Code: api.GAMENOTFOUND})
-	}
-
-	timer, err := timer_service.GetOrCreateCurrentTimer(userId, game.Id)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	timerDto := ConvertTimerToDto(timer)
@@ -47,7 +28,7 @@ func (Server) GetCurrentTimer(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, *timerDto)
 }
 
-func ConvertTimerToDto(timer *timer_service.Timer) *api.Timer {
+func ConvertTimerToDto(timer *common.Timer) *api.Timer {
 	return &api.Timer{
 		DurationInS:      timer.DurationInS,
 		RemainingTimeInS: timer.RemainingTimeInS,
@@ -58,48 +39,16 @@ func ConvertTimerToDto(timer *timer_service.Timer) *api.Timer {
 
 // PauseCurrentTimer (POST /timers/current/pause)
 func (Server) PauseCurrentTimer(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("sessionId")
+	userId, err := GetUserId(ctx)
 
 	if err != nil {
-		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
-	}
-
-	sessionId := cookie.Value
-
-	userId, err := auth_service.GetUserId(sessionId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	if !doesExist {
-		return ctx.JSON(http.StatusNotFound, api.NotFoundError{Code: api.GAMENOTFOUND})
-	}
-
-	doesExist, err = timer_service.CheckIfCurrentTimerExists(userId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	if !doesExist {
-		return ctx.JSON(http.StatusNotFound, api.NotFoundError{Code: api.TIMERNOTFOUND})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	timerAction, err := timer_service.PauseCurrentTimer(userId)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	if timerAction == nil {
-		return ctx.JSON(http.StatusConflict, api.ConflictError{Code: api.TIMERINCORRECTSTATE})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	timerActionDto := ConvertTimerActionToDto(timerAction)
@@ -107,7 +56,7 @@ func (Server) PauseCurrentTimer(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, *timerActionDto)
 }
 
-func ConvertTimerActionToDto(timerAction *timer_service.TimerAction) *api.TimerAction {
+func ConvertTimerActionToDto(timerAction *common.TimerAction) *api.TimerAction {
 	return &api.TimerAction{
 		Type:             api.TimerActionType(timerAction.Action),
 		RemainingTimeInS: timerAction.RemainingTimeInS,
@@ -116,48 +65,16 @@ func ConvertTimerActionToDto(timerAction *timer_service.TimerAction) *api.TimerA
 
 // StartCurrentTimer (POST /timers/current/start)
 func (Server) StartCurrentTimer(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("sessionId")
+	userId, err := GetUserId(ctx)
 
 	if err != nil {
-		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
-	}
-
-	sessionId := cookie.Value
-
-	userId, err := auth_service.GetUserId(sessionId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	doesExist, err := game_service.CheckIfCurrentGameExists(userId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	if !doesExist {
-		return ctx.JSON(http.StatusNotFound, api.NotFoundError{Code: api.GAMENOTFOUND})
-	}
-
-	doesExist, err = timer_service.CheckIfCurrentTimerExists(userId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	if !doesExist {
-		return ctx.JSON(http.StatusNotFound, api.NotFoundError{Code: api.TIMERNOTFOUND})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	timerAction, err := timer_service.StartCurrentTimer(userId)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	if timerAction == nil {
-		return ctx.JSON(http.StatusConflict, api.ConflictError{Code: api.TIMERINCORRECTSTATE})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	timerActionDto := ConvertTimerActionToDto(timerAction)

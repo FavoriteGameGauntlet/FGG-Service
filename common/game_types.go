@@ -1,4 +1,4 @@
-package game_service
+package common
 
 import (
 	"time"
@@ -9,7 +9,7 @@ type Game struct {
 	Link       *string
 	Name       string
 	State      GameState
-	HourCount  int
+	TimeSpent  time.Duration
 	FinishDate *time.Time
 }
 
@@ -21,11 +21,6 @@ const (
 	GameStateCancelled GameState = "cancelled"
 	GameStateFinished  GameState = "finished"
 	GameStateStarted   GameState = "started"
-)
-
-const (
-	CancellingGamePenaltyDiceCount = 2
-	HourCountForDice               = 6
 )
 
 type UnplayedGame struct {

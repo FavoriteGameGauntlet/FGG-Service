@@ -1,4 +1,4 @@
-package effect_service
+package common
 
 import "time"
 

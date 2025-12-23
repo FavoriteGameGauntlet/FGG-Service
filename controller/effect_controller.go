@@ -2,7 +2,7 @@ package controller
 
 import (
 	"FGG-Service/api"
-	"FGG-Service/auth_service"
+	"FGG-Service/common"
 	"FGG-Service/effect_service"
 	"net/http"
 
@@ -11,24 +11,16 @@ import (
 
 // GetAvailableEffects (POST /effects/available)
 func (Server) GetAvailableEffects(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("sessionId")
+	userId, err := GetUserId(ctx)
 
 	if err != nil {
-		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
-	}
-
-	sessionId := cookie.Value
-
-	userId, err := auth_service.GetUserId(sessionId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	effects, err := effect_service.GetAvailableEffects(userId)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	effectsDto := ConvertEffectsToDto(effects)
@@ -36,7 +28,7 @@ func (Server) GetAvailableEffects(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, *effectsDto)
 }
 
-func ConvertEffectsToDto(effects *effect_service.Effects) *api.Effects {
+func ConvertEffectsToDto(effects *common.Effects) *api.Effects {
 	effectsDto := make(api.Effects, len(*effects))
 
 	for i, effect := range *effects {
@@ -51,24 +43,16 @@ func ConvertEffectsToDto(effects *effect_service.Effects) *api.Effects {
 
 // CheckAvailableEffectRoll CheckEffectRoll (GET /effects/has-roll)
 func (Server) CheckAvailableEffectRoll(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("sessionId")
+	userId, err := GetUserId(ctx)
 
 	if err != nil {
-		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
-	}
-
-	sessionId := cookie.Value
-
-	userId, err := auth_service.GetUserId(sessionId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	doesExist, err := effect_service.CheckIfAvailableRollExists(userId)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	return ctx.JSON(http.StatusOK, doesExist)
@@ -76,24 +60,16 @@ func (Server) CheckAvailableEffectRoll(ctx echo.Context) error {
 
 // GetEffectHistory (GET /effects/history)
 func (Server) GetEffectHistory(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("sessionId")
+	userId, err := GetUserId(ctx)
 
 	if err != nil {
-		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
-	}
-
-	sessionId := cookie.Value
-
-	userId, err := auth_service.GetUserId(sessionId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	effects, err := effect_service.GetEffectHistory(userId)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	effectsDto := ConvertRolledEffectsToDto(effects)
@@ -101,7 +77,7 @@ func (Server) GetEffectHistory(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, *effectsDto)
 }
 
-func ConvertRolledEffectsToDto(effects *effect_service.RolledEffects) *api.RolledEffects {
+func ConvertRolledEffectsToDto(effects *common.RolledEffects) *api.RolledEffects {
 	effectsDto := make(api.RolledEffects, len(*effects))
 
 	for i, effect := range *effects {
@@ -117,34 +93,16 @@ func ConvertRolledEffectsToDto(effects *effect_service.RolledEffects) *api.Rolle
 
 // MakeEffectRoll (POST /effects/roll)
 func (Server) MakeEffectRoll(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("sessionId")
+	userId, err := GetUserId(ctx)
 
 	if err != nil {
-		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
-	}
-
-	sessionId := cookie.Value
-
-	userId, err := auth_service.GetUserId(sessionId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	doesExist, err := effect_service.CheckIfAvailableRollExists(userId)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	if !doesExist {
-		return ctx.JSON(http.StatusConflict, api.ConflictError{Code: api.NOAVAILABLEROLLS})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	effects, err := effect_service.MakeEffectRoll(userId)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	effectsDto := ConvertEffectsToDto(effects)

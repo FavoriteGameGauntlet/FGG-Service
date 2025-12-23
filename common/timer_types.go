@@ -1,4 +1,4 @@
-package timer_service
+package common
 
 import (
 	"time"
@@ -11,8 +11,6 @@ type Timer struct {
 	State            TimerStateType
 	TimerActionDate  *time.Time
 }
-
-const DefaultTimerDurationInS = 30
 
 type TimerStateType string
 

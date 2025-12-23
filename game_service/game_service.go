@@ -1,15 +1,13 @@
 package game_service
 
 import (
+	"FGG-Service/common"
 	"FGG-Service/db_access"
-	"FGG-Service/timer_service"
+	"FGG-Service/effect_service"
 	"database/sql"
 	"errors"
-	"fmt"
 	"math/rand"
 	"time"
-
-	"github.com/justinian/dice"
 )
 
 const (
@@ -40,7 +38,7 @@ const (
 				FROM GameHistory gh
 					INNER JOIN Games g ON gh.GameId = g.Id
 				WHERE gh.UserId = $userId
-					AND gh.State <> $finishedGameState)
+					AND gh.State NOT IN ($finishedGameState, $cancelledGameState))
          	THEN true
          	ELSE false
        	END AS 'DoesExist'`
@@ -71,25 +69,20 @@ const (
 			INNER JOIN Games g ON gh.GameId = g.Id
 			LEFT JOIN Timers t ON t.UserId = gh.UserId AND t.GameId = gh.GameId
 		WHERE gh.UserId = $userId
-			AND gh.State <> $finishedGameState
+			AND gh.State NOT IN ($finishedGameState, $cancelledGameState)
 		GROUP BY g.Id, g.Name, gh.State, g.Link, gh.FinishDate`
 	CancelCurrentGameCommand = `
 		UPDATE GameHistory
 		SET State = $cancelledGameState,
-			FinishDate = datetime('now', 'subsec'),
-			MapPoints = $mapPoints
+			FinishDate = datetime('now', 'subsec')
 		WHERE UserId = $userId
 			AND GameId = $gameId;`
 	FinishCurrentGameCommand = `
 		UPDATE GameHistory
 		SET State = $finishedGameState,
-			FinishDate = datetime('now', 'subsec'),
-			MapPoints = $mapPoints
+			FinishDate = datetime('now', 'subsec')
 		WHERE UserId = $userId
 			AND GameId = $gameId;`
-	CreateAvailableRollCommand = `
-		INSERT INTO AvailableRolls (UserId)
-		VALUES ($userId)`
 	GetGameHistoryCommand = `
 		SELECT 
 		  g.Id,
@@ -111,9 +104,30 @@ const (
 		DELETE FROM UnplayedGames
 		WHERE UserId = $userId
 			AND GameId = $gameId`
+	ActCurrentTimerCommand = `
+		INSERT INTO TimerActions (TimerId, Action, RemainingTimeInS)
+		VALUES ($timerId, $timerAction, $remainingTimeInS)`
+	GetCurrentTimerCommand = `
+		SELECT
+			t.Id,
+			t.State,
+			t.DurationInS,
+			ta.CreateDate,
+			CASE ta.Action
+				WHEN $startTimerAction THEN ta.RemainingTimeInS - (strftime('%s', 'now') - strftime('%s', ta.CreateDate))
+				WHEN $pauseTimerAction THEN ta.RemainingTimeInS
+				WHEN $finishTimerAction THEN 0
+				ELSE t.DurationInS
+			END AS RemainingTimeInS
+		FROM Timers t
+			LEFT JOIN TimerActions ta ON t.Id = ta.TimerId
+		WHERE UserId = $userId
+			AND t.State != $finishedTimerState
+		ORDER BY ta.CreateDate DESC
+		LIMIT 1`
 )
 
-func AddUnplayedGames(userId int, gamesPtr *UnplayedGames) error {
+func AddUnplayedGames(userId int, gamesPtr *common.UnplayedGames) error {
 	games := *gamesPtr
 	numberOfGames := len(games)
 	errorCount := 0
@@ -134,7 +148,7 @@ func AddUnplayedGames(userId int, gamesPtr *UnplayedGames) error {
 	return nil
 }
 
-func AddUnplayedGame(userId int, unplayedGame *UnplayedGame) error {
+func AddUnplayedGame(userId int, unplayedGame *common.UnplayedGame) error {
 	doesExist, err := CheckIfUnplayedGameExists(
 		userId,
 		unplayedGame.Name,
@@ -172,7 +186,7 @@ func CheckIfUnplayedGameExists(userId int, gameName string) (bool, error) {
 	return doesExist, nil
 }
 
-func AddOrGetGame(unplayedGame *UnplayedGame) (*Game, error) {
+func AddOrGetGame(unplayedGame *common.UnplayedGame) (*common.Game, error) {
 	doesExist, err := CheckIfGameExists(unplayedGame.Name)
 
 	if err != nil {
@@ -180,7 +194,7 @@ func AddOrGetGame(unplayedGame *UnplayedGame) (*Game, error) {
 	}
 
 	if doesExist {
-		var game *Game
+		var game *common.Game
 		game, err = GetGame(unplayedGame.Name)
 
 		if err != nil {
@@ -200,7 +214,7 @@ func AddOrGetGame(unplayedGame *UnplayedGame) (*Game, error) {
 		return nil, err
 	}
 
-	var game *Game
+	var game *common.Game
 	game, err = GetGame(unplayedGame.Name)
 
 	if err != nil {
@@ -210,10 +224,10 @@ func AddOrGetGame(unplayedGame *UnplayedGame) (*Game, error) {
 	return game, nil
 }
 
-func GetGame(gameName string) (*Game, error) {
+func GetGame(gameName string) (*common.Game, error) {
 	row := db_access.QueryRow(GetGameCommand, gameName)
 
-	game := Game{}
+	game := common.Game{}
 	err := row.Scan(&game.Id, &game.Name, &game.Link)
 
 	if err != nil {
@@ -236,7 +250,7 @@ func CheckIfGameExists(gameName string) (bool, error) {
 	return doesExist, nil
 }
 
-func GetUnplayedGames(userId int) (*UnplayedGames, error) {
+func GetUnplayedGames(userId int) (*common.UnplayedGames, error) {
 	rows, err := db_access.Query(GetUnplayedGamesCommand, userId)
 
 	if err != nil {
@@ -245,11 +259,11 @@ func GetUnplayedGames(userId int) (*UnplayedGames, error) {
 
 	gameCount := 0
 	errorCount := 0
-	games := UnplayedGames{}
+	games := common.UnplayedGames{}
 	for rows.Next() {
 		gameCount++
 
-		game := UnplayedGame{}
+		game := common.UnplayedGame{}
 		err = rows.Scan(&game.GameId, &game.Name, &game.Link)
 
 		if err != nil {
@@ -267,16 +281,16 @@ func GetUnplayedGames(userId int) (*UnplayedGames, error) {
 	return &games, nil
 }
 
-func GetCurrentGame(userId int) (*Game, error) {
-	row := db_access.QueryRow(GetCurrentGameCommand, userId, GameStateFinished)
+func GetCurrentGame(userId int) (*common.Game, error) {
+	row := db_access.QueryRow(GetCurrentGameCommand, userId, common.GameStateFinished, common.GameStateCancelled)
 
-	game := Game{}
+	game := common.Game{}
 	var spentSeconds *int
 	var finishDateString *string
 	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link, &spentSeconds, &finishDateString)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
+		return nil, common.NewCurrentGameNotFoundError()
 	}
 
 	if err != nil {
@@ -284,9 +298,7 @@ func GetCurrentGame(userId int) (*Game, error) {
 	}
 
 	if spentSeconds != nil {
-		hourCount := *spentSeconds / int(time.Hour/time.Second)
-
-		game.HourCount = hourCount
+		game.TimeSpent = time.Duration(*spentSeconds) * time.Second
 	}
 
 	var finishDate *time.Time
@@ -308,7 +320,7 @@ func GetCurrentGame(userId int) (*Game, error) {
 }
 
 func CheckIfCurrentGameExists(userId int) (bool, error) {
-	row := db_access.QueryRow(CheckIfCurrentGameExistsCommand, userId, GameStateFinished)
+	row := db_access.QueryRow(CheckIfCurrentGameExistsCommand, userId, common.GameStateFinished, common.GameStateCancelled)
 
 	var doesExist bool
 	err := row.Scan(&doesExist)
@@ -328,83 +340,134 @@ func CancelCurrentGame(userId int) error {
 	}
 
 	if game == nil {
-		return err
+		return common.NewCurrentGameNotFoundError()
 	}
 
-	_, err = timer_service.StopCurrentTimer(userId)
+	_, err = StopCurrentTimer(userId)
 
 	if err != nil {
 		return err
 	}
 
-	diceCount := CancellingGamePenaltyDiceCount
-	resultPoints, err := RollResultPoints(diceCount)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = db_access.Exec(CancelCurrentGameCommand, GameStateCancelled, resultPoints, userId, game.Id)
+	_, err = db_access.Exec(CancelCurrentGameCommand, common.GameStateCancelled, userId, game.Id)
 
 	return err
 }
 
-func FinishCurrentGame(userId int) (bool, error) {
-	_, err := timer_service.StopCurrentTimer(userId)
-
-	if err != nil {
-		return false, err
-	}
-
+func FinishCurrentGame(userId int) error {
 	game, err := GetCurrentGame(userId)
 
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if game == nil {
-		return false, err
+		return common.NewCurrentGameNotFoundError()
 	}
 
-	if game.HourCount == 0 {
-		return false, nil
+	if game.TimeSpent < 1*time.Second {
+		return common.NewCompletedTimersNotFoundError()
 	}
 
-	additionalDiceCount := game.HourCount / HourCountForDice
-	diceCount := 1 + additionalDiceCount
-	resultPoints, err := RollResultPoints(diceCount)
+	_, err = StopCurrentTimer(userId)
 
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	_, err = db_access.Exec(FinishCurrentGameCommand, GameStateFinished, resultPoints, userId, game.Id)
+	_, err = db_access.Exec(FinishCurrentGameCommand, common.GameStateFinished, userId, game.Id)
 
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	_, err = db_access.Exec(CreateAvailableRollCommand, userId, game.Id)
+	err = effect_service.CreateAvailableRoll(userId)
 
-	return true, err
+	return err
 }
 
-func RollResultPoints(diceCount int) (int, error) {
-	diceFormula := fmt.Sprintf("%dd6", diceCount)
-
-	roll, _, err := dice.Roll(diceFormula)
-	var rolledValue int
+func StopCurrentTimer(userId int) (*common.TimerAction, error) {
+	timer, err := GetCurrentTimer(userId)
 
 	if err != nil {
-		return rolledValue, err
+		return nil, err
 	}
 
-	rolledValue = roll.Int()
+	if timer == nil {
+		return nil, nil
+	}
 
-	return rolledValue, nil
+	if timer.State == common.TimerStateFinished {
+		return nil, nil
+	}
+
+	timerAction := common.TimerActionStop
+	remainingTimerInS := 0
+
+	_, err = db_access.Exec(
+		ActCurrentTimerCommand,
+		timer.Id,
+		timerAction,
+		remainingTimerInS,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &common.TimerAction{
+		Action:           timerAction,
+		RemainingTimeInS: remainingTimerInS,
+	}, nil
 }
 
-func GetGameHistory(userId int) (*Games, error) {
+func GetCurrentTimer(userId int) (*common.Timer, error) {
+	row := db_access.QueryRow(
+		GetCurrentTimerCommand,
+		common.TimerActionStart,
+		common.TimerActionPause,
+		common.TimerActionStop,
+		userId,
+		common.TimerStateFinished,
+	)
+
+	timer := common.Timer{}
+	var timerActionDateString *string
+	err := row.Scan(
+		&timer.Id,
+		&timer.State,
+		&timer.DurationInS,
+		&timerActionDateString,
+		&timer.RemainingTimeInS,
+	)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var timerActionDate *time.Time
+
+	if timerActionDateString != nil {
+		var notNilDate time.Time
+		notNilDate, err = time.Parse(db_access.ISO8601, *timerActionDateString)
+
+		if err != nil {
+			return nil, err
+		}
+
+		timerActionDate = &notNilDate
+	}
+
+	timer.TimerActionDate = timerActionDate
+
+	return &timer, nil
+}
+
+func GetGameHistory(userId int) (*common.Games, error) {
 	rows, err := db_access.Query(GetGameHistoryCommand, userId)
 
 	if err != nil {
@@ -413,11 +476,11 @@ func GetGameHistory(userId int) (*Games, error) {
 
 	gameCount := 0
 	errorCount := 0
-	games := Games{}
+	games := common.Games{}
 	for rows.Next() {
 		gameCount++
 
-		game := Game{}
+		game := common.Game{}
 		var spentSeconds *int
 		var finishDateString *string
 		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.Link, &spentSeconds, &finishDateString)
@@ -428,9 +491,7 @@ func GetGameHistory(userId int) (*Games, error) {
 		}
 
 		if spentSeconds != nil {
-			hourCount := *spentSeconds / int(time.Hour/time.Second)
-
-			game.HourCount = hourCount
+			game.TimeSpent = time.Duration(*spentSeconds) * time.Second
 		}
 
 		var finishDate *time.Time
@@ -459,15 +520,25 @@ func GetGameHistory(userId int) (*Games, error) {
 	return &games, nil
 }
 
-func MakeGameRoll(userId int) (*Game, error) {
+func MakeGameRoll(userId int) (*common.Game, error) {
+	doesExist, err := CheckIfCurrentGameExists(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if doesExist {
+		return nil, common.NewCurrentGameAlreadyExistsError()
+	}
+
 	unplayedGames, err := GetUnplayedGames(userId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if unplayedGames == nil || len(*unplayedGames) == 0 {
-		return nil, err
+	if unplayedGames == nil || len(*unplayedGames) < common.MinimumNumberOfUnplayedGames {
+		return nil, common.NewUnplayedGamesNotFoundError()
 	}
 
 	randomNumber := rand.Intn(len(*unplayedGames))
@@ -485,10 +556,10 @@ func MakeGameRoll(userId int) (*Game, error) {
 		return nil, err
 	}
 
-	return &Game{
+	return &common.Game{
 		Id:    randomUnplayedGame.GameId,
 		Name:  randomUnplayedGame.Name,
 		Link:  randomUnplayedGame.Link,
-		State: GameStateStarted,
+		State: common.GameStateStarted,
 	}, nil
 }

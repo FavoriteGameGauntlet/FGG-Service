@@ -1,23 +1,16 @@
 package timer_service
 
 import (
+	"FGG-Service/common"
 	"FGG-Service/db_access"
+	"FGG-Service/effect_service"
+	"FGG-Service/game_service"
 	"database/sql"
 	"errors"
 	"time"
 )
 
 const (
-	CheckIfCurrentTimerExistsCommand = `
-		SELECT CASE 
-			WHEN EXISTS (
-				SELECT 1
-				FROM Timers
-				WHERE UserId = $userId
-					AND State != $finishedTimerState)
-         	THEN true
-         	ELSE false
-       		END AS 'DoesExist'`
 	GetCurrentTimerCommand = `
 		SELECT
 			t.Id,
@@ -53,41 +46,29 @@ const (
 			END <= 0`
 )
 
-func CheckIfCurrentTimerExists(userId int) (bool, error) {
-	row := db_access.QueryRow(
-		CheckIfCurrentTimerExistsCommand,
-		userId,
-		TimerStateFinished,
-	)
-
-	var doesExist bool
-	err := row.Scan(&doesExist)
-
-	if err != nil {
-		return doesExist, err
-	}
-
-	return doesExist, nil
-}
-
-func GetOrCreateCurrentTimer(userId int, gameId int) (*Timer, error) {
-	doesExist, err := CheckIfCurrentTimerExists(userId)
+func GetOrCreateCurrentTimer(userId int) (*common.Timer, error) {
+	game, err := game_service.GetCurrentGame(userId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if doesExist {
-		timer, err := GetCurrentTimer(userId)
+	if game == nil {
+		return nil, common.NewCurrentGameNotFoundError()
+	}
 
-		if err != nil {
-			return nil, err
-		}
+	timer, err := GetCurrentTimer(userId)
 
+	var notFoundError *common.CurrentTimerNotFoundError
+	if err != nil && !errors.As(err, &notFoundError) {
+		return nil, err
+	}
+
+	if timer != nil {
 		return timer, nil
 	}
 
-	timer, err := CreateCurrentTimer(userId, gameId)
+	timer, err = CreateCurrentTimer(userId, game.Id)
 
 	if err != nil {
 		return nil, err
@@ -96,17 +77,17 @@ func GetOrCreateCurrentTimer(userId int, gameId int) (*Timer, error) {
 	return timer, nil
 }
 
-func GetCurrentTimer(userId int) (*Timer, error) {
+func GetCurrentTimer(userId int) (*common.Timer, error) {
 	row := db_access.QueryRow(
 		GetCurrentTimerCommand,
-		TimerActionStart,
-		TimerActionPause,
-		TimerActionStop,
+		common.TimerActionStart,
+		common.TimerActionPause,
+		common.TimerActionStop,
 		userId,
-		TimerStateFinished,
+		common.TimerStateFinished,
 	)
 
-	timer := Timer{}
+	timer := common.Timer{}
 	var timerActionDateString *string
 	err := row.Scan(
 		&timer.Id,
@@ -117,7 +98,7 @@ func GetCurrentTimer(userId int) (*Timer, error) {
 	)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
+		return nil, common.NewCurrentTimerNotFoundError()
 	}
 
 	if err != nil {
@@ -142,26 +123,36 @@ func GetCurrentTimer(userId int) (*Timer, error) {
 	return &timer, nil
 }
 
-func CreateCurrentTimer(userId int, gameId int) (*Timer, error) {
+func CreateCurrentTimer(userId int, gameId int) (*common.Timer, error) {
 	_, err := db_access.Exec(
 		CreateTimerCommand,
 		userId,
 		gameId,
-		DefaultTimerDurationInS,
+		common.DefaultTimerDurationInS,
 	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &Timer{
-		DurationInS:      DefaultTimerDurationInS,
-		State:            TimerStateCreated,
-		RemainingTimeInS: DefaultTimerDurationInS,
+	return &common.Timer{
+		DurationInS:      common.DefaultTimerDurationInS,
+		State:            common.TimerStateCreated,
+		RemainingTimeInS: common.DefaultTimerDurationInS,
 	}, nil
 }
 
-func StartCurrentTimer(userId int) (*TimerAction, error) {
+func StartCurrentTimer(userId int) (*common.TimerAction, error) {
+	game, err := game_service.GetCurrentGame(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if game == nil {
+		return nil, common.NewCurrentGameNotFoundError()
+	}
+
 	timer, err := GetCurrentTimer(userId)
 
 	if err != nil {
@@ -169,15 +160,15 @@ func StartCurrentTimer(userId int) (*TimerAction, error) {
 	}
 
 	if timer == nil {
-		return nil, nil
+		return nil, common.NewCurrentTimerNotFoundError()
 	}
 
-	if timer.State == TimerStateRunning ||
-		timer.State == TimerStateFinished {
-		return nil, nil
+	if timer.State == common.TimerStateRunning ||
+		timer.State == common.TimerStateFinished {
+		return nil, common.NewCurrentTimerIncorrectStateError(timer.State)
 	}
 
-	timerAction := TimerActionStart
+	timerAction := common.TimerActionStart
 	remainingTimerInS := timer.RemainingTimeInS
 
 	_, err = db_access.Exec(
@@ -191,13 +182,23 @@ func StartCurrentTimer(userId int) (*TimerAction, error) {
 		return nil, err
 	}
 
-	return &TimerAction{
+	return &common.TimerAction{
 		Action:           timerAction,
 		RemainingTimeInS: remainingTimerInS,
 	}, nil
 }
 
-func PauseCurrentTimer(userId int) (*TimerAction, error) {
+func PauseCurrentTimer(userId int) (*common.TimerAction, error) {
+	game, err := game_service.GetCurrentGame(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if game == nil {
+		return nil, common.NewCurrentGameNotFoundError()
+	}
+
 	timer, err := GetCurrentTimer(userId)
 
 	if err != nil {
@@ -205,16 +206,16 @@ func PauseCurrentTimer(userId int) (*TimerAction, error) {
 	}
 
 	if timer == nil {
-		return nil, nil
+		return nil, common.NewCurrentTimerNotFoundError()
 	}
 
-	if timer.State == TimerStateCreated ||
-		timer.State == TimerStatePaused ||
-		timer.State == TimerStateFinished {
-		return nil, nil
+	if timer.State == common.TimerStateCreated ||
+		timer.State == common.TimerStatePaused ||
+		timer.State == common.TimerStateFinished {
+		return nil, common.NewCurrentTimerIncorrectStateError(timer.State)
 	}
 
-	timerAction := TimerActionPause
+	timerAction := common.TimerActionPause
 	remainingTimerInS := timer.RemainingTimeInS
 
 	_, err = db_access.Exec(
@@ -228,13 +229,13 @@ func PauseCurrentTimer(userId int) (*TimerAction, error) {
 		return nil, err
 	}
 
-	return &TimerAction{
+	return &common.TimerAction{
 		Action:           timerAction,
 		RemainingTimeInS: remainingTimerInS,
 	}, nil
 }
 
-func StopCurrentTimer(userId int) (*TimerAction, error) {
+func StopCurrentTimer(userId int) (*common.TimerAction, error) {
 	timer, err := GetCurrentTimer(userId)
 
 	if err != nil {
@@ -242,15 +243,15 @@ func StopCurrentTimer(userId int) (*TimerAction, error) {
 	}
 
 	if timer == nil {
-		return nil, nil
+		return nil, common.NewCurrentTimerNotFoundError()
 	}
 
-	if timer.State == TimerStateCreated ||
-		timer.State == TimerStateFinished {
-		return nil, nil
+	if timer.State == common.TimerStateCreated ||
+		timer.State == common.TimerStateFinished {
+		return nil, common.NewCurrentTimerIncorrectStateError(timer.State)
 	}
 
-	timerAction := TimerActionStop
+	timerAction := common.TimerActionStop
 	remainingTimerInS := 0
 
 	_, err = db_access.Exec(
@@ -264,14 +265,14 @@ func StopCurrentTimer(userId int) (*TimerAction, error) {
 		return nil, err
 	}
 
-	return &TimerAction{
+	return &common.TimerAction{
 		Action:           timerAction,
 		RemainingTimeInS: remainingTimerInS,
 	}, nil
 }
 
 func StopAllCompletedTimers() error {
-	rows, err := db_access.Query(GetCompletedTimerUsersCommand, TimerStateRunning, TimerStatePaused)
+	rows, err := db_access.Query(GetCompletedTimerUsersCommand, common.TimerStateRunning, common.TimerStatePaused)
 
 	if err != nil {
 		return err
@@ -295,6 +296,12 @@ func StopAllCompletedTimers() error {
 		if err != nil {
 			errorCount++
 			continue
+		}
+
+		err = effect_service.CreateAvailableRoll(userId)
+
+		if err != nil {
+			errorCount++
 		}
 	}
 

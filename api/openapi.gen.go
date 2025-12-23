@@ -9,41 +9,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Defines values for ConflictErrorCode.
-const (
-	CURRENTGAMEALREADYEXISTS ConflictErrorCode = "CURRENT_GAME_ALREADY_EXISTS"
-	EMAILALREADYEXISTS       ConflictErrorCode = "EMAIL_ALREADY_EXISTS"
-	NOAVAILABLEROLLS         ConflictErrorCode = "NO_AVAILABLE_ROLLS"
-	NOCOMPLETEDTIMERS        ConflictErrorCode = "NO_COMPLETED_TIMERS"
-	NOUNPLAYEDGAMES          ConflictErrorCode = "NO_UNPLAYED_GAMES"
-	SESSIONALREADYEXISTS     ConflictErrorCode = "SESSION_ALREADY_EXISTS"
-	TIMERINCORRECTSTATE      ConflictErrorCode = "TIMER_INCORRECT_STATE"
-	USERNAMEALREADYEXISTS    ConflictErrorCode = "USERNAME_ALREADY_EXISTS"
-)
-
 // Defines values for GameState.
 const (
 	GameStateCancelled GameState = "cancelled"
 	GameStateFinished  GameState = "finished"
 	GameStateStarted   GameState = "started"
-)
-
-// Defines values for InternalServerErrorCode.
-const (
-	UNEXPECTED InternalServerErrorCode = "UNEXPECTED"
-)
-
-// Defines values for NotAuthorizedErrorCode.
-const (
-	NOACTIVESESSION NotAuthorizedErrorCode = "NO_ACTIVE_SESSION"
-	WRONGAUTHDATA   NotAuthorizedErrorCode = "WRONG_AUTH_DATA"
-)
-
-// Defines values for NotFoundErrorCode.
-const (
-	GAMENOTFOUND  NotFoundErrorCode = "GAME_NOT_FOUND"
-	TIMERNOTFOUND NotFoundErrorCode = "TIMER_NOT_FOUND"
-	USERNOTFOUND  NotFoundErrorCode = "USER_NOT_FOUND"
 )
 
 // Defines values for TimerState.
@@ -61,15 +31,6 @@ const (
 	Stop  TimerActionType = "stop"
 )
 
-// ConflictError defines model for ConflictError.
-type ConflictError struct {
-	Code    ConflictErrorCode `json:"code"`
-	Message string            `json:"message"`
-}
-
-// ConflictErrorCode defines model for ConflictError.Code.
-type ConflictErrorCode string
-
 // Effect defines model for Effect.
 type Effect struct {
 	Description *string `json:"description,omitempty"`
@@ -82,13 +43,19 @@ type Effects = []Effect
 // Email defines model for Email.
 type Email = string
 
+// Error defines model for Error.
+type Error struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
 // Game defines model for Game.
 type Game struct {
 	FinishDate *time.Time `json:"finishDate,omitempty"`
-	HourCount  int        `json:"hourCount"`
 	Link       *string    `json:"link,omitempty"`
 	Name       Name       `json:"name"`
 	State      GameState  `json:"state"`
+	TimeSpent  string     `json:"timeSpent"`
 }
 
 // GameState defines model for Game.State.
@@ -96,15 +63,6 @@ type GameState string
 
 // Games defines model for Games.
 type Games = []Game
-
-// InternalServerError defines model for InternalServerError.
-type InternalServerError struct {
-	Code    InternalServerErrorCode `json:"code"`
-	Message string                  `json:"message"`
-}
-
-// InternalServerErrorCode defines model for InternalServerError.Code.
-type InternalServerErrorCode string
 
 // Name defines model for Name.
 type Name = string
@@ -115,24 +73,6 @@ type NewUser struct {
 	Name     Name     `json:"name"`
 	Password Password `json:"password"`
 }
-
-// NotAuthorizedError defines model for NotAuthorizedError.
-type NotAuthorizedError struct {
-	Code    NotAuthorizedErrorCode `json:"code"`
-	Message string                 `json:"message"`
-}
-
-// NotAuthorizedErrorCode defines model for NotAuthorizedError.Code.
-type NotAuthorizedErrorCode string
-
-// NotFoundError defines model for NotFoundError.
-type NotFoundError struct {
-	Code    NotFoundErrorCode `json:"code"`
-	Message string            `json:"message"`
-}
-
-// NotFoundErrorCode defines model for NotFoundError.Code.
-type NotFoundErrorCode string
 
 // Password defines model for Password.
 type Password = string

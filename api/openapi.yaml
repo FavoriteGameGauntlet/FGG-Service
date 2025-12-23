@@ -1,7 +1,7 @@
 openapi: 3.1.2
 info:
   title: Favorite Game Gauntlet
-  version: 0.3.1
+  version: 0.4.0
 paths:
 
   /auth/signup:
@@ -24,19 +24,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '409':
           description: A user with the given email or name already exists.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConflictError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -65,13 +65,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -95,13 +95,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -127,19 +127,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: Unplayed games data not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
     get:
       operationId: getUnplayedGames
       tags:
@@ -160,19 +160,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: Unplayed games data not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -198,25 +198,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: No unplayed games available for rolling.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '409':
           description: Game roll not allowed due to current game state.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConflictError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -240,19 +240,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: Current game not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -273,25 +273,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: No current game available to finish.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '409':
           description: Game finishing not allowed due to lack of completed timers for the game.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConflictError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -312,19 +312,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: No current game available to cancel.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -349,19 +349,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: Game history not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
   /timers/current:
@@ -385,19 +385,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: No active timer found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -422,25 +422,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: No timer available to start.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '409':
           description: Timer cannot be started due to incorrect state.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConflictError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -465,25 +465,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: No timer available to pause.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '409':
           description: Timer cannot be paused due to incorrect state.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConflictError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -509,19 +509,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: Effect roll information not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -546,19 +546,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: Effect history not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -583,25 +583,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: No available effects to roll.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundError'
+                $ref: '#/components/schemas/Error'
         '409':
           description: Effect roll not allowed due to current game or timer state.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConflictError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -625,19 +625,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotAuthorizedError'
+                $ref: '#/components/schemas/Error'
         '404':
           description: Available effects data not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConflictError'
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InternalServerError'
+                $ref: '#/components/schemas/Error'
 
 
 
@@ -724,13 +724,14 @@ components:
             state:
               type: string
               enum: [ 'started', 'finished', 'cancelled' ]
-            hourCount:
-              type: integer
-              format: int
+            timeSpent:
+              type: string
+              format: duration
+              example: 2h10m5s
             finishDate:
               type: string
               format: date-time
-          required: [ state, hourCount ]
+          required: [ state, timeSpent ]
 
     Games:
       type: array
@@ -794,65 +795,11 @@ components:
       items:
         $ref: '#/components/schemas/RolledEffect'
 
-
-
-    NotAuthorizedError:
+    Error:
       type: object
       properties:
         code:
           type: string
-          enum: [
-            'NO_ACTIVE_SESSION',
-            'WRONG_AUTH_DATA'
-          ]
-        message:
-          type: string
-      required: [ code, message ]
-
-    NotFoundError:
-      type: object
-      properties:
-        code:
-          type: string
-          enum: [
-            'GAME_NOT_FOUND',
-            'TIMER_NOT_FOUND',
-            'USER_NOT_FOUND'
-          ]
-        message:
-          type: string
-      required: [ code, message ]
-      example:
-        code: 'USER_NOT_FOUND'
-        message: ''
-
-    ConflictError:
-      type: object
-      properties:
-        code:
-          type: string
-          enum: [
-            'CURRENT_GAME_ALREADY_EXISTS',
-            'EMAIL_ALREADY_EXISTS',
-            'NO_AVAILABLE_ROLLS',
-            'NO_COMPLETED_TIMERS',
-            'NO_UNPLAYED_GAMES',
-            'SESSION_ALREADY_EXISTS',
-            'TIMER_INCORRECT_STATE',
-            'USERNAME_ALREADY_EXISTS'
-          ]
-        message:
-          type: string
-      required: [ code, message ]
-
-    InternalServerError:
-      type: object
-      properties:
-        code:
-          type: string
-          enum: [
-            'UNEXPECTED'
-          ]
         message:
           type: string
       required: [ code, message ]

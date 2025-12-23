@@ -1,6 +1,7 @@
 package effect_service
 
 import (
+	"FGG-Service/common"
 	"FGG-Service/db_access"
 	"time"
 )
@@ -46,6 +47,17 @@ const (
 	AddEffectHistoryCommand = `
 		INSERT INTO EffectHistory (EffectId, UserId)
 		VALUES ($effectId, $userId)`
+	CreateAvailableRollCommand = `
+		INSERT INTO AvailableRolls (UserId)
+		VALUES ($userId)`
+	DeleteAvailableRollCommand = `
+		DELETE FROM AvailableRolls
+		WHERE Id IN (
+		  SELECT Id
+		  FROM AvailableRolls
+		  WHERE UserId = $userId
+		  ORDER BY CreateDate
+		  LIMIT 1)`
 )
 
 func CheckIfAvailableRollExists(userId int) (bool, error) {
@@ -61,7 +73,7 @@ func CheckIfAvailableRollExists(userId int) (bool, error) {
 	return doesExist, nil
 }
 
-func GetAvailableEffects(userId int) (*Effects, error) {
+func GetAvailableEffects(userId int) (*common.Effects, error) {
 	rows, err := db_access.Query(GetAvailableEffectsCommand, userId)
 
 	if err != nil {
@@ -70,11 +82,11 @@ func GetAvailableEffects(userId int) (*Effects, error) {
 
 	effectCount := 0
 	errorCount := 0
-	effects := Effects{}
+	effects := common.Effects{}
 	for rows.Next() {
 		effectCount++
 
-		effect := Effect{}
+		effect := common.Effect{}
 		err = rows.Scan(&effect.Id, &effect.Name, &effect.Description)
 
 		if err != nil {
@@ -92,7 +104,7 @@ func GetAvailableEffects(userId int) (*Effects, error) {
 	return &effects, nil
 }
 
-func GetEffectHistory(userId int) (*RolledEffects, error) {
+func GetEffectHistory(userId int) (*common.RolledEffects, error) {
 	rows, err := db_access.Query(GetEffectHistoryCommand, userId)
 
 	if err != nil {
@@ -101,11 +113,11 @@ func GetEffectHistory(userId int) (*RolledEffects, error) {
 
 	effectCount := 0
 	errorCount := 0
-	effects := RolledEffects{}
+	effects := common.RolledEffects{}
 	for rows.Next() {
 		effectCount++
 
-		effect := RolledEffect{}
+		effect := common.RolledEffect{}
 		var rollDateString string
 		err = rows.Scan(&effect.Name, &effect.Description, &rollDateString)
 
@@ -134,8 +146,24 @@ func GetEffectHistory(userId int) (*RolledEffects, error) {
 	return &effects, nil
 }
 
-func MakeEffectRoll(userId int) (*Effects, error) {
+func MakeEffectRoll(userId int) (*common.Effects, error) {
+	doesExist, err := CheckIfAvailableRollExists(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !doesExist {
+		return nil, common.NewAvailableRollsNotFoundError()
+	}
+
 	rows, err := db_access.Query(MakeEffectRollCommand, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = DeleteAvailableRoll(userId)
 
 	if err != nil {
 		return nil, err
@@ -143,11 +171,11 @@ func MakeEffectRoll(userId int) (*Effects, error) {
 
 	effectCount := 0
 	errorCount := 0
-	effects := Effects{}
+	effects := common.Effects{}
 	for rows.Next() {
 		effectCount++
 
-		effect := Effect{}
+		effect := common.Effect{}
 		err = rows.Scan(&effect.Id, &effect.Name, &effect.Description)
 
 		if err != nil {
@@ -171,4 +199,16 @@ func MakeEffectRoll(userId int) (*Effects, error) {
 	}
 
 	return &effects, nil
+}
+
+func CreateAvailableRoll(userId int) error {
+	_, err := db_access.Exec(CreateAvailableRollCommand, userId)
+
+	return err
+}
+
+func DeleteAvailableRoll(userId int) error {
+	_, err := db_access.Exec(DeleteAvailableRollCommand, userId)
+
+	return err
 }

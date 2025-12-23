@@ -3,6 +3,7 @@ package controller
 import (
 	"FGG-Service/api"
 	"FGG-Service/auth_service"
+	"FGG-Service/common"
 	"net/http"
 	"time"
 
@@ -12,80 +13,56 @@ import (
 // Login (POST /auth/login)
 func (Server) Login(ctx echo.Context) error {
 	var user api.User
-	if err := ctx.Bind(&user); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	doesExist, err := auth_service.CheckIfUserNameExists(user.Name)
+	err := ctx.Bind(&user)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		// TODO: Fix a status code for this error, should be 400
+		return SendJSONErrorResponse(ctx, err)
 	}
 
-	if !doesExist {
-		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.WRONGAUTHDATA})
-	}
+	doesExist, _ := CheckIfSessionExists(ctx)
 
-	cookie, err := ctx.Cookie("sessionId")
-
-	if err == nil {
-		sessionId := cookie.Value
-		doesExist, err = auth_service.CheckIfUserSessionExists(sessionId)
-
-		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-		}
-
-		if doesExist {
-			return ctx.JSON(http.StatusConflict, api.ConflictError{Code: api.SESSIONALREADYEXISTS})
-		}
+	if doesExist {
+		return SendJSONErrorResponse(ctx, common.NewSessionAlreadyExistsAuthError())
 	}
 
 	sessionId, err := auth_service.CreateSession(user.Name, user.Password)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
-	if sessionId == nil {
-		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.WRONGAUTHDATA})
-	}
-
-	cookie = new(http.Cookie)
-	cookie.Name = "sessionId"
-	cookie.Value = *sessionId
-	cookie.Expires = time.Now().Add(24 * time.Hour)
-	cookie.HttpOnly = true
-	cookie.Path = "/"
-	cookie.Secure = false
-
+	cookie := CreateSessionCookie(*sessionId)
 	ctx.SetCookie(cookie)
 
 	return ctx.NoContent(http.StatusOK)
 }
 
+func CreateSessionCookie(sessionId string) *http.Cookie {
+	cookie := new(http.Cookie)
+	cookie.Name = "sessionId"
+	cookie.Value = sessionId
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	cookie.HttpOnly = true
+	cookie.Path = "/"
+	cookie.Secure = false
+
+	return cookie
+}
+
 // Logout (POST /auth/logout)
 func (Server) Logout(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("sessionId")
+	cookie, err := GetSessionCookie(ctx)
 
 	if err != nil {
-		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	sessionId := cookie.Value
-
-	doesExist, err := auth_service.CheckIfUserSessionExists(sessionId)
+	err = auth_service.DeleteSession(sessionId)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	if !doesExist {
-		return ctx.JSON(http.StatusUnauthorized, api.NotAuthorizedError{Code: api.NOACTIVESESSION})
-	}
-
-	if err = auth_service.DeleteSession(sessionId); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	cookie.MaxAge = -1
@@ -97,34 +74,17 @@ func (Server) Logout(ctx echo.Context) error {
 // SignUp (POST /auth/signup)
 func (Server) SignUp(ctx echo.Context) error {
 	var user api.NewUser
-	if err := ctx.Bind(&user); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	doesExist, err := auth_service.CheckIfUserNameExists(user.Name)
+	err := ctx.Bind(&user)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	if doesExist {
-		return ctx.JSON(http.StatusConflict, api.ConflictError{Code: api.USERNAMEALREADYEXISTS})
-	}
-
-	doesExist, err = auth_service.CheckIfUserEmailExists(user.Email)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
-	}
-
-	if doesExist {
-		return ctx.JSON(http.StatusConflict, api.ConflictError{Code: api.EMAILALREADYEXISTS})
+		// TODO: Fix a status code for this error, should be 400
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	err = auth_service.CreateUser(user.Name, user.Email, user.Password)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.InternalServerError{Code: api.UNEXPECTED, Message: err.Error()})
+		return SendJSONErrorResponse(ctx, err)
 	}
 
 	return ctx.NoContent(http.StatusOK)

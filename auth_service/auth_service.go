@@ -1,6 +1,7 @@
 package auth_service
 
 import (
+	"FGG-Service/common"
 	"FGG-Service/db_access"
 	"database/sql"
 	"errors"
@@ -56,32 +57,6 @@ const (
 		VALUES ($sessionId, $userId)`
 )
 
-func CheckIfUserNameExists(userName string) (bool, error) {
-	row := db_access.QueryRow(CheckIfUserNameExistsCommand, userName)
-
-	var doesExist bool
-	err := row.Scan(&doesExist)
-
-	if err != nil {
-		return doesExist, err
-	}
-
-	return doesExist, nil
-}
-
-func CheckIfUserEmailExists(userEmail string) (bool, error) {
-	row := db_access.QueryRow(CheckIfUserEmailExistsCommand, userEmail)
-
-	var doesExist bool
-	err := row.Scan(&doesExist)
-
-	if err != nil {
-		return doesExist, err
-	}
-
-	return doesExist, nil
-}
-
 func CheckIfUserSessionExists(sessionId string) (bool, error) {
 	row := db_access.QueryRow(CheckIfUserSessionExistsCommand, sessionId)
 
@@ -96,9 +71,55 @@ func CheckIfUserSessionExists(sessionId string) (bool, error) {
 }
 
 func CreateUser(userName string, userEmail string, userPassword string) error {
-	_, err := db_access.Exec(CreateUserCommand, userName, userEmail, userPassword)
+	err := ThrowIfUserNameExists(userName)
+
+	if err != nil {
+		return err
+	}
+
+	err = CheckIfUserEmailExists(userEmail)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = db_access.Exec(CreateUserCommand, userName, userEmail, userPassword)
 
 	return err
+}
+
+func ThrowIfUserNameExists(userName string) error {
+	row := db_access.QueryRow(CheckIfUserNameExistsCommand, userName)
+
+	var doesExist bool
+	err := row.Scan(&doesExist)
+
+	if err != nil {
+		return err
+	}
+
+	if doesExist {
+		return common.NewUserNameAlreadyExistsError()
+	}
+
+	return nil
+}
+
+func CheckIfUserEmailExists(userEmail string) error {
+	row := db_access.QueryRow(CheckIfUserEmailExistsCommand, userEmail)
+
+	var doesExist bool
+	err := row.Scan(&doesExist)
+
+	if err != nil {
+		return err
+	}
+
+	if doesExist {
+		return common.NewUserEmailAlreadyExistsError()
+	}
+
+	return nil
 }
 
 func GetUserId(sessionId string) (int, error) {
@@ -106,6 +127,10 @@ func GetUserId(sessionId string) (int, error) {
 
 	var userId int
 	err := row.Scan(&userId)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return userId, common.NewActiveSessionNotFoundAuthError()
+	}
 
 	if err != nil {
 		return userId, err
@@ -127,7 +152,7 @@ func CreateSession(userName string, userPassword string) (*string, error) {
 	err := row.Scan(&userId)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
+		return nil, common.NewWrongDataAuthError()
 	}
 
 	if err != nil {
