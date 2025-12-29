@@ -128,7 +128,7 @@ func (Server) GetUnplayedGames(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	games, err := game_service.GetUnplayedGames(userId)
+	games, err := game_service.GetUnplayedGamesCommand(userId)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
@@ -139,10 +139,10 @@ func (Server) GetUnplayedGames(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, *gamesDto)
 }
 
-func ConvertUnplayedGamesToDto(games *common.UnplayedGames) *api.UnplayedGames {
-	gamesDto := make(api.UnplayedGames, len(*games))
+func ConvertUnplayedGamesToDto(games common.UnplayedGames) *api.UnplayedGames {
+	gamesDto := make(api.UnplayedGames, len(games))
 
-	for i, game := range *games {
+	for i, game := range games {
 		gamesDto[i] = api.UnplayedGame{
 			Link: game.Link,
 			Name: game.Name,

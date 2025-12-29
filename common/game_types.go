@@ -24,6 +24,7 @@ const (
 )
 
 type UnplayedGame struct {
+	Id     int
 	GameId int
 	Link   *string
 	Name   string

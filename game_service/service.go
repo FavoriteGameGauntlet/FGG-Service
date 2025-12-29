@@ -42,35 +42,6 @@ const (
          	THEN true
          	ELSE false
        	END AS 'DoesExist'`
-	AddGameCommand = `
-		INSERT INTO Games (Name, Link)
-		VALUES ($gameName, $gameLink)`
-	GetGameCommand = `
-		SELECT Id, Name, Link
-		FROM Games
-		WHERE Name = $gameName`
-	AddUnplayedGameCommand = `
-		INSERT INTO UnplayedGames (UserId, GameId)
-		VALUES ($userId, $gameId)`
-	GetUnplayedGamesCommand = `
-		SELECT g.Id, g.Name, g.Link
-		FROM UnplayedGames ug
-			INNER JOIN Games g ON ug.GameId = g.Id
-		WHERE ug.UserId = $userId`
-	GetCurrentGameCommand = `
-		SELECT
-		  g.Id,
-		  g.Name,
-		  gh.State,
-		  g.Link,
-		  SUM(t.DurationInS) AS SpentSeconds,
-		  gh.FinishDate
-		FROM GameHistory gh
-			INNER JOIN Games g ON gh.GameId = g.Id
-			LEFT JOIN Timers t ON t.UserId = gh.UserId AND t.GameId = gh.GameId
-		WHERE gh.UserId = $userId
-			AND gh.State NOT IN ($finishedGameState, $cancelledGameState)
-		GROUP BY g.Id, g.Name, gh.State, g.Link, gh.FinishDate`
 	CancelCurrentGameCommand = `
 		UPDATE GameHistory
 		SET State = $cancelledGameState,
@@ -97,13 +68,6 @@ const (
 		WHERE gh.UserId = $userId
 		GROUP BY g.Id, g.Name, gh.State, g.Link, gh.FinishDate
 		ORDER BY gh.FinishDate NULLS FIRST`
-	CreateCurrentGameCommand = `
-		INSERT INTO GameHistory (UserId, GameId)
-		VALUES ($userId, $gameId)`
-	DeleteUnplayedGameCommand = `
-		DELETE FROM UnplayedGames
-		WHERE UserId = $userId
-			AND GameId = $gameId`
 	ActCurrentTimerCommand = `
 		INSERT INTO TimerActions (TimerId, Action, RemainingTimeInS)
 		VALUES ($timerId, $timerAction, $remainingTimeInS)`
@@ -164,11 +128,7 @@ func AddUnplayedGame(userId int, unplayedGame *common.UnplayedGame) error {
 		return err
 	}
 
-	_, err = db_access.Exec(
-		AddUnplayedGameCommand,
-		userId,
-		game.Id,
-	)
+	err = CreateUnplayedGameCommand(userId, game.Id)
 
 	return err
 }
@@ -194,41 +154,24 @@ func AddOrGetGame(unplayedGame *common.UnplayedGame) (*common.Game, error) {
 	}
 
 	if doesExist {
-		var game *common.Game
-		game, err = GetGame(unplayedGame.Name)
+		var game common.Game
+		game, err = GetGameCommand(unplayedGame.Name)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return game, nil
+		return &game, nil
 	}
 
-	_, err = db_access.Exec(
-		AddGameCommand,
-		unplayedGame.Name,
-		unplayedGame.Link,
-	)
+	err = CreateGameCommand(unplayedGame.Name, unplayedGame.Link)
 
 	if err != nil {
 		return nil, err
 	}
 
-	var game *common.Game
-	game, err = GetGame(unplayedGame.Name)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return game, nil
-}
-
-func GetGame(gameName string) (*common.Game, error) {
-	row := db_access.QueryRow(GetGameCommand, gameName)
-
-	game := common.Game{}
-	err := row.Scan(&game.Id, &game.Name, &game.Link)
+	var game common.Game
+	game, err = GetGameCommand(unplayedGame.Name)
 
 	if err != nil {
 		return nil, err
@@ -248,37 +191,6 @@ func CheckIfGameExists(gameName string) (bool, error) {
 	}
 
 	return doesExist, nil
-}
-
-func GetUnplayedGames(userId int) (*common.UnplayedGames, error) {
-	rows, err := db_access.Query(GetUnplayedGamesCommand, userId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	gameCount := 0
-	errorCount := 0
-	games := common.UnplayedGames{}
-	for rows.Next() {
-		gameCount++
-
-		game := common.UnplayedGame{}
-		err = rows.Scan(&game.GameId, &game.Name, &game.Link)
-
-		if err != nil {
-			errorCount++
-			continue
-		}
-
-		games = append(games, game)
-	}
-
-	if errorCount > 0 && errorCount == gameCount {
-		return nil, err
-	}
-
-	return &games, nil
 }
 
 func GetCurrentGame(userId int) (*common.Game, error) {
@@ -520,46 +432,48 @@ func GetGameHistory(userId int) (*common.Games, error) {
 	return &games, nil
 }
 
-func MakeGameRoll(userId int) (*common.Game, error) {
+func MakeGameRoll(userId int) (common.Game, error) {
+	game := common.Game{}
+
 	doesExist, err := CheckIfCurrentGameExists(userId)
 
 	if err != nil {
-		return nil, err
+		return game, err
 	}
 
 	if doesExist {
-		return nil, common.NewCurrentGameAlreadyExistsError()
+		return game, common.NewCurrentGameAlreadyExistsError()
 	}
 
-	unplayedGames, err := GetUnplayedGames(userId)
+	unplayedGames, err := GetUnplayedGamesCommand(userId)
 
 	if err != nil {
-		return nil, err
+		return game, err
 	}
 
-	if unplayedGames == nil || len(*unplayedGames) < common.MinimumNumberOfUnplayedGames {
-		return nil, common.NewUnplayedGamesNotFoundError()
+	if unplayedGames == nil || len(unplayedGames) < common.MinimumNumberOfUnplayedGames {
+		return game, common.NewUnplayedGamesNotFoundError()
 	}
 
-	randomNumber := rand.Intn(len(*unplayedGames))
-	randomUnplayedGame := (*unplayedGames)[randomNumber]
+	randomNumber := rand.Intn(len(unplayedGames))
+	randomUnplayedGame := unplayedGames[randomNumber]
 
-	_, err = db_access.Exec(CreateCurrentGameCommand, userId, randomUnplayedGame.GameId)
+	err = CreateCurrentGameCommand(userId, randomUnplayedGame.GameId)
 
 	if err != nil {
-		return nil, err
+		return game, err
 	}
 
-	_, err = db_access.Exec(DeleteUnplayedGameCommand, userId, randomUnplayedGame.GameId)
+	err = DeleteUnplayedGameCommand(userId, randomUnplayedGame.GameId)
 
 	if err != nil {
-		return nil, err
+		return game, err
 	}
 
-	return &common.Game{
-		Id:    randomUnplayedGame.GameId,
-		Name:  randomUnplayedGame.Name,
-		Link:  randomUnplayedGame.Link,
-		State: common.GameStateStarted,
-	}, nil
+	game.Id = randomUnplayedGame.GameId
+	game.Name = randomUnplayedGame.Name
+	game.Link = randomUnplayedGame.Link
+	game.State = common.GameStateStarted
+
+	return game, nil
 }
