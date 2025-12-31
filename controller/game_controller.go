@@ -25,11 +25,11 @@ func (Server) GetCurrentGame(ctx echo.Context) error {
 
 	gameDto := ConvertGameToDto(game)
 
-	return ctx.JSON(http.StatusOK, *gameDto)
+	return ctx.JSON(http.StatusOK, gameDto)
 }
 
-func ConvertGameToDto(game *common.Game) *api.Game {
-	return &api.Game{
+func ConvertGameToDto(game common.Game) api.Game {
+	return api.Game{
 		Link:       game.Link,
 		Name:       game.Name,
 		State:      api.GameState(game.State),
@@ -86,19 +86,19 @@ func (Server) GetGameHistory(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	gamesDto := ConvertGamesToDto(games)
+	gamesDto := ConvertGamesToDto(*games)
 
-	return ctx.JSON(http.StatusOK, *gamesDto)
+	return ctx.JSON(http.StatusOK, gamesDto)
 }
 
-func ConvertGamesToDto(games *common.Games) *api.Games {
-	gamesDto := make(api.Games, len(*games))
+func ConvertGamesToDto(games common.Games) api.Games {
+	gamesDto := make(api.Games, len(games))
 
-	for i, game := range *games {
-		gamesDto[i] = *ConvertGameToDto(&game)
+	for i, game := range games {
+		gamesDto[i] = ConvertGameToDto(game)
 	}
 
-	return &gamesDto
+	return gamesDto
 }
 
 // MakeGameRoll (GET /games/roll)
@@ -117,7 +117,7 @@ func (Server) MakeGameRoll(ctx echo.Context) error {
 
 	gameDto := ConvertGameToDto(game)
 
-	return ctx.JSON(http.StatusOK, *gameDto)
+	return ctx.JSON(http.StatusOK, gameDto)
 }
 
 // GetUnplayedGames (GET /games/unplayed)
@@ -128,7 +128,7 @@ func (Server) GetUnplayedGames(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	games, err := game_service.GetUnplayedGamesCommand(userId)
+	games, err := game_service.GetUnplayedGames(userId)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
@@ -136,10 +136,10 @@ func (Server) GetUnplayedGames(ctx echo.Context) error {
 
 	gamesDto := ConvertUnplayedGamesToDto(games)
 
-	return ctx.JSON(http.StatusOK, *gamesDto)
+	return ctx.JSON(http.StatusOK, gamesDto)
 }
 
-func ConvertUnplayedGamesToDto(games common.UnplayedGames) *api.UnplayedGames {
+func ConvertUnplayedGamesToDto(games common.UnplayedGames) api.UnplayedGames {
 	gamesDto := make(api.UnplayedGames, len(games))
 
 	for i, game := range games {
@@ -149,7 +149,7 @@ func ConvertUnplayedGamesToDto(games common.UnplayedGames) *api.UnplayedGames {
 		}
 	}
 
-	return &gamesDto
+	return gamesDto
 }
 
 // AddUnplayedGames (POST /games/unplayed)
@@ -168,7 +168,7 @@ func (Server) AddUnplayedGames(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	games := ConvertUnplayedGamesFromDto(&gamesDto)
+	games := ConvertUnplayedGamesFromDto(gamesDto)
 	err = game_service.AddUnplayedGames(userId, games)
 
 	if err != nil {
@@ -178,15 +178,15 @@ func (Server) AddUnplayedGames(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func ConvertUnplayedGamesFromDto(games *api.UnplayedGames) *common.UnplayedGames {
-	gamesDto := make(common.UnplayedGames, len(*games))
+func ConvertUnplayedGamesFromDto(games api.UnplayedGames) common.UnplayedGames {
+	gamesDto := make(common.UnplayedGames, len(games))
 
-	for i, g := range *games {
+	for i, g := range games {
 		gamesDto[i] = common.UnplayedGame{
 			Link: g.Link,
 			Name: g.Name,
 		}
 	}
 
-	return &gamesDto
+	return gamesDto
 }

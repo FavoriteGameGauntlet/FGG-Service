@@ -47,14 +47,10 @@ const (
 )
 
 func GetOrCreateCurrentTimer(userId int) (*common.Timer, error) {
-	game, err := game_service.GetCurrentGame(userId)
+	game, err := game_service.GetCurrentGameCommand(userId)
 
 	if err != nil {
 		return nil, err
-	}
-
-	if game == nil {
-		return nil, common.NewCurrentGameNotFoundError()
 	}
 
 	timer, err := GetCurrentTimer(userId)
@@ -143,14 +139,10 @@ func CreateCurrentTimer(userId int, gameId int) (*common.Timer, error) {
 }
 
 func StartCurrentTimer(userId int) (*common.TimerAction, error) {
-	game, err := game_service.GetCurrentGame(userId)
+	_, err := game_service.GetCurrentGameCommand(userId)
 
 	if err != nil {
 		return nil, err
-	}
-
-	if game == nil {
-		return nil, common.NewCurrentGameNotFoundError()
 	}
 
 	timer, err := GetCurrentTimer(userId)
@@ -189,14 +181,10 @@ func StartCurrentTimer(userId int) (*common.TimerAction, error) {
 }
 
 func PauseCurrentTimer(userId int) (*common.TimerAction, error) {
-	game, err := game_service.GetCurrentGame(userId)
+	_, err := game_service.GetCurrentGameCommand(userId)
 
 	if err != nil {
 		return nil, err
-	}
-
-	if game == nil {
-		return nil, common.NewCurrentGameNotFoundError()
 	}
 
 	timer, err := GetCurrentTimer(userId)

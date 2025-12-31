@@ -3,7 +3,6 @@ package game_service
 import (
 	"FGG-Service/common"
 	"FGG-Service/db_access"
-	"FGG-Service/effect_service"
 	"database/sql"
 	"errors"
 	"math/rand"
@@ -42,32 +41,6 @@ const (
          	THEN true
          	ELSE false
        	END AS 'DoesExist'`
-	CancelCurrentGameCommand = `
-		UPDATE GameHistory
-		SET State = $cancelledGameState,
-			FinishDate = datetime('now', 'subsec')
-		WHERE UserId = $userId
-			AND GameId = $gameId;`
-	FinishCurrentGameCommand = `
-		UPDATE GameHistory
-		SET State = $finishedGameState,
-			FinishDate = datetime('now', 'subsec')
-		WHERE UserId = $userId
-			AND GameId = $gameId;`
-	GetGameHistoryCommand = `
-		SELECT 
-		  g.Id,
-		  g.Name,
-		  gh.State,
-		  g.Link,
-		  SUM(t.DurationInS) AS SpentSeconds,
-		  gh.FinishDate
-		FROM GameHistory gh
-			INNER JOIN Games g ON gh.GameId = g.Id
-			LEFT JOIN Timers t ON t.UserId = gh.UserId AND t.GameId = gh.GameId
-		WHERE gh.UserId = $userId
-		GROUP BY g.Id, g.Name, gh.State, g.Link, gh.FinishDate
-		ORDER BY gh.FinishDate NULLS FIRST`
 	ActCurrentTimerCommand = `
 		INSERT INTO TimerActions (TimerId, Action, RemainingTimeInS)
 		VALUES ($timerId, $timerAction, $remainingTimeInS)`
@@ -91,8 +64,7 @@ const (
 		LIMIT 1`
 )
 
-func AddUnplayedGames(userId int, gamesPtr *common.UnplayedGames) error {
-	games := *gamesPtr
+func AddUnplayedGames(userId int, games common.UnplayedGames) error {
 	numberOfGames := len(games)
 	errorCount := 0
 
@@ -131,6 +103,10 @@ func AddUnplayedGame(userId int, unplayedGame *common.UnplayedGame) error {
 	err = CreateUnplayedGameCommand(userId, game.Id)
 
 	return err
+}
+
+func GetUnplayedGames(userId int) (common.UnplayedGames, error) {
+	return GetUnplayedGamesCommand(userId)
 }
 
 func CheckIfUnplayedGameExists(userId int, gameName string) (bool, error) {
@@ -193,42 +169,22 @@ func CheckIfGameExists(gameName string) (bool, error) {
 	return doesExist, nil
 }
 
-func GetCurrentGame(userId int) (*common.Game, error) {
-	row := db_access.QueryRow(GetCurrentGameCommand, userId, common.GameStateFinished, common.GameStateCancelled)
-
-	game := common.Game{}
-	var spentSeconds *int
-	var finishDateString *string
-	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link, &spentSeconds, &finishDateString)
-
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, common.NewCurrentGameNotFoundError()
-	}
+func GetCurrentGame(userId int) (common.Game, error) {
+	game, err := GetCurrentGameCommand(userId)
 
 	if err != nil {
-		return nil, err
+		return common.Game{}, err
 	}
 
-	if spentSeconds != nil {
-		game.TimeSpent = time.Duration(*spentSeconds) * time.Second
+	secondsSpent, err := GetGameSecondsSpentCommand(userId, game.Id)
+
+	if err != nil {
+		return common.Game{}, err
 	}
 
-	var finishDate *time.Time
+	game.TimeSpent = time.Duration(secondsSpent) * time.Second
 
-	if finishDateString != nil {
-		var notNilFinishDate time.Time
-		notNilFinishDate, err = time.Parse(db_access.ISO8601, *finishDateString)
-
-		if err != nil {
-			return nil, err
-		}
-
-		finishDate = &notNilFinishDate
-	}
-
-	game.FinishDate = finishDate
-
-	return &game, nil
+	return game, nil
 }
 
 func CheckIfCurrentGameExists(userId int) (bool, error) {
@@ -251,30 +207,26 @@ func CancelCurrentGame(userId int) error {
 		return err
 	}
 
-	if game == nil {
-		return common.NewCurrentGameNotFoundError()
-	}
-
 	_, err = StopCurrentTimer(userId)
 
 	if err != nil {
 		return err
 	}
 
-	_, err = db_access.Exec(CancelCurrentGameCommand, common.GameStateCancelled, userId, game.Id)
-
-	return err
-}
-
-func FinishCurrentGame(userId int) error {
-	game, err := GetCurrentGame(userId)
+	err = CancelCurrentGameCommand(userId, game.Id)
 
 	if err != nil {
 		return err
 	}
 
-	if game == nil {
-		return common.NewCurrentGameNotFoundError()
+	return nil
+}
+
+func FinishCurrentGame(userId int) error {
+	game, err := GetCurrentGameCommand(userId)
+
+	if err != nil {
+		return err
 	}
 
 	if game.TimeSpent < 1*time.Second {
@@ -287,15 +239,13 @@ func FinishCurrentGame(userId int) error {
 		return err
 	}
 
-	_, err = db_access.Exec(FinishCurrentGameCommand, common.GameStateFinished, userId, game.Id)
+	err = FinishCurrentGameCommand(userId, game.Id)
 
 	if err != nil {
 		return err
 	}
 
-	err = effect_service.CreateAvailableRoll(userId)
-
-	return err
+	return nil
 }
 
 func StopCurrentTimer(userId int) (*common.TimerAction, error) {
