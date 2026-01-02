@@ -15,7 +15,7 @@ const (
         	WHEN EXISTS (
 				SELECT 1
 				FROM Users
-				WHERE Name = $userName) 
+				WHERE Name = ?) 
          	THEN true
          	ELSE false
        	END AS 'DoesExist'`
@@ -24,7 +24,7 @@ const (
         	WHEN EXISTS (
 				SELECT 1
 				FROM Users
-				WHERE Email = $userEmail) 
+				WHERE Email = ?) 
          	THEN true
          	ELSE false
        	END AS 'DoesExist'`
@@ -33,28 +33,28 @@ const (
         	WHEN EXISTS (
 				SELECT 1
 				FROM UserSessions
-				WHERE Id = $sessionId) 
+				WHERE Id = ?) 
          	THEN true
          	ELSE false
        	END AS 'DoesExist'`
 	CreateUserCommand = `
 		INSERT INTO Users (Name, Email, Password)
-		VALUES ($userName, $userEmail, $userPassword)`
+		VALUES (?, ?, ?)`
 	GetUserIdBySessionIdCommand = `
 		SELECT UserId
 		FROM UserSessions
-		WHERE Id = $sessionId`
+		WHERE Id = ?`
 	GetUserIdByUserNameAndPasswordCommand = `
 		SELECT Id
 		FROM Users
-		WHERE Name = $userName
-			AND PASSWORD = $userPassword`
+		WHERE Name = ?
+			AND PASSWORD = ?`
 	DeleteSessionCommand = `
 		DELETE FROM main.UserSessions
-		WHERE Id = $sessionId`
+		WHERE Id = ?`
 	CreateSessionCommand = `
 		INSERT INTO UserSessions (Id, UserId)
-		VALUES ($sessionId, $userId)`
+		VALUES (?, ?)`
 )
 
 func CheckIfUserSessionExists(sessionId string) (bool, error) {

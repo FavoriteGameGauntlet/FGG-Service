@@ -18,31 +18,31 @@ const (
 			t.DurationInS,
 			ta.CreateDate,
 			CASE ta.Action
-				WHEN $startTimerAction THEN ta.RemainingTimeInS - (strftime('%s', 'now') - strftime('%s', ta.CreateDate))
-				WHEN $pauseTimerAction THEN ta.RemainingTimeInS
-				WHEN $finishTimerAction THEN 0
+				WHEN ? THEN ta.RemainingTimeInS - (strftime('%s', 'now') - strftime('%s', ta.CreateDate))
+				WHEN ? THEN ta.RemainingTimeInS
+				WHEN ? THEN 0
 				ELSE t.DurationInS
 			END AS RemainingTimeInS
 		FROM Timers t
 			LEFT JOIN TimerActions ta ON t.Id = ta.TimerId
-		WHERE UserId = $userId
-			AND t.State != $finishedTimerState
+		WHERE UserId = ?
+			AND t.State != ?
 		ORDER BY ta.CreateDate DESC
 		LIMIT 1`
 	CreateTimerCommand = `
 		INSERT INTO Timers (UserId, GameId, DurationInS)
-		VALUES ($userId, $gameId, $timerDurationInS)`
+		VALUES (?, ?, ?)`
 	ActCurrentTimerCommand = `
 		INSERT INTO TimerActions (TimerId, Action, RemainingTimeInS)
-		VALUES ($timerId, $timerAction, $remainingTimeInS)`
+		VALUES (?, ?, ?)`
 	GetCompletedTimerUsersCommand = `
 		SELECT DISTINCT t.UserId
 		FROM Timers t
 			LEFT JOIN TimerActions ta ON t.Id = ta.TimerId
-		WHERE t.State IN ($runningTimerState, $pausedTimerState)
+		WHERE t.State IN (?, ?)
 	  	    AND CASE t.State
-				WHEN $runningTimerState THEN ta.RemainingTimeInS - (strftime('%s', 'now') - strftime('%s', ta.CreateDate))
-				WHEN $pausedTimerState THEN ta.RemainingTimeInS
+				WHEN ? THEN ta.RemainingTimeInS - (strftime('%s', 'now') - strftime('%s', ta.CreateDate))
+				WHEN ? THEN ta.RemainingTimeInS
 			END <= 0`
 )
 

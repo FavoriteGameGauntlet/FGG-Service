@@ -3,7 +3,7 @@ package db_access
 import (
 	"database/sql"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 var db *sql.DB
@@ -12,7 +12,13 @@ const Path = "data/FGG.db?_journal_mode=WAL"
 
 func Init() {
 	var err error
-	db, err = sql.Open("sqlite3", Path)
+	db, err = sql.Open("sqlite", Path)
+
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.Ping()
 
 	if err != nil {
 		panic(err)

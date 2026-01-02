@@ -12,7 +12,7 @@ const (
         	WHEN EXISTS (
 				SELECT 1
 				FROM AvailableRolls
-				WHERE UserId = $userId)
+				WHERE UserId = ?)
          	THEN true
          	ELSE false
        	END AS 'DoesExist'`
@@ -22,14 +22,14 @@ const (
 			LEFT JOIN (
 				SELECT EffectId
 				FROM EffectHistory
-				WHERE UserId = $userId
+				WHERE UserId = ?
 			) eh ON e.Id = eh.EffectId
 		WHERE eh.EffectId IS NULL`
 	GetEffectHistoryCommand = `
 		SELECT e.Name, e.Description, eh.CreateDate
 		FROM EffectHistory eh
 			INNER JOIN Effects e ON eh.EffectId = e.Id
-		WHERE eh.UserId = $userId`
+		WHERE eh.UserId = ?`
 	MakeEffectRollCommand = `
 		SELECT Id, Name, Description
 		FROM Effects
@@ -39,23 +39,23 @@ const (
 		  		LEFT JOIN (
 					SELECT EffectId
 					FROM EffectHistory
-					WHERE UserId = $userId
+					WHERE UserId = ?
 				) eh ON e.Id = eh.EffectId
 			WHERE eh.EffectId IS NULL
 			ORDER BY RANDOM()
 			LIMIT 5)`
 	AddEffectHistoryCommand = `
 		INSERT INTO EffectHistory (EffectId, UserId)
-		VALUES ($effectId, $userId)`
+		VALUES (?, ?)`
 	CreateAvailableRollCommand = `
 		INSERT INTO AvailableRolls (UserId)
-		VALUES ($userId)`
+		VALUES (?)`
 	DeleteAvailableRollCommand = `
 		DELETE FROM AvailableRolls
 		WHERE Id IN (
 		  SELECT Id
 		  FROM AvailableRolls
-		  WHERE UserId = $userId
+		  WHERE UserId = ?
 		  ORDER BY CreateDate
 		  LIMIT 1)`
 )

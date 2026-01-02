@@ -16,14 +16,14 @@ const (
 				SELECT 1
 				FROM GameHistory gh
 					INNER JOIN Games g ON gh.GameId = g.Id
-				WHERE gh.UserId = $userId
-					AND gh.State NOT IN ($finishedGameState, $cancelledGameState))
+				WHERE gh.UserId = ?
+					AND gh.State NOT IN (?, ?))
          	THEN true
          	ELSE false
        	END AS 'DoesExist'`
 	ActCurrentTimerCommand = `
 		INSERT INTO TimerActions (TimerId, Action, RemainingTimeInS)
-		VALUES ($timerId, $timerAction, $remainingTimeInS)`
+		VALUES (?, ?, ?)`
 	GetCurrentTimerCommand = `
 		SELECT
 			t.Id,
@@ -31,15 +31,15 @@ const (
 			t.DurationInS,
 			ta.CreateDate,
 			CASE ta.Action
-				WHEN $startTimerAction THEN ta.RemainingTimeInS - (strftime('%s', 'now') - strftime('%s', ta.CreateDate))
-				WHEN $pauseTimerAction THEN ta.RemainingTimeInS
-				WHEN $finishTimerAction THEN 0
+				WHEN ? THEN ta.RemainingTimeInS - (strftime('%s', 'now') - strftime('%s', ta.CreateDate))
+				WHEN ? THEN ta.RemainingTimeInS
+				WHEN ? THEN 0
 				ELSE t.DurationInS
 			END AS RemainingTimeInS
 		FROM Timers t
 			LEFT JOIN TimerActions ta ON t.Id = ta.TimerId
-		WHERE UserId = $userId
-			AND t.State != $finishedTimerState
+		WHERE UserId = ?
+			AND t.State != ?
 		ORDER BY ta.CreateDate DESC
 		LIMIT 1`
 )

@@ -13,7 +13,7 @@ const DoesGameExistQuery = `
 		CASE WHEN EXISTS (
 			SELECT 1
 			FROM Games
-			WHERE Name = $gameName
+			WHERE Name = ?
 		)
 		THEN true
 		ELSE false
@@ -29,7 +29,7 @@ func DoesGameExistCommand(gameName string) (doesExist bool, err error) {
 
 const CreateGameQuery = `
 	INSERT INTO Games (Name)
-	VALUES ($gameName)
+	VALUES (?)
 `
 
 func CreateGameCommand(name string) error {
@@ -44,7 +44,7 @@ func CreateGameCommand(name string) error {
 const GetGameQuery = `
 	SELECT Id, Name
 	FROM Games
-	WHERE Name = $gameName
+	WHERE Name = ?
 `
 
 func GetGameCommand(name string) (game common.Game, err error) {
@@ -61,8 +61,8 @@ const DoesUnplayedGameExistQuery = `
 			SELECT 1
 			FROM UnplayedGames ug
 				INNER JOIN Games g ON ug.GameId = g.Id
-			WHERE ug.UserId = $userId
-				AND g.Name = $gameName
+			WHERE ug.UserId = ?
+				AND g.Name = ?
 		)
 		THEN true
 		ELSE false
@@ -78,7 +78,7 @@ func DoesUnplayedGameExistCommand(userId int, gameName string) (doesExist bool, 
 
 const CreateUnplayedGameQuery = `
 	INSERT INTO UnplayedGames (UserId, GameId)
-	VALUES ($userId, $gameId)
+	VALUES (?, ?)
 `
 
 func CreateUnplayedGameCommand(userId int, gameId int) error {
@@ -93,8 +93,8 @@ func CreateUnplayedGameCommand(userId int, gameId int) error {
 
 const DeleteUnplayedGameQuery = `
 	DELETE FROM UnplayedGames
-	WHERE UserId = $userId
-		AND GameId = $gameId
+	WHERE UserId = ?
+		AND GameId = ?
 `
 
 func DeleteUnplayedGameCommand(userId int, gameId int) error {
@@ -107,7 +107,7 @@ const GetUnplayedGamesQuery = `
 	SELECT ug.Id, g.Id, g.Name
 	FROM UnplayedGames ug
 		INNER JOIN Games g ON ug.GameId = g.Id
-	WHERE ug.UserId = $userId
+	WHERE ug.UserId = ?
 `
 
 func GetUnplayedGamesCommand(userId int) (games common.UnplayedGames, err error) {
@@ -133,7 +133,7 @@ func GetUnplayedGamesCommand(userId int) (games common.UnplayedGames, err error)
 
 const CreateCurrentGameQuery = `
 	INSERT INTO GameHistory (UserId, GameId)
-	VALUES ($userId, $gameId)
+	VALUES (?, ?)
 `
 
 func CreateCurrentGameCommand(userId int, gameId int) error {
@@ -150,13 +150,17 @@ const GetCurrentGameQuery = `
 		gh.FinishDate
 	FROM GameHistory gh
 		INNER JOIN Games g ON gh.GameId = g.Id
-		LEFT JOIN Timers t ON t.UserId = gh.UserId AND t.GameId = gh.GameId
-	WHERE gh.UserId = $userId
-		AND gh.State NOT IN ($finishedGameState, $cancelledGameState)
+	WHERE gh.UserId = ?
+		AND gh.State NOT IN (?, ?)
 `
 
 func GetCurrentGameCommand(userId int) (game common.Game, err error) {
 	games, err := GetHistoryGames(userId, GetCurrentGameQuery)
+
+	if len(games) == 0 {
+		err = common.NewCurrentGameNotFoundError()
+		return
+	}
 
 	game = games[0]
 
@@ -193,6 +197,8 @@ func GetHistoryGames(userId int, query string) (games common.Games, err error) {
 		}
 
 		game.FinishDate = finishDate
+
+		games = append(games, game)
 	}
 
 	return
@@ -217,8 +223,8 @@ FROM Timers t
         ORDER BY ta2.CreateDate DESC
         LIMIT 1
     )
-WHERE t.UserId = $userId
-  	AND t.GameId = $gameId
+WHERE t.UserId = ?
+  	AND t.GameId = ?
 `
 
 func GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
@@ -243,10 +249,10 @@ func GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, e
 
 const CancelCurrentGameQuery = `
 	UPDATE GameHistory
-	SET State = $cancelledGameState,
+	SET State = ?,
 		FinishDate = datetime('now', 'subsec')
-	WHERE UserId = $userId
-		AND GameId = $gameId;
+	WHERE UserId = ?
+		AND GameId = ?;
 `
 
 func CancelCurrentGameCommand(userId int, gameId int) error {
@@ -257,10 +263,10 @@ func CancelCurrentGameCommand(userId int, gameId int) error {
 
 const FinishCurrentGameQuery = `
 	UPDATE GameHistory
-	SET State = $finishedGameState,
+	SET State = ?,
 		FinishDate = datetime('now', 'subsec')
-	WHERE UserId = $userId
-		AND GameId = $gameId;
+	WHERE UserId = ?
+		AND GameId = ?;
 `
 
 func FinishCurrentGameCommand(userId int, gameId int) error {
@@ -278,8 +284,8 @@ const GetGameHistoryQuery = `
 	FROM GameHistory gh
 		INNER JOIN Games g ON gh.GameId = g.Id
 		LEFT JOIN Timers t ON t.UserId = gh.UserId AND t.GameId = gh.GameId
-	WHERE gh.UserId = $userId
-		AND gh.State IN ($finishedGameState, $cancelledGameState)
+	WHERE gh.UserId = ?
+		AND gh.State IN (?, ?)
 	ORDER BY gh.FinishDate NULLS FIRST
 `
 
