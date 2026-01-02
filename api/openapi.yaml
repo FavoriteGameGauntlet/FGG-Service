@@ -705,10 +705,6 @@ components:
       properties:
         name:
           $ref: '#/components/schemas/Name'
-        link:
-          type: string
-          format: hostname
-          example: 'https://store.steampowered.com/app/20'
       required: [ name ]
 
     UnplayedGames:

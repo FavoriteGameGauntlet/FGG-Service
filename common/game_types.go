@@ -6,7 +6,6 @@ import (
 
 type Game struct {
 	Id         int
-	Link       *string
 	Name       string
 	State      GameState
 	TimeSpent  time.Duration
@@ -26,7 +25,6 @@ const (
 type UnplayedGame struct {
 	Id     int
 	GameId int
-	Link   *string
 	Name   string
 }
 

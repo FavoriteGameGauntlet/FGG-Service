@@ -205,6 +205,25 @@ func NewCurrentTimerIncorrectStateError(timerState TimerStateType) *CurrentTimer
 	}
 }
 
+type UnplayedGameAlreadyExistsError struct {
+	ConflictStateError
+}
+
+func NewUnplayedGameAlreadyExistsError(gameName string) *UnplayedGameAlreadyExistsError {
+	message := fmt.Sprintf(
+		"The unplayed game \"%s\" has already been added.",
+		gameName)
+
+	return &UnplayedGameAlreadyExistsError{
+		ConflictStateError{
+			BaseError{
+				Code:    "UNPLAYED_GAME_ALREADY_EXISTS",
+				Message: message,
+			},
+		},
+	}
+}
+
 type CurrentGameAlreadyExistsError struct {
 	ConflictStateError
 }

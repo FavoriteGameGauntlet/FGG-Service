@@ -5,40 +5,75 @@ import (
 	"FGG-Service/db_access"
 	"database/sql"
 	"errors"
+	"time"
 )
 
+const DoesGameExistQuery = `
+	SELECT
+		CASE WHEN EXISTS (
+			SELECT 1
+			FROM Games
+			WHERE Name = $gameName
+		)
+		THEN true
+		ELSE false
+	END AS DoesExist`
+
+func DoesGameExistCommand(gameName string) (doesExist bool, err error) {
+	row := db_access.QueryRow(DoesGameExistQuery, gameName)
+
+	err = row.Scan(&doesExist)
+
+	return
+}
+
 const CreateGameQuery = `
-	INSERT INTO Games (Name, Link)
-	VALUES ($gameName, $gameLink)
+	INSERT INTO Games (Name)
+	VALUES ($gameName)
 `
 
-func CreateGameCommand(name string, link *string) error {
+func CreateGameCommand(name string) error {
 	_, err := db_access.Exec(
 		CreateGameQuery,
 		name,
-		link,
 	)
 
 	return err
 }
 
 const GetGameQuery = `
-	SELECT Id, Name, Link
+	SELECT Id, Name
 	FROM Games
 	WHERE Name = $gameName
 `
 
-func GetGameCommand(name string) (common.Game, error) {
+func GetGameCommand(name string) (game common.Game, err error) {
 	row := db_access.QueryRow(GetGameQuery, name)
 
-	game := common.Game{}
-	err := row.Scan(&game.Id, &game.Name, &game.Link)
+	err = row.Scan(&game.Id, &game.Name)
 
-	if err != nil {
-		return game, err
-	}
+	return
+}
 
-	return game, nil
+const DoesUnplayedGameExistQuery = `
+	SELECT 
+	    CASE WHEN EXISTS (
+			SELECT 1
+			FROM UnplayedGames ug
+				INNER JOIN Games g ON ug.GameId = g.Id
+			WHERE ug.UserId = $userId
+				AND g.Name = $gameName
+		)
+		THEN true
+		ELSE false
+	END AS DoesExist`
+
+func DoesUnplayedGameExistCommand(userId int, gameName string) (doesExist bool, err error) {
+	row := db_access.QueryRow(DoesUnplayedGameExistQuery, userId, gameName)
+
+	err = row.Scan(&doesExist)
+
+	return
 }
 
 const CreateUnplayedGameQuery = `
@@ -69,33 +104,31 @@ func DeleteUnplayedGameCommand(userId int, gameId int) error {
 }
 
 const GetUnplayedGamesQuery = `
-	SELECT ug.Id, g.Id, g.Name, g.Link
+	SELECT ug.Id, g.Id, g.Name
 	FROM UnplayedGames ug
 		INNER JOIN Games g ON ug.GameId = g.Id
 	WHERE ug.UserId = $userId
 `
 
-func GetUnplayedGamesCommand(userId int) (common.UnplayedGames, error) {
+func GetUnplayedGamesCommand(userId int) (games common.UnplayedGames, err error) {
 	rows, err := db_access.Query(GetUnplayedGamesQuery, userId)
 
 	if err != nil {
-		return common.UnplayedGames{}, err
+		return
 	}
-
-	games := common.UnplayedGames{}
 
 	for rows.Next() {
 		game := common.UnplayedGame{}
-		err = rows.Scan(&game.Id, &game.GameId, &game.Name, &game.Link)
+		err = rows.Scan(&game.Id, &game.GameId, &game.Name)
 
 		if err != nil {
-			return common.UnplayedGames{}, err
+			return
 		}
 
 		games = append(games, game)
 	}
 
-	return games, nil
+	return
 }
 
 const CreateCurrentGameQuery = `
@@ -114,7 +147,6 @@ const GetCurrentGameQuery = `
 		g.Id,
 		g.Name,
 		gh.State,
-		g.Link,
 		gh.FinishDate
 	FROM GameHistory gh
 		INNER JOIN Games g ON gh.GameId = g.Id
@@ -123,34 +155,52 @@ const GetCurrentGameQuery = `
 		AND gh.State NOT IN ($finishedGameState, $cancelledGameState)
 `
 
-func GetCurrentGameCommand(userId int) (common.Game, error) {
-	row := db_access.QueryRow(GetCurrentGameQuery, userId, common.GameStateFinished, common.GameStateCancelled)
+func GetCurrentGameCommand(userId int) (game common.Game, err error) {
+	games, err := GetHistoryGames(userId, GetCurrentGameQuery)
 
-	game := common.Game{}
-	var finishDateString *string
-	err := row.Scan(&game.Id, &game.Name, &game.State, &game.Link, &finishDateString)
+	game = games[0]
 
-	if errors.Is(err, sql.ErrNoRows) {
-		return common.Game{}, common.NewCurrentGameNotFoundError()
-	}
+	return
+}
 
-	if err != nil {
-		return common.Game{}, err
-	}
-
-	finishDate, err := common.ConvertToNullableDate(finishDateString)
+func GetHistoryGames(userId int, query string) (games common.Games, err error) {
+	rows, err := db_access.Query(query, userId, common.GameStateFinished, common.GameStateCancelled)
 
 	if err != nil {
-		return common.Game{}, err
+		return
 	}
 
-	game.FinishDate = finishDate
+	for rows.Next() {
+		game := common.Game{}
+		var finishDateString *string
+		err = rows.Scan(&game.Id, &game.Name, &game.State, &finishDateString)
 
-	return game, nil
+		if errors.Is(err, sql.ErrNoRows) {
+			// TODO: Change the error to the most suitable
+			err = common.NewCurrentGameNotFoundError()
+			return
+		}
+
+		if err != nil {
+			return
+		}
+
+		var finishDate *time.Time
+		finishDate, err = common.ConvertToNullableDate(finishDateString)
+
+		if err != nil {
+			return
+		}
+
+		game.FinishDate = finishDate
+	}
+
+	return
 }
 
 const GetGameSecondsSpentQuery = `
-SELECT SUM(
+SELECT 
+    SUM(
         t.DurationInS -
         CASE ta.Action
             WHEN 'start' THEN ta.RemainingTimeInS - (strftime('%s','now') - strftime('%s', ta.CreateDate))
@@ -171,21 +221,24 @@ WHERE t.UserId = $userId
   	AND t.GameId = $gameId
 `
 
-func GetGameSecondsSpentCommand(userId int, gameId int) (int, error) {
+func GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
 	row := db_access.QueryRow(GetGameSecondsSpentQuery, userId, gameId)
 
 	var secondsSpent int
-	err := row.Scan(&secondsSpent)
+	err = row.Scan(&secondsSpent)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, nil
+		err = nil
+		return
 	}
 
 	if err != nil {
-		return 0, err
+		return
 	}
 
-	return secondsSpent, nil
+	timeSpent = time.Duration(secondsSpent) * time.Second
+
+	return
 }
 
 const CancelCurrentGameQuery = `
@@ -216,16 +269,37 @@ func FinishCurrentGameCommand(userId int, gameId int) error {
 	return err
 }
 
-const GetGameHistoryCommand = `
+const GetGameHistoryQuery = `
 	SELECT 
 		g.Id,
 		g.Name,
 		gh.State,
-		g.Link,
 		gh.FinishDate
 	FROM GameHistory gh
 		INNER JOIN Games g ON gh.GameId = g.Id
 		LEFT JOIN Timers t ON t.UserId = gh.UserId AND t.GameId = gh.GameId
 	WHERE gh.UserId = $userId
+		AND gh.State IN ($finishedGameState, $cancelledGameState)
 	ORDER BY gh.FinishDate NULLS FIRST
 `
+
+func GetEndedGamesCommand(userId int) (games common.Games, err error) {
+	games, err = GetHistoryGames(userId, GetGameHistoryQuery)
+
+	if err != nil {
+		return
+	}
+
+	for _, game := range games {
+		var timeSpent time.Duration
+		timeSpent, err = GetGameTimeSpentCommand(userId, game.Id)
+
+		if err != nil {
+			return
+		}
+
+		game.TimeSpent = timeSpent
+	}
+
+	return
+}

@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.17 on Thu Nov 27 00:54:51 2025
+-- File generated with SQLiteStudio v3.4.18 on Fri Jan 2 14:47:00 2026
 --
 -- Text encoding used: System
 --
@@ -87,7 +87,6 @@ CREATE TABLE IF NOT EXISTS Games (
                        NOT NULL,
     Name       TEXT    NOT NULL
                        UNIQUE,
-    Link       TEXT    UNIQUE,
     CreateDate TEXT    DEFAULT (datetime('now', 'subsec') ) 
                        NOT NULL
 );
@@ -167,6 +166,20 @@ CREATE TABLE IF NOT EXISTS UserSessions (
 );
 
 
+-- Index: CreateDateIndex
+CREATE INDEX IF NOT EXISTS CreateDateIndex ON TimerActions (
+    TimerId,
+    CreateDate DESC
+);
+
+
+-- Index: UserGameIndex
+CREATE INDEX IF NOT EXISTS UserGameIndex ON Timers (
+    UserId,
+    GameId
+);
+
+
 -- Trigger: UpdateTimerState
 CREATE TRIGGER IF NOT EXISTS UpdateTimerState
                        AFTER INSERT
@@ -174,7 +187,11 @@ CREATE TRIGGER IF NOT EXISTS UpdateTimerState
                     FOR EACH ROW
 BEGIN
     UPDATE Timers
-       SET State = CASE new.Action WHEN 'start' THEN 'running' WHEN 'pause' THEN 'paused' WHEN 'stop' THEN 'finished' END
+       SET State = CASE new.Action
+                        WHEN 'start' THEN 'running'
+                        WHEN 'pause' THEN 'paused'
+                        WHEN 'stop' THEN 'finished'
+           END
      WHERE Id = new.TimerId;
 END;
 

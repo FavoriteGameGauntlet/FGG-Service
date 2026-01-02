@@ -30,7 +30,6 @@ func (Server) GetCurrentGame(ctx echo.Context) error {
 
 func ConvertGameToDto(game common.Game) api.Game {
 	return api.Game{
-		Link:       game.Link,
 		Name:       game.Name,
 		State:      api.GameState(game.State),
 		TimeSpent:  game.TimeSpent.String(),
@@ -86,7 +85,7 @@ func (Server) GetGameHistory(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	gamesDto := ConvertGamesToDto(*games)
+	gamesDto := ConvertGamesToDto(games)
 
 	return ctx.JSON(http.StatusOK, gamesDto)
 }
@@ -144,7 +143,6 @@ func ConvertUnplayedGamesToDto(games common.UnplayedGames) api.UnplayedGames {
 
 	for i, game := range games {
 		gamesDto[i] = api.UnplayedGame{
-			Link: game.Link,
 			Name: game.Name,
 		}
 	}
@@ -183,7 +181,6 @@ func ConvertUnplayedGamesFromDto(games api.UnplayedGames) common.UnplayedGames {
 
 	for i, g := range games {
 		gamesDto[i] = common.UnplayedGame{
-			Link: g.Link,
 			Name: g.Name,
 		}
 	}
