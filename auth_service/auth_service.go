@@ -48,7 +48,7 @@ const (
 		SELECT Id
 		FROM Users
 		WHERE Name = ?
-			AND PASSWORD = ?`
+			AND Password = ?`
 	DeleteSessionCommand = `
 		DELETE FROM main.UserSessions
 		WHERE Id = ?`
