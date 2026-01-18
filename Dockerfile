@@ -1,10 +1,14 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:alpine AS builder
 
 WORKDIR /app
 
+RUN apk add build-base sqlite
+
 COPY . .
-#RUN apk add build-base sqlite
+
 RUN CGO_ENABLED=1 go build
 #RUN mkdir -p data && sqlite3 ./data/FGG.db < ./db_access/FGG.sql
 
-ENTRYPOINT ["./FGG-Service"]
+COPY entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["./FGG-Service"]
