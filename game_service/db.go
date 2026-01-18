@@ -122,12 +122,14 @@ func GetUnplayedGamesCommand(userId int) (games common.UnplayedGames, err error)
 		err = rows.Scan(&game.Id, &game.GameId, &game.Name)
 
 		if err != nil {
+			_ = rows.Close()
 			return
 		}
 
 		games = append(games, game)
 	}
 
+	_ = rows.Close()
 	return
 }
 
@@ -180,12 +182,14 @@ func GetHistoryGames(userId int, query string) (games common.Games, err error) {
 		err = rows.Scan(&game.Id, &game.Name, &game.State, &finishDateString)
 
 		if errors.Is(err, sql.ErrNoRows) {
+			_ = rows.Close()
 			// TODO: Change the error to the most suitable
 			err = common.NewCurrentGameNotFoundError()
 			return
 		}
 
 		if err != nil {
+			_ = rows.Close()
 			return
 		}
 
@@ -193,6 +197,7 @@ func GetHistoryGames(userId int, query string) (games common.Games, err error) {
 		finishDate, err = common.ConvertToNullableDate(finishDateString)
 
 		if err != nil {
+			_ = rows.Close()
 			return
 		}
 
@@ -200,6 +205,8 @@ func GetHistoryGames(userId int, query string) (games common.Games, err error) {
 
 		games = append(games, game)
 	}
+
+	_ = rows.Close()
 
 	return
 }

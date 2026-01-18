@@ -132,19 +132,6 @@ func GetCurrentGame(userId int) (game common.Game, err error) {
 	return
 }
 
-func CheckIfCurrentGameExists(userId int) (bool, error) {
-	row := db_access.QueryRow(CheckIfCurrentGameExistsCommand, userId, common.GameStateFinished, common.GameStateCancelled)
-
-	var doesExist bool
-	err := row.Scan(&doesExist)
-
-	if err != nil {
-		return doesExist, err
-	}
-
-	return doesExist, nil
-}
-
 func CancelCurrentGame(userId int) error {
 	game, err := GetCurrentGame(userId)
 
@@ -223,7 +210,7 @@ func StopCurrentTimer(userId int) (*common.TimerAction, error) {
 	}
 
 	return &common.TimerAction{
-		Action:           timerAction,
+		Type:             timerAction,
 		RemainingTimeInS: remainingTimerInS,
 	}, nil
 }
@@ -323,4 +310,17 @@ func MakeGameRoll(userId int) (common.Game, error) {
 	game.State = common.GameStateStarted
 
 	return game, nil
+}
+
+func CheckIfCurrentGameExists(userId int) (bool, error) {
+	row := db_access.QueryRow(CheckIfCurrentGameExistsCommand, userId, common.GameStateFinished, common.GameStateCancelled)
+
+	var doesExist bool
+	err := row.Scan(&doesExist)
+
+	if err != nil {
+		return doesExist, err
+	}
+
+	return doesExist, nil
 }
