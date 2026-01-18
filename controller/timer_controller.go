@@ -25,11 +25,11 @@ func (Server) GetCurrentTimer(ctx echo.Context) error {
 
 	timerDto := ConvertTimerToDto(timer)
 
-	return ctx.JSON(http.StatusOK, *timerDto)
+	return ctx.JSON(http.StatusOK, timerDto)
 }
 
-func ConvertTimerToDto(timer *common.Timer) *api.Timer {
-	return &api.Timer{
+func ConvertTimerToDto(timer common.Timer) api.Timer {
+	return api.Timer{
 		DurationInS:      timer.DurationInS,
 		RemainingTimeInS: timer.RemainingTimeInS,
 		State:            api.TimerState(timer.State),
@@ -53,12 +53,12 @@ func (Server) PauseCurrentTimer(ctx echo.Context) error {
 
 	timerActionDto := ConvertTimerActionToDto(timerAction)
 
-	return ctx.JSON(http.StatusOK, *timerActionDto)
+	return ctx.JSON(http.StatusOK, timerActionDto)
 }
 
-func ConvertTimerActionToDto(timerAction *common.TimerAction) *api.TimerAction {
-	return &api.TimerAction{
-		Type:             api.TimerActionType(timerAction.Action),
+func ConvertTimerActionToDto(timerAction common.TimerAction) api.TimerAction {
+	return api.TimerAction{
+		Type:             api.TimerActionType(timerAction.Type),
 		RemainingTimeInS: timerAction.RemainingTimeInS,
 	}
 }
@@ -79,5 +79,5 @@ func (Server) StartCurrentTimer(ctx echo.Context) error {
 
 	timerActionDto := ConvertTimerActionToDto(timerAction)
 
-	return ctx.JSON(http.StatusOK, *timerActionDto)
+	return ctx.JSON(http.StatusOK, timerActionDto)
 }

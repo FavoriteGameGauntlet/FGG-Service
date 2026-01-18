@@ -22,15 +22,15 @@ const (
 )
 
 type TimerAction struct {
-	Action           TimerActionAction
+	Type             TimerActionType
 	Id               int
 	RemainingTimeInS int
 }
 
-type TimerActionAction string
+type TimerActionType string
 
 const (
-	TimerActionPause TimerActionAction = "pause"
-	TimerActionStart TimerActionAction = "start"
-	TimerActionStop  TimerActionAction = "stop"
+	TimerActionPause TimerActionType = "pause"
+	TimerActionStart TimerActionType = "start"
+	TimerActionStop  TimerActionType = "stop"
 )
