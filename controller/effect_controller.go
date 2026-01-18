@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GetAvailableEffects (POST /effects/available)
+// GetAvailableEffects (GET /effects/available)
 func (Server) GetAvailableEffects(ctx echo.Context) error {
 	userId, err := GetUserId(ctx)
 
@@ -25,37 +25,37 @@ func (Server) GetAvailableEffects(ctx echo.Context) error {
 
 	effectsDto := ConvertEffectsToDto(effects)
 
-	return ctx.JSON(http.StatusOK, *effectsDto)
+	return ctx.JSON(http.StatusOK, effectsDto)
 }
 
-func ConvertEffectsToDto(effects *common.Effects) *api.Effects {
-	effectsDto := make(api.Effects, len(*effects))
+func ConvertEffectsToDto(effects common.Effects) api.Effects {
+	effectsDto := make(api.Effects, len(effects))
 
-	for i, effect := range *effects {
+	for i, effect := range effects {
 		effectsDto[i] = api.Effect{
 			Name:        effect.Name,
 			Description: effect.Description,
 		}
 	}
 
-	return &effectsDto
+	return effectsDto
 }
 
-// CheckAvailableEffectRoll CheckEffectRoll (GET /effects/has-roll)
-func (Server) CheckAvailableEffectRoll(ctx echo.Context) error {
+// GetAvailableEffectsCount (GET /effects/available/count)
+func (Server) GetAvailableEffectsCount(ctx echo.Context) error {
 	userId, err := GetUserId(ctx)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	doesExist, err := effect_service.CheckIfAvailableRollExists(userId)
+	count, err := effect_service.GetAvailableRollsCount(userId)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	return ctx.JSON(http.StatusOK, doesExist)
+	return ctx.JSON(http.StatusOK, count)
 }
 
 // GetEffectHistory (GET /effects/history)
@@ -74,13 +74,13 @@ func (Server) GetEffectHistory(ctx echo.Context) error {
 
 	effectsDto := ConvertRolledEffectsToDto(effects)
 
-	return ctx.JSON(http.StatusOK, *effectsDto)
+	return ctx.JSON(http.StatusOK, effectsDto)
 }
 
-func ConvertRolledEffectsToDto(effects *common.RolledEffects) *api.RolledEffects {
-	effectsDto := make(api.RolledEffects, len(*effects))
+func ConvertRolledEffectsToDto(effects common.RolledEffects) api.RolledEffects {
+	effectsDto := make(api.RolledEffects, len(effects))
 
-	for i, effect := range *effects {
+	for i, effect := range effects {
 		effectsDto[i] = api.RolledEffect{
 			Name:        effect.Name,
 			Description: effect.Description,
@@ -88,7 +88,7 @@ func ConvertRolledEffectsToDto(effects *common.RolledEffects) *api.RolledEffects
 		}
 	}
 
-	return &effectsDto
+	return effectsDto
 }
 
 // MakeEffectRoll (POST /effects/roll)
@@ -107,5 +107,5 @@ func (Server) MakeEffectRoll(ctx echo.Context) error {
 
 	effectsDto := ConvertEffectsToDto(effects)
 
-	return ctx.JSON(http.StatusOK, *effectsDto)
+	return ctx.JSON(http.StatusOK, effectsDto)
 }

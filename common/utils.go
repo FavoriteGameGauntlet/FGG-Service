@@ -5,19 +5,29 @@ import (
 	"time"
 )
 
-func ConvertToNullableDate(dateString *string) (*time.Time, error) {
-	var date *time.Time
-
+func ConvertToNullableDate(dateString *string) (date *time.Time, err error) {
 	if dateString != nil {
 		var notNilFinishDate time.Time
-		notNilFinishDate, err := time.Parse(db_access.ISO8601, *dateString)
+		notNilFinishDate, err = ConvertToDate(*dateString)
 
 		if err != nil {
-			return nil, err
+			return
 		}
 
 		date = &notNilFinishDate
 	}
 
-	return date, nil
+	return
+}
+
+func ConvertToDate(dateString string) (date time.Time, err error) {
+	notNilFinishDate, err := time.Parse(db_access.ISO8601, dateString)
+
+	if err != nil {
+		return
+	}
+
+	date = notNilFinishDate
+
+	return
 }
