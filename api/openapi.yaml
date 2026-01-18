@@ -1,7 +1,7 @@
-openapi: 3.1.2
+openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.4.1
+  version: 0.5.0
 paths:
 
   /auth/signup:
@@ -487,44 +487,6 @@ paths:
 
 
 
-  /effects/has-roll:
-    get:
-      operationId: checkAvailableEffectRoll
-      tags:
-        - Effects
-      summary: Check if there are any effect rolls available
-      description: |
-        You can find out if you have any available effect rolls.<br>
-        If the value is 'true', you have one.<br>
-        If the value is 'false', you don't.
-      responses:
-        '200':
-          description: Boolean indicating whether the user has available effect rolls.
-          content:
-            application/json:
-              schema:
-                type: boolean
-        '401':
-          description: Authentication required.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Effect roll information not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: Internal server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-
-
   /effects/history:
     get:
       operationId: getEffectHistory
@@ -606,7 +568,7 @@ paths:
 
 
   /effects/available:
-    post:
+    get:
       operationId: getAvailableEffects
       tags:
         - Effects
@@ -620,6 +582,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Effects'
+        '401':
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Available effects data not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+
+  /effects/available/count:
+    get:
+      operationId: getAvailableEffectsCount
+      tags:
+        - Effects
+      summary: Get the number of effects available for rolling
+      description: |
+        Returns the total number of effects that are currently available for rolling.<br>
+        This value represents how many effects can still be obtained via the roll command.
+      responses:
+        '200':
+          description: Number of available effects successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int
         '401':
           description: Authentication required.
           content:
