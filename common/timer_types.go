@@ -5,11 +5,11 @@ import (
 )
 
 type Timer struct {
-	DurationInS      int
-	Id               int
-	RemainingTimeInS int
-	State            TimerStateType
-	TimerActionDate  *time.Time
+	Duration        time.Duration
+	Id              int
+	RemainingTime   time.Duration
+	State           TimerStateType
+	TimerActionDate *time.Time
 }
 
 type TimerStateType string
@@ -22,9 +22,9 @@ const (
 )
 
 type TimerAction struct {
-	Type             TimerActionType
-	Id               int
-	RemainingTimeInS int
+	Type          TimerActionType
+	Id            int
+	RemainingTime time.Duration
 }
 
 type TimerActionType string
