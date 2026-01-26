@@ -73,20 +73,20 @@ func ActCurrentTimer(
 		}
 	}
 
-	remainingTimeInS := timer.RemainingTimeInS
-	if remainingTimeInS < 0 {
-		remainingTimeInS = 0
+	remainingTime := timer.RemainingTime
+	if remainingTime < 0 {
+		remainingTime = 0
 	}
 
-	err = ActTimerCommand(timer.Id, actionType, remainingTimeInS)
+	err = ActTimerCommand(timer.Id, actionType, remainingTime)
 
 	if err != nil {
 		return
 	}
 
 	timerAction = common.TimerAction{
-		Type:             actionType,
-		RemainingTimeInS: remainingTimeInS,
+		Type:          actionType,
+		RemainingTime: remainingTime,
 	}
 
 	return

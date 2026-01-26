@@ -30,10 +30,10 @@ func (Server) GetCurrentTimer(ctx echo.Context) error {
 
 func ConvertTimerToDto(timer common.Timer) api.Timer {
 	return api.Timer{
-		DurationInS:      timer.DurationInS,
-		RemainingTimeInS: timer.RemainingTimeInS,
-		State:            api.TimerState(timer.State),
-		TimerActionDate:  timer.TimerActionDate,
+		Duration:        timer.Duration.String(),
+		RemainingTime:   timer.RemainingTime.String(),
+		State:           api.TimerState(timer.State),
+		TimerActionDate: timer.TimerActionDate,
 	}
 }
 
@@ -58,8 +58,8 @@ func (Server) PauseCurrentTimer(ctx echo.Context) error {
 
 func ConvertTimerActionToDto(timerAction common.TimerAction) api.TimerAction {
 	return api.TimerAction{
-		Type:             api.TimerActionType(timerAction.Type),
-		RemainingTimeInS: timerAction.RemainingTimeInS,
+		Type:          api.TimerActionType(timerAction.Type),
+		RemainingTime: timerAction.RemainingTime.String(),
 	}
 }
 

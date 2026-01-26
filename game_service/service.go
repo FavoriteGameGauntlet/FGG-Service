@@ -196,13 +196,13 @@ func StopCurrentTimer(userId int) (*common.TimerAction, error) {
 	}
 
 	timerAction := common.TimerActionStop
-	remainingTimerInS := 0
+	remainingTime := time.Duration(0)
 
 	_, err = db_access.Exec(
 		ActCurrentTimerCommand,
 		timer.Id,
 		timerAction,
-		remainingTimerInS,
+		remainingTime.Seconds(),
 	)
 
 	if err != nil {
@@ -210,8 +210,8 @@ func StopCurrentTimer(userId int) (*common.TimerAction, error) {
 	}
 
 	return &common.TimerAction{
-		Type:             timerAction,
-		RemainingTimeInS: remainingTimerInS,
+		Type:          timerAction,
+		RemainingTime: remainingTime,
 	}, nil
 }
 
@@ -230,9 +230,9 @@ func GetCurrentTimer(userId int) (*common.Timer, error) {
 	err := row.Scan(
 		&timer.Id,
 		&timer.State,
-		&timer.DurationInS,
+		&timer.Duration,
 		&timerActionDateString,
-		&timer.RemainingTimeInS,
+		&timer.RemainingTime,
 	)
 
 	if errors.Is(err, sql.ErrNoRows) {

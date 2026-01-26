@@ -39,12 +39,13 @@ func GetCurrentTimerCommand(userId int) (timer common.Timer, err error) {
 	)
 
 	var timerActionDateString *string
+	var remainingTimeInS int
 	err = row.Scan(
 		&timer.Id,
 		&timer.State,
-		&timer.DurationInS,
+		&timer.Duration,
 		&timerActionDateString,
-		&timer.RemainingTimeInS,
+		&remainingTimeInS,
 	)
 
 	if errors.Is(err, sql.ErrNoRows) {
@@ -70,6 +71,7 @@ func GetCurrentTimerCommand(userId int) (timer common.Timer, err error) {
 	}
 
 	timer.TimerActionDate = timerActionDate
+	timer.RemainingTime = time.Duration(remainingTimeInS) * time.Second
 
 	return
 }
@@ -84,7 +86,7 @@ func CreateCurrentTimerCommand(userId int, gameId int) (timer common.Timer, err 
 		CreateCurrentTimerQuery,
 		userId,
 		gameId,
-		common.DefaultTimerDurationInS,
+		common.DefaultTimerDuration,
 	)
 
 	if err != nil {
@@ -92,9 +94,9 @@ func CreateCurrentTimerCommand(userId int, gameId int) (timer common.Timer, err 
 	}
 
 	timer = common.Timer{
-		DurationInS:      common.DefaultTimerDurationInS,
-		State:            common.TimerStateCreated,
-		RemainingTimeInS: common.DefaultTimerDurationInS,
+		Duration:      common.DefaultTimerDuration,
+		State:         common.TimerStateCreated,
+		RemainingTime: common.DefaultTimerDuration,
 	}
 
 	return
@@ -105,12 +107,12 @@ const ActTimerQuery = `
 	VALUES (?, ?, ?)
 `
 
-func ActTimerCommand(timerId int, actionType common.TimerActionType, remainingTimeInS int) error {
+func ActTimerCommand(timerId int, actionType common.TimerActionType, remainingTime time.Duration) error {
 	_, err := db_access.Exec(
 		ActTimerQuery,
 		timerId,
 		actionType,
-		remainingTimeInS,
+		remainingTime.Seconds(),
 	)
 
 	return err

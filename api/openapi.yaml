@@ -740,16 +740,16 @@ components:
         state:
           type: string
           enum: [ 'created', 'running', 'paused', 'finished' ]
-        remainingTimeInS:
-          type: integer
-          format: int
-        durationInS:
-          type: integer
-          format: int
+        remainingTime:
+          type: string
+          format: duration
+        duration:
+          type: string
+          format: duration
         timerActionDate:
           type: string
           format: date-time
-      required: [ state, remainingTimeInS, durationInS ]
+      required: [ state, remainingTime, duration ]
 
     TimerAction:
       type: object
@@ -757,10 +757,10 @@ components:
         type:
           type: string
           enum: [ 'start', 'pause', 'stop' ]
-        remainingTimeInS:
-          type: integer
-          format: int
-      required: [ type, remainingTimeInS ]
+        remainingTime:
+          type: string
+          format: duration
+      required: [ type, remainingTime ]
 
     Effect:
       type: object

@@ -88,10 +88,10 @@ type RolledEffects = []RolledEffect
 
 // Timer defines model for Timer.
 type Timer struct {
-	DurationInS      int        `json:"durationInS"`
-	RemainingTimeInS int        `json:"remainingTimeInS"`
-	State            TimerState `json:"state"`
-	TimerActionDate  *time.Time `json:"timerActionDate,omitempty"`
+	Duration        string     `json:"duration"`
+	RemainingTime   string     `json:"remainingTime"`
+	State           TimerState `json:"state"`
+	TimerActionDate *time.Time `json:"timerActionDate,omitempty"`
 }
 
 // TimerState defines model for Timer.State.
@@ -99,8 +99,8 @@ type TimerState string
 
 // TimerAction defines model for TimerAction.
 type TimerAction struct {
-	RemainingTimeInS int             `json:"remainingTimeInS"`
-	Type             TimerActionType `json:"type"`
+	RemainingTime string          `json:"remainingTime"`
+	Type          TimerActionType `json:"type"`
 }
 
 // TimerActionType defines model for TimerAction.Type.
