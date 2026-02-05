@@ -155,13 +155,13 @@ func CancelCurrentGame(userId int) error {
 }
 
 func FinishCurrentGame(userId int) error {
-	game, err := GetCurrentGameCommand(userId)
+	game, err := GetCurrentGame(userId)
 
 	if err != nil {
 		return err
 	}
 
-	if game.TimeSpent < 1*time.Second {
+	if game.TimeSpent == 0 {
 		return common.NewCompletedTimersNotFoundError()
 	}
 
@@ -266,7 +266,18 @@ func GetCurrentTimer(userId int) (*common.Timer, error) {
 }
 
 func GetGameHistory(userId int) (games common.Games, err error) {
-	games, err = GetEndedGamesCommand(userId)
+	games, err = GetGameHistoryCommand(userId)
+
+	for _, game := range games {
+		var timeSpent time.Duration
+		timeSpent, err = GetGameTimeSpentCommand(userId, game.Id)
+
+		if err != nil {
+			return
+		}
+
+		game.TimeSpent = timeSpent
+	}
 
 	return
 }
