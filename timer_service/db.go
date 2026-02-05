@@ -88,7 +88,7 @@ func CreateCurrentTimerCommand(userId int, gameId int) (timer common.Timer, err 
 		CreateCurrentTimerQuery,
 		userId,
 		gameId,
-		common.DefaultTimerDuration,
+		common.DefaultTimerDuration.Seconds(),
 	)
 
 	if err != nil {
