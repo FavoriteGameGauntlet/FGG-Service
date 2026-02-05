@@ -43,6 +43,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	defer func(e *echo.Echo) {
+		_ = e.Close()
+	}(e)
 }
 
 func StartTimerFinisherScheduler() {

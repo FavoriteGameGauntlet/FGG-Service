@@ -226,13 +226,15 @@ func GetCurrentTimer(userId int) (*common.Timer, error) {
 	)
 
 	timer := common.Timer{}
+	var durationInS int
 	var timerActionDateString *string
+	var remainingTimeInS int
 	err := row.Scan(
 		&timer.Id,
 		&timer.State,
-		&timer.Duration,
+		&durationInS,
 		&timerActionDateString,
-		&timer.RemainingTime,
+		&remainingTimeInS,
 	)
 
 	if errors.Is(err, sql.ErrNoRows) {
@@ -256,7 +258,9 @@ func GetCurrentTimer(userId int) (*common.Timer, error) {
 		timerActionDate = &notNilDate
 	}
 
+	timer.Duration = time.Duration(durationInS) * time.Second
 	timer.TimerActionDate = timerActionDate
+	timer.RemainingTime = time.Duration(remainingTimeInS) * time.Second
 
 	return &timer, nil
 }

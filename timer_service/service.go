@@ -20,7 +20,9 @@ func GetOrCreateCurrentTimer(userId int) (timer common.Timer, err error) {
 		return
 	}
 
-	timer, err = CreateCurrentTimerCommand(userId, game.Id)
+	if errors.As(err, &notFoundError) {
+		timer, err = CreateCurrentTimerCommand(userId, game.Id)
+	}
 
 	return
 }
