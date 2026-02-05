@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.5.0
+  version: 0.6.1
 paths:
 
   /auth/signup:
@@ -680,6 +680,14 @@ components:
       minLength: 6
       maxLength: 35
 
+    Duration:
+      type: string
+      format: duration
+      example: PT2h10m5s
+      description: the duration notation as defined by ISO 8601
+
+
+
     NewUser:
       type: object
       properties:
@@ -721,9 +729,7 @@ components:
               type: string
               enum: [ 'started', 'finished', 'cancelled' ]
             timeSpent:
-              type: string
-              format: duration
-              example: 2h10m5s
+              $ref: '#/components/schemas/Duration'
             finishDate:
               type: string
               format: date-time
@@ -741,11 +747,9 @@ components:
           type: string
           enum: [ 'created', 'running', 'paused', 'finished' ]
         remainingTime:
-          type: string
-          format: duration
+          $ref: '#/components/schemas/Duration'
         duration:
-          type: string
-          format: duration
+          $ref: '#/components/schemas/Duration'
         timerActionDate:
           type: string
           format: date-time
@@ -758,8 +762,7 @@ components:
           type: string
           enum: [ 'start', 'pause', 'stop' ]
         remainingTime:
-          type: string
-          format: duration
+          $ref: '#/components/schemas/Duration'
       required: [ type, remainingTime ]
 
     Effect:

@@ -38,12 +38,13 @@ func GetCurrentTimerCommand(userId int) (timer common.Timer, err error) {
 		common.TimerStateFinished,
 	)
 
+	var durationInS int
 	var timerActionDateString *string
 	var remainingTimeInS int
 	err = row.Scan(
 		&timer.Id,
 		&timer.State,
-		&timer.Duration,
+		&durationInS,
 		&timerActionDateString,
 		&remainingTimeInS,
 	)
@@ -70,6 +71,7 @@ func GetCurrentTimerCommand(userId int) (timer common.Timer, err error) {
 		timerActionDate = &notNilDate
 	}
 
+	timer.Duration = time.Duration(durationInS) * time.Second
 	timer.TimerActionDate = timerActionDate
 	timer.RemainingTime = time.Duration(remainingTimeInS) * time.Second
 
@@ -135,8 +137,8 @@ func GetCompletedTimerUsersCommand() (userIds []int, err error) {
 		GetCompletedTimerUsersQuery,
 		common.TimerStateCreated,
 		common.TimerStateFinished,
-		common.TimerStateRunning,
-		common.TimerStatePaused,
+		common.TimerActionStart,
+		common.TimerActionPause,
 	)
 
 	if err != nil {

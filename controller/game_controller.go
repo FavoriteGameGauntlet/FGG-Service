@@ -32,7 +32,7 @@ func ConvertGameToDto(game common.Game) api.Game {
 	return api.Game{
 		Name:       game.Name,
 		State:      api.GameState(game.State),
-		TimeSpent:  game.TimeSpent.String(),
+		TimeSpent:  common.DurationToISO8601(game.TimeSpent),
 		FinishDate: game.FinishDate,
 	}
 }
