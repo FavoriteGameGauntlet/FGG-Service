@@ -4,6 +4,7 @@ import (
 	"FGG-Service/api"
 	"FGG-Service/auth_service"
 	"FGG-Service/common"
+	"FGG-Service/validator"
 	"net/http"
 	"time"
 
@@ -23,7 +24,7 @@ func (Server) Login(ctx echo.Context) error {
 	doesExist, _ := CheckIfSessionExists(ctx)
 
 	if doesExist {
-		return SendJSONErrorResponse(ctx, common.NewSessionAlreadyExistsAuthError())
+		return SendJSONErrorResponse(ctx, common.NewSessionAlreadyExistsUnauthorizedError())
 	}
 
 	sessionId, err := auth_service.CreateSession(user.Name, user.Password)
@@ -78,6 +79,24 @@ func (Server) SignUp(ctx echo.Context) error {
 
 	if err != nil {
 		// TODO: Fix a status code for this error, should be 400
+		return SendJSONErrorResponse(ctx, err)
+	}
+
+	err = validator.ValidateUserName(user.Name)
+
+	if err != nil {
+		return SendJSONErrorResponse(ctx, err)
+	}
+
+	err = validator.ValidateEmail(user.Email)
+
+	if err != nil {
+		return SendJSONErrorResponse(ctx, err)
+	}
+
+	err = validator.ValidatePassword(user.Email)
+
+	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
 	}
 

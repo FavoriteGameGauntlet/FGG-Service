@@ -4,6 +4,7 @@ import (
 	"FGG-Service/api"
 	"FGG-Service/common"
 	"FGG-Service/game_service"
+	"FGG-Service/validator"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -167,6 +168,15 @@ func (Server) AddUnplayedGames(ctx echo.Context) error {
 	}
 
 	games := ConvertUnplayedGamesFromDto(gamesDto)
+
+	for _, game := range games {
+		err = validator.ValidateGameName(game.Name)
+
+		if err != nil {
+			return SendJSONErrorResponse(ctx, err)
+		}
+	}
+
 	err = game_service.AddUnplayedGames(userId, games)
 
 	if err != nil {

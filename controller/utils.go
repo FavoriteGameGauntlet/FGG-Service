@@ -12,13 +12,16 @@ import (
 
 func SendJSONErrorResponse(ctx echo.Context, err error) error {
 	var apiCode int
-	var authError *common.AuthError
+	var BadRequestError *common.BadRequestError
+	var UnauthorizedError *common.UnauthorizedError
 	var notFoundError *common.NotFoundError
 	var currentTimerIncorrectStateError *common.CurrentTimerIncorrectStateError
 	var databaseError *common.DatabaseError
 
 	switch {
-	case errors.As(err, &authError):
+	case errors.As(err, &BadRequestError):
+		apiCode = http.StatusBadRequest
+	case errors.As(err, &UnauthorizedError):
 		apiCode = http.StatusUnauthorized
 	case errors.As(err, &notFoundError):
 		apiCode = http.StatusNotFound
@@ -56,7 +59,7 @@ func GetUserId(ctx echo.Context) (int, error) {
 	cookie, err := ctx.Cookie("sessionId")
 
 	if err != nil {
-		return userId, common.NewCookieNotFoundAuthError()
+		return userId, common.NewCookieNotFoundUnauthorizedError()
 	}
 
 	sessionId := cookie.Value
@@ -74,7 +77,7 @@ func GetSessionCookie(ctx echo.Context) (*http.Cookie, error) {
 	cookie, err := ctx.Cookie("sessionId")
 
 	if err != nil {
-		return nil, common.NewCookieNotFoundAuthError()
+		return nil, common.NewCookieNotFoundUnauthorizedError()
 	}
 
 	return cookie, nil
@@ -84,14 +87,14 @@ func CheckIfSessionExists(ctx echo.Context) (bool, error) {
 	cookie, err := GetSessionCookie(ctx)
 
 	if err != nil {
-		return false, common.NewCookieNotFoundAuthError()
+		return false, common.NewCookieNotFoundUnauthorizedError()
 	}
 
 	sessionId := cookie.Value
 	doesExist, err := auth_service.CheckIfUserSessionExists(sessionId)
 
 	if err != nil {
-		return false, common.NewCookieNotFoundAuthError()
+		return false, common.NewCookieNotFoundUnauthorizedError()
 	}
 
 	return doesExist, nil
