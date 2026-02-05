@@ -157,7 +157,11 @@ const GetCurrentGameQuery = `
 `
 
 func GetCurrentGameCommand(userId int) (game common.Game, err error) {
-	games, err := GetHistoryGames(userId, GetCurrentGameQuery)
+	games, err := getHistoryGames(userId, GetCurrentGameQuery)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return
+	}
 
 	if len(games) == 0 {
 		err = common.NewCurrentGameNotFoundError()
@@ -169,7 +173,7 @@ func GetCurrentGameCommand(userId int) (game common.Game, err error) {
 	return
 }
 
-func GetHistoryGames(userId int, query string) (games common.Games, err error) {
+func getHistoryGames(userId int, query string) (games common.Games, err error) {
 	rows, err := db_access.Query(query, userId, common.GameStateFinished, common.GameStateCancelled)
 
 	if err != nil {
@@ -183,8 +187,6 @@ func GetHistoryGames(userId int, query string) (games common.Games, err error) {
 
 		if errors.Is(err, sql.ErrNoRows) {
 			_ = rows.Close()
-			// TODO: Change the error to the most suitable
-			err = common.NewCurrentGameNotFoundError()
 			return
 		}
 
@@ -212,26 +214,29 @@ func GetHistoryGames(userId int, query string) (games common.Games, err error) {
 }
 
 const GetGameSecondsSpentQuery = `
-SELECT 
-    SUM(
-        t.DurationInS -
-        CASE ta.Action
-            WHEN 'start' THEN ta.RemainingTimeInS - (strftime('%s','now') - strftime('%s', ta.CreateDate))
-            WHEN 'pause' THEN ta.RemainingTimeInS
-            WHEN 'stop'  THEN ta.RemainingTimeInS
-            ELSE t.DurationInS
-        END
-    ) AS SecondsSpent
-FROM Timers t
-	LEFT JOIN TimerActions ta ON ta.Id = (
-        SELECT ta2.Id
-        FROM TimerActions ta2
-        WHERE ta2.TimerId = t.Id
-        ORDER BY ta2.CreateDate DESC
-        LIMIT 1
-    )
-WHERE t.UserId = ?
-  	AND t.GameId = ?
+	SELECT 
+		COALESCE(
+			SUM(
+				t.DurationInS -
+				CASE ta.Action
+					WHEN 'start' THEN ta.RemainingTimeInS - (strftime('%s','now') - strftime('%s', ta.CreateDate))
+					WHEN 'pause' THEN ta.RemainingTimeInS
+					WHEN 'stop'  THEN ta.RemainingTimeInS
+					ELSE t.DurationInS
+				END
+			),
+			0
+	    ) AS SecondsSpent
+	FROM Timers t
+		LEFT JOIN TimerActions ta ON ta.Id = (
+			SELECT ta2.Id
+			FROM TimerActions ta2
+			WHERE ta2.TimerId = t.Id
+			ORDER BY ta2.CreateDate DESC
+			LIMIT 1
+		)
+	WHERE t.UserId = ?
+		AND t.GameId = ?
 `
 
 func GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
@@ -296,22 +301,11 @@ const GetGameHistoryQuery = `
 	ORDER BY gh.FinishDate NULLS FIRST
 `
 
-func GetEndedGamesCommand(userId int) (games common.Games, err error) {
-	games, err = GetHistoryGames(userId, GetGameHistoryQuery)
+func GetGameHistoryCommand(userId int) (games common.Games, err error) {
+	games, err = getHistoryGames(userId, GetGameHistoryQuery)
 
-	if err != nil {
-		return
-	}
-
-	for _, game := range games {
-		var timeSpent time.Duration
-		timeSpent, err = GetGameTimeSpentCommand(userId, game.Id)
-
-		if err != nil {
-			return
-		}
-
-		game.TimeSpent = timeSpent
+	if errors.Is(err, sql.ErrNoRows) {
+		err = nil
 	}
 
 	return
