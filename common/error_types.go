@@ -27,17 +27,100 @@ func (e *BaseError) GetMessage() string {
 	return e.Message
 }
 
-type AuthError struct {
+type BadRequestError struct {
 	BaseError
 }
 
-type CookieNotFoundAuthError struct {
-	AuthError
+type UserNameBadRequestError struct {
+	BadRequestError
 }
 
-func NewCookieNotFoundAuthError() *CookieNotFoundAuthError {
-	return &CookieNotFoundAuthError{
-		AuthError{
+func NewUserNameBadRequestError(name string, messageDetails string) *UserNameBadRequestError {
+	message := fmt.Sprintf(
+		"'%s' does not match the format. %s",
+		name,
+		messageDetails)
+
+	return &UserNameBadRequestError{
+		BadRequestError{
+			BaseError{
+				Code:    "INCORRECT_USER_NAME_FORMAT",
+				Message: message,
+			},
+		},
+	}
+}
+
+type GameNameBadRequestError struct {
+	BadRequestError
+}
+
+func NewGameNameBadRequestError(name string, messageDetails string) *GameNameBadRequestError {
+	message := fmt.Sprintf(
+		"'%s' does not match the format. %s",
+		name,
+		messageDetails)
+
+	return &GameNameBadRequestError{
+		BadRequestError{
+			BaseError{
+				Code:    "INCORRECT_GAME_NAME_FORMAT",
+				Message: message,
+			},
+		},
+	}
+}
+
+type EmailBadRequestError struct {
+	BadRequestError
+}
+
+func NewEmailBadRequestError(email string, messageDetails string) *EmailBadRequestError {
+	message := fmt.Sprintf(
+		"'%s' does not match the format. %s",
+		email,
+		messageDetails)
+
+	return &EmailBadRequestError{
+		BadRequestError{
+			BaseError{
+				Code:    "INCORRECT_EMAIL_FORMAT",
+				Message: message,
+			},
+		},
+	}
+}
+
+type PasswordBadRequestError struct {
+	BadRequestError
+}
+
+func NewPasswordBadRequestError(messageDetails string) *PasswordBadRequestError {
+	message := fmt.Sprintf(
+		"The password does not match the format. %s",
+		messageDetails)
+
+	return &PasswordBadRequestError{
+		BadRequestError{
+			BaseError{
+				Code:    "INCORRECT_PASSWORD_FORMAT",
+				Message: message,
+			},
+		},
+	}
+}
+
+type UnauthorizedError struct {
+	BaseError
+}
+
+type CookieNotFoundUnauthorizedError struct {
+	UnauthorizedError
+}
+
+func NewCookieNotFoundUnauthorizedError() *CookieNotFoundUnauthorizedError {
+	return &CookieNotFoundUnauthorizedError{
+		UnauthorizedError{
 			BaseError{
 				Code: "COOKIE_NOT_FOUND",
 				// TODO: Make a message
@@ -47,13 +130,13 @@ func NewCookieNotFoundAuthError() *CookieNotFoundAuthError {
 	}
 }
 
-type ActiveSessionNotFoundAuthError struct {
-	AuthError
+type ActiveSessionNotFoundUnauthorizedError struct {
+	UnauthorizedError
 }
 
-func NewActiveSessionNotFoundAuthError() *ActiveSessionNotFoundAuthError {
-	return &ActiveSessionNotFoundAuthError{
-		AuthError{
+func NewActiveSessionNotFoundUnauthorizedError() *ActiveSessionNotFoundUnauthorizedError {
+	return &ActiveSessionNotFoundUnauthorizedError{
+		UnauthorizedError{
 			BaseError{
 				Code: "ACTIVE_SESSION_NOT_FOUND",
 				// TODO: Make a message
@@ -63,13 +146,13 @@ func NewActiveSessionNotFoundAuthError() *ActiveSessionNotFoundAuthError {
 	}
 }
 
-type WrongDataAuthError struct {
-	AuthError
+type WrongDataUnauthorizedError struct {
+	UnauthorizedError
 }
 
-func NewWrongDataAuthError() *WrongDataAuthError {
-	return &WrongDataAuthError{
-		AuthError{
+func NewWrongDataUnauthorizedError() *WrongDataUnauthorizedError {
+	return &WrongDataUnauthorizedError{
+		UnauthorizedError{
 			BaseError{
 				Code: "WRONG_AUTH_DATA",
 				// TODO: Make a message
@@ -79,13 +162,13 @@ func NewWrongDataAuthError() *WrongDataAuthError {
 	}
 }
 
-type SessionAlreadyExistsAuthError struct {
-	AuthError
+type SessionAlreadyExistsUnauthorizedError struct {
+	UnauthorizedError
 }
 
-func NewSessionAlreadyExistsAuthError() *SessionAlreadyExistsAuthError {
-	return &SessionAlreadyExistsAuthError{
-		AuthError{
+func NewSessionAlreadyExistsUnauthorizedError() *SessionAlreadyExistsUnauthorizedError {
+	return &SessionAlreadyExistsUnauthorizedError{
+		UnauthorizedError{
 			BaseError{
 				Code: "SESSION_ALREADY_EXISTS",
 				// TODO: Make a message

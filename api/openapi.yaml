@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.6.1
+  version: 0.7.0
 paths:
 
   /auth/signup:
@@ -655,18 +655,29 @@ components:
       in: path
       required: true
       schema:
-        $ref: '#/components/schemas/Name'
+        $ref: '#/components/schemas/UserName'
 
   schemas:
     Id:
       type: integer
       format: int
 
-    Name:
+    UserName:
       type: string
-      pattern: '^[A-Za-z0-9_]+$'
+      pattern: '^\w+$'
       minLength: 3
       maxLength: 35
+
+    GameName:
+      type: string
+      pattern: '^.+$'
+      minLength: 1
+      maxLength: 70
+
+    EffectName:
+      type: string
+      minLength: 1
+      maxLength: 70
 
     Password:
       type: string
@@ -692,7 +703,7 @@ components:
       type: object
       properties:
         name:
-          $ref: '#/components/schemas/Name'
+          $ref: '#/components/schemas/UserName'
         email:
           $ref: '#/components/schemas/Email'
         password:
@@ -703,7 +714,7 @@ components:
       type: object
       properties:
         name:
-          $ref: '#/components/schemas/Name'
+          $ref: '#/components/schemas/UserName'
         password:
           $ref: '#/components/schemas/Password'
       required: [ name, password ]
@@ -712,7 +723,7 @@ components:
       type: object
       properties:
         name:
-          $ref: '#/components/schemas/Name'
+          $ref: '#/components/schemas/GameName'
       required: [ name ]
 
     UnplayedGames:
@@ -769,7 +780,7 @@ components:
       type: object
       properties:
         name:
-          $ref: '#/components/schemas/Name'
+          $ref: '#/components/schemas/EffectName'
         description:
           type: string
       required: [ name ]

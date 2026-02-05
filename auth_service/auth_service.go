@@ -129,7 +129,7 @@ func GetUserId(sessionId string) (int, error) {
 	err := row.Scan(&userId)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return userId, common.NewActiveSessionNotFoundAuthError()
+		return userId, common.NewActiveSessionNotFoundUnauthorizedError()
 	}
 
 	if err != nil {
@@ -152,7 +152,7 @@ func CreateSession(userName string, userPassword string) (*string, error) {
 	err := row.Scan(&userId)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, common.NewWrongDataAuthError()
+		return nil, common.NewWrongDataUnauthorizedError()
 	}
 
 	if err != nil {
