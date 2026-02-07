@@ -8,7 +8,7 @@ import (
 
 var db *sql.DB
 
-const Path = "data/FGG.db?_journal_mode=WAL"
+const Path = "file:data/FGG.db?journal_mode=WAL&busy_timeout=5000"
 
 func Init() {
 	var err error
