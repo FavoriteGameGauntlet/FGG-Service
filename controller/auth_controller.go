@@ -94,7 +94,7 @@ func (Server) SignUp(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	err = validator.ValidatePassword(user.Email)
+	err = validator.ValidatePassword(user.Password)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
