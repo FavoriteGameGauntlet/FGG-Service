@@ -8,7 +8,7 @@ import (
 
 var db *sql.DB
 
-const Path = "file:data/FGG.db?journal_mode=WAL&busy_timeout=5000"
+const Path = "file:data/FGG.db"
 
 func Init() {
 	var err error
@@ -19,6 +19,18 @@ func Init() {
 	}
 
 	err = db.Ping()
+
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = db.Exec("PRAGMA journal_mode=WAL;")
+
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = db.Exec("PRAGMA busy_timeout=5000;")
 
 	if err != nil {
 		panic(err)
