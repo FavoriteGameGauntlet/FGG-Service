@@ -295,7 +295,6 @@ const GetGameHistoryQuery = `
 		gh.FinishDate
 	FROM GameHistory gh
 		INNER JOIN Games g ON gh.GameId = g.Id
-		LEFT JOIN Timers t ON t.UserId = gh.UserId AND t.GameId = gh.GameId
 	WHERE gh.UserId = ?
 		AND gh.State IN (?, ?)
 	ORDER BY gh.FinishDate NULLS FIRST
