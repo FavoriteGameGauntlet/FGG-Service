@@ -15,7 +15,7 @@ func GetOrCreateCurrentTimer(userId int) (timer common.Timer, err error) {
 
 	timer, err = GetCurrentTimerCommand(userId)
 
-	var notFoundError *common.CurrentTimerNotFoundError
+	var notFoundError *common.NotFoundError
 	if err != nil && !errors.As(err, &notFoundError) {
 		return
 	}

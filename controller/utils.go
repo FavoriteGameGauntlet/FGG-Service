@@ -11,26 +11,22 @@ import (
 )
 
 func SendJSONErrorResponse(ctx echo.Context, err error) error {
-	var apiCode int
-	var BadRequestError *common.BadRequestError
-	var UnauthorizedError *common.UnauthorizedError
+	var badRequestError *common.BadRequestError
+	var unauthorizedError *common.UnauthorizedError
 	var notFoundError *common.NotFoundError
-	var currentTimerIncorrectStateError *common.CurrentTimerIncorrectStateError
-	var databaseError *common.DatabaseError
+	var conflictError *common.ConflictError
+
+	apiCode := http.StatusInternalServerError
 
 	switch {
-	case errors.As(err, &BadRequestError):
+	case errors.As(err, &badRequestError):
 		apiCode = http.StatusBadRequest
-	case errors.As(err, &UnauthorizedError):
+	case errors.As(err, &unauthorizedError):
 		apiCode = http.StatusUnauthorized
 	case errors.As(err, &notFoundError):
 		apiCode = http.StatusNotFound
-	case errors.As(err, &currentTimerIncorrectStateError):
+	case errors.As(err, &conflictError):
 		apiCode = http.StatusConflict
-	case errors.As(err, &databaseError):
-		apiCode = http.StatusInternalServerError
-	default:
-		apiCode = http.StatusInternalServerError
 	}
 
 	apiError := ConvertToError(err)
