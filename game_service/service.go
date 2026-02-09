@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	CheckIfCurrentGameExistsCommand = `
+	DoesCurrentGameExistCommand = `
 		SELECT CASE
         	WHEN EXISTS (
 				SELECT 1
@@ -285,7 +285,7 @@ func GetGameHistory(userId int) (games common.Games, err error) {
 func MakeGameRoll(userId int) (common.Game, error) {
 	game := common.Game{}
 
-	doesExist, err := CheckIfCurrentGameExists(userId)
+	doesExist, err := DoesCurrentGameExist(userId)
 
 	if err != nil {
 		return game, err
@@ -327,8 +327,8 @@ func MakeGameRoll(userId int) (common.Game, error) {
 	return game, nil
 }
 
-func CheckIfCurrentGameExists(userId int) (bool, error) {
-	row := db_access.QueryRow(CheckIfCurrentGameExistsCommand, userId, common.GameStateFinished, common.GameStateCancelled)
+func DoesCurrentGameExist(userId int) (bool, error) {
+	row := db_access.QueryRow(DoesCurrentGameExistCommand, userId, common.GameStateFinished, common.GameStateCancelled)
 
 	var doesExist bool
 	err := row.Scan(&doesExist)

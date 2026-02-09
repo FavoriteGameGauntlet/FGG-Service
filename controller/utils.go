@@ -4,6 +4,7 @@ import (
 	"FGG-Service/api"
 	"FGG-Service/auth_service"
 	"FGG-Service/common"
+	"database/sql"
 	"errors"
 	"net/http"
 
@@ -49,28 +50,29 @@ func ConvertToError(err error) api.Error {
 	}
 }
 
-func GetUserId(ctx echo.Context) (int, error) {
-	var userId int
-
-	cookie, err := ctx.Cookie("sessionId")
+func GetUserId(ctx echo.Context) (userId int, err error) {
+	cookie, err := ctx.Cookie(SessionCookieName)
 
 	if err != nil {
-		return userId, common.NewCookieNotFoundUnauthorizedError()
+		err = common.NewCookieNotFoundUnauthorizedError()
+		return
 	}
 
 	sessionId := cookie.Value
 
-	userId, err = auth_service.GetUserId(sessionId)
+	userSession, err := auth_service.GetUserSessionById(sessionId)
 
 	if err != nil {
-		return userId, err
+		return
 	}
 
-	return userId, nil
+	userId = userSession.UserId
+
+	return
 }
 
 func GetSessionCookie(ctx echo.Context) (*http.Cookie, error) {
-	cookie, err := ctx.Cookie("sessionId")
+	cookie, err := ctx.Cookie(SessionCookieName)
 
 	if err != nil {
 		return nil, common.NewCookieNotFoundUnauthorizedError()
@@ -79,19 +81,26 @@ func GetSessionCookie(ctx echo.Context) (*http.Cookie, error) {
 	return cookie, nil
 }
 
-func CheckIfSessionExists(ctx echo.Context) (bool, error) {
+func DoesUserSessionExist(ctx echo.Context) (doesExist bool, err error) {
 	cookie, err := GetSessionCookie(ctx)
 
 	if err != nil {
-		return false, common.NewCookieNotFoundUnauthorizedError()
+		err = common.NewCookieNotFoundUnauthorizedError()
+		return
 	}
 
 	sessionId := cookie.Value
-	doesExist, err := auth_service.CheckIfUserSessionExists(sessionId)
+	_, err = auth_service.GetUserSessionById(sessionId)
 
-	if err != nil {
-		return false, common.NewCookieNotFoundUnauthorizedError()
+	if errors.Is(err, sql.ErrNoRows) {
+		err = nil
+		return
 	}
 
-	return doesExist, nil
+	if err != nil {
+		return
+	}
+
+	doesExist = true
+	return
 }
