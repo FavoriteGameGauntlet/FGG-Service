@@ -163,7 +163,7 @@ func (Server) AddUnplayedGames(ctx echo.Context) error {
 	err = ctx.Bind(&gamesDto)
 
 	if err != nil {
-		// TODO: Fix a status code for this error, should be 400
+		err = common.NewBadRequestError(err.Error())
 		return SendJSONErrorResponse(ctx, err)
 	}
 

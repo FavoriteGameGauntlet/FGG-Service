@@ -17,14 +17,14 @@ func (Server) Login(ctx echo.Context) error {
 	err := ctx.Bind(&user)
 
 	if err != nil {
-		// TODO: Fix a status code for this error, should be 400
+		err = common.NewBadRequestError(err.Error())
 		return SendJSONErrorResponse(ctx, err)
 	}
 
 	doesExist, _ := CheckIfSessionExists(ctx)
 
 	if doesExist {
-		return SendJSONErrorResponse(ctx, common.NewSessionAlreadyExistsUnauthorizedError())
+		return SendJSONErrorResponse(ctx, common.NewSessionAlreadyExistsConflictError())
 	}
 
 	sessionId, err := auth_service.CreateSession(user.Name, user.Password)
@@ -78,7 +78,7 @@ func (Server) SignUp(ctx echo.Context) error {
 	err := ctx.Bind(&user)
 
 	if err != nil {
-		// TODO: Fix a status code for this error, should be 400
+		err = common.NewBadRequestError(err.Error())
 		return SendJSONErrorResponse(ctx, err)
 	}
 
