@@ -21,19 +21,20 @@ func (Server) Login(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	doesExist, _ := CheckIfSessionExists(ctx)
+	doesExist, _ := DoesUserSessionExist(ctx)
 
 	if doesExist {
-		return SendJSONErrorResponse(ctx, common.NewSessionAlreadyExistsConflictError())
+		err = common.NewSessionAlreadyExistsConflictError()
+		return SendJSONErrorResponse(ctx, err)
 	}
 
-	sessionId, err := auth_service.CreateSession(user.Name, user.Password)
+	userSession, err := auth_service.CreateSession(user.Name, user.Password)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	cookie := CreateSessionCookie(*sessionId)
+	cookie := CreateSessionCookie(userSession.Id)
 	ctx.SetCookie(cookie)
 
 	return ctx.NoContent(http.StatusOK)
@@ -41,7 +42,7 @@ func (Server) Login(ctx echo.Context) error {
 
 func CreateSessionCookie(sessionId string) *http.Cookie {
 	cookie := new(http.Cookie)
-	cookie.Name = "sessionId"
+	cookie.Name = SessionCookieName
 	cookie.Value = sessionId
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	cookie.HttpOnly = true
@@ -60,7 +61,7 @@ func (Server) Logout(ctx echo.Context) error {
 	}
 
 	sessionId := cookie.Value
-	err = auth_service.DeleteSession(sessionId)
+	err = auth_service.DeleteUserSession(sessionId)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)

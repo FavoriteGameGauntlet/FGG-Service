@@ -185,11 +185,6 @@ func getHistoryGames(userId int, query string) (games common.Games, err error) {
 		var finishDateString *string
 		err = rows.Scan(&game.Id, &game.Name, &game.State, &finishDateString)
 
-		if errors.Is(err, sql.ErrNoRows) {
-			_ = rows.Close()
-			return
-		}
-
 		if err != nil {
 			_ = rows.Close()
 			return
