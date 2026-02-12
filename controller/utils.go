@@ -62,6 +62,11 @@ func GetUserId(ctx echo.Context) (userId int, err error) {
 
 	userSession, err := auth_service.GetUserSessionById(sessionId)
 
+	if errors.Is(err, sql.ErrNoRows) {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return
+	}
+
 	if err != nil {
 		return
 	}

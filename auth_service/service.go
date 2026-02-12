@@ -7,24 +7,24 @@ import (
 )
 
 func CreateUser(userName string, userEmail string, userPassword string) error {
-	_, err := GetUserByNameCommand(userName)
+	user, err := GetUserByNameCommand(userName)
 
-	if errors.Is(err, sql.ErrNoRows) {
-		return common.NewUserNameAlreadyExistsError()
-	}
-
-	if err != nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
 
-	_, err = GetUserByEmailCommand(userEmail)
-
-	if errors.Is(err, sql.ErrNoRows) {
+	if user.Name != "" {
 		return common.NewUserNameAlreadyExistsError()
 	}
 
-	if err != nil {
+	user, err = GetUserByEmailCommand(userEmail)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err
+	}
+
+	if user.Name != "" {
+		return common.NewUserNameAlreadyExistsError()
 	}
 
 	err = CreateUserCommand(userName, userEmail, userPassword)
