@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.18 on Fri Jan 2 14:47:00 2026
+-- File generated with SQLiteStudio v3.4.17 on Fri Feb 13 00:10:14 2026
 --
 -- Text encoding used: System
 --
@@ -15,14 +15,6 @@ CREATE TABLE IF NOT EXISTS AvailableRolls (
                        NOT NULL,
     CreateDate TEXT    NOT NULL
                        DEFAULT (datetime('now', 'subsec') ) 
-);
-
-
--- Table: BonusPointsHistory
-CREATE TABLE IF NOT EXISTS BonusPointsHistory (
-    Id INTEGER UNIQUE
-             PRIMARY KEY AUTOINCREMENT
-             NOT NULL
 );
 
 
@@ -75,7 +67,6 @@ CREATE TABLE IF NOT EXISTS GameHistory (
                        DEFAULT ('started'),
     CreateDate TEXT    NOT NULL
                        DEFAULT (datetime('now', 'subsec') ),
-    MapPoints  INTEGER,
     FinishDate TEXT
 );
 
@@ -89,20 +80,6 @@ CREATE TABLE IF NOT EXISTS Games (
                        UNIQUE,
     CreateDate TEXT    DEFAULT (datetime('now', 'subsec') ) 
                        NOT NULL
-);
-
-
--- Table: TimerActions
-CREATE TABLE IF NOT EXISTS TimerActions (
-    Id               INTEGER PRIMARY KEY AUTOINCREMENT
-                             UNIQUE
-                             NOT NULL,
-    TimerId          INTEGER REFERENCES Timers (Id) 
-                             NOT NULL,
-    Action           TEXT    NOT NULL,
-    CreateDate       TEXT    NOT NULL
-                             DEFAULT (datetime('now', 'subsec') ),
-    RemainingTimeInS INTEGER NOT NULL
 );
 
 
@@ -166,34 +143,11 @@ CREATE TABLE IF NOT EXISTS UserSessions (
 );
 
 
--- Index: CreateDateIndex
-CREATE INDEX IF NOT EXISTS CreateDateIndex ON TimerActions (
-    TimerId,
-    CreateDate DESC
-);
-
-
 -- Index: UserGameIndex
 CREATE INDEX IF NOT EXISTS UserGameIndex ON Timers (
     UserId,
     GameId
 );
-
-
--- Trigger: UpdateTimerState
-CREATE TRIGGER IF NOT EXISTS UpdateTimerState
-                       AFTER INSERT
-                          ON TimerActions
-                    FOR EACH ROW
-BEGIN
-    UPDATE Timers
-       SET State = CASE new.Action
-                        WHEN 'start' THEN 'running'
-                        WHEN 'pause' THEN 'paused'
-                        WHEN 'stop' THEN 'finished'
-           END
-     WHERE Id = new.TimerId;
-END;
 
 
 COMMIT TRANSACTION;

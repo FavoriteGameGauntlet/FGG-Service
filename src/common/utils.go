@@ -1,7 +1,7 @@
 package common
 
 import (
-	"FGG-Service/db_access"
+	"FGG-Service/src/db_access"
 	"fmt"
 	"time"
 )

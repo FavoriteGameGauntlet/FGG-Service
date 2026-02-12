@@ -1,8 +1,8 @@
-package game_service
+package game_db
 
 import (
-	"FGG-Service/common"
-	"FGG-Service/db_access"
+	"FGG-Service/src/common"
+	"FGG-Service/src/db_access"
 	"database/sql"
 	"errors"
 	"time"
@@ -213,29 +213,27 @@ const GetGameSecondsSpentQuery = `
 		COALESCE(
 			SUM(
 				t.DurationInS -
-				CASE ta.Action
-					WHEN 'start' THEN ta.RemainingTimeInS - (strftime('%s','now') - strftime('%s', ta.CreateDate))
-					WHEN 'pause' THEN ta.RemainingTimeInS
-					WHEN 'stop'  THEN ta.RemainingTimeInS
+				CASE t.State
+					WHEN ? THEN t.RemainingTimeInS - (strftime('%s','now') - strftime('%s', t.LastActionDate))
+					WHEN ? THEN t.RemainingTimeInS
+					WHEN ? THEN t.RemainingTimeInS
 					ELSE t.DurationInS
 				END
 			),
 			0
 	    ) AS SecondsSpent
 	FROM Timers t
-		LEFT JOIN TimerActions ta ON ta.Id = (
-			SELECT ta2.Id
-			FROM TimerActions ta2
-			WHERE ta2.TimerId = t.Id
-			ORDER BY ta2.CreateDate DESC
-			LIMIT 1
-		)
 	WHERE t.UserId = ?
 		AND t.GameId = ?
 `
 
 func GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
-	row := db_access.QueryRow(GetGameSecondsSpentQuery, userId, gameId)
+	row := db_access.QueryRow(GetGameSecondsSpentQuery,
+		common.TimerStateRunning,
+		common.TimerStatePaused,
+		common.TimerStateFinished,
+		userId,
+		gameId)
 
 	var secondsSpent int
 	err = row.Scan(&secondsSpent)

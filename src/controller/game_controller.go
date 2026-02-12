@@ -2,9 +2,9 @@ package controller
 
 import (
 	"FGG-Service/api"
-	"FGG-Service/common"
-	"FGG-Service/game_service"
-	"FGG-Service/validator"
+	"FGG-Service/src/common"
+	"FGG-Service/src/game/game_service"
+	"FGG-Service/src/validator"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
