@@ -1,8 +1,8 @@
-package effect_service
+package effect_db
 
 import (
-	"FGG-Service/common"
-	"FGG-Service/db_access"
+	"FGG-Service/src/common"
+	"FGG-Service/src/db_access"
 	"time"
 )
 

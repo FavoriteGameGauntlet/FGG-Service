@@ -2,8 +2,8 @@ package controller
 
 import (
 	"FGG-Service/api"
-	"FGG-Service/common"
-	"FGG-Service/effect_service"
+	"FGG-Service/src/common"
+	"FGG-Service/src/effect/effect_service"
 	"net/http"
 
 	"github.com/labstack/echo/v4"

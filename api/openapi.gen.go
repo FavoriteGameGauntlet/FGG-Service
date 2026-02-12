@@ -24,18 +24,17 @@ const (
 	TimerStateRunning  TimerState = "running"
 )
 
-// Defines values for TimerActionType.
-const (
-	Pause TimerActionType = "pause"
-	Start TimerActionType = "start"
-	Stop  TimerActionType = "stop"
-)
+// Duration the duration notation as defined by ISO 8601
+type Duration = string
 
 // Effect defines model for Effect.
 type Effect struct {
-	Description *string `json:"description,omitempty"`
-	Name        Name    `json:"name"`
+	Description *string    `json:"description,omitempty"`
+	Name        EffectName `json:"name"`
 }
+
+// EffectName defines model for EffectName.
+type EffectName = string
 
 // Effects defines model for Effects.
 type Effects = []Effect
@@ -52,24 +51,26 @@ type Error struct {
 // Game defines model for Game.
 type Game struct {
 	FinishDate *time.Time `json:"finishDate,omitempty"`
-	Name       Name       `json:"name"`
+	Name       GameName   `json:"name"`
 	State      GameState  `json:"state"`
-	TimeSpent  string     `json:"timeSpent"`
+
+	// TimeSpent the duration notation as defined by ISO 8601
+	TimeSpent Duration `json:"timeSpent"`
 }
 
 // GameState defines model for Game.State.
 type GameState string
 
+// GameName defines model for GameName.
+type GameName = string
+
 // Games defines model for Games.
 type Games = []Game
-
-// Name defines model for Name.
-type Name = string
 
 // NewUser defines model for NewUser.
 type NewUser struct {
 	Email    Email    `json:"email"`
-	Name     Name     `json:"name"`
+	Name     UserName `json:"name"`
 	Password Password `json:"password"`
 }
 
@@ -78,9 +79,9 @@ type Password = string
 
 // RolledEffect defines model for RolledEffect.
 type RolledEffect struct {
-	Description *string   `json:"description,omitempty"`
-	Name        Name      `json:"name"`
-	RollDate    time.Time `json:"rollDate"`
+	Description *string    `json:"description,omitempty"`
+	Name        EffectName `json:"name"`
+	RollDate    time.Time  `json:"rollDate"`
 }
 
 // RolledEffects defines model for RolledEffects.
@@ -88,27 +89,21 @@ type RolledEffects = []RolledEffect
 
 // Timer defines model for Timer.
 type Timer struct {
-	Duration        string     `json:"duration"`
-	RemainingTime   string     `json:"remainingTime"`
-	State           TimerState `json:"state"`
-	TimerActionDate *time.Time `json:"timerActionDate,omitempty"`
+	// Duration the duration notation as defined by ISO 8601
+	Duration       Duration  `json:"duration"`
+	LastActionDate time.Time `json:"lastActionDate"`
+
+	// RemainingTime the duration notation as defined by ISO 8601
+	RemainingTime Duration   `json:"remainingTime"`
+	State         TimerState `json:"state"`
 }
 
 // TimerState defines model for Timer.State.
 type TimerState string
 
-// TimerAction defines model for TimerAction.
-type TimerAction struct {
-	RemainingTime string          `json:"remainingTime"`
-	Type          TimerActionType `json:"type"`
-}
-
-// TimerActionType defines model for TimerAction.Type.
-type TimerActionType string
-
 // UnplayedGame defines model for UnplayedGame.
 type UnplayedGame struct {
-	Name Name `json:"name"`
+	Name GameName `json:"name"`
 }
 
 // UnplayedGames defines model for UnplayedGames.
@@ -116,9 +111,12 @@ type UnplayedGames = []UnplayedGame
 
 // User defines model for User.
 type User struct {
-	Name     Name     `json:"name"`
+	Name     UserName `json:"name"`
 	Password Password `json:"password"`
 }
+
+// UserName defines model for UserName.
+type UserName = string
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody = User

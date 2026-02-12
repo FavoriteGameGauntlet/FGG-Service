@@ -2,9 +2,9 @@ package main
 
 import (
 	"FGG-Service/api"
-	"FGG-Service/controller"
-	"FGG-Service/db_access"
-	"FGG-Service/timer_service"
+	"FGG-Service/src/controller"
+	"FGG-Service/src/db_access"
+	"FGG-Service/src/timer/timer_service"
 	"embed"
 	"net/http"
 	"time"

@@ -1,7 +1,7 @@
 package auth_service
 
 import (
-	"FGG-Service/common"
+	"FGG-Service/src/common"
 	"database/sql"
 	"errors"
 )
@@ -23,8 +23,8 @@ func CreateUser(userName string, userEmail string, userPassword string) error {
 		return err
 	}
 
-	if user.Name != "" {
-		return common.NewUserNameAlreadyExistsError()
+	if user.Email != "" {
+		return common.NewUserEmailAlreadyExistsError()
 	}
 
 	err = CreateUserCommand(userName, userEmail, userPassword)

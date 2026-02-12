@@ -1,7 +1,7 @@
 package validator
 
 import (
-	"FGG-Service/common"
+	"FGG-Service/src/common"
 	"regexp"
 )
 

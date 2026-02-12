@@ -1,8 +1,8 @@
 package auth_service
 
 import (
-	"FGG-Service/common"
-	"FGG-Service/db_access"
+	"FGG-Service/src/common"
+	"FGG-Service/src/db_access"
 
 	"github.com/google/uuid"
 )
@@ -67,10 +67,9 @@ const GetUserSessionByIdQuery = `
 	WHERE Id = ?
 `
 
-func GetUserSessionByIdCommand(userSessionId string) (user common.UserSession, err error) {
+func GetUserSessionByIdCommand(userSessionId string) (userSession common.UserSession, err error) {
 	row := db_access.QueryRow(GetUserSessionByIdQuery, userSessionId)
 
-	var userSession common.UserSession
 	err = row.Scan(&userSession.Id, &userSession.UserId)
 
 	return

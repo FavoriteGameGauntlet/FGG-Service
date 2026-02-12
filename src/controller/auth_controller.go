@@ -2,9 +2,9 @@ package controller
 
 import (
 	"FGG-Service/api"
-	"FGG-Service/auth_service"
-	"FGG-Service/common"
-	"FGG-Service/validator"
+	"FGG-Service/src/auth_service"
+	"FGG-Service/src/common"
+	"FGG-Service/src/validator"
 	"net/http"
 	"time"
 

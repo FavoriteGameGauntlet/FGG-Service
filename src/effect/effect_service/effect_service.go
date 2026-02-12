@@ -1,23 +1,24 @@
 package effect_service
 
 import (
-	"FGG-Service/common"
+	"FGG-Service/src/common"
+	"FGG-Service/src/effect/effect_db"
 )
 
 func GetAvailableRollsCount(userId int) (count int, err error) {
-	return GetAvailableRollsCountCommand(userId)
+	return effect_db.GetAvailableRollsCountCommand(userId)
 }
 
 func GetAvailableEffects(userId int) (common.Effects, error) {
-	return GetAvailableEffectsCommand(userId)
+	return effect_db.GetAvailableEffectsCommand(userId)
 }
 
 func GetEffectHistory(userId int) (common.RolledEffects, error) {
-	return GetEffectHistoryCommand(userId)
+	return effect_db.GetEffectHistoryCommand(userId)
 }
 
 func MakeEffectRoll(userId int) (effects common.Effects, err error) {
-	rollCount, err := GetAvailableRollsCountCommand(userId)
+	rollCount, err := effect_db.GetAvailableRollsCountCommand(userId)
 
 	if err != nil {
 		return
@@ -28,13 +29,13 @@ func MakeEffectRoll(userId int) (effects common.Effects, err error) {
 		return
 	}
 
-	effects, err = MakeEffectRollCommand(userId)
+	effects, err = effect_db.MakeEffectRollCommand(userId)
 
 	if err != nil {
 		return
 	}
 
-	err = DeleteAvailableRollCommand(userId)
+	err = effect_db.DeleteAvailableRollCommand(userId)
 
 	return
 }
