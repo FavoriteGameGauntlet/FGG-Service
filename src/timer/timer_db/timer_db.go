@@ -69,8 +69,8 @@ func CreateCurrentTimerCommand(userId int, gameId int) error {
 		CreateCurrentTimerQuery,
 		userId,
 		gameId,
-		common.DefaultTimerDuration.Seconds(),
-		common.DefaultTimerDuration.Seconds(),
+		common.DefaultTimerDurationInS,
+		common.DefaultTimerDurationInS,
 	)
 
 	return err

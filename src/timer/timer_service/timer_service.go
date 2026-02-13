@@ -9,11 +9,18 @@ import (
 )
 
 func GetOrCreateCurrentTimer(userId int) (timer common.Timer, err error) {
-	game, err := game_db.GetCurrentGameCommand(userId)
+	games, err := game_db.GetCurrentGameCommand(userId)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = common.NewCurrentGameNotFoundError()
+		return
+	}
 
 	if err != nil {
 		return
 	}
+
+	game := games[0]
 
 	timer, err = timer_db.GetCurrentTimerCommand(userId)
 
@@ -65,6 +72,23 @@ func StopCurrentTimer(userId int) (common.Timer, error) {
 			common.TimerStateCreated,
 			common.TimerStateFinished,
 		})
+}
+
+func ForceStopCurrentTimer(userId int) (timer common.Timer, err error) {
+	timer, err = ActCurrentTimer(
+		userId,
+		common.TimerStateFinished,
+		[]common.TimerStateType{
+			common.TimerStateFinished,
+		})
+
+	var notFoundError *common.NotFoundError
+	if err != nil && !errors.As(err, &notFoundError) {
+		return
+	}
+
+	err = nil
+	return
 }
 
 func ActCurrentTimer(

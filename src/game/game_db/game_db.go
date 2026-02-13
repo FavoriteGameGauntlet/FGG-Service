@@ -156,19 +156,8 @@ const GetCurrentGameQuery = `
 		AND gh.State NOT IN (?, ?)
 `
 
-func GetCurrentGameCommand(userId int) (game common.Game, err error) {
-	games, err := getHistoryGames(userId, GetCurrentGameQuery)
-
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return
-	}
-
-	if len(games) == 0 {
-		err = common.NewCurrentGameNotFoundError()
-		return
-	}
-
-	game = games[0]
+func GetCurrentGameCommand(userId int) (games common.Games, err error) {
+	games, err = getHistoryGames(userId, GetCurrentGameQuery)
 
 	return
 }
