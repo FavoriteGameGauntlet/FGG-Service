@@ -16,6 +16,7 @@ func SendJSONErrorResponse(ctx echo.Context, err error) error {
 	var unauthorizedError *common.UnauthorizedError
 	var notFoundError *common.NotFoundError
 	var conflictError *common.ConflictError
+	var unprocessableError *common.UnprocessableError
 
 	apiCode := http.StatusInternalServerError
 
@@ -28,6 +29,8 @@ func SendJSONErrorResponse(ctx echo.Context, err error) error {
 		apiCode = http.StatusNotFound
 	case errors.As(err, &conflictError):
 		apiCode = http.StatusConflict
+	case errors.As(err, &unprocessableError):
+		apiCode = http.StatusUnprocessableEntity
 	}
 
 	apiError := ConvertToError(err)

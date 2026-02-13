@@ -42,7 +42,7 @@ func CreateSession(userName string, userPassword string) (userSession common.Use
 	user, err := GetUserByNameAndPasswordCommand(userName, userPassword)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		err = common.NewWrongDataUnauthorizedError()
+		err = common.NewWrongDataUnprocessableError()
 		return
 	}
 

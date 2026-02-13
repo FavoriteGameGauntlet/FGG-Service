@@ -39,61 +39,6 @@ func NewBadRequestError(message string) error {
 	}
 }
 
-func NewUserNameBadRequestError(name string, messageDetails string) error {
-	message := fmt.Sprintf(
-		"'%s' does not match the format. %s",
-		name,
-		messageDetails)
-
-	return &BadRequestError{
-		&BaseError{
-			Code:    "INCORRECT_USER_NAME_FORMAT",
-			Message: message,
-		},
-	}
-}
-
-func NewGameNameBadRequestError(name string, messageDetails string) error {
-	message := fmt.Sprintf(
-		"'%s' does not match the format. %s",
-		name,
-		messageDetails)
-
-	return &BadRequestError{
-		&BaseError{
-			Code:    "INCORRECT_GAME_NAME_FORMAT",
-			Message: message,
-		},
-	}
-}
-
-func NewEmailBadRequestError(email string, messageDetails string) error {
-	message := fmt.Sprintf(
-		"'%s' does not match the format. %s",
-		email,
-		messageDetails)
-
-	return &BadRequestError{
-		&BaseError{
-			Code:    "INCORRECT_EMAIL_FORMAT",
-			Message: message,
-		},
-	}
-}
-
-func NewPasswordBadRequestError(messageDetails string) error {
-	message := fmt.Sprintf(
-		"The password does not match the format. %s",
-		messageDetails)
-
-	return &BadRequestError{
-		&BaseError{
-			Code:    "INCORRECT_PASSWORD_FORMAT",
-			Message: message,
-		},
-	}
-}
-
 type UnauthorizedError struct {
 	*BaseError
 }
@@ -112,15 +57,6 @@ func NewActiveSessionNotFoundUnauthorizedError() error {
 		&BaseError{
 			Code:    "ACTIVE_SESSION_NOT_FOUND",
 			Message: "An authentication session couldn't be found. Try logging in.",
-		},
-	}
-}
-
-func NewWrongDataUnauthorizedError() error {
-	return &UnauthorizedError{
-		&BaseError{
-			Code:    "WRONG_AUTH_DATA",
-			Message: "Incorrect login or password. Try again.",
 		},
 	}
 }
@@ -240,6 +176,74 @@ func NewUserEmailAlreadyExistsError() error {
 		&BaseError{
 			Code:    "USER_EMAIL_ALREADY_EXISTS",
 			Message: "This email is already taken. Try another one.",
+		},
+	}
+}
+
+type UnprocessableError struct {
+	*BaseError
+}
+
+func NewWrongDataUnprocessableError() error {
+	return &UnprocessableError{
+		&BaseError{
+			Code:    "WRONG_AUTH_DATA",
+			Message: "Incorrect login or password. Try again.",
+		},
+	}
+}
+
+func NewUserNameUnprocessableError(name string, messageDetails string) error {
+	message := fmt.Sprintf(
+		"'%s' does not match the format. %s",
+		name,
+		messageDetails)
+
+	return &UnprocessableError{
+		&BaseError{
+			Code:    "INCORRECT_USER_NAME_FORMAT",
+			Message: message,
+		},
+	}
+}
+
+func NewGameNameUnprocessableError(name string, messageDetails string) error {
+	message := fmt.Sprintf(
+		"'%s' does not match the format. %s",
+		name,
+		messageDetails)
+
+	return &UnprocessableError{
+		&BaseError{
+			Code:    "INCORRECT_GAME_NAME_FORMAT",
+			Message: message,
+		},
+	}
+}
+
+func NewEmailUnprocessableError(email string, messageDetails string) error {
+	message := fmt.Sprintf(
+		"'%s' does not match the format. %s",
+		email,
+		messageDetails)
+
+	return &UnprocessableError{
+		&BaseError{
+			Code:    "INCORRECT_EMAIL_FORMAT",
+			Message: message,
+		},
+	}
+}
+
+func NewPasswordUnprocessableError(messageDetails string) error {
+	message := fmt.Sprintf(
+		"The password does not match the format. %s",
+		messageDetails)
+
+	return &UnprocessableError{
+		&BaseError{
+			Code:    "INCORRECT_PASSWORD_FORMAT",
+			Message: message,
 		},
 	}
 }

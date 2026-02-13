@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.8.1
+  version: 0.8.2
 paths:
 
   /auth/signup:
@@ -681,13 +681,13 @@ components:
 
     Password:
       type: string
-      pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]$'
+      pattern: '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[ !"#$%&''()*+,-./=:;<>?@\[\\\]^_|{}~]).+$'
       minLength: 8
       maxLength: 35
 
     Email:
       type: string
-      pattern: '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+      pattern: '^[\w\d._%+-]+@[\w\d.-]+\.[\w]{2,}$'
       minLength: 6
       maxLength: 35
 
