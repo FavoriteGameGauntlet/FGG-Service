@@ -9,19 +9,19 @@ var userNameRegex = regexp.MustCompile(`^\w+$`)
 
 func ValidateUserName(name string) error {
 	if len(name) < 3 {
-		return common.NewUserNameBadRequestError(
+		return common.NewUserNameUnprocessableError(
 			name,
 			"The name is too short, it should be at least 3 characters long.")
 	}
 
 	if len(name) > 35 {
-		return common.NewUserNameBadRequestError(
+		return common.NewUserNameUnprocessableError(
 			name,
 			"The name is too long, it should be less than 35 characters long.")
 	}
 
 	if !userNameRegex.MatchString(name) {
-		return common.NewUserNameBadRequestError(
+		return common.NewUserNameUnprocessableError(
 			name,
 			"The name must contain only Latin letters, numbers, and underscores")
 	}
@@ -33,19 +33,19 @@ var gameNameRegex = regexp.MustCompile(`^.+$`)
 
 func ValidateGameName(name string) error {
 	if len(name) < 1 {
-		return common.NewGameNameBadRequestError(
+		return common.NewGameNameUnprocessableError(
 			name,
 			"The name is too short, it should be at least 1 characters long.")
 	}
 
 	if len(name) > 70 {
-		return common.NewGameNameBadRequestError(
+		return common.NewGameNameUnprocessableError(
 			name,
 			"The name is too long, it should be less than 70 characters long.")
 	}
 
 	if !gameNameRegex.MatchString(name) {
-		return common.NewGameNameBadRequestError(
+		return common.NewGameNameUnprocessableError(
 			name,
 			"The name must contain only UTF-8 characters")
 	}
@@ -57,19 +57,19 @@ var emailRegex = regexp.MustCompile(`^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]
 
 func ValidateEmail(email string) error {
 	if len(email) < 6 {
-		return common.NewEmailBadRequestError(
+		return common.NewEmailUnprocessableError(
 			email,
 			"The email is too short, it should be at least 6 characters long.")
 	}
 
 	if len(email) > 100 {
-		return common.NewEmailBadRequestError(
+		return common.NewEmailUnprocessableError(
 			email,
 			"The email is too long, it should be less than 100 characters long.")
 	}
 
 	if !emailRegex.MatchString(email) {
-		return common.NewEmailBadRequestError(
+		return common.NewEmailUnprocessableError(
 			email,
 			"The email must follow the pattern (e.g. email@example.com)")
 	}
@@ -80,36 +80,36 @@ func ValidateEmail(email string) error {
 var passwordUppercaseLetterRegex = regexp.MustCompile(`[A-Z]`)
 var passwordLowercaseLetterRegex = regexp.MustCompile(`[a-z]`)
 var passwordDigitRegex = regexp.MustCompile(`\d`)
-var passwordSpecialSymbolRegex = regexp.MustCompile(`[ !"#$%&'()*+,-./:;<=>?@\[\\\]^_{|}~]`)
+var passwordSpecialSymbolRegex = regexp.MustCompile(`[ !"#$%&'()*+,-.=/:;<>?@\[\\\]^_|{}~]`)
 
 func ValidatePassword(password string) error {
 	if len(password) < 8 {
-		return common.NewPasswordBadRequestError(
+		return common.NewPasswordUnprocessableError(
 			"The password is too short, it should be at least 8 characters long.")
 	}
 
 	if len(password) > 35 {
-		return common.NewPasswordBadRequestError(
+		return common.NewPasswordUnprocessableError(
 			"The password is too long, it should be less than 35 characters long.")
 	}
 
 	if !passwordUppercaseLetterRegex.MatchString(password) {
-		return common.NewPasswordBadRequestError(
+		return common.NewPasswordUnprocessableError(
 			"The password doesn't contain uppercase letters.")
 	}
 
 	if !passwordLowercaseLetterRegex.MatchString(password) {
-		return common.NewPasswordBadRequestError(
+		return common.NewPasswordUnprocessableError(
 			"The password doesn't contain lowercase letters.")
 	}
 
 	if !passwordDigitRegex.MatchString(password) {
-		return common.NewPasswordBadRequestError(
+		return common.NewPasswordUnprocessableError(
 			"The password doesn't contain digits.")
 	}
 
 	if !passwordSpecialSymbolRegex.MatchString(password) {
-		return common.NewPasswordBadRequestError(
+		return common.NewPasswordUnprocessableError(
 			"The password doesn't contain any of special symbols ( !\"#$%&'()*+,-./:;<=>?@[]\\^_{|}~).")
 	}
 
