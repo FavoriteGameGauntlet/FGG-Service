@@ -81,11 +81,18 @@ func CreateGame(unplayedGame *common.UnplayedGame) (game common.Game, err error)
 }
 
 func GetCurrentGame(userId int) (game common.Game, err error) {
-	game, err = game_db.GetCurrentGameCommand(userId)
+	games, err := game_db.GetCurrentGameCommand(userId)
+
+	if errors.Is(err, sql.ErrNoRows) || len(games) == 0 {
+		err = common.NewCurrentGameNotFoundError()
+		return
+	}
 
 	if err != nil {
 		return
 	}
+
+	game = games[0]
 
 	timeSpent, err := game_db.GetGameTimeSpentCommand(userId, game.Id)
 
@@ -105,7 +112,7 @@ func CancelCurrentGame(userId int) error {
 		return err
 	}
 
-	_, err = timer_service.StopCurrentTimer(userId)
+	_, err = timer_service.ForceStopCurrentTimer(userId)
 
 	if err != nil {
 		return err
@@ -131,7 +138,7 @@ func FinishCurrentGame(userId int) error {
 		return common.NewCompletedTimersNotFoundError()
 	}
 
-	_, err = timer_service.StopCurrentTimer(userId)
+	_, err = timer_service.ForceStopCurrentTimer(userId)
 
 	if err != nil {
 		return err
@@ -166,8 +173,9 @@ func GetGameHistory(userId int) (games common.Games, err error) {
 func MakeGameRoll(userId int) (game common.Game, err error) {
 	game, err = GetCurrentGame(userId)
 
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return game, err
+	var notFoundError *common.NotFoundError
+	if err != nil && !errors.As(err, &notFoundError) {
+		return
 	}
 
 	if game.Name != "" {
