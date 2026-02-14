@@ -35,7 +35,7 @@ func MakeEffectRoll(userId int) (effects common.Effects, err error) {
 		return
 	}
 
-	err = effect_db.DeleteAvailableRollCommand(userId)
+	err = effect_db.DecreaseAvailableRollsValueCommand(userId)
 
 	return
 }

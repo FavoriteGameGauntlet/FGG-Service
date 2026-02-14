@@ -7,8 +7,8 @@ import (
 )
 
 const GetAvailableRollsCountQuery = `
-	SELECT COUNT(*)
-	FROM AvailableRolls
+	SELECT AvailableRolls
+	FROM UserStats
 	WHERE UserId = ?
 `
 
@@ -21,14 +21,19 @@ func GetAvailableRollsCountCommand(userId int) (count int, err error) {
 }
 
 const GetAvailableEffectsQuery = `
-	SELECT e.Id, e.Name, e.Description
-	FROM Effects e
-		LEFT JOIN (
-			SELECT EffectId
-			FROM EffectHistory
-			WHERE UserId = ?
-		) eh ON e.Id = eh.EffectId
-	WHERE eh.EffectId IS NULL
+	SELECT we.Id, we.Name, we.Description
+	FROM WheelEffects we
+	WHERE NOT EXISTS (
+		SELECT 1
+		FROM WheelEffectHistory weh
+		WHERE weh.WheelEffectId = we.Id
+			AND weh.UserId = ?)
+	  	AND NOT EXISTS (
+			SELECT 1
+			FROM LastWheelEffects lwe
+			WHERE lwe.WheelEffectId = we.Id
+				AND lwe.UserId = ?
+				AND Position = 0)
 `
 
 func GetAvailableEffectsCommand(userId int) (effects common.Effects, err error) {
@@ -55,10 +60,10 @@ func GetAvailableEffectsCommand(userId int) (effects common.Effects, err error) 
 }
 
 const GetEffectHistoryQuery = `
-	SELECT e.Name, e.Description, eh.CreateDate
-	FROM EffectHistory eh
-		INNER JOIN Effects e ON eh.EffectId = e.Id
-	WHERE eh.UserId = ?
+	SELECT we.Name, we.Description, weh.RollDate
+	FROM WheelEffectHistory weh
+		INNER JOIN WheelEffects we ON weh.WheelEffectId = we.Id
+	WHERE weh.UserId = ?
 `
 
 func GetEffectHistoryCommand(userId int) (effects common.RolledEffects, err error) {
@@ -96,19 +101,21 @@ func GetEffectHistoryCommand(userId int) (effects common.RolledEffects, err erro
 }
 
 const MakeEffectRollQuery = `
-	SELECT Id, Name, Description
-	FROM Effects
-	WHERE Id IN (
-		SELECT id
-		FROM Effects e
-			LEFT JOIN (
-				SELECT EffectId
-				FROM EffectHistory
-				WHERE UserId = ?
-			) eh ON e.Id = eh.EffectId
-		WHERE eh.EffectId IS NULL
-		ORDER BY RANDOM()
-		LIMIT 5)
+	SELECT we.Id, we.Name, we.Description
+	FROM WheelEffects we
+	WHERE NOT EXISTS (
+		SELECT 1
+		FROM WheelEffectHistory weh
+		WHERE weh.WheelEffectId = we.Id
+			AND weh.UserId = ?)
+		AND NOT EXISTS (
+			SELECT 1
+			FROM LastWheelEffects lwe
+			WHERE lwe.WheelEffectId = we.Id
+				AND lwe.UserId = ?
+				AND Position = 0)
+	ORDER BY RANDOM()
+	LIMIT 5
 `
 
 func MakeEffectRollCommand(userId int) (effects common.Effects, err error) {
@@ -134,18 +141,14 @@ func MakeEffectRollCommand(userId int) (effects common.Effects, err error) {
 	return
 }
 
-const DeleteAvailableRollQuery = `
-	DELETE FROM AvailableRolls
-	WHERE Id IN (
-		SELECT Id
-		FROM AvailableRolls
-		WHERE UserId = ?
-		ORDER BY CreateDate
-		LIMIT 1)
+const DecreaseAvailableRollsValueQuery = `
+	UPDATE UserStats
+	SET AvailableRolls = AvailableRolls - 1
+	WHERE UserId = ?
 `
 
-func DeleteAvailableRollCommand(userId int) error {
-	_, err := db_access.Exec(DeleteAvailableRollQuery, userId)
+func DecreaseAvailableRollsValueCommand(userId int) error {
+	_, err := db_access.Exec(DecreaseAvailableRollsValueQuery, userId)
 
 	return err
 }

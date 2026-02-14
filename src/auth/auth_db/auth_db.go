@@ -1,4 +1,4 @@
-package auth_service
+package auth_db
 
 import (
 	"FGG-Service/src/common"
@@ -8,21 +8,21 @@ import (
 )
 
 const GetUserByNameQuery = `
-	SELECT Id, Name, Email
+	SELECT Id, Login, Nickname, Email
 	FROM Users
-	WHERE Name = ?
+	WHERE Login = ?
 `
 
 func GetUserByNameCommand(userName string) (user common.User, err error) {
 	row := db_access.QueryRow(GetUserByNameQuery, userName)
 
-	err = row.Scan(&user.Id, &user.Name, &user.Email)
+	err = row.Scan(&user.Id, &user.Login, &user.Nickname, &user.Email)
 
 	return
 }
 
 const GetUserByEmailQuery = `
-	SELECT Id, Name, Email
+	SELECT Id, Login, Nickname, Email
 	FROM Users
 	WHERE Email = ?
 `
@@ -30,33 +30,33 @@ const GetUserByEmailQuery = `
 func GetUserByEmailCommand(userEmail string) (user common.User, err error) {
 	row := db_access.QueryRow(GetUserByEmailQuery, userEmail)
 
-	err = row.Scan(&user.Id, &user.Name, &user.Email)
+	err = row.Scan(&user.Id, &user.Login, &user.Nickname, &user.Email)
 
 	return
 }
 
 const GetUserByNameAndPasswordQuery = `
-	SELECT Id, Name, Email
+	SELECT Id, Login, Nickname, Email
 	FROM Users
-	WHERE Name = ?
+	WHERE Login = ?
 		AND Password = ?
 `
 
-func GetUserByNameAndPasswordCommand(userName string, userPassword string) (user common.User, err error) {
-	row := db_access.QueryRow(GetUserByNameAndPasswordQuery, userName, userPassword)
+func GetUserByNameAndPasswordCommand(login string, password string) (user common.User, err error) {
+	row := db_access.QueryRow(GetUserByNameAndPasswordQuery, login, password)
 
-	err = row.Scan(&user.Id, &user.Name, &user.Email)
+	err = row.Scan(&user.Id, &user.Login, &user.Nickname, &user.Email)
 
 	return
 }
 
 const CreateUserQuery = `
-	INSERT INTO Users (Name, Email, Password)
+	INSERT INTO Users (Login, Email, Password)
 	VALUES (?, ?, ?)
 `
 
-func CreateUserCommand(userName string, userEmail string, userPassword string) error {
-	_, err := db_access.Exec(CreateUserQuery, userName, userEmail, userPassword)
+func CreateUserCommand(login string, email string, password string) error {
+	_, err := db_access.Exec(CreateUserQuery, login, email, password)
 
 	return err
 }
@@ -67,8 +67,8 @@ const GetUserSessionByIdQuery = `
 	WHERE Id = ?
 `
 
-func GetUserSessionByIdCommand(userSessionId string) (userSession common.UserSession, err error) {
-	row := db_access.QueryRow(GetUserSessionByIdQuery, userSessionId)
+func GetUserSessionByIdCommand(sessionId string) (userSession common.UserSession, err error) {
+	row := db_access.QueryRow(GetUserSessionByIdQuery, sessionId)
 
 	err = row.Scan(&userSession.Id, &userSession.UserId)
 
@@ -102,8 +102,8 @@ const DeleteUserSessionQuery = `
 	WHERE Id = ?
 `
 
-func DeleteUserSessionCommand(userSessionId string) error {
-	_, err := db_access.Exec(DeleteUserSessionQuery, userSessionId)
+func DeleteUserSessionCommand(sessionId string) error {
+	_, err := db_access.Exec(DeleteUserSessionQuery, sessionId)
 
 	return err
 }

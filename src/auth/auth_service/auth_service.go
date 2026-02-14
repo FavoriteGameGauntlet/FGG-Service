@@ -1,23 +1,24 @@
 package auth_service
 
 import (
+	"FGG-Service/src/auth/auth_db"
 	"FGG-Service/src/common"
 	"database/sql"
 	"errors"
 )
 
 func CreateUser(userName string, userEmail string, userPassword string) error {
-	user, err := GetUserByNameCommand(userName)
+	user, err := auth_db.GetUserByNameCommand(userName)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
 
-	if user.Name != "" {
+	if user.Login != "" {
 		return common.NewUserNameAlreadyExistsError()
 	}
 
-	user, err = GetUserByEmailCommand(userEmail)
+	user, err = auth_db.GetUserByEmailCommand(userEmail)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err
@@ -27,19 +28,19 @@ func CreateUser(userName string, userEmail string, userPassword string) error {
 		return common.NewUserEmailAlreadyExistsError()
 	}
 
-	err = CreateUserCommand(userName, userEmail, userPassword)
+	err = auth_db.CreateUserCommand(userName, userEmail, userPassword)
 
 	return err
 }
 
 func GetUserSessionById(sessionId string) (userSession common.UserSession, err error) {
-	userSession, err = GetUserSessionByIdCommand(sessionId)
+	userSession, err = auth_db.GetUserSessionByIdCommand(sessionId)
 
 	return
 }
 
 func CreateSession(userName string, userPassword string) (userSession common.UserSession, err error) {
-	user, err := GetUserByNameAndPasswordCommand(userName, userPassword)
+	user, err := auth_db.GetUserByNameAndPasswordCommand(userName, userPassword)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		err = common.NewWrongDataUnprocessableError()
@@ -50,13 +51,13 @@ func CreateSession(userName string, userPassword string) (userSession common.Use
 		return
 	}
 
-	userSession, err = CreateUserSessionCommand(user.Id)
+	userSession, err = auth_db.CreateUserSessionCommand(user.Id)
 
 	return
 }
 
 func DeleteUserSession(userSessionId string) error {
-	err := DeleteUserSessionCommand(userSessionId)
+	err := auth_db.DeleteUserSessionCommand(userSessionId)
 
 	return err
 }
