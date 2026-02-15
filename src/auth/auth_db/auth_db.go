@@ -8,7 +8,7 @@ import (
 )
 
 const GetUserByNameQuery = `
-	SELECT Id, Login, Nickname, Email
+	SELECT Id, Login, DisplayName, Email
 	FROM Users
 	WHERE Login = ?
 `
@@ -16,13 +16,13 @@ const GetUserByNameQuery = `
 func GetUserByNameCommand(userName string) (user common.User, err error) {
 	row := db_access.QueryRow(GetUserByNameQuery, userName)
 
-	err = row.Scan(&user.Id, &user.Login, &user.Nickname, &user.Email)
+	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
 
 	return
 }
 
 const GetUserByEmailQuery = `
-	SELECT Id, Login, Nickname, Email
+	SELECT Id, Login, DisplayName, Email
 	FROM Users
 	WHERE Email = ?
 `
@@ -30,22 +30,22 @@ const GetUserByEmailQuery = `
 func GetUserByEmailCommand(userEmail string) (user common.User, err error) {
 	row := db_access.QueryRow(GetUserByEmailQuery, userEmail)
 
-	err = row.Scan(&user.Id, &user.Login, &user.Nickname, &user.Email)
+	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
 
 	return
 }
 
-const GetUserByNameAndPasswordQuery = `
-	SELECT Id, Login, Nickname, Email
+const GetUserByLoginAndPasswordQuery = `
+	SELECT Id, Login, DisplayName, Email
 	FROM Users
 	WHERE Login = ?
 		AND Password = ?
 `
 
-func GetUserByNameAndPasswordCommand(login string, password string) (user common.User, err error) {
-	row := db_access.QueryRow(GetUserByNameAndPasswordQuery, login, password)
+func GetUserByLoginAndPasswordCommand(login string, password string) (user common.User, err error) {
+	row := db_access.QueryRow(GetUserByLoginAndPasswordQuery, login, password)
 
-	err = row.Scan(&user.Id, &user.Login, &user.Nickname, &user.Email)
+	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
 
 	return
 }

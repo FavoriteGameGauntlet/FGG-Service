@@ -7,45 +7,45 @@ import (
 
 var userNameRegex = regexp.MustCompile(`^\w+$`)
 
-func ValidateUserName(name string) error {
-	if len(name) < 3 {
+func ValidateUserLogin(login string) error {
+	if len(login) < 3 {
 		return common.NewUserNameUnprocessableError(
-			name,
-			"The name is too short, it should be at least 3 characters long.")
+			login,
+			"The login is too short, it should be at least 3 characters long.")
 	}
 
-	if len(name) > 35 {
+	if len(login) > 35 {
 		return common.NewUserNameUnprocessableError(
-			name,
-			"The name is too long, it should be less than 35 characters long.")
+			login,
+			"The login is too long, it should be less than 35 characters long.")
 	}
 
-	if !userNameRegex.MatchString(name) {
+	if !userNameRegex.MatchString(login) {
 		return common.NewUserNameUnprocessableError(
-			name,
-			"The name must contain only Latin letters, numbers, and underscores")
+			login,
+			"The login must contain only Latin letters, numbers, and underscores")
 	}
 
 	return nil
 }
 
-var gameNameRegex = regexp.MustCompile(`^.+$`)
+var nameRegex = regexp.MustCompile(`^.+$`)
 
-func ValidateGameName(name string) error {
+func ValidateName(name string) error {
 	if len(name) < 1 {
-		return common.NewGameNameUnprocessableError(
+		return common.NewNameUnprocessableError(
 			name,
 			"The name is too short, it should be at least 1 characters long.")
 	}
 
 	if len(name) > 70 {
-		return common.NewGameNameUnprocessableError(
+		return common.NewNameUnprocessableError(
 			name,
 			"The name is too long, it should be less than 70 characters long.")
 	}
 
-	if !gameNameRegex.MatchString(name) {
-		return common.NewGameNameUnprocessableError(
+	if !nameRegex.MatchString(name) {
+		return common.NewNameUnprocessableError(
 			name,
 			"The name must contain only UTF-8 characters")
 	}
@@ -77,10 +77,8 @@ func ValidateEmail(email string) error {
 	return nil
 }
 
-var passwordUppercaseLetterRegex = regexp.MustCompile(`[A-Z]`)
-var passwordLowercaseLetterRegex = regexp.MustCompile(`[a-z]`)
+var passwordLetterRegex = regexp.MustCompile(`\w`)
 var passwordDigitRegex = regexp.MustCompile(`\d`)
-var passwordSpecialSymbolRegex = regexp.MustCompile(`[ !"#$%&'()*+,-.=/:;<>?@\[\\\]^_|{}~]`)
 
 func ValidatePassword(password string) error {
 	if len(password) < 8 {
@@ -93,24 +91,14 @@ func ValidatePassword(password string) error {
 			"The password is too long, it should be less than 35 characters long.")
 	}
 
-	if !passwordUppercaseLetterRegex.MatchString(password) {
+	if !passwordLetterRegex.MatchString(password) {
 		return common.NewPasswordUnprocessableError(
-			"The password doesn't contain uppercase letters.")
-	}
-
-	if !passwordLowercaseLetterRegex.MatchString(password) {
-		return common.NewPasswordUnprocessableError(
-			"The password doesn't contain lowercase letters.")
+			"The password doesn't contain letters.")
 	}
 
 	if !passwordDigitRegex.MatchString(password) {
 		return common.NewPasswordUnprocessableError(
 			"The password doesn't contain digits.")
-	}
-
-	if !passwordSpecialSymbolRegex.MatchString(password) {
-		return common.NewPasswordUnprocessableError(
-			"The password doesn't contain any of special symbols ( !\"#$%&'()*+,-./:;<=>?@[]\\^_{|}~).")
 	}
 
 	return nil

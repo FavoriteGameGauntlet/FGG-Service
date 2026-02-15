@@ -24,12 +24,12 @@ func (Server) GetCurrentGame(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	gameDto := ConvertGameToDto(game)
+	gameDto := convertGameToDto(game)
 
 	return ctx.JSON(http.StatusOK, gameDto)
 }
 
-func ConvertGameToDto(game common.Game) api.Game {
+func convertGameToDto(game common.Game) api.Game {
 	return api.Game{
 		Name:       game.Name,
 		State:      api.GameState(game.State),
@@ -52,7 +52,7 @@ func (Server) CancelCurrentGame(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	return ctx.NoContent(http.StatusOK)
+	return ctx.NoContent(http.StatusNoContent)
 }
 
 // FinishCurrentGame (GET /games/current/finish)
@@ -69,7 +69,7 @@ func (Server) FinishCurrentGame(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	return ctx.NoContent(http.StatusOK)
+	return ctx.NoContent(http.StatusNoContent)
 }
 
 // GetGameHistory (GET /games/history)
@@ -86,16 +86,16 @@ func (Server) GetGameHistory(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	gamesDto := ConvertGamesToDto(games)
+	gamesDto := convertGamesToDto(games)
 
 	return ctx.JSON(http.StatusOK, gamesDto)
 }
 
-func ConvertGamesToDto(games common.Games) api.Games {
+func convertGamesToDto(games common.Games) api.Games {
 	gamesDto := make(api.Games, len(games))
 
 	for i, game := range games {
-		gamesDto[i] = ConvertGameToDto(game)
+		gamesDto[i] = convertGameToDto(game)
 	}
 
 	return gamesDto
@@ -115,13 +115,13 @@ func (Server) MakeGameRoll(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	gameDto := ConvertGameToDto(game)
+	gameDto := convertGameToDto(game)
 
 	return ctx.JSON(http.StatusOK, gameDto)
 }
 
-// GetUnplayedGames (GET /games/unplayed)
-func (Server) GetUnplayedGames(ctx echo.Context) error {
+// GetWishlistGames (GET /games/wishlist)
+func (Server) GetWishlistGames(ctx echo.Context) error {
 	userId, err := GetUserId(ctx)
 
 	if err != nil {
@@ -134,16 +134,16 @@ func (Server) GetUnplayedGames(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	gamesDto := ConvertUnplayedGamesToDto(games)
+	gamesDto := convertWishlistGamesToDto(games)
 
 	return ctx.JSON(http.StatusOK, gamesDto)
 }
 
-func ConvertUnplayedGamesToDto(games common.UnplayedGames) api.UnplayedGames {
-	gamesDto := make(api.UnplayedGames, len(games))
+func convertWishlistGamesToDto(games common.UnplayedGames) api.WishlistGames {
+	gamesDto := make(api.WishlistGames, len(games))
 
 	for i, game := range games {
-		gamesDto[i] = api.UnplayedGame{
+		gamesDto[i] = api.WishlistGame{
 			Name: game.Name,
 		}
 	}
@@ -151,49 +151,41 @@ func ConvertUnplayedGamesToDto(games common.UnplayedGames) api.UnplayedGames {
 	return gamesDto
 }
 
-// AddUnplayedGames (POST /games/unplayed)
-func (Server) AddUnplayedGames(ctx echo.Context) error {
+// AddWishlistGame (POST /games/wishlist)
+func (Server) AddWishlistGame(ctx echo.Context) error {
 	userId, err := GetUserId(ctx)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	var gamesDto api.UnplayedGames
-	err = ctx.Bind(&gamesDto)
+	var gameDto api.WishlistGame
+	err = ctx.Bind(&gameDto)
 
 	if err != nil {
 		err = common.NewBadRequestError(err.Error())
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	games := ConvertUnplayedGamesFromDto(gamesDto)
+	game := convertWishlistGameFromDto(gameDto)
 
-	for _, game := range games {
-		err = validator.ValidateGameName(game.Name)
-
-		if err != nil {
-			return SendJSONErrorResponse(ctx, err)
-		}
-	}
-
-	err = game_service.AddUnplayedGames(userId, games)
+	err = validator.ValidateName(game.Name)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	return ctx.NoContent(http.StatusOK)
-}
+	err = game_service.CreateUnplayedGame(userId, game)
 
-func ConvertUnplayedGamesFromDto(games api.UnplayedGames) common.UnplayedGames {
-	gamesDto := make(common.UnplayedGames, len(games))
-
-	for i, g := range games {
-		gamesDto[i] = common.UnplayedGame{
-			Name: g.Name,
-		}
+	if err != nil {
+		return SendJSONErrorResponse(ctx, err)
 	}
 
-	return gamesDto
+	return ctx.NoContent(http.StatusNoContent)
+}
+
+func convertWishlistGameFromDto(gameDto api.WishlistGame) common.UnplayedGame {
+	return common.UnplayedGame{
+		Name: gameDto.Name,
+	}
 }

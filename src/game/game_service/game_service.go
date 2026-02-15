@@ -16,7 +16,7 @@ func AddUnplayedGames(userId int, games common.UnplayedGames) error {
 
 	var err error
 	for _, game := range games {
-		err = CreateUnplayedGame(userId, &game)
+		err = CreateUnplayedGame(userId, game)
 
 		if err != nil {
 			errorCount++
@@ -30,7 +30,7 @@ func AddUnplayedGames(userId int, games common.UnplayedGames) error {
 	return nil
 }
 
-func CreateUnplayedGame(userId int, unplayedGame *common.UnplayedGame) error {
+func CreateUnplayedGame(userId int, unplayedGame common.UnplayedGame) error {
 	doesExist, err := game_db.DoesUnplayedGameExistCommand(userId, unplayedGame.Name)
 
 	if err != nil {
@@ -52,7 +52,7 @@ func CreateUnplayedGame(userId int, unplayedGame *common.UnplayedGame) error {
 	if doesExist {
 		game, err = game_db.GetGameCommand(unplayedGame.Name)
 	} else {
-		game, err = CreateGame(unplayedGame)
+		game, err = createGame(unplayedGame)
 	}
 
 	if err != nil {
@@ -68,7 +68,7 @@ func GetUnplayedGames(userId int) (common.UnplayedGames, error) {
 	return game_db.GetUnplayedGamesCommand(userId)
 }
 
-func CreateGame(unplayedGame *common.UnplayedGame) (game common.Game, err error) {
+func createGame(unplayedGame common.UnplayedGame) (game common.Game, err error) {
 	err = game_db.CreateGameCommand(unplayedGame.Name)
 
 	if err != nil {

@@ -13,7 +13,7 @@ import (
 
 // Login (POST /auth/login)
 func (Server) Login(ctx echo.Context) error {
-	var user api.User
+	var user api.LoginUser
 	err := ctx.Bind(&user)
 
 	if err != nil {
@@ -28,19 +28,19 @@ func (Server) Login(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	userSession, err := auth_service.CreateSession(user.Name, user.Password)
+	userSession, err := auth_service.CreateSession(user.Login, user.Password)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	cookie := CreateSessionCookie(userSession.Id)
+	cookie := createSessionCookie(userSession.Id)
 	ctx.SetCookie(cookie)
 
-	return ctx.NoContent(http.StatusOK)
+	return ctx.NoContent(http.StatusNoContent)
 }
 
-func CreateSessionCookie(sessionId string) *http.Cookie {
+func createSessionCookie(sessionId string) *http.Cookie {
 	cookie := new(http.Cookie)
 	cookie.Name = SessionCookieName
 	cookie.Value = sessionId
@@ -70,12 +70,12 @@ func (Server) Logout(ctx echo.Context) error {
 	cookie.MaxAge = -1
 	ctx.SetCookie(cookie)
 
-	return ctx.NoContent(http.StatusOK)
+	return ctx.NoContent(http.StatusNoContent)
 }
 
 // SignUp (POST /auth/signup)
 func (Server) SignUp(ctx echo.Context) error {
-	var user api.NewUser
+	var user api.SignupUser
 	err := ctx.Bind(&user)
 
 	if err != nil {
@@ -83,7 +83,7 @@ func (Server) SignUp(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	err = validator.ValidateUserName(user.Name)
+	err = validator.ValidateUserLogin(user.Login)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
@@ -101,11 +101,11 @@ func (Server) SignUp(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	err = auth_service.CreateUser(user.Name, user.Email, user.Password)
+	err = auth_service.CreateUser(user.Login, user.Email, user.Password)
 
 	if err != nil {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	return ctx.NoContent(http.StatusOK)
+	return ctx.NoContent(http.StatusNoContent)
 }

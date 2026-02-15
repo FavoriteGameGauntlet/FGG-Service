@@ -1,10 +1,10 @@
 package common
 
 type User struct {
-	Id       int
-	Login    string
-	Nickname string
-	Email    string
+	Id          int
+	Login       string
+	DisplayName string
+	Email       string
 }
 
 type UserSession struct {

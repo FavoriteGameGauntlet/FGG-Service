@@ -9,90 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GetAvailableEffects (GET /effects/available)
-func (Server) GetAvailableEffects(ctx echo.Context) error {
-	userId, err := GetUserId(ctx)
-
-	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
-	}
-
-	effects, err := effect_service.GetAvailableEffects(userId)
-
-	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
-	}
-
-	effectsDto := ConvertEffectsToDto(effects)
-
-	return ctx.JSON(http.StatusOK, effectsDto)
-}
-
-func ConvertEffectsToDto(effects common.Effects) api.Effects {
-	effectsDto := make(api.Effects, len(effects))
-
-	for i, effect := range effects {
-		effectsDto[i] = api.Effect{
-			Name:        effect.Name,
-			Description: effect.Description,
-		}
-	}
-
-	return effectsDto
-}
-
-// GetAvailableEffectsCount (GET /effects/available/count)
-func (Server) GetAvailableEffectsCount(ctx echo.Context) error {
-	userId, err := GetUserId(ctx)
-
-	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
-	}
-
-	count, err := effect_service.GetAvailableRollsCount(userId)
-
-	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
-	}
-
-	return ctx.JSON(http.StatusOK, count)
-}
-
-// GetEffectHistory (GET /effects/history)
-func (Server) GetEffectHistory(ctx echo.Context) error {
-	userId, err := GetUserId(ctx)
-
-	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
-	}
-
-	effects, err := effect_service.GetEffectHistory(userId)
-
-	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
-	}
-
-	effectsDto := ConvertRolledEffectsToDto(effects)
-
-	return ctx.JSON(http.StatusOK, effectsDto)
-}
-
-func ConvertRolledEffectsToDto(effects common.RolledEffects) api.RolledEffects {
-	effectsDto := make(api.RolledEffects, len(effects))
-
-	for i, effect := range effects {
-		effectsDto[i] = api.RolledEffect{
-			Name:        effect.Name,
-			Description: effect.Description,
-			RollDate:    effect.RollDate,
-		}
-	}
-
-	return effectsDto
-}
-
-// MakeEffectRoll (POST /effects/roll)
-func (Server) MakeEffectRoll(ctx echo.Context) error {
+// MakeAvailableWheelEffectRoll (POST /wheel-effects/available/roll
+func (Server) MakeAvailableWheelEffectRoll(ctx echo.Context) error {
 	userId, err := GetUserId(ctx)
 
 	if err != nil {
@@ -105,7 +23,80 @@ func (Server) MakeEffectRoll(ctx echo.Context) error {
 		return SendJSONErrorResponse(ctx, err)
 	}
 
-	effectsDto := ConvertEffectsToDto(effects)
+	effectsDto := convertEffectsToDto(effects)
 
 	return ctx.JSON(http.StatusOK, effectsDto)
+}
+
+// ApplyAvailableWheelEffectRoll (POST /wheel-effects/available/roll/apply)
+func (Server) ApplyAvailableWheelEffectRoll(ctx echo.Context) error {
+	return ctx.NoContent(http.StatusNotImplemented)
+}
+
+// GetWheelEffectHistory (GET /wheel-effects/history)
+func (Server) GetWheelEffectHistory(ctx echo.Context) error {
+	userId, err := GetUserId(ctx)
+
+	if err != nil {
+		return SendJSONErrorResponse(ctx, err)
+	}
+
+	effects, err := effect_service.GetEffectHistory(userId)
+
+	if err != nil {
+		return SendJSONErrorResponse(ctx, err)
+	}
+
+	effectsDto := convertRolledEffectsToDto(effects)
+
+	return ctx.JSON(http.StatusOK, effectsDto)
+}
+
+func convertRolledEffectsToDto(effects common.RolledEffects) api.RolledWheelEffects {
+	effectsDto := make(api.RolledWheelEffects, len(effects))
+
+	for i, effect := range effects {
+		position := i - 2
+
+		effectsDto[i] = api.RolledWheelEffect{
+			Name:        effect.Name,
+			Description: effect.Description,
+			Position:    &position,
+			RollDate:    effect.RollDate,
+		}
+	}
+
+	return effectsDto
+}
+
+// GetAvailableWheelEffects (GET /wheel-effects/available)
+func (s Server) GetAvailableWheelEffects(ctx echo.Context) error {
+	userId, err := GetUserId(ctx)
+
+	if err != nil {
+		return SendJSONErrorResponse(ctx, err)
+	}
+
+	effects, err := effect_service.GetAvailableEffects(userId)
+
+	if err != nil {
+		return SendJSONErrorResponse(ctx, err)
+	}
+
+	effectsDto := convertEffectsToDto(effects)
+
+	return ctx.JSON(http.StatusOK, effectsDto)
+}
+
+func convertEffectsToDto(effects common.Effects) api.WheelEffects {
+	effectsDto := make(api.WheelEffects, len(effects))
+
+	for i, effect := range effects {
+		effectsDto[i] = api.WheelEffect{
+			Name:        effect.Name,
+			Description: effect.Description,
+		}
+	}
+
+	return effectsDto
 }

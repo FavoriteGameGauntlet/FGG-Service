@@ -207,7 +207,7 @@ func NewUserNameUnprocessableError(name string, messageDetails string) error {
 	}
 }
 
-func NewGameNameUnprocessableError(name string, messageDetails string) error {
+func NewNameUnprocessableError(name string, messageDetails string) error {
 	message := fmt.Sprintf(
 		"'%s' does not match the format. %s",
 		name,

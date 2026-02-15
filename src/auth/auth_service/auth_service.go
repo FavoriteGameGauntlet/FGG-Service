@@ -7,8 +7,8 @@ import (
 	"errors"
 )
 
-func CreateUser(userName string, userEmail string, userPassword string) error {
-	user, err := auth_db.GetUserByNameCommand(userName)
+func CreateUser(login string, email string, password string) error {
+	user, err := auth_db.GetUserByNameCommand(login)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err
@@ -18,7 +18,7 @@ func CreateUser(userName string, userEmail string, userPassword string) error {
 		return common.NewUserNameAlreadyExistsError()
 	}
 
-	user, err = auth_db.GetUserByEmailCommand(userEmail)
+	user, err = auth_db.GetUserByEmailCommand(email)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err
@@ -28,7 +28,7 @@ func CreateUser(userName string, userEmail string, userPassword string) error {
 		return common.NewUserEmailAlreadyExistsError()
 	}
 
-	err = auth_db.CreateUserCommand(userName, userEmail, userPassword)
+	err = auth_db.CreateUserCommand(login, email, password)
 
 	return err
 }
@@ -39,8 +39,8 @@ func GetUserSessionById(sessionId string) (userSession common.UserSession, err e
 	return
 }
 
-func CreateSession(userName string, userPassword string) (userSession common.UserSession, err error) {
-	user, err := auth_db.GetUserByNameAndPasswordCommand(userName, userPassword)
+func CreateSession(userLogin string, userPassword string) (userSession common.UserSession, err error) {
+	user, err := auth_db.GetUserByLoginAndPasswordCommand(userLogin, userPassword)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		err = common.NewWrongDataUnprocessableError()

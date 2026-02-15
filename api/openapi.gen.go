@@ -4,9 +4,12 @@
 package api
 
 import (
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/oapi-codegen/runtime"
 )
 
 // Defines values for GameState.
@@ -24,23 +27,8 @@ const (
 	TimerStateRunning  TimerState = "running"
 )
 
-// Duration the duration notation as defined by ISO 8601
+// Duration The duration notation as defined by ISO 8601
 type Duration = string
-
-// Effect defines model for Effect.
-type Effect struct {
-	Description *string    `json:"description,omitempty"`
-	Name        EffectName `json:"name"`
-}
-
-// EffectName defines model for EffectName.
-type EffectName = string
-
-// Effects defines model for Effects.
-type Effects = []Effect
-
-// Email defines model for Email.
-type Email = string
 
 // Error defines model for Error.
 type Error struct {
@@ -48,52 +36,84 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// FreePointChange defines model for FreePointChange.
+type FreePointChange struct {
+	ActualChangeValue *int        `json:"actualChangeValue,omitempty"`
+	ChangeDate        time.Time   `json:"changeDate"`
+	ChangeSource      interface{} `json:"changeSource"`
+	ChangeValue       int         `json:"changeValue"`
+	FinalValue        Points      `json:"finalValue"`
+	WheelEffectName   *Name       `json:"wheelEffectName,omitempty"`
+}
+
+// FreePointChanges defines model for FreePointChanges.
+type FreePointChanges = []FreePointChange
+
 // Game defines model for Game.
 type Game struct {
 	FinishDate *time.Time `json:"finishDate,omitempty"`
-	Name       GameName   `json:"name"`
+	Name       Name       `json:"name"`
 	State      GameState  `json:"state"`
 
-	// TimeSpent the duration notation as defined by ISO 8601
+	// TimeSpent The duration notation as defined by ISO 8601
 	TimeSpent Duration `json:"timeSpent"`
 }
 
 // GameState defines model for Game.State.
 type GameState string
 
-// GameName defines model for GameName.
-type GameName = string
-
 // Games defines model for Games.
 type Games = []Game
 
-// NewUser defines model for NewUser.
-type NewUser struct {
-	Email    Email    `json:"email"`
-	Name     UserName `json:"name"`
-	Password Password `json:"password"`
+// LoginUser defines model for LoginUser.
+type LoginUser struct {
+	Login    UserLogin    `json:"login"`
+	Password UserPassword `json:"password"`
 }
 
-// Password defines model for Password.
-type Password = string
+// Name defines model for Name.
+type Name = string
 
-// RolledEffect defines model for RolledEffect.
-type RolledEffect struct {
-	Description *string    `json:"description,omitempty"`
-	Name        EffectName `json:"name"`
-	RollDate    time.Time  `json:"rollDate"`
+// Points defines model for Points.
+type Points = int
+
+// RolledWheelEffect defines model for RolledWheelEffect.
+type RolledWheelEffect struct {
+	Description *string   `json:"description,omitempty"`
+	Name        Name      `json:"name"`
+	Position    *int      `json:"position,omitempty"`
+	RollDate    time.Time `json:"rollDate"`
 }
 
-// RolledEffects defines model for RolledEffects.
-type RolledEffects = []RolledEffect
+// RolledWheelEffects defines model for RolledWheelEffects.
+type RolledWheelEffects = []RolledWheelEffect
+
+// SignupUser defines model for SignupUser.
+type SignupUser struct {
+	Email    UserEmail    `json:"email"`
+	Login    UserLogin    `json:"login"`
+	Password UserPassword `json:"password"`
+}
+
+// TerritoryPointChange defines model for TerritoryPointChange.
+type TerritoryPointChange struct {
+	ActualChangeValue *int        `json:"actualChangeValue,omitempty"`
+	ChangeDate        time.Time   `json:"changeDate"`
+	ChangeSource      interface{} `json:"changeSource"`
+	ChangeValue       int         `json:"changeValue"`
+	FinalValue        Points      `json:"finalValue"`
+}
+
+// TerritoryPointChanges defines model for TerritoryPointChanges.
+type TerritoryPointChanges = []TerritoryPointChange
 
 // Timer defines model for Timer.
 type Timer struct {
-	// Duration the duration notation as defined by ISO 8601
+	// Duration The duration notation as defined by ISO 8601
 	Duration       Duration  `json:"duration"`
 	LastActionDate time.Time `json:"lastActionDate"`
 
-	// RemainingTime the duration notation as defined by ISO 8601
+	// RemainingTime The duration notation as defined by ISO 8601
 	RemainingTime Duration   `json:"remainingTime"`
 	State         TimerState `json:"state"`
 }
@@ -101,31 +121,115 @@ type Timer struct {
 // TimerState defines model for Timer.State.
 type TimerState string
 
-// UnplayedGame defines model for UnplayedGame.
-type UnplayedGame struct {
-	Name GameName `json:"name"`
+// UserEmail defines model for UserEmail.
+type UserEmail = string
+
+// UserInfo defines model for UserInfo.
+type UserInfo struct {
+	AvailableRolls   Points     `json:"availableRolls"`
+	DisplayName      Name       `json:"displayName"`
+	ExperiencePoints *Points    `json:"experiencePoints,omitempty"`
+	FreePoints       Points     `json:"freePoints"`
+	Login            *UserLogin `json:"login,omitempty"`
+	TerritoryHours   *Points    `json:"territoryHours,omitempty"`
+	TerritoryPoints  Points     `json:"territoryPoints"`
 }
 
-// UnplayedGames defines model for UnplayedGames.
-type UnplayedGames = []UnplayedGame
+// UserInfos defines model for UserInfos.
+type UserInfos = []UserInfo
 
-// User defines model for User.
-type User struct {
-	Name     UserName `json:"name"`
-	Password Password `json:"password"`
+// UserLogin defines model for UserLogin.
+type UserLogin = string
+
+// UserPassword defines model for UserPassword.
+type UserPassword = string
+
+// UserStats defines model for UserStats.
+type UserStats struct {
+	AvailableRolls   Points  `json:"availableRolls"`
+	ExperiencePoints *Points `json:"experiencePoints,omitempty"`
+	FreePoints       Points  `json:"freePoints"`
+	TerritoryHours   *Points `json:"territoryHours,omitempty"`
+	TerritoryPoints  Points  `json:"territoryPoints"`
 }
 
-// UserName defines model for UserName.
-type UserName = string
+// VictoryPointChange defines model for VictoryPointChange.
+type VictoryPointChange struct {
+	ActualChangeValue *int      `json:"actualChangeValue,omitempty"`
+	ChangeDate        time.Time `json:"changeDate"`
+	ChangeSource      string    `json:"changeSource"`
+	ChangeValue       int       `json:"changeValue"`
+	FinalValue        Points    `json:"finalValue"`
+}
+
+// WheelEffect defines model for WheelEffect.
+type WheelEffect struct {
+	Description *string `json:"description,omitempty"`
+	Name        Name    `json:"name"`
+}
+
+// WheelEffects defines model for WheelEffects.
+type WheelEffects = []WheelEffect
+
+// WishlistGame defines model for WishlistGame.
+type WishlistGame struct {
+	Name Name `json:"name"`
+}
+
+// WishlistGames defines model for WishlistGames.
+type WishlistGames = []WishlistGame
+
+// ChangeExperiencePointsJSONBody defines parameters for ChangeExperiencePoints.
+type ChangeExperiencePointsJSONBody struct {
+	ChangeValue *int `json:"changeValue,omitempty"`
+}
+
+// ChangeFreePointsJSONBody defines parameters for ChangeFreePoints.
+type ChangeFreePointsJSONBody struct {
+	ChangeSource *string `json:"changeSource,omitempty"`
+	ChangeValue  *int    `json:"changeValue,omitempty"`
+}
+
+// ChangeTerritoryHoursJSONBody defines parameters for ChangeTerritoryHours.
+type ChangeTerritoryHoursJSONBody struct {
+	ChangeValue *int `json:"changeValue,omitempty"`
+}
+
+// ChangeTerritoryPointsJSONBody defines parameters for ChangeTerritoryPoints.
+type ChangeTerritoryPointsJSONBody struct {
+	ChangeSource *string `json:"changeSource,omitempty"`
+	ChangeValue  *int    `json:"changeValue,omitempty"`
+}
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
-type LoginJSONRequestBody = User
+type LoginJSONRequestBody = LoginUser
 
 // SignUpJSONRequestBody defines body for SignUp for application/json ContentType.
-type SignUpJSONRequestBody = NewUser
+type SignUpJSONRequestBody = SignupUser
 
 // AddUnplayedGamesJSONRequestBody defines body for AddUnplayedGames for application/json ContentType.
-type AddUnplayedGamesJSONRequestBody = UnplayedGames
+type AddUnplayedGamesJSONRequestBody = WishlistGames
+
+// AddWishlistGameJSONRequestBody defines body for AddWishlistGame for application/json ContentType.
+type AddWishlistGameJSONRequestBody = WishlistGame
+
+// ChangeExperiencePointsJSONRequestBody defines body for ChangeExperiencePoints for application/json ContentType.
+type ChangeExperiencePointsJSONRequestBody ChangeExperiencePointsJSONBody
+
+// ChangeFreePointsJSONRequestBody defines body for ChangeFreePoints for application/json ContentType.
+type ChangeFreePointsJSONRequestBody ChangeFreePointsJSONBody
+
+// ChangeTerritoryHoursJSONRequestBody defines body for ChangeTerritoryHours for application/json ContentType.
+type ChangeTerritoryHoursJSONRequestBody ChangeTerritoryHoursJSONBody
+
+// ChangeTerritoryPointsJSONRequestBody defines body for ChangeTerritoryPoints for application/json ContentType.
+type ChangeTerritoryPointsJSONRequestBody ChangeTerritoryPointsJSONBody
+
+// ChangeOwnDisplayNameJSONRequestBody defines body for ChangeOwnDisplayName for application/json ContentType.
+type ChangeOwnDisplayNameJSONRequestBody = Name
+
+// ApplyAvailableWheelEffectRollJSONRequestBody defines body for ApplyAvailableWheelEffectRoll for application/json ContentType.
+type ApplyAvailableWheelEffectRollJSONRequestBody = UserInfos
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -171,6 +275,30 @@ type ServerInterface interface {
 	// Add game wishlist
 	// (POST /games/unplayed)
 	AddUnplayedGames(ctx echo.Context) error
+	// Get game wishlist
+	// (GET /games/wishlist)
+	GetWishlistGames(ctx echo.Context) error
+	// Add game wishlist
+	// (POST /games/wishlist)
+	AddWishlistGame(ctx echo.Context) error
+
+	// (POST /points/experience-points)
+	ChangeExperiencePoints(ctx echo.Context) error
+
+	// (GET /points/free-point-history)
+	GetFreePointHistory(ctx echo.Context) error
+
+	// (POST /points/free-points)
+	ChangeFreePoints(ctx echo.Context) error
+
+	// (POST /points/territory-hours)
+	ChangeTerritoryHours(ctx echo.Context) error
+
+	// (GET /points/territory-point-history)
+	GetTerritoryPointHistory(ctx echo.Context) error
+
+	// (POST /points/territory-points)
+	ChangeTerritoryPoints(ctx echo.Context) error
 	// Get a timer for the current game
 	// (GET /timers/current)
 	GetCurrentTimer(ctx echo.Context) error
@@ -180,6 +308,48 @@ type ServerInterface interface {
 	// Start or continue the current timer
 	// (POST /timers/current/start)
 	StartCurrentTimer(ctx echo.Context) error
+
+	// (GET /users/infos)
+	GetUserInfos(ctx echo.Context) error
+
+	// (GET /users/self/display-name)
+	GetOwnDisplayName(ctx echo.Context) error
+
+	// (POST /users/self/display-name)
+	ChangeOwnDisplayName(ctx echo.Context) error
+
+	// (GET /users/self/stats)
+	GetOwnStats(ctx echo.Context) error
+
+	// (GET /users/{login}/free-point-history)
+	GetUserFreePointHistory(ctx echo.Context, login UserLogin) error
+
+	// (GET /users/{login}/game-history)
+	GetUserGameHistory(ctx echo.Context, login UserLogin) error
+
+	// (GET /users/{login}/stats)
+	GetUserStats(ctx echo.Context, login UserLogin) error
+
+	// (GET /users/{login}/territory-point-history)
+	GetUserTerritoryPointHistory(ctx echo.Context, login UserLogin) error
+
+	// (GET /users/{login}/wheel-effect-history)
+	GetUserWheelEffectHistory(ctx echo.Context, login UserLogin) error
+
+	// (GET /users/{login}/wishlist-games)
+	GetUserWishlistGames(ctx echo.Context, login UserLogin) error
+	// Get a list of effects available for rolling
+	// (GET /wheel-effects/available)
+	GetAvailableWheelEffects(ctx echo.Context) error
+	// Make the roll of the effect available
+	// (POST /wheel-effects/available/roll)
+	MakeAvailableWheelEffectRoll(ctx echo.Context) error
+
+	// (POST /wheel-effects/available/roll/apply)
+	ApplyAvailableWheelEffectRoll(ctx echo.Context) error
+	// Get a list of all effect rolls
+	// (GET /wheel-effects/history)
+	GetWheelEffectHistory(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -313,6 +483,78 @@ func (w *ServerInterfaceWrapper) AddUnplayedGames(ctx echo.Context) error {
 	return err
 }
 
+// GetWishlistGames converts echo context to params.
+func (w *ServerInterfaceWrapper) GetWishlistGames(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetWishlistGames(ctx)
+	return err
+}
+
+// AddWishlistGame converts echo context to params.
+func (w *ServerInterfaceWrapper) AddWishlistGame(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AddWishlistGame(ctx)
+	return err
+}
+
+// ChangeExperiencePoints converts echo context to params.
+func (w *ServerInterfaceWrapper) ChangeExperiencePoints(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ChangeExperiencePoints(ctx)
+	return err
+}
+
+// GetFreePointHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetFreePointHistory(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetFreePointHistory(ctx)
+	return err
+}
+
+// ChangeFreePoints converts echo context to params.
+func (w *ServerInterfaceWrapper) ChangeFreePoints(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ChangeFreePoints(ctx)
+	return err
+}
+
+// ChangeTerritoryHours converts echo context to params.
+func (w *ServerInterfaceWrapper) ChangeTerritoryHours(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ChangeTerritoryHours(ctx)
+	return err
+}
+
+// GetTerritoryPointHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetTerritoryPointHistory(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetTerritoryPointHistory(ctx)
+	return err
+}
+
+// ChangeTerritoryPoints converts echo context to params.
+func (w *ServerInterfaceWrapper) ChangeTerritoryPoints(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ChangeTerritoryPoints(ctx)
+	return err
+}
+
 // GetCurrentTimer converts echo context to params.
 func (w *ServerInterfaceWrapper) GetCurrentTimer(ctx echo.Context) error {
 	var err error
@@ -337,6 +579,174 @@ func (w *ServerInterfaceWrapper) StartCurrentTimer(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.StartCurrentTimer(ctx)
+	return err
+}
+
+// GetUserInfos converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUserInfos(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetUserInfos(ctx)
+	return err
+}
+
+// GetOwnDisplayName converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnDisplayName(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetOwnDisplayName(ctx)
+	return err
+}
+
+// ChangeOwnDisplayName converts echo context to params.
+func (w *ServerInterfaceWrapper) ChangeOwnDisplayName(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ChangeOwnDisplayName(ctx)
+	return err
+}
+
+// GetOwnStats converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnStats(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetOwnStats(ctx)
+	return err
+}
+
+// GetUserFreePointHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUserFreePointHistory(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login UserLogin
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetUserFreePointHistory(ctx, login)
+	return err
+}
+
+// GetUserGameHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUserGameHistory(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login UserLogin
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetUserGameHistory(ctx, login)
+	return err
+}
+
+// GetUserStats converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUserStats(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login UserLogin
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetUserStats(ctx, login)
+	return err
+}
+
+// GetUserTerritoryPointHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUserTerritoryPointHistory(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login UserLogin
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetUserTerritoryPointHistory(ctx, login)
+	return err
+}
+
+// GetUserWheelEffectHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUserWheelEffectHistory(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login UserLogin
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetUserWheelEffectHistory(ctx, login)
+	return err
+}
+
+// GetUserWishlistGames converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUserWishlistGames(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login UserLogin
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetUserWishlistGames(ctx, login)
+	return err
+}
+
+// GetAvailableWheelEffects converts echo context to params.
+func (w *ServerInterfaceWrapper) GetAvailableWheelEffects(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetAvailableWheelEffects(ctx)
+	return err
+}
+
+// MakeAvailableWheelEffectRoll converts echo context to params.
+func (w *ServerInterfaceWrapper) MakeAvailableWheelEffectRoll(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.MakeAvailableWheelEffectRoll(ctx)
+	return err
+}
+
+// ApplyAvailableWheelEffectRoll converts echo context to params.
+func (w *ServerInterfaceWrapper) ApplyAvailableWheelEffectRoll(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ApplyAvailableWheelEffectRoll(ctx)
+	return err
+}
+
+// GetWheelEffectHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetWheelEffectHistory(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetWheelEffectHistory(ctx)
 	return err
 }
 
@@ -382,8 +792,30 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/games/roll", wrapper.MakeGameRoll)
 	router.GET(baseURL+"/games/unplayed", wrapper.GetUnplayedGames)
 	router.POST(baseURL+"/games/unplayed", wrapper.AddUnplayedGames)
+	router.GET(baseURL+"/games/wishlist", wrapper.GetWishlistGames)
+	router.POST(baseURL+"/games/wishlist", wrapper.AddWishlistGame)
+	router.POST(baseURL+"/points/experience-points", wrapper.ChangeExperiencePoints)
+	router.GET(baseURL+"/points/free-point-history", wrapper.GetFreePointHistory)
+	router.POST(baseURL+"/points/free-points", wrapper.ChangeFreePoints)
+	router.POST(baseURL+"/points/territory-hours", wrapper.ChangeTerritoryHours)
+	router.GET(baseURL+"/points/territory-point-history", wrapper.GetTerritoryPointHistory)
+	router.POST(baseURL+"/points/territory-points", wrapper.ChangeTerritoryPoints)
 	router.GET(baseURL+"/timers/current", wrapper.GetCurrentTimer)
 	router.POST(baseURL+"/timers/current/pause", wrapper.PauseCurrentTimer)
 	router.POST(baseURL+"/timers/current/start", wrapper.StartCurrentTimer)
+	router.GET(baseURL+"/users/infos", wrapper.GetUserInfos)
+	router.GET(baseURL+"/users/self/display-name", wrapper.GetOwnDisplayName)
+	router.POST(baseURL+"/users/self/display-name", wrapper.ChangeOwnDisplayName)
+	router.GET(baseURL+"/users/self/stats", wrapper.GetOwnStats)
+	router.GET(baseURL+"/users/:login/free-point-history", wrapper.GetUserFreePointHistory)
+	router.GET(baseURL+"/users/:login/game-history", wrapper.GetUserGameHistory)
+	router.GET(baseURL+"/users/:login/stats", wrapper.GetUserStats)
+	router.GET(baseURL+"/users/:login/territory-point-history", wrapper.GetUserTerritoryPointHistory)
+	router.GET(baseURL+"/users/:login/wheel-effect-history", wrapper.GetUserWheelEffectHistory)
+	router.GET(baseURL+"/users/:login/wishlist-games", wrapper.GetUserWishlistGames)
+	router.GET(baseURL+"/wheel-effects/available", wrapper.GetAvailableWheelEffects)
+	router.POST(baseURL+"/wheel-effects/available/roll", wrapper.MakeAvailableWheelEffectRoll)
+	router.POST(baseURL+"/wheel-effects/available/roll/apply", wrapper.ApplyAvailableWheelEffectRoll)
+	router.GET(baseURL+"/wheel-effects/history", wrapper.GetWheelEffectHistory)
 
 }
