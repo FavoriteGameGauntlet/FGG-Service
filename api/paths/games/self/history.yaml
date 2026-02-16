@@ -1,0 +1,10 @@
+get:
+  operationId: getOwnGameHistory
+  tags: [ Games ]
+  responses:
+    "200":
+      $ref: "../../../components/responses/CurrentGamesResponse.yaml"
+    "401":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../components/responses/ErrorResponse.yaml"

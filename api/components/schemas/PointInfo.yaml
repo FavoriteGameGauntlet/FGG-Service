@@ -1,0 +1,13 @@
+type: object
+properties:
+  territoryPoints:
+    $ref: "./Points.yaml"
+  freePoints:
+    $ref: "./Points.yaml"
+  availableRolls:
+    $ref: "./Points.yaml"
+  territoryHours:
+    $ref: "./Points.yaml"
+  experiencePoints:
+    $ref: "./Points.yaml"
+required: [ territoryPoints, freePoints, availableRolls, territoryHours, experiencePoints ]

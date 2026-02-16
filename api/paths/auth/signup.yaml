@@ -1,0 +1,14 @@
+post:
+  operationId: signUp
+  tags: [ Auth ]
+  requestBody:
+    $ref: "../../components/requests/SignupUserRequest.yaml"
+  responses:
+    "204":
+      description: Success.
+    "401":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+    "409":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../components/responses/ErrorResponse.yaml"

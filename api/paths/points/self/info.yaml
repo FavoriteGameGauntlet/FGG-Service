@@ -1,0 +1,10 @@
+get:
+  operationId: getOwnPointInfo
+  tags: [ Points ]
+  responses:
+    "200":
+      $ref: "../../../components/responses/PointInfoResponse.yaml"
+    "401":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../components/responses/ErrorResponse.yaml"

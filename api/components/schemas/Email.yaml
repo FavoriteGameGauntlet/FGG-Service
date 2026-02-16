@@ -1,0 +1,4 @@
+type: string
+pattern: '^[\w\d._%+-]+@[\w\d.-]+\.[\w]{2,}$'
+minLength: 6
+maxLength: 35

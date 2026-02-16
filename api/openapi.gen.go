@@ -6,310 +6,186 @@ package api
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
 )
 
-// Defines values for GameState.
-const (
-	GameStateCancelled GameState = "cancelled"
-	GameStateFinished  GameState = "finished"
-	GameStateStarted   GameState = "started"
-)
-
-// Defines values for TimerState.
-const (
-	TimerStateCreated  TimerState = "created"
-	TimerStateFinished TimerState = "finished"
-	TimerStatePaused   TimerState = "paused"
-	TimerStateRunning  TimerState = "running"
-)
-
-// Duration The duration notation as defined by ISO 8601
-type Duration = string
-
-// Error defines model for Error.
-type Error struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
+// LoginJSONBody defines parameters for Login.
+type LoginJSONBody struct {
+	Login    string `json:"login"`
+	Password string `json:"password"`
 }
 
-// FreePointChange defines model for FreePointChange.
-type FreePointChange struct {
-	ActualChangeValue *int        `json:"actualChangeValue,omitempty"`
-	ChangeDate        time.Time   `json:"changeDate"`
-	ChangeSource      interface{} `json:"changeSource"`
-	ChangeValue       int         `json:"changeValue"`
-	FinalValue        Points      `json:"finalValue"`
-	WheelEffectName   *Name       `json:"wheelEffectName,omitempty"`
+// SignUpJSONBody defines parameters for SignUp.
+type SignUpJSONBody struct {
+	Email    string `json:"email"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
 }
 
-// FreePointChanges defines model for FreePointChanges.
-type FreePointChanges = []FreePointChange
-
-// Game defines model for Game.
-type Game struct {
-	FinishDate *time.Time `json:"finishDate,omitempty"`
-	Name       Name       `json:"name"`
-	State      GameState  `json:"state"`
-
-	// TimeSpent The duration notation as defined by ISO 8601
-	TimeSpent Duration `json:"timeSpent"`
+// AddOwnWishlistGameJSONBody defines parameters for AddOwnWishlistGame.
+type AddOwnWishlistGameJSONBody struct {
+	Name string `json:"name"`
 }
 
-// GameState defines model for Game.State.
-type GameState string
-
-// Games defines model for Games.
-type Games = []Game
-
-// LoginUser defines model for LoginUser.
-type LoginUser struct {
-	Login    UserLogin    `json:"login"`
-	Password UserPassword `json:"password"`
-}
-
-// Name defines model for Name.
-type Name = string
-
-// Points defines model for Points.
-type Points = int
-
-// RolledWheelEffect defines model for RolledWheelEffect.
-type RolledWheelEffect struct {
-	Description *string   `json:"description,omitempty"`
-	Name        Name      `json:"name"`
-	Position    *int      `json:"position,omitempty"`
-	RollDate    time.Time `json:"rollDate"`
-}
-
-// RolledWheelEffects defines model for RolledWheelEffects.
-type RolledWheelEffects = []RolledWheelEffect
-
-// SignupUser defines model for SignupUser.
-type SignupUser struct {
-	Email    UserEmail    `json:"email"`
-	Login    UserLogin    `json:"login"`
-	Password UserPassword `json:"password"`
-}
-
-// TerritoryPointChange defines model for TerritoryPointChange.
-type TerritoryPointChange struct {
-	ActualChangeValue *int        `json:"actualChangeValue,omitempty"`
-	ChangeDate        time.Time   `json:"changeDate"`
-	ChangeSource      interface{} `json:"changeSource"`
-	ChangeValue       int         `json:"changeValue"`
-	FinalValue        Points      `json:"finalValue"`
-}
-
-// TerritoryPointChanges defines model for TerritoryPointChanges.
-type TerritoryPointChanges = []TerritoryPointChange
-
-// Timer defines model for Timer.
-type Timer struct {
-	// Duration The duration notation as defined by ISO 8601
-	Duration       Duration  `json:"duration"`
-	LastActionDate time.Time `json:"lastActionDate"`
-
-	// RemainingTime The duration notation as defined by ISO 8601
-	RemainingTime Duration   `json:"remainingTime"`
-	State         TimerState `json:"state"`
-}
-
-// TimerState defines model for Timer.State.
-type TimerState string
-
-// UserEmail defines model for UserEmail.
-type UserEmail = string
-
-// UserInfo defines model for UserInfo.
-type UserInfo struct {
-	AvailableRolls   Points     `json:"availableRolls"`
-	DisplayName      Name       `json:"displayName"`
-	ExperiencePoints *Points    `json:"experiencePoints,omitempty"`
-	FreePoints       Points     `json:"freePoints"`
-	Login            *UserLogin `json:"login,omitempty"`
-	TerritoryHours   *Points    `json:"territoryHours,omitempty"`
-	TerritoryPoints  Points     `json:"territoryPoints"`
-}
-
-// UserInfos defines model for UserInfos.
-type UserInfos = []UserInfo
-
-// UserLogin defines model for UserLogin.
-type UserLogin = string
-
-// UserPassword defines model for UserPassword.
-type UserPassword = string
-
-// UserStats defines model for UserStats.
-type UserStats struct {
-	AvailableRolls   Points  `json:"availableRolls"`
-	ExperiencePoints *Points `json:"experiencePoints,omitempty"`
-	FreePoints       Points  `json:"freePoints"`
-	TerritoryHours   *Points `json:"territoryHours,omitempty"`
-	TerritoryPoints  Points  `json:"territoryPoints"`
-}
-
-// VictoryPointChange defines model for VictoryPointChange.
-type VictoryPointChange struct {
-	ActualChangeValue *int      `json:"actualChangeValue,omitempty"`
-	ChangeDate        time.Time `json:"changeDate"`
-	ChangeSource      string    `json:"changeSource"`
-	ChangeValue       int       `json:"changeValue"`
-	FinalValue        Points    `json:"finalValue"`
-}
-
-// WheelEffect defines model for WheelEffect.
-type WheelEffect struct {
-	Description *string `json:"description,omitempty"`
-	Name        Name    `json:"name"`
-}
-
-// WheelEffects defines model for WheelEffects.
-type WheelEffects = []WheelEffect
-
-// WishlistGame defines model for WishlistGame.
-type WishlistGame struct {
-	Name Name `json:"name"`
-}
-
-// WishlistGames defines model for WishlistGames.
-type WishlistGames = []WishlistGame
-
-// ChangeExperiencePointsJSONBody defines parameters for ChangeExperiencePoints.
-type ChangeExperiencePointsJSONBody struct {
-	ChangeValue *int `json:"changeValue,omitempty"`
-}
-
-// ChangeFreePointsJSONBody defines parameters for ChangeFreePoints.
-type ChangeFreePointsJSONBody struct {
+// ChangeOwnExperiencePointsJSONBody defines parameters for ChangeOwnExperiencePoints.
+type ChangeOwnExperiencePointsJSONBody struct {
 	ChangeSource *string `json:"changeSource,omitempty"`
 	ChangeValue  *int    `json:"changeValue,omitempty"`
 }
 
-// ChangeTerritoryHoursJSONBody defines parameters for ChangeTerritoryHours.
-type ChangeTerritoryHoursJSONBody struct {
-	ChangeValue *int `json:"changeValue,omitempty"`
-}
-
-// ChangeTerritoryPointsJSONBody defines parameters for ChangeTerritoryPoints.
-type ChangeTerritoryPointsJSONBody struct {
+// ChangeOwnFreePointsJSONBody defines parameters for ChangeOwnFreePoints.
+type ChangeOwnFreePointsJSONBody struct {
 	ChangeSource *string `json:"changeSource,omitempty"`
 	ChangeValue  *int    `json:"changeValue,omitempty"`
+}
+
+// ChangeOwnTerritoryHoursJSONBody defines parameters for ChangeOwnTerritoryHours.
+type ChangeOwnTerritoryHoursJSONBody struct {
+	ChangeSource *string `json:"changeSource,omitempty"`
+	ChangeValue  *int    `json:"changeValue,omitempty"`
+}
+
+// ChangeOwnTerritoryPointsJSONBody defines parameters for ChangeOwnTerritoryPoints.
+type ChangeOwnTerritoryPointsJSONBody struct {
+	ChangeSource *string `json:"changeSource,omitempty"`
+	ChangeValue  *int    `json:"changeValue,omitempty"`
+}
+
+// ChangeOwnDisplayNameJSONBody defines parameters for ChangeOwnDisplayName.
+type ChangeOwnDisplayNameJSONBody = string
+
+// ApplyAvailableWheelEffectRollJSONBody defines parameters for ApplyAvailableWheelEffectRoll.
+type ApplyAvailableWheelEffectRollJSONBody = []struct {
+	Login       string `json:"login"`
+	PointChange struct {
+		ChangeSource *string `json:"changeSource,omitempty"`
+		ChangeValue  *int    `json:"changeValue,omitempty"`
+	} `json:"pointChange"`
 }
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
-type LoginJSONRequestBody = LoginUser
+type LoginJSONRequestBody LoginJSONBody
 
 // SignUpJSONRequestBody defines body for SignUp for application/json ContentType.
-type SignUpJSONRequestBody = SignupUser
+type SignUpJSONRequestBody SignUpJSONBody
 
-// AddUnplayedGamesJSONRequestBody defines body for AddUnplayedGames for application/json ContentType.
-type AddUnplayedGamesJSONRequestBody = WishlistGames
+// AddOwnWishlistGameJSONRequestBody defines body for AddOwnWishlistGame for application/json ContentType.
+type AddOwnWishlistGameJSONRequestBody AddOwnWishlistGameJSONBody
 
-// AddWishlistGameJSONRequestBody defines body for AddWishlistGame for application/json ContentType.
-type AddWishlistGameJSONRequestBody = WishlistGame
+// ChangeOwnExperiencePointsJSONRequestBody defines body for ChangeOwnExperiencePoints for application/json ContentType.
+type ChangeOwnExperiencePointsJSONRequestBody ChangeOwnExperiencePointsJSONBody
 
-// ChangeExperiencePointsJSONRequestBody defines body for ChangeExperiencePoints for application/json ContentType.
-type ChangeExperiencePointsJSONRequestBody ChangeExperiencePointsJSONBody
+// ChangeOwnFreePointsJSONRequestBody defines body for ChangeOwnFreePoints for application/json ContentType.
+type ChangeOwnFreePointsJSONRequestBody ChangeOwnFreePointsJSONBody
 
-// ChangeFreePointsJSONRequestBody defines body for ChangeFreePoints for application/json ContentType.
-type ChangeFreePointsJSONRequestBody ChangeFreePointsJSONBody
+// ChangeOwnTerritoryHoursJSONRequestBody defines body for ChangeOwnTerritoryHours for application/json ContentType.
+type ChangeOwnTerritoryHoursJSONRequestBody ChangeOwnTerritoryHoursJSONBody
 
-// ChangeTerritoryHoursJSONRequestBody defines body for ChangeTerritoryHours for application/json ContentType.
-type ChangeTerritoryHoursJSONRequestBody ChangeTerritoryHoursJSONBody
-
-// ChangeTerritoryPointsJSONRequestBody defines body for ChangeTerritoryPoints for application/json ContentType.
-type ChangeTerritoryPointsJSONRequestBody ChangeTerritoryPointsJSONBody
+// ChangeOwnTerritoryPointsJSONRequestBody defines body for ChangeOwnTerritoryPoints for application/json ContentType.
+type ChangeOwnTerritoryPointsJSONRequestBody ChangeOwnTerritoryPointsJSONBody
 
 // ChangeOwnDisplayNameJSONRequestBody defines body for ChangeOwnDisplayName for application/json ContentType.
-type ChangeOwnDisplayNameJSONRequestBody = Name
+type ChangeOwnDisplayNameJSONRequestBody = ChangeOwnDisplayNameJSONBody
 
 // ApplyAvailableWheelEffectRollJSONRequestBody defines body for ApplyAvailableWheelEffectRoll for application/json ContentType.
-type ApplyAvailableWheelEffectRollJSONRequestBody = UserInfos
+type ApplyAvailableWheelEffectRollJSONRequestBody = ApplyAvailableWheelEffectRollJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Log in an existing user
+
 	// (POST /auth/login)
 	Login(ctx echo.Context) error
-	// Log out the current user
+
 	// (POST /auth/logout)
 	Logout(ctx echo.Context) error
-	// Register a new user account
+
 	// (POST /auth/signup)
 	SignUp(ctx echo.Context) error
-	// Get a list of effects available for rolling
-	// (GET /effects/available)
-	GetAvailableEffects(ctx echo.Context) error
-	// Get the number of effects available for rolling
-	// (GET /effects/available/count)
-	GetAvailableEffectsCount(ctx echo.Context) error
-	// Get a list of all effect rolls
-	// (GET /effects/history)
-	GetEffectHistory(ctx echo.Context) error
-	// Make the roll of the effect available
-	// (POST /effects/roll)
-	MakeEffectRoll(ctx echo.Context) error
-	// Get the current game
-	// (GET /games/current)
-	GetCurrentGame(ctx echo.Context) error
-	// Cancel the current game
-	// (POST /games/current/cancel)
-	CancelCurrentGame(ctx echo.Context) error
-	// Complete the current game
-	// (POST /games/current/finish)
-	FinishCurrentGame(ctx echo.Context) error
-	// Get a list of all games played
-	// (GET /games/history)
-	GetGameHistory(ctx echo.Context) error
-	// Select a random game from the wishlist
-	// (POST /games/roll)
-	MakeGameRoll(ctx echo.Context) error
-	// Get game wishlist
-	// (GET /games/unplayed)
-	GetUnplayedGames(ctx echo.Context) error
-	// Add game wishlist
-	// (POST /games/unplayed)
-	AddUnplayedGames(ctx echo.Context) error
-	// Get game wishlist
-	// (GET /games/wishlist)
-	GetWishlistGames(ctx echo.Context) error
-	// Add game wishlist
-	// (POST /games/wishlist)
-	AddWishlistGame(ctx echo.Context) error
 
-	// (POST /points/experience-points)
-	ChangeExperiencePoints(ctx echo.Context) error
+	// (GET /games/self/current)
+	GetOwnCurrentGame(ctx echo.Context) error
 
-	// (GET /points/free-point-history)
-	GetFreePointHistory(ctx echo.Context) error
+	// (POST /games/self/current/cancel)
+	CancelOwnCurrentGame(ctx echo.Context) error
 
-	// (POST /points/free-points)
-	ChangeFreePoints(ctx echo.Context) error
+	// (POST /games/self/current/finish)
+	FinishOwnCurrentGame(ctx echo.Context) error
 
-	// (POST /points/territory-hours)
-	ChangeTerritoryHours(ctx echo.Context) error
+	// (POST /games/self/current/roll)
+	RollNewCurrentGame(ctx echo.Context) error
 
-	// (GET /points/territory-point-history)
-	GetTerritoryPointHistory(ctx echo.Context) error
+	// (GET /games/self/history)
+	GetOwnGameHistory(ctx echo.Context) error
 
-	// (POST /points/territory-points)
-	ChangeTerritoryPoints(ctx echo.Context) error
-	// Get a timer for the current game
-	// (GET /timers/current)
-	GetCurrentTimer(ctx echo.Context) error
-	// Pause the current timer
-	// (POST /timers/current/pause)
-	PauseCurrentTimer(ctx echo.Context) error
-	// Start or continue the current timer
-	// (POST /timers/current/start)
-	StartCurrentTimer(ctx echo.Context) error
+	// (GET /games/self/wishlist)
+	GetOwnWishlistGames(ctx echo.Context) error
 
-	// (GET /users/infos)
+	// (POST /games/self/wishlist)
+	AddOwnWishlistGame(ctx echo.Context) error
+
+	// (GET /games/{login}/current)
+	GetCurrentGameByLogin(ctx echo.Context, login string) error
+
+	// (GET /games/{login}/history)
+	GetGameHistoryByLogin(ctx echo.Context, login string) error
+
+	// (GET /games/{login}/wishlist)
+	GetWishlistGamesByLogin(ctx echo.Context, login string) error
+
+	// (GET /points/self/experience-points)
+	GetOwnExperiencePoints(ctx echo.Context) error
+
+	// (POST /points/self/experience-points)
+	ChangeOwnExperiencePoints(ctx echo.Context) error
+
+	// (GET /points/self/free-points)
+	GetOwnFreePoints(ctx echo.Context) error
+
+	// (POST /points/self/free-points)
+	ChangeOwnFreePoints(ctx echo.Context) error
+
+	// (GET /points/self/free-points/history)
+	GetOwnFreePointHistory(ctx echo.Context) error
+
+	// (GET /points/self/info)
+	GetOwnPointInfo(ctx echo.Context) error
+
+	// (GET /points/self/territory-hours)
+	GetOwnTerritoryHours(ctx echo.Context) error
+
+	// (POST /points/self/territory-hours)
+	ChangeOwnTerritoryHours(ctx echo.Context) error
+
+	// (GET /points/self/territory-points)
+	GetOwnTerritoryPoints(ctx echo.Context) error
+
+	// (POST /points/self/territory-points)
+	ChangeOwnTerritoryPoints(ctx echo.Context) error
+
+	// (GET /points/self/territory-points/history)
+	GetOwnTerritoryPointHistory(ctx echo.Context) error
+
+	// (GET /points/{login}/free-points/history)
+	GetFreePointHistoryByLogin(ctx echo.Context, login string) error
+
+	// (GET /points/{login}/info)
+	GetPointInfoByLogin(ctx echo.Context, login string) error
+
+	// (GET /points/{login}/territory-points/history)
+	GetTerritoryPointHistoryByLogin(ctx echo.Context, login string) error
+
+	// (GET /timers/self/current)
+	GetOwnCurrentTimer(ctx echo.Context) error
+
+	// (POST /timers/self/current/pause)
+	PauseOwnCurrentTimer(ctx echo.Context) error
+
+	// (POST /timers/self/current/start)
+	StartOwnCurrentTimer(ctx echo.Context) error
+
+	// (GET /users/names)
 	GetUserInfos(ctx echo.Context) error
 
 	// (GET /users/self/display-name)
@@ -318,38 +194,23 @@ type ServerInterface interface {
 	// (POST /users/self/display-name)
 	ChangeOwnDisplayName(ctx echo.Context) error
 
-	// (GET /users/self/stats)
-	GetOwnStats(ctx echo.Context) error
-
-	// (GET /users/{login}/free-point-history)
-	GetUserFreePointHistory(ctx echo.Context, login UserLogin) error
-
-	// (GET /users/{login}/game-history)
-	GetUserGameHistory(ctx echo.Context, login UserLogin) error
-
-	// (GET /users/{login}/stats)
-	GetUserStats(ctx echo.Context, login UserLogin) error
-
-	// (GET /users/{login}/territory-point-history)
-	GetUserTerritoryPointHistory(ctx echo.Context, login UserLogin) error
-
-	// (GET /users/{login}/wheel-effect-history)
-	GetUserWheelEffectHistory(ctx echo.Context, login UserLogin) error
-
-	// (GET /users/{login}/wishlist-games)
-	GetUserWishlistGames(ctx echo.Context, login UserLogin) error
-	// Get a list of effects available for rolling
-	// (GET /wheel-effects/available)
-	GetAvailableWheelEffects(ctx echo.Context) error
-	// Make the roll of the effect available
 	// (POST /wheel-effects/available/roll)
-	MakeAvailableWheelEffectRoll(ctx echo.Context) error
+	RollAvailableWheelEffects(ctx echo.Context) error
 
 	// (POST /wheel-effects/available/roll/apply)
 	ApplyAvailableWheelEffectRoll(ctx echo.Context) error
-	// Get a list of all effect rolls
-	// (GET /wheel-effects/history)
-	GetWheelEffectHistory(ctx echo.Context) error
+
+	// (GET /wheel-effects/available/roll/count)
+	GetAvailableWheelEffectRollsCount(ctx echo.Context) error
+
+	// (GET /wheel-effects/self/available)
+	GetOwnAvailableWheelEffects(ctx echo.Context) error
+
+	// (GET /wheel-effects/self/history)
+	GetOwnWheelEffectHistory(ctx echo.Context) error
+
+	// (GET /wheel-effects/{login}/history)
+	GetWheelEffectHistoryByLogin(ctx echo.Context, login string) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -384,201 +245,288 @@ func (w *ServerInterfaceWrapper) SignUp(ctx echo.Context) error {
 	return err
 }
 
-// GetAvailableEffects converts echo context to params.
-func (w *ServerInterfaceWrapper) GetAvailableEffects(ctx echo.Context) error {
+// GetOwnCurrentGame converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnCurrentGame(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetAvailableEffects(ctx)
+	err = w.Handler.GetOwnCurrentGame(ctx)
 	return err
 }
 
-// GetAvailableEffectsCount converts echo context to params.
-func (w *ServerInterfaceWrapper) GetAvailableEffectsCount(ctx echo.Context) error {
+// CancelOwnCurrentGame converts echo context to params.
+func (w *ServerInterfaceWrapper) CancelOwnCurrentGame(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetAvailableEffectsCount(ctx)
+	err = w.Handler.CancelOwnCurrentGame(ctx)
 	return err
 }
 
-// GetEffectHistory converts echo context to params.
-func (w *ServerInterfaceWrapper) GetEffectHistory(ctx echo.Context) error {
+// FinishOwnCurrentGame converts echo context to params.
+func (w *ServerInterfaceWrapper) FinishOwnCurrentGame(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetEffectHistory(ctx)
+	err = w.Handler.FinishOwnCurrentGame(ctx)
 	return err
 }
 
-// MakeEffectRoll converts echo context to params.
-func (w *ServerInterfaceWrapper) MakeEffectRoll(ctx echo.Context) error {
+// RollNewCurrentGame converts echo context to params.
+func (w *ServerInterfaceWrapper) RollNewCurrentGame(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.MakeEffectRoll(ctx)
+	err = w.Handler.RollNewCurrentGame(ctx)
 	return err
 }
 
-// GetCurrentGame converts echo context to params.
-func (w *ServerInterfaceWrapper) GetCurrentGame(ctx echo.Context) error {
+// GetOwnGameHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnGameHistory(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetCurrentGame(ctx)
+	err = w.Handler.GetOwnGameHistory(ctx)
 	return err
 }
 
-// CancelCurrentGame converts echo context to params.
-func (w *ServerInterfaceWrapper) CancelCurrentGame(ctx echo.Context) error {
+// GetOwnWishlistGames converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnWishlistGames(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.CancelCurrentGame(ctx)
+	err = w.Handler.GetOwnWishlistGames(ctx)
 	return err
 }
 
-// FinishCurrentGame converts echo context to params.
-func (w *ServerInterfaceWrapper) FinishCurrentGame(ctx echo.Context) error {
+// AddOwnWishlistGame converts echo context to params.
+func (w *ServerInterfaceWrapper) AddOwnWishlistGame(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.FinishCurrentGame(ctx)
+	err = w.Handler.AddOwnWishlistGame(ctx)
 	return err
 }
 
-// GetGameHistory converts echo context to params.
-func (w *ServerInterfaceWrapper) GetGameHistory(ctx echo.Context) error {
+// GetCurrentGameByLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) GetCurrentGameByLogin(ctx echo.Context) error {
 	var err error
+	// ------------- Path parameter "login" -------------
+	var login string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetGameHistory(ctx)
+	err = w.Handler.GetCurrentGameByLogin(ctx, login)
 	return err
 }
 
-// MakeGameRoll converts echo context to params.
-func (w *ServerInterfaceWrapper) MakeGameRoll(ctx echo.Context) error {
+// GetGameHistoryByLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) GetGameHistoryByLogin(ctx echo.Context) error {
 	var err error
+	// ------------- Path parameter "login" -------------
+	var login string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.MakeGameRoll(ctx)
+	err = w.Handler.GetGameHistoryByLogin(ctx, login)
 	return err
 }
 
-// GetUnplayedGames converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUnplayedGames(ctx echo.Context) error {
+// GetWishlistGamesByLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) GetWishlistGamesByLogin(ctx echo.Context) error {
 	var err error
+	// ------------- Path parameter "login" -------------
+	var login string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUnplayedGames(ctx)
+	err = w.Handler.GetWishlistGamesByLogin(ctx, login)
 	return err
 }
 
-// AddUnplayedGames converts echo context to params.
-func (w *ServerInterfaceWrapper) AddUnplayedGames(ctx echo.Context) error {
+// GetOwnExperiencePoints converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnExperiencePoints(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AddUnplayedGames(ctx)
+	err = w.Handler.GetOwnExperiencePoints(ctx)
 	return err
 }
 
-// GetWishlistGames converts echo context to params.
-func (w *ServerInterfaceWrapper) GetWishlistGames(ctx echo.Context) error {
+// ChangeOwnExperiencePoints converts echo context to params.
+func (w *ServerInterfaceWrapper) ChangeOwnExperiencePoints(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetWishlistGames(ctx)
+	err = w.Handler.ChangeOwnExperiencePoints(ctx)
 	return err
 }
 
-// AddWishlistGame converts echo context to params.
-func (w *ServerInterfaceWrapper) AddWishlistGame(ctx echo.Context) error {
+// GetOwnFreePoints converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnFreePoints(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AddWishlistGame(ctx)
+	err = w.Handler.GetOwnFreePoints(ctx)
 	return err
 }
 
-// ChangeExperiencePoints converts echo context to params.
-func (w *ServerInterfaceWrapper) ChangeExperiencePoints(ctx echo.Context) error {
+// ChangeOwnFreePoints converts echo context to params.
+func (w *ServerInterfaceWrapper) ChangeOwnFreePoints(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ChangeExperiencePoints(ctx)
+	err = w.Handler.ChangeOwnFreePoints(ctx)
 	return err
 }
 
-// GetFreePointHistory converts echo context to params.
-func (w *ServerInterfaceWrapper) GetFreePointHistory(ctx echo.Context) error {
+// GetOwnFreePointHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnFreePointHistory(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetFreePointHistory(ctx)
+	err = w.Handler.GetOwnFreePointHistory(ctx)
 	return err
 }
 
-// ChangeFreePoints converts echo context to params.
-func (w *ServerInterfaceWrapper) ChangeFreePoints(ctx echo.Context) error {
+// GetOwnPointInfo converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnPointInfo(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ChangeFreePoints(ctx)
+	err = w.Handler.GetOwnPointInfo(ctx)
 	return err
 }
 
-// ChangeTerritoryHours converts echo context to params.
-func (w *ServerInterfaceWrapper) ChangeTerritoryHours(ctx echo.Context) error {
+// GetOwnTerritoryHours converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnTerritoryHours(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ChangeTerritoryHours(ctx)
+	err = w.Handler.GetOwnTerritoryHours(ctx)
 	return err
 }
 
-// GetTerritoryPointHistory converts echo context to params.
-func (w *ServerInterfaceWrapper) GetTerritoryPointHistory(ctx echo.Context) error {
+// ChangeOwnTerritoryHours converts echo context to params.
+func (w *ServerInterfaceWrapper) ChangeOwnTerritoryHours(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetTerritoryPointHistory(ctx)
+	err = w.Handler.ChangeOwnTerritoryHours(ctx)
 	return err
 }
 
-// ChangeTerritoryPoints converts echo context to params.
-func (w *ServerInterfaceWrapper) ChangeTerritoryPoints(ctx echo.Context) error {
+// GetOwnTerritoryPoints converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnTerritoryPoints(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ChangeTerritoryPoints(ctx)
+	err = w.Handler.GetOwnTerritoryPoints(ctx)
 	return err
 }
 
-// GetCurrentTimer converts echo context to params.
-func (w *ServerInterfaceWrapper) GetCurrentTimer(ctx echo.Context) error {
+// ChangeOwnTerritoryPoints converts echo context to params.
+func (w *ServerInterfaceWrapper) ChangeOwnTerritoryPoints(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetCurrentTimer(ctx)
+	err = w.Handler.ChangeOwnTerritoryPoints(ctx)
 	return err
 }
 
-// PauseCurrentTimer converts echo context to params.
-func (w *ServerInterfaceWrapper) PauseCurrentTimer(ctx echo.Context) error {
+// GetOwnTerritoryPointHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnTerritoryPointHistory(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PauseCurrentTimer(ctx)
+	err = w.Handler.GetOwnTerritoryPointHistory(ctx)
 	return err
 }
 
-// StartCurrentTimer converts echo context to params.
-func (w *ServerInterfaceWrapper) StartCurrentTimer(ctx echo.Context) error {
+// GetFreePointHistoryByLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) GetFreePointHistoryByLogin(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetFreePointHistoryByLogin(ctx, login)
+	return err
+}
+
+// GetPointInfoByLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) GetPointInfoByLogin(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetPointInfoByLogin(ctx, login)
+	return err
+}
+
+// GetTerritoryPointHistoryByLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) GetTerritoryPointHistoryByLogin(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetTerritoryPointHistoryByLogin(ctx, login)
+	return err
+}
+
+// GetOwnCurrentTimer converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnCurrentTimer(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.StartCurrentTimer(ctx)
+	err = w.Handler.GetOwnCurrentTimer(ctx)
+	return err
+}
+
+// PauseOwnCurrentTimer converts echo context to params.
+func (w *ServerInterfaceWrapper) PauseOwnCurrentTimer(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PauseOwnCurrentTimer(ctx)
+	return err
+}
+
+// StartOwnCurrentTimer converts echo context to params.
+func (w *ServerInterfaceWrapper) StartOwnCurrentTimer(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.StartOwnCurrentTimer(ctx)
 	return err
 }
 
@@ -609,126 +557,12 @@ func (w *ServerInterfaceWrapper) ChangeOwnDisplayName(ctx echo.Context) error {
 	return err
 }
 
-// GetOwnStats converts echo context to params.
-func (w *ServerInterfaceWrapper) GetOwnStats(ctx echo.Context) error {
+// RollAvailableWheelEffects converts echo context to params.
+func (w *ServerInterfaceWrapper) RollAvailableWheelEffects(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetOwnStats(ctx)
-	return err
-}
-
-// GetUserFreePointHistory converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUserFreePointHistory(ctx echo.Context) error {
-	var err error
-	// ------------- Path parameter "login" -------------
-	var login UserLogin
-
-	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUserFreePointHistory(ctx, login)
-	return err
-}
-
-// GetUserGameHistory converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUserGameHistory(ctx echo.Context) error {
-	var err error
-	// ------------- Path parameter "login" -------------
-	var login UserLogin
-
-	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUserGameHistory(ctx, login)
-	return err
-}
-
-// GetUserStats converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUserStats(ctx echo.Context) error {
-	var err error
-	// ------------- Path parameter "login" -------------
-	var login UserLogin
-
-	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUserStats(ctx, login)
-	return err
-}
-
-// GetUserTerritoryPointHistory converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUserTerritoryPointHistory(ctx echo.Context) error {
-	var err error
-	// ------------- Path parameter "login" -------------
-	var login UserLogin
-
-	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUserTerritoryPointHistory(ctx, login)
-	return err
-}
-
-// GetUserWheelEffectHistory converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUserWheelEffectHistory(ctx echo.Context) error {
-	var err error
-	// ------------- Path parameter "login" -------------
-	var login UserLogin
-
-	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUserWheelEffectHistory(ctx, login)
-	return err
-}
-
-// GetUserWishlistGames converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUserWishlistGames(ctx echo.Context) error {
-	var err error
-	// ------------- Path parameter "login" -------------
-	var login UserLogin
-
-	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUserWishlistGames(ctx, login)
-	return err
-}
-
-// GetAvailableWheelEffects converts echo context to params.
-func (w *ServerInterfaceWrapper) GetAvailableWheelEffects(ctx echo.Context) error {
-	var err error
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetAvailableWheelEffects(ctx)
-	return err
-}
-
-// MakeAvailableWheelEffectRoll converts echo context to params.
-func (w *ServerInterfaceWrapper) MakeAvailableWheelEffectRoll(ctx echo.Context) error {
-	var err error
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.MakeAvailableWheelEffectRoll(ctx)
+	err = w.Handler.RollAvailableWheelEffects(ctx)
 	return err
 }
 
@@ -741,12 +575,46 @@ func (w *ServerInterfaceWrapper) ApplyAvailableWheelEffectRoll(ctx echo.Context)
 	return err
 }
 
-// GetWheelEffectHistory converts echo context to params.
-func (w *ServerInterfaceWrapper) GetWheelEffectHistory(ctx echo.Context) error {
+// GetAvailableWheelEffectRollsCount converts echo context to params.
+func (w *ServerInterfaceWrapper) GetAvailableWheelEffectRollsCount(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetWheelEffectHistory(ctx)
+	err = w.Handler.GetAvailableWheelEffectRollsCount(ctx)
+	return err
+}
+
+// GetOwnAvailableWheelEffects converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnAvailableWheelEffects(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetOwnAvailableWheelEffects(ctx)
+	return err
+}
+
+// GetOwnWheelEffectHistory converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOwnWheelEffectHistory(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetOwnWheelEffectHistory(ctx)
+	return err
+}
+
+// GetWheelEffectHistoryByLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) GetWheelEffectHistoryByLogin(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetWheelEffectHistoryByLogin(ctx, login)
 	return err
 }
 
@@ -781,41 +649,41 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/auth/login", wrapper.Login)
 	router.POST(baseURL+"/auth/logout", wrapper.Logout)
 	router.POST(baseURL+"/auth/signup", wrapper.SignUp)
-	router.GET(baseURL+"/effects/available", wrapper.GetAvailableEffects)
-	router.GET(baseURL+"/effects/available/count", wrapper.GetAvailableEffectsCount)
-	router.GET(baseURL+"/effects/history", wrapper.GetEffectHistory)
-	router.POST(baseURL+"/effects/roll", wrapper.MakeEffectRoll)
-	router.GET(baseURL+"/games/current", wrapper.GetCurrentGame)
-	router.POST(baseURL+"/games/current/cancel", wrapper.CancelCurrentGame)
-	router.POST(baseURL+"/games/current/finish", wrapper.FinishCurrentGame)
-	router.GET(baseURL+"/games/history", wrapper.GetGameHistory)
-	router.POST(baseURL+"/games/roll", wrapper.MakeGameRoll)
-	router.GET(baseURL+"/games/unplayed", wrapper.GetUnplayedGames)
-	router.POST(baseURL+"/games/unplayed", wrapper.AddUnplayedGames)
-	router.GET(baseURL+"/games/wishlist", wrapper.GetWishlistGames)
-	router.POST(baseURL+"/games/wishlist", wrapper.AddWishlistGame)
-	router.POST(baseURL+"/points/experience-points", wrapper.ChangeExperiencePoints)
-	router.GET(baseURL+"/points/free-point-history", wrapper.GetFreePointHistory)
-	router.POST(baseURL+"/points/free-points", wrapper.ChangeFreePoints)
-	router.POST(baseURL+"/points/territory-hours", wrapper.ChangeTerritoryHours)
-	router.GET(baseURL+"/points/territory-point-history", wrapper.GetTerritoryPointHistory)
-	router.POST(baseURL+"/points/territory-points", wrapper.ChangeTerritoryPoints)
-	router.GET(baseURL+"/timers/current", wrapper.GetCurrentTimer)
-	router.POST(baseURL+"/timers/current/pause", wrapper.PauseCurrentTimer)
-	router.POST(baseURL+"/timers/current/start", wrapper.StartCurrentTimer)
-	router.GET(baseURL+"/users/infos", wrapper.GetUserInfos)
+	router.GET(baseURL+"/games/self/current", wrapper.GetOwnCurrentGame)
+	router.POST(baseURL+"/games/self/current/cancel", wrapper.CancelOwnCurrentGame)
+	router.POST(baseURL+"/games/self/current/finish", wrapper.FinishOwnCurrentGame)
+	router.POST(baseURL+"/games/self/current/roll", wrapper.RollNewCurrentGame)
+	router.GET(baseURL+"/games/self/history", wrapper.GetOwnGameHistory)
+	router.GET(baseURL+"/games/self/wishlist", wrapper.GetOwnWishlistGames)
+	router.POST(baseURL+"/games/self/wishlist", wrapper.AddOwnWishlistGame)
+	router.GET(baseURL+"/games/:login/current", wrapper.GetCurrentGameByLogin)
+	router.GET(baseURL+"/games/:login/history", wrapper.GetGameHistoryByLogin)
+	router.GET(baseURL+"/games/:login/wishlist", wrapper.GetWishlistGamesByLogin)
+	router.GET(baseURL+"/points/self/experience-points", wrapper.GetOwnExperiencePoints)
+	router.POST(baseURL+"/points/self/experience-points", wrapper.ChangeOwnExperiencePoints)
+	router.GET(baseURL+"/points/self/free-points", wrapper.GetOwnFreePoints)
+	router.POST(baseURL+"/points/self/free-points", wrapper.ChangeOwnFreePoints)
+	router.GET(baseURL+"/points/self/free-points/history", wrapper.GetOwnFreePointHistory)
+	router.GET(baseURL+"/points/self/info", wrapper.GetOwnPointInfo)
+	router.GET(baseURL+"/points/self/territory-hours", wrapper.GetOwnTerritoryHours)
+	router.POST(baseURL+"/points/self/territory-hours", wrapper.ChangeOwnTerritoryHours)
+	router.GET(baseURL+"/points/self/territory-points", wrapper.GetOwnTerritoryPoints)
+	router.POST(baseURL+"/points/self/territory-points", wrapper.ChangeOwnTerritoryPoints)
+	router.GET(baseURL+"/points/self/territory-points/history", wrapper.GetOwnTerritoryPointHistory)
+	router.GET(baseURL+"/points/:login/free-points/history", wrapper.GetFreePointHistoryByLogin)
+	router.GET(baseURL+"/points/:login/info", wrapper.GetPointInfoByLogin)
+	router.GET(baseURL+"/points/:login/territory-points/history", wrapper.GetTerritoryPointHistoryByLogin)
+	router.GET(baseURL+"/timers/self/current", wrapper.GetOwnCurrentTimer)
+	router.POST(baseURL+"/timers/self/current/pause", wrapper.PauseOwnCurrentTimer)
+	router.POST(baseURL+"/timers/self/current/start", wrapper.StartOwnCurrentTimer)
+	router.GET(baseURL+"/users/names", wrapper.GetUserInfos)
 	router.GET(baseURL+"/users/self/display-name", wrapper.GetOwnDisplayName)
 	router.POST(baseURL+"/users/self/display-name", wrapper.ChangeOwnDisplayName)
-	router.GET(baseURL+"/users/self/stats", wrapper.GetOwnStats)
-	router.GET(baseURL+"/users/:login/free-point-history", wrapper.GetUserFreePointHistory)
-	router.GET(baseURL+"/users/:login/game-history", wrapper.GetUserGameHistory)
-	router.GET(baseURL+"/users/:login/stats", wrapper.GetUserStats)
-	router.GET(baseURL+"/users/:login/territory-point-history", wrapper.GetUserTerritoryPointHistory)
-	router.GET(baseURL+"/users/:login/wheel-effect-history", wrapper.GetUserWheelEffectHistory)
-	router.GET(baseURL+"/users/:login/wishlist-games", wrapper.GetUserWishlistGames)
-	router.GET(baseURL+"/wheel-effects/available", wrapper.GetAvailableWheelEffects)
-	router.POST(baseURL+"/wheel-effects/available/roll", wrapper.MakeAvailableWheelEffectRoll)
+	router.POST(baseURL+"/wheel-effects/available/roll", wrapper.RollAvailableWheelEffects)
 	router.POST(baseURL+"/wheel-effects/available/roll/apply", wrapper.ApplyAvailableWheelEffectRoll)
-	router.GET(baseURL+"/wheel-effects/history", wrapper.GetWheelEffectHistory)
+	router.GET(baseURL+"/wheel-effects/available/roll/count", wrapper.GetAvailableWheelEffectRollsCount)
+	router.GET(baseURL+"/wheel-effects/self/available", wrapper.GetOwnAvailableWheelEffects)
+	router.GET(baseURL+"/wheel-effects/self/history", wrapper.GetOwnWheelEffectHistory)
+	router.GET(baseURL+"/wheel-effects/:login/history", wrapper.GetWheelEffectHistoryByLogin)
 
 }

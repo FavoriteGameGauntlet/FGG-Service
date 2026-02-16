@@ -1,0 +1,22 @@
+post:
+  operationId: addOwnWishlistGame
+  tags: [ Games ]
+  requestBody:
+    $ref: "../../../components/requests/WishlistGameRequest.yaml"
+  responses:
+    "204":
+      description: Success.
+    "401":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+get:
+  operationId: getOwnWishlistGames
+  tags: [ Games ]
+  responses:
+    "200":
+      $ref: "../../../components/responses/WishlistGamesResponse.yaml"
+    "401":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../components/responses/ErrorResponse.yaml"

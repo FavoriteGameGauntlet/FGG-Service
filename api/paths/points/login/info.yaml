@@ -1,0 +1,14 @@
+get:
+  operationId: getPointInfoByLogin
+  tags: [ Points ]
+  parameters:
+    - $ref: "../../../components/parameters/Login.yaml"
+  responses:
+    "200":
+      $ref: "../../../components/responses/PointInfoResponse.yaml"
+    "401":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "404":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
