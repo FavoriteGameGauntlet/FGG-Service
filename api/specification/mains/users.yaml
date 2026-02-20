@@ -1,0 +1,10 @@
+openapi: 3.0.4
+info:
+  title: Favorite Game Gauntlet
+  version: 0.9.0
+paths:
+  /users/names:
+    $ref: "../paths/users/names.yaml"
+
+  /users/self/display-name:
+    $ref: "../paths/users/self/display-name.yaml"

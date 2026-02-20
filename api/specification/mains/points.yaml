@@ -1,0 +1,34 @@
+openapi: 3.0.4
+info:
+  title: Favorite Game Gauntlet
+  version: 0.9.0
+paths:
+  /points/self/info:
+    $ref: "../paths/points/self/info.yaml"
+
+  /points/{login}/info:
+    $ref: "../paths/points/login/info.yaml"
+
+  /points/self/territory-points:
+    $ref: "../paths/points/self/territory-points.yaml"
+
+  /points/self/territory-points/history:
+    $ref: "../paths/points/self/territory-points/history.yaml"
+
+  /points/{login}/territory-points/history:
+    $ref: "../paths/points/login/territory-points/history.yaml"
+
+  /points/self/free-points:
+    $ref: "../paths/points/self/free-points.yaml"
+
+  /points/self/free-points/history:
+    $ref: "../paths/points/self/free-points/history.yaml"
+
+  /points/{login}/free-points/history:
+    $ref: "../paths/points/login/free-points/history.yaml"
+
+  /points/self/experience-points:
+    $ref: "../paths/points/self/experience-points.yaml"
+
+  /points/self/territory-hours:
+    $ref: "../paths/points/self/territory-hours.yaml"

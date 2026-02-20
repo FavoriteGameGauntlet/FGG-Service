@@ -15,7 +15,7 @@ import (
 )
 
 //go:embed index.html
-//go:embed api/specification/openapi.yaml
+//go:embed api/specification/mains/*
 var swaggerUI embed.FS
 
 func main() {
