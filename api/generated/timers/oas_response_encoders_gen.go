@@ -7,16 +7,13 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 )
 
-func encodeGetOwnCurrentTimerResponse(response GetOwnCurrentTimerRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnCurrentTimerResponse(response GetOwnCurrentTimerRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *Timer:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -29,7 +26,6 @@ func encodeGetOwnCurrentTimerResponse(response GetOwnCurrentTimerRes, w http.Res
 	case *GetOwnCurrentTimerUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -42,7 +38,6 @@ func encodeGetOwnCurrentTimerResponse(response GetOwnCurrentTimerRes, w http.Res
 	case *GetOwnCurrentTimerNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -55,7 +50,6 @@ func encodeGetOwnCurrentTimerResponse(response GetOwnCurrentTimerRes, w http.Res
 	case *GetOwnCurrentTimerInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -70,12 +64,11 @@ func encodeGetOwnCurrentTimerResponse(response GetOwnCurrentTimerRes, w http.Res
 	}
 }
 
-func encodePauseOwnCurrentTimerResponse(response PauseOwnCurrentTimerRes, w http.ResponseWriter, span trace.Span) error {
+func encodePauseOwnCurrentTimerResponse(response PauseOwnCurrentTimerRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *Timer:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -88,7 +81,6 @@ func encodePauseOwnCurrentTimerResponse(response PauseOwnCurrentTimerRes, w http
 	case *PauseOwnCurrentTimerUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -101,7 +93,6 @@ func encodePauseOwnCurrentTimerResponse(response PauseOwnCurrentTimerRes, w http
 	case *PauseOwnCurrentTimerNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -114,7 +105,6 @@ func encodePauseOwnCurrentTimerResponse(response PauseOwnCurrentTimerRes, w http
 	case *PauseOwnCurrentTimerConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -127,7 +117,6 @@ func encodePauseOwnCurrentTimerResponse(response PauseOwnCurrentTimerRes, w http
 	case *PauseOwnCurrentTimerInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -142,12 +131,11 @@ func encodePauseOwnCurrentTimerResponse(response PauseOwnCurrentTimerRes, w http
 	}
 }
 
-func encodeStartOwnCurrentTimerResponse(response StartOwnCurrentTimerRes, w http.ResponseWriter, span trace.Span) error {
+func encodeStartOwnCurrentTimerResponse(response StartOwnCurrentTimerRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *Timer:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -160,7 +148,6 @@ func encodeStartOwnCurrentTimerResponse(response StartOwnCurrentTimerRes, w http
 	case *StartOwnCurrentTimerUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -173,7 +160,6 @@ func encodeStartOwnCurrentTimerResponse(response StartOwnCurrentTimerRes, w http
 	case *StartOwnCurrentTimerNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -186,7 +172,6 @@ func encodeStartOwnCurrentTimerResponse(response StartOwnCurrentTimerRes, w http
 	case *StartOwnCurrentTimerConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -199,7 +184,6 @@ func encodeStartOwnCurrentTimerResponse(response StartOwnCurrentTimerRes, w http
 	case *StartOwnCurrentTimerInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)

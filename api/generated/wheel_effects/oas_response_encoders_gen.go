@@ -7,16 +7,13 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 )
 
-func encodeApplyAvailableWheelEffectRollResponse(response ApplyAvailableWheelEffectRollRes, w http.ResponseWriter, span trace.Span) error {
+func encodeApplyAvailableWheelEffectRollResponse(response ApplyAvailableWheelEffectRollRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *FreePointChangeResults:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -29,7 +26,6 @@ func encodeApplyAvailableWheelEffectRollResponse(response ApplyAvailableWheelEff
 	case *ApplyAvailableWheelEffectRollUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -42,7 +38,6 @@ func encodeApplyAvailableWheelEffectRollResponse(response ApplyAvailableWheelEff
 	case *ApplyAvailableWheelEffectRollNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -55,7 +50,6 @@ func encodeApplyAvailableWheelEffectRollResponse(response ApplyAvailableWheelEff
 	case *ApplyAvailableWheelEffectRollConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -68,7 +62,6 @@ func encodeApplyAvailableWheelEffectRollResponse(response ApplyAvailableWheelEff
 	case *ApplyAvailableWheelEffectRollInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -83,12 +76,11 @@ func encodeApplyAvailableWheelEffectRollResponse(response ApplyAvailableWheelEff
 	}
 }
 
-func encodeGetAvailableWheelEffectRollsCountResponse(response GetAvailableWheelEffectRollsCountRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetAvailableWheelEffectRollsCountResponse(response GetAvailableWheelEffectRollsCountRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *Points:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -101,7 +93,6 @@ func encodeGetAvailableWheelEffectRollsCountResponse(response GetAvailableWheelE
 	case *GetAvailableWheelEffectRollsCountUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -114,7 +105,6 @@ func encodeGetAvailableWheelEffectRollsCountResponse(response GetAvailableWheelE
 	case *GetAvailableWheelEffectRollsCountNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -127,7 +117,6 @@ func encodeGetAvailableWheelEffectRollsCountResponse(response GetAvailableWheelE
 	case *GetAvailableWheelEffectRollsCountInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -142,12 +131,11 @@ func encodeGetAvailableWheelEffectRollsCountResponse(response GetAvailableWheelE
 	}
 }
 
-func encodeGetOwnAvailableWheelEffectsResponse(response GetOwnAvailableWheelEffectsRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnAvailableWheelEffectsResponse(response GetOwnAvailableWheelEffectsRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *WheelEffects:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -160,7 +148,6 @@ func encodeGetOwnAvailableWheelEffectsResponse(response GetOwnAvailableWheelEffe
 	case *GetOwnAvailableWheelEffectsUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -173,7 +160,6 @@ func encodeGetOwnAvailableWheelEffectsResponse(response GetOwnAvailableWheelEffe
 	case *GetOwnAvailableWheelEffectsInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -188,12 +174,11 @@ func encodeGetOwnAvailableWheelEffectsResponse(response GetOwnAvailableWheelEffe
 	}
 }
 
-func encodeGetOwnWheelEffectHistoryResponse(response GetOwnWheelEffectHistoryRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnWheelEffectHistoryResponse(response GetOwnWheelEffectHistoryRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *RolledWheelEffects:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -206,7 +191,6 @@ func encodeGetOwnWheelEffectHistoryResponse(response GetOwnWheelEffectHistoryRes
 	case *GetOwnWheelEffectHistoryUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -219,7 +203,6 @@ func encodeGetOwnWheelEffectHistoryResponse(response GetOwnWheelEffectHistoryRes
 	case *GetOwnWheelEffectHistoryInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -234,12 +217,11 @@ func encodeGetOwnWheelEffectHistoryResponse(response GetOwnWheelEffectHistoryRes
 	}
 }
 
-func encodeGetWheelEffectHistoryByLoginResponse(response GetWheelEffectHistoryByLoginRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetWheelEffectHistoryByLoginResponse(response GetWheelEffectHistoryByLoginRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *RolledWheelEffects:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -252,7 +234,6 @@ func encodeGetWheelEffectHistoryByLoginResponse(response GetWheelEffectHistoryBy
 	case *GetWheelEffectHistoryByLoginUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -265,7 +246,6 @@ func encodeGetWheelEffectHistoryByLoginResponse(response GetWheelEffectHistoryBy
 	case *GetWheelEffectHistoryByLoginNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -278,7 +258,6 @@ func encodeGetWheelEffectHistoryByLoginResponse(response GetWheelEffectHistoryBy
 	case *GetWheelEffectHistoryByLoginInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -293,12 +272,11 @@ func encodeGetWheelEffectHistoryByLoginResponse(response GetWheelEffectHistoryBy
 	}
 }
 
-func encodeRollAvailableWheelEffectsResponse(response RollAvailableWheelEffectsRes, w http.ResponseWriter, span trace.Span) error {
+func encodeRollAvailableWheelEffectsResponse(response RollAvailableWheelEffectsRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *RolledWheelEffects:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -311,7 +289,6 @@ func encodeRollAvailableWheelEffectsResponse(response RollAvailableWheelEffectsR
 	case *RollAvailableWheelEffectsUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -324,7 +301,6 @@ func encodeRollAvailableWheelEffectsResponse(response RollAvailableWheelEffectsR
 	case *RollAvailableWheelEffectsNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -337,7 +313,6 @@ func encodeRollAvailableWheelEffectsResponse(response RollAvailableWheelEffectsR
 	case *RollAvailableWheelEffectsConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -350,7 +325,6 @@ func encodeRollAvailableWheelEffectsResponse(response RollAvailableWheelEffectsR
 	case *RollAvailableWheelEffectsInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)

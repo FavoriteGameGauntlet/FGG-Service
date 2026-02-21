@@ -7,16 +7,13 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 )
 
-func encodeChangeOwnExperiencePointsResponse(response ChangeOwnExperiencePointsRes, w http.ResponseWriter, span trace.Span) error {
+func encodeChangeOwnExperiencePointsResponse(response ChangeOwnExperiencePointsRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *PointChangeResult:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -29,7 +26,6 @@ func encodeChangeOwnExperiencePointsResponse(response ChangeOwnExperiencePointsR
 	case *ChangeOwnExperiencePointsUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -42,7 +38,6 @@ func encodeChangeOwnExperiencePointsResponse(response ChangeOwnExperiencePointsR
 	case *ChangeOwnExperiencePointsConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -55,7 +50,6 @@ func encodeChangeOwnExperiencePointsResponse(response ChangeOwnExperiencePointsR
 	case *ChangeOwnExperiencePointsInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -70,12 +64,11 @@ func encodeChangeOwnExperiencePointsResponse(response ChangeOwnExperiencePointsR
 	}
 }
 
-func encodeChangeOwnFreePointsResponse(response ChangeOwnFreePointsRes, w http.ResponseWriter, span trace.Span) error {
+func encodeChangeOwnFreePointsResponse(response ChangeOwnFreePointsRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *FreePointChangeResults:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -88,7 +81,6 @@ func encodeChangeOwnFreePointsResponse(response ChangeOwnFreePointsRes, w http.R
 	case *ChangeOwnFreePointsUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -101,7 +93,6 @@ func encodeChangeOwnFreePointsResponse(response ChangeOwnFreePointsRes, w http.R
 	case *ChangeOwnFreePointsConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -114,7 +105,6 @@ func encodeChangeOwnFreePointsResponse(response ChangeOwnFreePointsRes, w http.R
 	case *ChangeOwnFreePointsInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -129,12 +119,11 @@ func encodeChangeOwnFreePointsResponse(response ChangeOwnFreePointsRes, w http.R
 	}
 }
 
-func encodeChangeOwnTerritoryHoursResponse(response ChangeOwnTerritoryHoursRes, w http.ResponseWriter, span trace.Span) error {
+func encodeChangeOwnTerritoryHoursResponse(response ChangeOwnTerritoryHoursRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *PointChangeResult:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -147,7 +136,6 @@ func encodeChangeOwnTerritoryHoursResponse(response ChangeOwnTerritoryHoursRes, 
 	case *ChangeOwnTerritoryHoursUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -160,7 +148,6 @@ func encodeChangeOwnTerritoryHoursResponse(response ChangeOwnTerritoryHoursRes, 
 	case *ChangeOwnTerritoryHoursConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -173,7 +160,6 @@ func encodeChangeOwnTerritoryHoursResponse(response ChangeOwnTerritoryHoursRes, 
 	case *ChangeOwnTerritoryHoursInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -188,12 +174,11 @@ func encodeChangeOwnTerritoryHoursResponse(response ChangeOwnTerritoryHoursRes, 
 	}
 }
 
-func encodeChangeOwnTerritoryPointsResponse(response ChangeOwnTerritoryPointsRes, w http.ResponseWriter, span trace.Span) error {
+func encodeChangeOwnTerritoryPointsResponse(response ChangeOwnTerritoryPointsRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *TerritoryPointChangeResults:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -206,7 +191,6 @@ func encodeChangeOwnTerritoryPointsResponse(response ChangeOwnTerritoryPointsRes
 	case *ChangeOwnTerritoryPointsUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -219,7 +203,6 @@ func encodeChangeOwnTerritoryPointsResponse(response ChangeOwnTerritoryPointsRes
 	case *ChangeOwnTerritoryPointsConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -232,7 +215,6 @@ func encodeChangeOwnTerritoryPointsResponse(response ChangeOwnTerritoryPointsRes
 	case *ChangeOwnTerritoryPointsInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -247,12 +229,11 @@ func encodeChangeOwnTerritoryPointsResponse(response ChangeOwnTerritoryPointsRes
 	}
 }
 
-func encodeGetFreePointHistoryByLoginResponse(response GetFreePointHistoryByLoginRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetFreePointHistoryByLoginResponse(response GetFreePointHistoryByLoginRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *FreePointChangeResults:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -265,7 +246,6 @@ func encodeGetFreePointHistoryByLoginResponse(response GetFreePointHistoryByLogi
 	case *GetFreePointHistoryByLoginUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -278,7 +258,6 @@ func encodeGetFreePointHistoryByLoginResponse(response GetFreePointHistoryByLogi
 	case *GetFreePointHistoryByLoginNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -291,7 +270,6 @@ func encodeGetFreePointHistoryByLoginResponse(response GetFreePointHistoryByLogi
 	case *GetFreePointHistoryByLoginInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -306,12 +284,11 @@ func encodeGetFreePointHistoryByLoginResponse(response GetFreePointHistoryByLogi
 	}
 }
 
-func encodeGetOwnExperiencePointsResponse(response GetOwnExperiencePointsRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnExperiencePointsResponse(response GetOwnExperiencePointsRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *Points:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -324,7 +301,6 @@ func encodeGetOwnExperiencePointsResponse(response GetOwnExperiencePointsRes, w 
 	case *GetOwnExperiencePointsUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -337,7 +313,6 @@ func encodeGetOwnExperiencePointsResponse(response GetOwnExperiencePointsRes, w 
 	case *GetOwnExperiencePointsInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -352,12 +327,11 @@ func encodeGetOwnExperiencePointsResponse(response GetOwnExperiencePointsRes, w 
 	}
 }
 
-func encodeGetOwnFreePointHistoryResponse(response GetOwnFreePointHistoryRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnFreePointHistoryResponse(response GetOwnFreePointHistoryRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *FreePointChangeResults:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -370,7 +344,6 @@ func encodeGetOwnFreePointHistoryResponse(response GetOwnFreePointHistoryRes, w 
 	case *GetOwnFreePointHistoryUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -383,7 +356,6 @@ func encodeGetOwnFreePointHistoryResponse(response GetOwnFreePointHistoryRes, w 
 	case *GetOwnFreePointHistoryInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -398,12 +370,11 @@ func encodeGetOwnFreePointHistoryResponse(response GetOwnFreePointHistoryRes, w 
 	}
 }
 
-func encodeGetOwnFreePointsResponse(response GetOwnFreePointsRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnFreePointsResponse(response GetOwnFreePointsRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *Points:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -416,7 +387,6 @@ func encodeGetOwnFreePointsResponse(response GetOwnFreePointsRes, w http.Respons
 	case *GetOwnFreePointsUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -429,7 +399,6 @@ func encodeGetOwnFreePointsResponse(response GetOwnFreePointsRes, w http.Respons
 	case *GetOwnFreePointsInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -444,12 +413,11 @@ func encodeGetOwnFreePointsResponse(response GetOwnFreePointsRes, w http.Respons
 	}
 }
 
-func encodeGetOwnPointInfoResponse(response GetOwnPointInfoRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnPointInfoResponse(response GetOwnPointInfoRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *PointInfo:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -462,7 +430,6 @@ func encodeGetOwnPointInfoResponse(response GetOwnPointInfoRes, w http.ResponseW
 	case *GetOwnPointInfoUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -475,7 +442,6 @@ func encodeGetOwnPointInfoResponse(response GetOwnPointInfoRes, w http.ResponseW
 	case *GetOwnPointInfoInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -490,12 +456,11 @@ func encodeGetOwnPointInfoResponse(response GetOwnPointInfoRes, w http.ResponseW
 	}
 }
 
-func encodeGetOwnTerritoryHoursResponse(response GetOwnTerritoryHoursRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnTerritoryHoursResponse(response GetOwnTerritoryHoursRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *Points:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -508,7 +473,6 @@ func encodeGetOwnTerritoryHoursResponse(response GetOwnTerritoryHoursRes, w http
 	case *GetOwnTerritoryHoursUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -521,7 +485,6 @@ func encodeGetOwnTerritoryHoursResponse(response GetOwnTerritoryHoursRes, w http
 	case *GetOwnTerritoryHoursInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -536,12 +499,11 @@ func encodeGetOwnTerritoryHoursResponse(response GetOwnTerritoryHoursRes, w http
 	}
 }
 
-func encodeGetOwnTerritoryPointHistoryResponse(response GetOwnTerritoryPointHistoryRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnTerritoryPointHistoryResponse(response GetOwnTerritoryPointHistoryRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *TerritoryPointChangeResults:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -554,7 +516,6 @@ func encodeGetOwnTerritoryPointHistoryResponse(response GetOwnTerritoryPointHist
 	case *GetOwnTerritoryPointHistoryUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -567,7 +528,6 @@ func encodeGetOwnTerritoryPointHistoryResponse(response GetOwnTerritoryPointHist
 	case *GetOwnTerritoryPointHistoryInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -582,12 +542,11 @@ func encodeGetOwnTerritoryPointHistoryResponse(response GetOwnTerritoryPointHist
 	}
 }
 
-func encodeGetOwnTerritoryPointsResponse(response GetOwnTerritoryPointsRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnTerritoryPointsResponse(response GetOwnTerritoryPointsRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *Points:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -600,7 +559,6 @@ func encodeGetOwnTerritoryPointsResponse(response GetOwnTerritoryPointsRes, w ht
 	case *GetOwnTerritoryPointsUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -613,7 +571,6 @@ func encodeGetOwnTerritoryPointsResponse(response GetOwnTerritoryPointsRes, w ht
 	case *GetOwnTerritoryPointsInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -628,12 +585,11 @@ func encodeGetOwnTerritoryPointsResponse(response GetOwnTerritoryPointsRes, w ht
 	}
 }
 
-func encodeGetPointInfoByLoginResponse(response GetPointInfoByLoginRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetPointInfoByLoginResponse(response GetPointInfoByLoginRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *PointInfo:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -646,7 +602,6 @@ func encodeGetPointInfoByLoginResponse(response GetPointInfoByLoginRes, w http.R
 	case *GetPointInfoByLoginUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -659,7 +614,6 @@ func encodeGetPointInfoByLoginResponse(response GetPointInfoByLoginRes, w http.R
 	case *GetPointInfoByLoginNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -672,7 +626,6 @@ func encodeGetPointInfoByLoginResponse(response GetPointInfoByLoginRes, w http.R
 	case *GetPointInfoByLoginInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -687,12 +640,11 @@ func encodeGetPointInfoByLoginResponse(response GetPointInfoByLoginRes, w http.R
 	}
 }
 
-func encodeGetTerritoryPointHistoryByLoginResponse(response GetTerritoryPointHistoryByLoginRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetTerritoryPointHistoryByLoginResponse(response GetTerritoryPointHistoryByLoginRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *TerritoryPointChangeResults:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -705,7 +657,6 @@ func encodeGetTerritoryPointHistoryByLoginResponse(response GetTerritoryPointHis
 	case *GetTerritoryPointHistoryByLoginUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -718,7 +669,6 @@ func encodeGetTerritoryPointHistoryByLoginResponse(response GetTerritoryPointHis
 	case *GetTerritoryPointHistoryByLoginNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -731,7 +681,6 @@ func encodeGetTerritoryPointHistoryByLoginResponse(response GetTerritoryPointHis
 	case *GetTerritoryPointHistoryByLoginInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)

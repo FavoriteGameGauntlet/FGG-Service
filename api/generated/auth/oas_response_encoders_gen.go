@@ -9,11 +9,9 @@ import (
 	"github.com/go-faster/jx"
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/uri"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 )
 
-func encodeLoginResponse(response LoginRes, w http.ResponseWriter, span trace.Span) error {
+func encodeLoginResponse(response LoginRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *LoginNoContent:
 		w.Header().Set("Access-Control-Expose-Headers", "Set-Cookie")
@@ -37,14 +35,12 @@ func encodeLoginResponse(response LoginRes, w http.ResponseWriter, span trace.Sp
 			}
 		}
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *LoginUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -57,7 +53,6 @@ func encodeLoginResponse(response LoginRes, w http.ResponseWriter, span trace.Sp
 	case *LoginInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -72,7 +67,7 @@ func encodeLoginResponse(response LoginRes, w http.ResponseWriter, span trace.Sp
 	}
 }
 
-func encodeLogoutResponse(response LogoutRes, w http.ResponseWriter, span trace.Span) error {
+func encodeLogoutResponse(response LogoutRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *LogoutNoContent:
 		w.Header().Set("Access-Control-Expose-Headers", "Set-Cookie")
@@ -96,14 +91,12 @@ func encodeLogoutResponse(response LogoutRes, w http.ResponseWriter, span trace.
 			}
 		}
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *LogoutUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -116,7 +109,6 @@ func encodeLogoutResponse(response LogoutRes, w http.ResponseWriter, span trace.
 	case *LogoutInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -131,18 +123,16 @@ func encodeLogoutResponse(response LogoutRes, w http.ResponseWriter, span trace.
 	}
 }
 
-func encodeSignUpResponse(response SignUpRes, w http.ResponseWriter, span trace.Span) error {
+func encodeSignUpResponse(response SignUpRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *SignUpNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *SignUpUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -155,7 +145,6 @@ func encodeSignUpResponse(response SignUpRes, w http.ResponseWriter, span trace.
 	case *SignUpConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -168,7 +157,6 @@ func encodeSignUpResponse(response SignUpRes, w http.ResponseWriter, span trace.
 	case *SignUpInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)

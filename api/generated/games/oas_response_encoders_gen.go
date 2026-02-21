@@ -7,22 +7,18 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 )
 
-func encodeAddOwnWishlistGameResponse(response AddOwnWishlistGameRes, w http.ResponseWriter, span trace.Span) error {
+func encodeAddOwnWishlistGameResponse(response AddOwnWishlistGameRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *AddOwnWishlistGameNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *AddOwnWishlistGameUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -35,7 +31,6 @@ func encodeAddOwnWishlistGameResponse(response AddOwnWishlistGameRes, w http.Res
 	case *AddOwnWishlistGameInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -50,18 +45,16 @@ func encodeAddOwnWishlistGameResponse(response AddOwnWishlistGameRes, w http.Res
 	}
 }
 
-func encodeCancelOwnCurrentGameResponse(response CancelOwnCurrentGameRes, w http.ResponseWriter, span trace.Span) error {
+func encodeCancelOwnCurrentGameResponse(response CancelOwnCurrentGameRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *CancelOwnCurrentGameNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *CancelOwnCurrentGameUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -74,7 +67,6 @@ func encodeCancelOwnCurrentGameResponse(response CancelOwnCurrentGameRes, w http
 	case *CancelOwnCurrentGameNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -87,7 +79,6 @@ func encodeCancelOwnCurrentGameResponse(response CancelOwnCurrentGameRes, w http
 	case *CancelOwnCurrentGameInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -102,18 +93,16 @@ func encodeCancelOwnCurrentGameResponse(response CancelOwnCurrentGameRes, w http
 	}
 }
 
-func encodeFinishOwnCurrentGameResponse(response FinishOwnCurrentGameRes, w http.ResponseWriter, span trace.Span) error {
+func encodeFinishOwnCurrentGameResponse(response FinishOwnCurrentGameRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *FinishOwnCurrentGameNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *FinishOwnCurrentGameUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -126,7 +115,6 @@ func encodeFinishOwnCurrentGameResponse(response FinishOwnCurrentGameRes, w http
 	case *FinishOwnCurrentGameNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -139,7 +127,6 @@ func encodeFinishOwnCurrentGameResponse(response FinishOwnCurrentGameRes, w http
 	case *FinishOwnCurrentGameConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -152,7 +139,6 @@ func encodeFinishOwnCurrentGameResponse(response FinishOwnCurrentGameRes, w http
 	case *FinishOwnCurrentGameInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -167,12 +153,11 @@ func encodeFinishOwnCurrentGameResponse(response FinishOwnCurrentGameRes, w http
 	}
 }
 
-func encodeGetCurrentGameByLoginResponse(response GetCurrentGameByLoginRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetCurrentGameByLoginResponse(response GetCurrentGameByLoginRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *CurrentGame:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -185,7 +170,6 @@ func encodeGetCurrentGameByLoginResponse(response GetCurrentGameByLoginRes, w ht
 	case *GetCurrentGameByLoginUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -198,7 +182,6 @@ func encodeGetCurrentGameByLoginResponse(response GetCurrentGameByLoginRes, w ht
 	case *GetCurrentGameByLoginNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -211,7 +194,6 @@ func encodeGetCurrentGameByLoginResponse(response GetCurrentGameByLoginRes, w ht
 	case *GetCurrentGameByLoginInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -226,12 +208,11 @@ func encodeGetCurrentGameByLoginResponse(response GetCurrentGameByLoginRes, w ht
 	}
 }
 
-func encodeGetGameHistoryByLoginResponse(response GetGameHistoryByLoginRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetGameHistoryByLoginResponse(response GetGameHistoryByLoginRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *CurrentGames:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -244,7 +225,6 @@ func encodeGetGameHistoryByLoginResponse(response GetGameHistoryByLoginRes, w ht
 	case *GetGameHistoryByLoginUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -257,7 +237,6 @@ func encodeGetGameHistoryByLoginResponse(response GetGameHistoryByLoginRes, w ht
 	case *GetGameHistoryByLoginNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -270,7 +249,6 @@ func encodeGetGameHistoryByLoginResponse(response GetGameHistoryByLoginRes, w ht
 	case *GetGameHistoryByLoginInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -285,12 +263,11 @@ func encodeGetGameHistoryByLoginResponse(response GetGameHistoryByLoginRes, w ht
 	}
 }
 
-func encodeGetOwnCurrentGameResponse(response GetOwnCurrentGameRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnCurrentGameResponse(response GetOwnCurrentGameRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *CurrentGame:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -303,7 +280,6 @@ func encodeGetOwnCurrentGameResponse(response GetOwnCurrentGameRes, w http.Respo
 	case *GetOwnCurrentGameUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -316,7 +292,6 @@ func encodeGetOwnCurrentGameResponse(response GetOwnCurrentGameRes, w http.Respo
 	case *GetOwnCurrentGameNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -329,7 +304,6 @@ func encodeGetOwnCurrentGameResponse(response GetOwnCurrentGameRes, w http.Respo
 	case *GetOwnCurrentGameInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -344,12 +318,11 @@ func encodeGetOwnCurrentGameResponse(response GetOwnCurrentGameRes, w http.Respo
 	}
 }
 
-func encodeGetOwnGameHistoryResponse(response GetOwnGameHistoryRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnGameHistoryResponse(response GetOwnGameHistoryRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *CurrentGames:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -362,7 +335,6 @@ func encodeGetOwnGameHistoryResponse(response GetOwnGameHistoryRes, w http.Respo
 	case *GetOwnGameHistoryUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -375,7 +347,6 @@ func encodeGetOwnGameHistoryResponse(response GetOwnGameHistoryRes, w http.Respo
 	case *GetOwnGameHistoryInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -390,12 +361,11 @@ func encodeGetOwnGameHistoryResponse(response GetOwnGameHistoryRes, w http.Respo
 	}
 }
 
-func encodeGetOwnWishlistGamesResponse(response GetOwnWishlistGamesRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnWishlistGamesResponse(response GetOwnWishlistGamesRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *WishlistGames:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -408,7 +378,6 @@ func encodeGetOwnWishlistGamesResponse(response GetOwnWishlistGamesRes, w http.R
 	case *GetOwnWishlistGamesUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -421,7 +390,6 @@ func encodeGetOwnWishlistGamesResponse(response GetOwnWishlistGamesRes, w http.R
 	case *GetOwnWishlistGamesInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -436,12 +404,11 @@ func encodeGetOwnWishlistGamesResponse(response GetOwnWishlistGamesRes, w http.R
 	}
 }
 
-func encodeGetWishlistGamesByLoginResponse(response GetWishlistGamesByLoginRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetWishlistGamesByLoginResponse(response GetWishlistGamesByLoginRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *WishlistGames:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -454,7 +421,6 @@ func encodeGetWishlistGamesByLoginResponse(response GetWishlistGamesByLoginRes, 
 	case *GetWishlistGamesByLoginUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -467,7 +433,6 @@ func encodeGetWishlistGamesByLoginResponse(response GetWishlistGamesByLoginRes, 
 	case *GetWishlistGamesByLoginNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -480,7 +445,6 @@ func encodeGetWishlistGamesByLoginResponse(response GetWishlistGamesByLoginRes, 
 	case *GetWishlistGamesByLoginInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -495,12 +459,11 @@ func encodeGetWishlistGamesByLoginResponse(response GetWishlistGamesByLoginRes, 
 	}
 }
 
-func encodeRollNewCurrentGameResponse(response RollNewCurrentGameRes, w http.ResponseWriter, span trace.Span) error {
+func encodeRollNewCurrentGameResponse(response RollNewCurrentGameRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *CurrentGame:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -513,7 +476,6 @@ func encodeRollNewCurrentGameResponse(response RollNewCurrentGameRes, w http.Res
 	case *RollNewCurrentGameUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -526,7 +488,6 @@ func encodeRollNewCurrentGameResponse(response RollNewCurrentGameRes, w http.Res
 	case *RollNewCurrentGameNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -539,7 +500,6 @@ func encodeRollNewCurrentGameResponse(response RollNewCurrentGameRes, w http.Res
 	case *RollNewCurrentGameConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -552,7 +512,6 @@ func encodeRollNewCurrentGameResponse(response RollNewCurrentGameRes, w http.Res
 	case *RollNewCurrentGameInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)

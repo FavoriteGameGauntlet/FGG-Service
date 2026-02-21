@@ -7,22 +7,18 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 )
 
-func encodeChangeOwnDisplayNameResponse(response ChangeOwnDisplayNameRes, w http.ResponseWriter, span trace.Span) error {
+func encodeChangeOwnDisplayNameResponse(response ChangeOwnDisplayNameRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *ChangeOwnDisplayNameNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *ChangeOwnDisplayNameUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -35,7 +31,6 @@ func encodeChangeOwnDisplayNameResponse(response ChangeOwnDisplayNameRes, w http
 	case *ChangeOwnDisplayNameConflict:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -48,7 +43,6 @@ func encodeChangeOwnDisplayNameResponse(response ChangeOwnDisplayNameRes, w http
 	case *ChangeOwnDisplayNameInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -63,12 +57,11 @@ func encodeChangeOwnDisplayNameResponse(response ChangeOwnDisplayNameRes, w http
 	}
 }
 
-func encodeGetOwnDisplayNameResponse(response GetOwnDisplayNameRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetOwnDisplayNameResponse(response GetOwnDisplayNameRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *Name:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -81,7 +74,6 @@ func encodeGetOwnDisplayNameResponse(response GetOwnDisplayNameRes, w http.Respo
 	case *GetOwnDisplayNameUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -94,7 +86,6 @@ func encodeGetOwnDisplayNameResponse(response GetOwnDisplayNameRes, w http.Respo
 	case *GetOwnDisplayNameNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -107,7 +98,6 @@ func encodeGetOwnDisplayNameResponse(response GetOwnDisplayNameRes, w http.Respo
 	case *GetOwnDisplayNameInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -122,12 +112,11 @@ func encodeGetOwnDisplayNameResponse(response GetOwnDisplayNameRes, w http.Respo
 	}
 }
 
-func encodeGetUserInfosResponse(response GetUserInfosRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetUserInfosResponse(response GetUserInfosRes, w http.ResponseWriter) error {
 	switch response := response.(type) {
 	case *UserNames:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -140,7 +129,6 @@ func encodeGetUserInfosResponse(response GetUserInfosRes, w http.ResponseWriter,
 	case *GetUserInfosUnauthorized:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -153,7 +141,6 @@ func encodeGetUserInfosResponse(response GetUserInfosRes, w http.ResponseWriter,
 	case *GetUserInfosInternalServerError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(500)
-		span.SetStatus(codes.Error, http.StatusText(500))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
