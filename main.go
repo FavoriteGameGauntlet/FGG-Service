@@ -4,7 +4,7 @@ import (
 	"FGG-Service/api"
 	"FGG-Service/src/controller"
 	"FGG-Service/src/db_access"
-	"FGG-Service/src/timers/timer_service"
+	"FGG-Service/src/timers/service"
 	"embed"
 	"net/http"
 	"time"

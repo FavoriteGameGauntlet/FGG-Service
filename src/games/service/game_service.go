@@ -3,7 +3,7 @@ package game_service
 import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/games/db"
-	"FGG-Service/src/timers/timer_service"
+	"FGG-Service/src/timers/service"
 	"database/sql"
 	"errors"
 	"math/rand"

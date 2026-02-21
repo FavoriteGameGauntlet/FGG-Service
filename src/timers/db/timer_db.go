@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+type Database struct {
+}
+
 const GetCurrentTimerQuery = `
 	SELECT
 		t.Id,
@@ -22,7 +25,7 @@ const GetCurrentTimerQuery = `
 		AND t.State != ?
 `
 
-func GetCurrentTimerCommand(userId int) (timer common.Timer, err error) {
+func (db *Database) GetCurrentTimerCommand(userId int) (timer common.Timer, err error) {
 	row := db_access.QueryRow(
 		GetCurrentTimerQuery,
 		common.TimerStateRunning,
@@ -64,7 +67,7 @@ const CreateCurrentTimerQuery = `
 	VALUES (?, ?, ?, ?)
 `
 
-func CreateCurrentTimerCommand(userId int, gameId int) error {
+func (db *Database) CreateCurrentTimerCommand(userId int, gameId int) error {
 	_, err := db_access.Exec(
 		CreateCurrentTimerQuery,
 		userId,
@@ -85,7 +88,7 @@ const ActTimerQuery = `
 	WHERE Id = ?
 `
 
-func ActTimerCommand(
+func (db *Database) ActTimerCommand(
 	timerId int,
 	timerState common.TimerStateType,
 	remainingTime time.Duration) error {
@@ -111,7 +114,7 @@ const GetCompletedTimerUsersQuery = `
 		END <= 0
 `
 
-func GetCompletedTimerUsersCommand() (userIds []int, err error) {
+func (db *Database) GetCompletedTimerUsersCommand() (userIds []int, err error) {
 	rows, err := db_access.Query(
 		GetCompletedTimerUsersQuery,
 		common.TimerStateCreated,
