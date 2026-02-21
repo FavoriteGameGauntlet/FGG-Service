@@ -2,7 +2,7 @@ package timer_service
 
 import (
 	"FGG-Service/src/common"
-	"FGG-Service/src/games/game_db"
+	"FGG-Service/src/games/db"
 	"FGG-Service/src/timers/timer_db"
 	"database/sql"
 	"errors"

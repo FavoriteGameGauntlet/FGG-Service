@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+type Database struct {
+}
+
 const DoesGameExistQuery = `
 	SELECT
 		CASE WHEN EXISTS (
@@ -19,7 +22,7 @@ const DoesGameExistQuery = `
 		ELSE false
 	END AS DoesExist`
 
-func DoesGameExistCommand(gameName string) (doesExist bool, err error) {
+func (db *Database) DoesGameExistCommand(gameName string) (doesExist bool, err error) {
 	row := db_access.QueryRow(DoesGameExistQuery, gameName)
 
 	err = row.Scan(&doesExist)
@@ -32,7 +35,7 @@ const CreateGameQuery = `
 	VALUES (?)
 `
 
-func CreateGameCommand(name string) error {
+func (db *Database) CreateGameCommand(name string) error {
 	_, err := db_access.Exec(
 		CreateGameQuery,
 		name,
@@ -47,7 +50,7 @@ const GetGameQuery = `
 	WHERE Name = ?
 `
 
-func GetGameCommand(name string) (game common.Game, err error) {
+func (db *Database) GetGameCommand(name string) (game common.Game, err error) {
 	row := db_access.QueryRow(GetGameQuery, name)
 
 	err = row.Scan(&game.Id, &game.Name)
@@ -68,7 +71,7 @@ const DoesUnplayedGameExistQuery = `
 		ELSE false
 	END AS DoesExist`
 
-func DoesUnplayedGameExistCommand(userId int, gameName string) (doesExist bool, err error) {
+func (db *Database) DoesUnplayedGameExistCommand(userId int, gameName string) (doesExist bool, err error) {
 	row := db_access.QueryRow(DoesUnplayedGameExistQuery, userId, gameName)
 
 	err = row.Scan(&doesExist)
@@ -81,7 +84,7 @@ const CreateUnplayedGameQuery = `
 	VALUES (?, ?)
 `
 
-func CreateUnplayedGameCommand(userId int, gameId int) error {
+func (db *Database) CreateUnplayedGameCommand(userId int, gameId int) error {
 	_, err := db_access.Exec(
 		CreateUnplayedGameQuery,
 		userId,
@@ -97,7 +100,7 @@ const DeleteUnplayedGameQuery = `
 		AND GameId = ?
 `
 
-func DeleteUnplayedGameCommand(userId int, gameId int) error {
+func (db *Database) DeleteUnplayedGameCommand(userId int, gameId int) error {
 	_, err := db_access.Exec(DeleteUnplayedGameQuery, userId, gameId)
 
 	return err
@@ -110,7 +113,7 @@ const GetUnplayedGamesQuery = `
 	WHERE ug.UserId = ?
 `
 
-func GetUnplayedGamesCommand(userId int) (games common.UnplayedGames, err error) {
+func (db *Database) GetUnplayedGamesCommand(userId int) (games common.UnplayedGames, err error) {
 	rows, err := db_access.Query(GetUnplayedGamesQuery, userId)
 
 	if err != nil {
@@ -138,7 +141,7 @@ const CreateCurrentGameQuery = `
 	VALUES (?, ?)
 `
 
-func CreateCurrentGameCommand(userId int, gameId int) error {
+func (db *Database) CreateCurrentGameCommand(userId int, gameId int) error {
 	_, err := db_access.Exec(CreateCurrentGameQuery, userId, gameId)
 
 	return err
@@ -156,13 +159,13 @@ const GetCurrentGameQuery = `
 		AND gh.State NOT IN (?, ?)
 `
 
-func GetCurrentGameCommand(userId int) (games common.Games, err error) {
-	games, err = getHistoryGames(userId, GetCurrentGameQuery)
+func (db *Database) GetCurrentGameCommand(userId int) (games common.Games, err error) {
+	games, err = db.getHistoryGames(userId, GetCurrentGameQuery)
 
 	return
 }
 
-func getHistoryGames(userId int, query string) (games common.Games, err error) {
+func (db *Database) getHistoryGames(userId int, query string) (games common.Games, err error) {
 	rows, err := db_access.Query(query, userId, common.GameStateFinished, common.GameStateCancelled)
 
 	if err != nil {
@@ -216,7 +219,7 @@ const GetGameSecondsSpentQuery = `
 		AND t.GameId = ?
 `
 
-func GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
+func (db *Database) GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
 	row := db_access.QueryRow(GetGameSecondsSpentQuery,
 		common.TimerStateRunning,
 		common.TimerStatePaused,
@@ -249,7 +252,7 @@ const CancelCurrentGameQuery = `
 		AND GameId = ?;
 `
 
-func CancelCurrentGameCommand(userId int, gameId int) error {
+func (db *Database) CancelCurrentGameCommand(userId int, gameId int) error {
 	_, err := db_access.Exec(CancelCurrentGameQuery, common.GameStateCancelled, userId, gameId)
 
 	return err
@@ -263,7 +266,7 @@ const FinishCurrentGameQuery = `
 		AND GameId = ?;
 `
 
-func FinishCurrentGameCommand(userId int, gameId int) error {
+func (db *Database) FinishCurrentGameCommand(userId int, gameId int) error {
 	_, err := db_access.Exec(FinishCurrentGameQuery, common.GameStateFinished, userId, gameId)
 
 	return err
@@ -282,8 +285,8 @@ const GetGameHistoryQuery = `
 	ORDER BY gh.FinishDate NULLS FIRST
 `
 
-func GetGameHistoryCommand(userId int) (games common.Games, err error) {
-	games, err = getHistoryGames(userId, GetGameHistoryQuery)
+func (db *Database) GetGameHistoryCommand(userId int) (games common.Games, err error) {
+	games, err = db.getHistoryGames(userId, GetGameHistoryQuery)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil

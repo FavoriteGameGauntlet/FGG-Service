@@ -2,7 +2,7 @@ package game_service
 
 import (
 	"FGG-Service/src/common"
-	"FGG-Service/src/games/game_db"
+	"FGG-Service/src/games/db"
 	"FGG-Service/src/timers/timer_service"
 	"database/sql"
 	"errors"
@@ -11,6 +11,7 @@ import (
 )
 
 type Service struct {
+	Db game_db.Database
 }
 
 func (s *Service) AddUnplayedGames(userId int, games common.UnplayedGames) error {
@@ -19,7 +20,7 @@ func (s *Service) AddUnplayedGames(userId int, games common.UnplayedGames) error
 
 	var err error
 	for _, game := range games {
-		err = CreateUnplayedGame(userId, game)
+		err = s.CreateUnplayedGame(userId, game)
 
 		if err != nil {
 			errorCount++
@@ -34,7 +35,7 @@ func (s *Service) AddUnplayedGames(userId int, games common.UnplayedGames) error
 }
 
 func (s *Service) CreateUnplayedGame(userId int, unplayedGame common.UnplayedGame) error {
-	doesExist, err := game_db.DoesUnplayedGameExistCommand(userId, unplayedGame.Name)
+	doesExist, err := s.Db.DoesUnplayedGameExistCommand(userId, unplayedGame.Name)
 
 	if err != nil {
 		return err
@@ -44,7 +45,7 @@ func (s *Service) CreateUnplayedGame(userId int, unplayedGame common.UnplayedGam
 		return common.NewUnplayedGameAlreadyExistsError(unplayedGame.Name)
 	}
 
-	doesExist, err = game_db.DoesGameExistCommand(unplayedGame.Name)
+	doesExist, err = s.Db.DoesGameExistCommand(unplayedGame.Name)
 
 	if err != nil {
 		return err
@@ -53,38 +54,38 @@ func (s *Service) CreateUnplayedGame(userId int, unplayedGame common.UnplayedGam
 	game := common.Game{}
 
 	if doesExist {
-		game, err = game_db.GetGameCommand(unplayedGame.Name)
+		game, err = s.Db.GetGameCommand(unplayedGame.Name)
 	} else {
-		game, err = createGame(unplayedGame)
+		game, err = s.createGame(unplayedGame)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	err = game_db.CreateUnplayedGameCommand(userId, game.Id)
+	err = s.Db.CreateUnplayedGameCommand(userId, game.Id)
 
 	return err
 }
 
 func (s *Service) GetUnplayedGames(userId int) (common.UnplayedGames, error) {
-	return game_db.GetUnplayedGamesCommand(userId)
+	return s.Db.GetUnplayedGamesCommand(userId)
 }
 
 func (s *Service) createGame(unplayedGame common.UnplayedGame) (game common.Game, err error) {
-	err = game_db.CreateGameCommand(unplayedGame.Name)
+	err = s.Db.CreateGameCommand(unplayedGame.Name)
 
 	if err != nil {
 		return
 	}
 
-	game, err = game_db.GetGameCommand(unplayedGame.Name)
+	game, err = s.Db.GetGameCommand(unplayedGame.Name)
 
 	return
 }
 
 func (s *Service) GetCurrentGame(userId int) (game common.Game, err error) {
-	games, err := game_db.GetCurrentGameCommand(userId)
+	games, err := s.Db.GetCurrentGameCommand(userId)
 
 	if errors.Is(err, sql.ErrNoRows) || len(games) == 0 {
 		err = common.NewCurrentGameNotFoundError()
@@ -97,7 +98,7 @@ func (s *Service) GetCurrentGame(userId int) (game common.Game, err error) {
 
 	game = games[0]
 
-	timeSpent, err := game_db.GetGameTimeSpentCommand(userId, game.Id)
+	timeSpent, err := s.Db.GetGameTimeSpentCommand(userId, game.Id)
 
 	if err != nil {
 		return
@@ -109,7 +110,7 @@ func (s *Service) GetCurrentGame(userId int) (game common.Game, err error) {
 }
 
 func (s *Service) CancelCurrentGame(userId int) error {
-	game, err := GetCurrentGame(userId)
+	game, err := s.GetCurrentGame(userId)
 
 	if err != nil {
 		return err
@@ -121,7 +122,7 @@ func (s *Service) CancelCurrentGame(userId int) error {
 		return err
 	}
 
-	err = game_db.CancelCurrentGameCommand(userId, game.Id)
+	err = s.Db.CancelCurrentGameCommand(userId, game.Id)
 
 	if err != nil {
 		return err
@@ -131,7 +132,7 @@ func (s *Service) CancelCurrentGame(userId int) error {
 }
 
 func (s *Service) FinishCurrentGame(userId int) error {
-	game, err := GetCurrentGame(userId)
+	game, err := s.GetCurrentGame(userId)
 
 	if err != nil {
 		return err
@@ -147,7 +148,7 @@ func (s *Service) FinishCurrentGame(userId int) error {
 		return err
 	}
 
-	err = game_db.FinishCurrentGameCommand(userId, game.Id)
+	err = s.Db.FinishCurrentGameCommand(userId, game.Id)
 
 	if err != nil {
 		return err
@@ -157,11 +158,11 @@ func (s *Service) FinishCurrentGame(userId int) error {
 }
 
 func (s *Service) GetGameHistory(userId int) (games common.Games, err error) {
-	games, err = game_db.GetGameHistoryCommand(userId)
+	games, err = s.Db.GetGameHistoryCommand(userId)
 
 	for _, game := range games {
 		var timeSpent time.Duration
-		timeSpent, err = game_db.GetGameTimeSpentCommand(userId, game.Id)
+		timeSpent, err = s.Db.GetGameTimeSpentCommand(userId, game.Id)
 
 		if err != nil {
 			return
@@ -174,7 +175,7 @@ func (s *Service) GetGameHistory(userId int) (games common.Games, err error) {
 }
 
 func (s *Service) MakeGameRoll(userId int) (game common.Game, err error) {
-	game, err = GetCurrentGame(userId)
+	game, err = s.GetCurrentGame(userId)
 
 	var notFoundError *common.NotFoundError
 	if err != nil && !errors.As(err, &notFoundError) {
@@ -186,7 +187,7 @@ func (s *Service) MakeGameRoll(userId int) (game common.Game, err error) {
 		return
 	}
 
-	unplayedGames, err := game_db.GetUnplayedGamesCommand(userId)
+	unplayedGames, err := s.Db.GetUnplayedGamesCommand(userId)
 
 	if err != nil {
 		return
@@ -200,13 +201,13 @@ func (s *Service) MakeGameRoll(userId int) (game common.Game, err error) {
 	randomNumber := rand.Intn(len(unplayedGames))
 	randomUnplayedGame := unplayedGames[randomNumber]
 
-	err = game_db.CreateCurrentGameCommand(userId, randomUnplayedGame.GameId)
+	err = s.Db.CreateCurrentGameCommand(userId, randomUnplayedGame.GameId)
 
 	if err != nil {
 		return
 	}
 
-	err = game_db.DeleteUnplayedGameCommand(userId, randomUnplayedGame.GameId)
+	err = s.Db.DeleteUnplayedGameCommand(userId, randomUnplayedGame.GameId)
 
 	if err != nil {
 		return
