@@ -1,24 +1,24 @@
-package effect_service
+package wheel_effect_service
 
 import (
 	"FGG-Service/src/common"
-	"FGG-Service/src/effect/effect_db"
+	"FGG-Service/src/wheel-effects/whee_effect_db"
 )
 
 func GetAvailableRollsCount(userId int) (count int, err error) {
-	return effect_db.GetAvailableRollsCountCommand(userId)
+	return whee_effect_db.GetAvailableRollsCountCommand(userId)
 }
 
 func GetAvailableEffects(userId int) (common.Effects, error) {
-	return effect_db.GetAvailableEffectsCommand(userId)
+	return whee_effect_db.GetAvailableEffectsCommand(userId)
 }
 
 func GetEffectHistory(userId int) (common.RolledEffects, error) {
-	return effect_db.GetEffectHistoryCommand(userId)
+	return whee_effect_db.GetEffectHistoryCommand(userId)
 }
 
 func MakeEffectRoll(userId int) (effects common.Effects, err error) {
-	rollCount, err := effect_db.GetAvailableRollsCountCommand(userId)
+	rollCount, err := whee_effect_db.GetAvailableRollsCountCommand(userId)
 
 	if err != nil {
 		return
@@ -29,13 +29,13 @@ func MakeEffectRoll(userId int) (effects common.Effects, err error) {
 		return
 	}
 
-	effects, err = effect_db.MakeEffectRollCommand(userId)
+	effects, err = whee_effect_db.MakeEffectRollCommand(userId)
 
 	if err != nil {
 		return
 	}
 
-	err = effect_db.DecreaseAvailableRollsValueCommand(userId)
+	err = whee_effect_db.DecreaseAvailableRollsValueCommand(userId)
 
 	return
 }

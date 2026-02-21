@@ -2,15 +2,18 @@ package game_service
 
 import (
 	"FGG-Service/src/common"
-	"FGG-Service/src/game/game_db"
-	"FGG-Service/src/timer/timer_service"
+	"FGG-Service/src/games/game_db"
+	"FGG-Service/src/timers/timer_service"
 	"database/sql"
 	"errors"
 	"math/rand"
 	"time"
 )
 
-func AddUnplayedGames(userId int, games common.UnplayedGames) error {
+type Service struct {
+}
+
+func (s *Service) AddUnplayedGames(userId int, games common.UnplayedGames) error {
 	numberOfGames := len(games)
 	errorCount := 0
 
@@ -30,7 +33,7 @@ func AddUnplayedGames(userId int, games common.UnplayedGames) error {
 	return nil
 }
 
-func CreateUnplayedGame(userId int, unplayedGame common.UnplayedGame) error {
+func (s *Service) CreateUnplayedGame(userId int, unplayedGame common.UnplayedGame) error {
 	doesExist, err := game_db.DoesUnplayedGameExistCommand(userId, unplayedGame.Name)
 
 	if err != nil {
@@ -64,11 +67,11 @@ func CreateUnplayedGame(userId int, unplayedGame common.UnplayedGame) error {
 	return err
 }
 
-func GetUnplayedGames(userId int) (common.UnplayedGames, error) {
+func (s *Service) GetUnplayedGames(userId int) (common.UnplayedGames, error) {
 	return game_db.GetUnplayedGamesCommand(userId)
 }
 
-func createGame(unplayedGame common.UnplayedGame) (game common.Game, err error) {
+func (s *Service) createGame(unplayedGame common.UnplayedGame) (game common.Game, err error) {
 	err = game_db.CreateGameCommand(unplayedGame.Name)
 
 	if err != nil {
@@ -80,7 +83,7 @@ func createGame(unplayedGame common.UnplayedGame) (game common.Game, err error) 
 	return
 }
 
-func GetCurrentGame(userId int) (game common.Game, err error) {
+func (s *Service) GetCurrentGame(userId int) (game common.Game, err error) {
 	games, err := game_db.GetCurrentGameCommand(userId)
 
 	if errors.Is(err, sql.ErrNoRows) || len(games) == 0 {
@@ -105,7 +108,7 @@ func GetCurrentGame(userId int) (game common.Game, err error) {
 	return
 }
 
-func CancelCurrentGame(userId int) error {
+func (s *Service) CancelCurrentGame(userId int) error {
 	game, err := GetCurrentGame(userId)
 
 	if err != nil {
@@ -127,7 +130,7 @@ func CancelCurrentGame(userId int) error {
 	return nil
 }
 
-func FinishCurrentGame(userId int) error {
+func (s *Service) FinishCurrentGame(userId int) error {
 	game, err := GetCurrentGame(userId)
 
 	if err != nil {
@@ -153,7 +156,7 @@ func FinishCurrentGame(userId int) error {
 	return nil
 }
 
-func GetGameHistory(userId int) (games common.Games, err error) {
+func (s *Service) GetGameHistory(userId int) (games common.Games, err error) {
 	games, err = game_db.GetGameHistoryCommand(userId)
 
 	for _, game := range games {
@@ -170,7 +173,7 @@ func GetGameHistory(userId int) (games common.Games, err error) {
 	return
 }
 
-func MakeGameRoll(userId int) (game common.Game, err error) {
+func (s *Service) MakeGameRoll(userId int) (game common.Game, err error) {
 	game, err = GetCurrentGame(userId)
 
 	var notFoundError *common.NotFoundError

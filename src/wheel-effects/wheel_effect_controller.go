@@ -1,26 +1,27 @@
-package controller
+package wheel_effects
 
 import (
 	"FGG-Service/api"
 	"FGG-Service/src/common"
-	"FGG-Service/src/effect/effect_service"
+	"FGG-Service/src/controller"
+	"FGG-Service/src/wheel-effects/wheel_effect_service"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 // MakeAvailableWheelEffectRoll (POST /wheel-effects/available/roll
-func (Server) MakeAvailableWheelEffectRoll(ctx echo.Context) error {
-	userId, err := GetUserId(ctx)
+func (controller.Server) MakeAvailableWheelEffectRoll(ctx echo.Context) error {
+	userId, err := controller.GetUserId(ctx)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
-	effects, err := effect_service.MakeEffectRoll(userId)
+	effects, err := wheel_effect_service.MakeEffectRoll(userId)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
 	effectsDto := convertEffectsToDto(effects)
@@ -29,22 +30,22 @@ func (Server) MakeAvailableWheelEffectRoll(ctx echo.Context) error {
 }
 
 // ApplyAvailableWheelEffectRoll (POST /wheel-effects/available/roll/apply)
-func (Server) ApplyAvailableWheelEffectRoll(ctx echo.Context) error {
+func (controller.Server) ApplyAvailableWheelEffectRoll(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNotImplemented)
 }
 
 // GetWheelEffectHistory (GET /wheel-effects/history)
-func (Server) GetWheelEffectHistory(ctx echo.Context) error {
-	userId, err := GetUserId(ctx)
+func (controller.Server) GetWheelEffectHistory(ctx echo.Context) error {
+	userId, err := controller.GetUserId(ctx)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
-	effects, err := effect_service.GetEffectHistory(userId)
+	effects, err := wheel_effect_service.GetEffectHistory(userId)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
 	effectsDto := convertRolledEffectsToDto(effects)
@@ -70,17 +71,17 @@ func convertRolledEffectsToDto(effects common.RolledEffects) api.RolledWheelEffe
 }
 
 // GetAvailableWheelEffects (GET /wheel-effects/available)
-func (s Server) GetAvailableWheelEffects(ctx echo.Context) error {
-	userId, err := GetUserId(ctx)
+func (s controller.Server) GetAvailableWheelEffects(ctx echo.Context) error {
+	userId, err := controller.GetUserId(ctx)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
-	effects, err := effect_service.GetAvailableEffects(userId)
+	effects, err := wheel_effect_service.GetAvailableEffects(userId)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
 	effectsDto := convertEffectsToDto(effects)

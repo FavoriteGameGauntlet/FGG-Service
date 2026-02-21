@@ -1,26 +1,27 @@
-package controller
+package timers
 
 import (
 	"FGG-Service/api"
 	"FGG-Service/src/common"
-	"FGG-Service/src/timer/timer_service"
+	"FGG-Service/src/controller"
+	"FGG-Service/src/timers/timer_service"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 // GetCurrentTimer (GET /timers/current)
-func (Server) GetCurrentTimer(ctx echo.Context) error {
-	userId, err := GetUserId(ctx)
+func (controller.Server) GetCurrentTimer(ctx echo.Context) error {
+	userId, err := controller.GetUserId(ctx)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
 	timer, err := timer_service.GetOrCreateCurrentTimer(userId)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
 	timerDto := ConvertTimerToDto(timer)
@@ -38,17 +39,17 @@ func ConvertTimerToDto(timer common.Timer) api.Timer {
 }
 
 // PauseCurrentTimer (POST /timers/current/pause)
-func (Server) PauseCurrentTimer(ctx echo.Context) error {
-	userId, err := GetUserId(ctx)
+func (controller.Server) PauseCurrentTimer(ctx echo.Context) error {
+	userId, err := controller.GetUserId(ctx)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
 	timer, err := timer_service.PauseCurrentTimer(userId)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
 	timerActionDto := ConvertTimerToDto(timer)
@@ -57,17 +58,17 @@ func (Server) PauseCurrentTimer(ctx echo.Context) error {
 }
 
 // StartCurrentTimer (POST /timers/current/start)
-func (Server) StartCurrentTimer(ctx echo.Context) error {
-	userId, err := GetUserId(ctx)
+func (controller.Server) StartCurrentTimer(ctx echo.Context) error {
+	userId, err := controller.GetUserId(ctx)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
 	timer, err := timer_service.StartCurrentTimer(userId)
 
 	if err != nil {
-		return SendJSONErrorResponse(ctx, err)
+		return controller.SendJSONErrorResponse(ctx, err)
 	}
 
 	timerActionDto := ConvertTimerToDto(timer)

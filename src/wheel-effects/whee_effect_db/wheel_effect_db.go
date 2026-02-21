@@ -1,4 +1,4 @@
-package effect_db
+package whee_effect_db
 
 import (
 	"FGG-Service/src/common"
