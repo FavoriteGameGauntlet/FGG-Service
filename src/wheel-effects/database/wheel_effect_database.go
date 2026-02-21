@@ -1,4 +1,4 @@
-package whee_effect_db
+package wheel_effect_database
 
 import (
 	"FGG-Service/src/common"
@@ -6,13 +6,16 @@ import (
 	"time"
 )
 
+type Database struct {
+}
+
 const GetAvailableRollsCountQuery = `
 	SELECT AvailableRolls
 	FROM UserStats
 	WHERE UserId = ?
 `
 
-func GetAvailableRollsCountCommand(userId int) (count int, err error) {
+func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err error) {
 	row := db_access.QueryRow(GetAvailableRollsCountQuery, userId)
 
 	err = row.Scan(&count)
@@ -36,7 +39,7 @@ const GetAvailableEffectsQuery = `
 				AND Position = 0)
 `
 
-func GetAvailableEffectsCommand(userId int) (effects common.Effects, err error) {
+func (db *Database) GetAvailableEffectsCommand(userId int) (effects common.Effects, err error) {
 	rows, err := db_access.Query(GetAvailableEffectsQuery, userId)
 
 	if err != nil {
@@ -66,7 +69,7 @@ const GetEffectHistoryQuery = `
 	WHERE weh.UserId = ?
 `
 
-func GetEffectHistoryCommand(userId int) (effects common.RolledEffects, err error) {
+func (db *Database) GetEffectHistoryCommand(userId int) (effects common.RolledEffects, err error) {
 	rows, err := db_access.Query(GetEffectHistoryQuery, userId)
 
 	if err != nil {
@@ -118,7 +121,7 @@ const MakeEffectRollQuery = `
 	LIMIT 5
 `
 
-func MakeEffectRollCommand(userId int) (effects common.Effects, err error) {
+func (db *Database) MakeEffectRollCommand(userId int) (effects common.Effects, err error) {
 	rows, err := db_access.Query(MakeEffectRollQuery, userId)
 
 	if err != nil {
@@ -147,7 +150,7 @@ const DecreaseAvailableRollsValueQuery = `
 	WHERE UserId = ?
 `
 
-func DecreaseAvailableRollsValueCommand(userId int) error {
+func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
 	_, err := db_access.Exec(DecreaseAvailableRollsValueQuery, userId)
 
 	return err
