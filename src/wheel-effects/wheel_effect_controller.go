@@ -2,6 +2,7 @@ package wheel_effects
 
 import (
 	"FGG-Service/api"
+	"FGG-Service/src/auth/controller"
 	"FGG-Service/src/common"
 	"FGG-Service/src/controller"
 	"FGG-Service/src/wheel-effects/wheel_effect_service"
@@ -12,16 +13,16 @@ import (
 
 // MakeAvailableWheelEffectRoll (POST /wheel-effects/available/roll
 func (controller.Server) MakeAvailableWheelEffectRoll(ctx echo.Context) error {
-	userId, err := controller.GetUserId(ctx)
+	userId, err := auth.GetUserId(ctx)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	effects, err := wheel_effect_service.MakeEffectRoll(userId)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	effectsDto := convertEffectsToDto(effects)
@@ -36,16 +37,16 @@ func (controller.Server) ApplyAvailableWheelEffectRoll(ctx echo.Context) error {
 
 // GetWheelEffectHistory (GET /wheel-effects/history)
 func (controller.Server) GetWheelEffectHistory(ctx echo.Context) error {
-	userId, err := controller.GetUserId(ctx)
+	userId, err := auth.GetUserId(ctx)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	effects, err := wheel_effect_service.GetEffectHistory(userId)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	effectsDto := convertRolledEffectsToDto(effects)
@@ -72,16 +73,16 @@ func convertRolledEffectsToDto(effects common.RolledEffects) api.RolledWheelEffe
 
 // GetAvailableWheelEffects (GET /wheel-effects/available)
 func (s controller.Server) GetAvailableWheelEffects(ctx echo.Context) error {
-	userId, err := controller.GetUserId(ctx)
+	userId, err := auth.GetUserId(ctx)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	effects, err := wheel_effect_service.GetAvailableEffects(userId)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	effectsDto := convertEffectsToDto(effects)

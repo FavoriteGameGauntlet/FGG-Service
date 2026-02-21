@@ -1,3 +1,3 @@
-package controller
+package auth
 
 const SessionCookieName = "session_id"

@@ -2,6 +2,7 @@ package timers
 
 import (
 	"FGG-Service/api"
+	"FGG-Service/src/auth/controller"
 	"FGG-Service/src/common"
 	"FGG-Service/src/controller"
 	"FGG-Service/src/timers/timer_service"
@@ -12,16 +13,16 @@ import (
 
 // GetCurrentTimer (GET /timers/current)
 func (controller.Server) GetCurrentTimer(ctx echo.Context) error {
-	userId, err := controller.GetUserId(ctx)
+	userId, err := auth.GetUserId(ctx)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	timer, err := timer_service.GetOrCreateCurrentTimer(userId)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	timerDto := ConvertTimerToDto(timer)
@@ -40,16 +41,16 @@ func ConvertTimerToDto(timer common.Timer) api.Timer {
 
 // PauseCurrentTimer (POST /timers/current/pause)
 func (controller.Server) PauseCurrentTimer(ctx echo.Context) error {
-	userId, err := controller.GetUserId(ctx)
+	userId, err := auth.GetUserId(ctx)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	timer, err := timer_service.PauseCurrentTimer(userId)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	timerActionDto := ConvertTimerToDto(timer)
@@ -59,16 +60,16 @@ func (controller.Server) PauseCurrentTimer(ctx echo.Context) error {
 
 // StartCurrentTimer (POST /timers/current/start)
 func (controller.Server) StartCurrentTimer(ctx echo.Context) error {
-	userId, err := controller.GetUserId(ctx)
+	userId, err := auth.GetUserId(ctx)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	timer, err := timer_service.StartCurrentTimer(userId)
 
 	if err != nil {
-		return controller.SendJSONErrorResponse(ctx, err)
+		return auth.SendJSONErrorResponse(ctx, err)
 	}
 
 	timerActionDto := ConvertTimerToDto(timer)
