@@ -1,4 +1,4 @@
-package point_db
+package point_database
 
 type Database struct {
 }

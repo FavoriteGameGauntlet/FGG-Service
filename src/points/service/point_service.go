@@ -1,7 +1,7 @@
 package point_service
 
-import "FGG-Service/src/points/db"
+import "FGG-Service/src/points/database"
 
 type Service struct {
-	Db point_db.Database
+	Database point_database.Database
 }

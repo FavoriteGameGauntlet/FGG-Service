@@ -2,18 +2,19 @@ package timer_service
 
 import (
 	"FGG-Service/src/common"
-	"FGG-Service/src/games/db"
-	"FGG-Service/src/timers/db"
+	"FGG-Service/src/games/database"
+	"FGG-Service/src/timers/database"
 	"database/sql"
 	"errors"
 )
 
 type Service struct {
-	Db timer_db.Database
+	Database     timer_database.Database
+	GameDatabase game_database.Database
 }
 
 func (s *Service) GetOrCreateCurrentTimer(userId int) (timer common.Timer, err error) {
-	games, err := game_db.GetCurrentGameCommand(userId)
+	games, err := s.GameDatabase.GetCurrentGameCommand(userId)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		err = common.NewCurrentGameNotFoundError()
@@ -26,7 +27,7 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer common.Timer, err e
 
 	game := games[0]
 
-	timer, err = s.Db.GetCurrentTimerCommand(userId)
+	timer, err = s.Database.GetCurrentTimerCommand(userId)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return
@@ -36,13 +37,13 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer common.Timer, err e
 		return
 	}
 
-	err = s.Db.CreateCurrentTimerCommand(userId, game.Id)
+	err = s.Database.CreateCurrentTimerCommand(userId, game.Id)
 
 	if err != nil {
 		return
 	}
 
-	timer, err = s.Db.GetCurrentTimerCommand(userId)
+	timer, err = s.Database.GetCurrentTimerCommand(userId)
 
 	return
 }
@@ -100,7 +101,7 @@ func (s *Service) actCurrentTimer(
 	timerState common.TimerStateType,
 	incorrectStates []common.TimerStateType) (timer common.Timer, err error) {
 
-	timer, err = s.Db.GetCurrentTimerCommand(userId)
+	timer, err = s.Database.GetCurrentTimerCommand(userId)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		err = common.NewCurrentTimerNotFoundError()
@@ -123,19 +124,19 @@ func (s *Service) actCurrentTimer(
 		remainingTime = 0
 	}
 
-	err = s.Db.ActTimerCommand(timer.Id, timerState, remainingTime)
+	err = s.Database.ActTimerCommand(timer.Id, timerState, remainingTime)
 
 	if err != nil {
 		return
 	}
 
-	timer, err = s.Db.GetCurrentTimerCommand(userId)
+	timer, err = s.Database.GetCurrentTimerCommand(userId)
 
 	return
 }
 
 func (s *Service) StopAllCompletedTimers() error {
-	userIds, err := s.Db.GetCompletedTimerUsersCommand()
+	userIds, err := s.Database.GetCompletedTimerUsersCommand()
 
 	if err != nil {
 		return err
