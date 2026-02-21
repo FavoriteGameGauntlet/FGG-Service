@@ -2,7 +2,7 @@ package controller
 
 import (
 	"FGG-Service/api"
-	"FGG-Service/src/auth/auth_service"
+	"FGG-Service/src/auth/service"
 	"FGG-Service/src/common"
 	"database/sql"
 	"errors"
