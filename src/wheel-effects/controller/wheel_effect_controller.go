@@ -1,4 +1,4 @@
-package wheel_effects
+package effects
 
 import (
 	"FGG-Service/api/generated/wheel_effects"
@@ -7,7 +7,7 @@ import (
 )
 
 type Controller struct {
-	Service wheel_effect_service.Service
+	Service srveffects.Service
 }
 
 // ApplyAvailableWheelEffectRoll POST /wheel-effects/available/roll/apply

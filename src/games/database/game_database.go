@@ -1,4 +1,4 @@
-package game_database
+package dbgames
 
 import (
 	"FGG-Service/src/common"

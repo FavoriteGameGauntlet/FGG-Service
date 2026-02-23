@@ -7,7 +7,7 @@ import (
 )
 
 type Controller struct {
-	Service auth_service.Service
+	Service srvauth.Service
 }
 
 // Login POST /auth/login

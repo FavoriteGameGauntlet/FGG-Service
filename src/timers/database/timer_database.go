@@ -1,4 +1,4 @@
-package timer_database
+package dbtimers
 
 import (
 	"FGG-Service/src/common"

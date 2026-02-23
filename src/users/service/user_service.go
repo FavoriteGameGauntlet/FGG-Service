@@ -1,7 +1,7 @@
-package user_service
+package srvusers
 
 import "FGG-Service/src/users/database"
 
 type Service struct {
-	Database user_database.Database
+	Database dbusers.Database
 }

@@ -1,4 +1,4 @@
-package timer_service
+package srvtimers
 
 import (
 	"FGG-Service/src/common"
@@ -9,8 +9,8 @@ import (
 )
 
 type Service struct {
-	Database     timer_database.Database
-	GameDatabase game_database.Database
+	Database     dbtimers.Database
+	GameDatabase dbgames.Database
 }
 
 func (s *Service) GetOrCreateCurrentTimer(userId int) (timer common.Timer, err error) {

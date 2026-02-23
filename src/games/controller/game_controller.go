@@ -7,7 +7,7 @@ import (
 )
 
 type Controller struct {
-	Service game_service.Service
+	Service srvgames.Service
 }
 
 // AddOwnWishlistGame (POST /games/self/wishlist)

@@ -7,7 +7,7 @@ import (
 )
 
 type Controller struct {
-	Service point_service.Service
+	Service srvpoints.Service
 }
 
 // ChangeOwnExperiencePoints POST /points/self/experience-points

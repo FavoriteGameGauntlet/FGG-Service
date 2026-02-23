@@ -1,4 +1,4 @@
-package user_database
+package dbusers
 
 type Database struct {
 }

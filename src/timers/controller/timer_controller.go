@@ -7,7 +7,7 @@ import (
 )
 
 type Controller struct {
-	Service timer_service.Service
+	Service srvtimers.Service
 }
 
 // GetOwnCurrentTimer GET /timers/self/current

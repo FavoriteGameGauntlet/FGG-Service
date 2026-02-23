@@ -1,7 +1,7 @@
-package point_service
+package srvpoints
 
 import "FGG-Service/src/points/database"
 
 type Service struct {
-	Database point_database.Database
+	Database dbpoints.Database
 }

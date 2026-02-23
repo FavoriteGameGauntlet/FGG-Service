@@ -7,7 +7,7 @@ import (
 )
 
 type Controller struct {
-	Service user_service.Service
+	Service srvusers.Service
 }
 
 // ChangeOwnDisplayName POST /users/self/display-name

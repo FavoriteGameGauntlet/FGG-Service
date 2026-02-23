@@ -1,4 +1,4 @@
-package game_service
+package srvgames
 
 import (
 	"FGG-Service/src/common"
@@ -11,8 +11,8 @@ import (
 )
 
 type Service struct {
-	Database     game_database.Database
-	TimerService timer_service.Service
+	Database     dbgames.Database
+	TimerService srvtimers.Service
 }
 
 func (s *Service) AddUnplayedGames(userId int, games common.UnplayedGames) error {

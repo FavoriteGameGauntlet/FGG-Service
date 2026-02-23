@@ -1,4 +1,4 @@
-package auth_service
+package srvauth
 
 import (
 	"FGG-Service/src/auth/database"
@@ -8,7 +8,7 @@ import (
 )
 
 type Service struct {
-	Database auth_database.Database
+	Database dbauth.Database
 }
 
 func (s *Service) CreateUser(login string, email string, password string) error {

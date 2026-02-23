@@ -1,19 +1,19 @@
 package main
 
 import (
-	auth_server "FGG-Service/api/generated/auth"
-	games_server "FGG-Service/api/generated/games"
-	points_server "FGG-Service/api/generated/points"
-	timers_server "FGG-Service/api/generated/timers"
-	users_server "FGG-Service/api/generated/users"
-	wheel_effects_server "FGG-Service/api/generated/wheel_effects"
-	"FGG-Service/src/auth/controller"
+	genauth "FGG-Service/api/generated/auth"
+	gengames "FGG-Service/api/generated/games"
+	genpoints "FGG-Service/api/generated/points"
+	gentimers "FGG-Service/api/generated/timers"
+	genusers "FGG-Service/api/generated/users"
+	geneffects "FGG-Service/api/generated/wheel_effects"
+	ctrlauth "FGG-Service/src/auth/controller"
 	"FGG-Service/src/db_access"
-	"FGG-Service/src/games/controller"
-	"FGG-Service/src/points/controller"
-	"FGG-Service/src/timers/controller"
-	"FGG-Service/src/users/controller"
-	"FGG-Service/src/wheel-effects/controller"
+	ctrlgames "FGG-Service/src/games/controller"
+	ctrlpoints "FGG-Service/src/points/controller"
+	ctrltimers "FGG-Service/src/timers/controller"
+	ctrlusers "FGG-Service/src/users/controller"
+	ctrleffects "FGG-Service/src/wheel-effects/controller"
 	"embed"
 	"io/fs"
 	"net/http"
@@ -26,40 +26,44 @@ var indexHTML []byte
 var scalarUI embed.FS
 
 func main() {
-	authController := new(auth.Controller)
-	gamesController := new(games.Controller)
-	pointsController := new(points.Controller)
-	timersController := new(timers.Controller)
-	usersController := new(users.Controller)
-	wheelEffectsController := new(wheel_effects.Controller)
+	authController := new(ctrlauth.Controller)
+	gamesController := new(ctrlgames.Controller)
+	pointsController := new(ctrlpoints.Controller)
+	timersController := new(ctrltimers.Controller)
+	usersController := new(ctrlusers.Controller)
+	wheelEffectsController := new(ctrleffects.Controller)
 
-	authServer, err := auth_server.NewServer(authController)
+	authServer, err := genauth.NewServer(authController)
+
+	if err != nil {
+		panic(err)
+	}
+
+	gamesServer, err := gengames.NewServer(gamesController)
 
 	if err != nil {
 		panic(err)
 	}
 
-	gamesServer, err := games_server.NewServer(gamesController)
+	pointsServer, err := genpoints.NewServer(pointsController)
 
 	if err != nil {
 		panic(err)
 	}
-	pointsServer, err := points_server.NewServer(pointsController)
+
+	timersServer, err := gentimers.NewServer(timersController)
 
 	if err != nil {
 		panic(err)
 	}
-	timersServer, err := timers_server.NewServer(timersController)
+
+	usersServer, err := genusers.NewServer(usersController)
 
 	if err != nil {
 		panic(err)
 	}
-	usersServer, err := users_server.NewServer(usersController)
 
-	if err != nil {
-		panic(err)
-	}
-	wheelEffectsServer, err := wheel_effects_server.NewServer(wheelEffectsController)
+	wheelEffectsServer, err := geneffects.NewServer(wheelEffectsController)
 
 	if err != nil {
 		panic(err)
@@ -75,18 +79,16 @@ func main() {
 	mux.Handle("/wheel-effects", wheelEffectsServer)
 
 	sub, _ := fs.Sub(scalarUI, "api/specification/mains")
-
-	mux.HandleFunc("/swagger/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/swagger/" {
-			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.Write(indexHTML)
+	mux.HandleFunc("/scalar/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/scalar/" {
+			_, _ = w.Write(indexHTML)
 			return
 		}
-		http.StripPrefix("/swagger/", http.FileServer(http.FS(sub))).ServeHTTP(w, r)
+		http.StripPrefix("/scalar/", http.FileServer(http.FS(sub))).ServeHTTP(w, r)
 	})
 
-	mux.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/swagger/", http.StatusMovedPermanently)
+	mux.HandleFunc("/scalar", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/scalar/", http.StatusMovedPermanently)
 	})
 
 	db_access.Init()

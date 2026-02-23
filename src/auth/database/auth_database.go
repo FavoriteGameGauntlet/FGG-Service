@@ -1,4 +1,4 @@
-package auth_database
+package dbauth
 
 import (
 	"FGG-Service/src/common"
