@@ -4,11 +4,122 @@ info:
   version: 0.9.0
 paths:
   /auth/signup:
-    $ref: "../paths/auth/signup.yaml"
-
+    post:
+      operationId: signUp
+      tags:
+        - Auth
+      requestBody:
+        $ref: '#/components/requestBodies/SignupUserRequest'
+      responses:
+        '204':
+          description: Success.
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /auth/login:
-    $ref: "../paths/auth/login.yaml"
-
+    post:
+      operationId: login
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUser'
+      responses:
+        '204':
+          description: Success.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Session cookie
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /auth/logout:
-    $ref: "../paths/auth/logout.yaml"
-  
+    post:
+      operationId: logout
+      tags:
+        - Auth
+      responses:
+        '204':
+          description: Success.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Session cookie
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  schemas:
+    Login:
+      type: string
+      pattern: ^\w+$
+      minLength: 3
+      maxLength: 35
+    Email:
+      type: string
+      pattern: ^[\w\d._%+-]+@[\w\d.-]+\.[\w]{2,}$
+      minLength: 6
+      maxLength: 35
+    Password:
+      type: string
+      pattern: ^(?=.*\w)(?=.*\d).+$
+      minLength: 8
+      maxLength: 35
+    SignupUser:
+      type: object
+      properties:
+        login:
+          $ref: '#/components/schemas/Login'
+        email:
+          $ref: '#/components/schemas/Email'
+        password:
+          $ref: '#/components/schemas/Password'
+      required:
+        - login
+        - email
+        - password
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    LoginUser:
+      type: object
+      properties:
+        login:
+          $ref: '#/components/schemas/Login'
+        password:
+          $ref: '#/components/schemas/Password'
+      required:
+        - login
+        - password
+  requestBodies:
+    SignupUserRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SignupUser'
+  responses:
+    ErrorResponse:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

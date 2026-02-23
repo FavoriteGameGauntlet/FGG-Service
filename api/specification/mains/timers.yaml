@@ -4,10 +4,100 @@ info:
   version: 0.9.0
 paths:
   /timers/self/current:
-    $ref: "../paths/timers/self/current.yaml"
-
+    get:
+      operationId: getOwnCurrentTimer
+      tags:
+        - Timers
+      responses:
+        '200':
+          $ref: '#/components/responses/TimerResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /timers/self/current/start:
-    $ref: "../paths/timers/self/current/start.yaml"
-
+    post:
+      operationId: startOwnCurrentTimer
+      tags:
+        - Timers
+      responses:
+        '200':
+          $ref: '#/components/responses/TimerResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /timers/self/current/pause:
-    $ref: "../paths/timers/self/current/pause.yaml"
+    post:
+      operationId: pauseOwnCurrentTimer
+      tags:
+        - Timers
+      responses:
+        '200':
+          $ref: '#/components/responses/TimerResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  schemas:
+    Duration:
+      type: string
+      format: duration
+      example: PT2h10m5s
+      description: The duration notation as defined by ISO 8601
+    Timer:
+      type: object
+      properties:
+        state:
+          type: string
+          enum:
+            - created
+            - running
+            - paused
+            - finished
+        remainingTime:
+          $ref: '#/components/schemas/Duration'
+        duration:
+          $ref: '#/components/schemas/Duration'
+        lastActionDate:
+          type: string
+          format: date-time
+      required:
+        - state
+        - remainingTime
+        - duration
+        - lastActionDate
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+  responses:
+    TimerResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Timer'
+    ErrorResponse:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

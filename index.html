@@ -12,8 +12,15 @@
 
 <script>
     Scalar.createApiReference('#app', {
-      url: 'api/openapi.yaml',
-      showToolbar: 'always',
+      sources: [
+        { url: '/swagger/auth.yaml',          title: 'Auth' },
+        { url: '/swagger/games.yaml',         title: 'Games' },
+        { url: '/swagger/points.yaml',        title: 'Points' },
+        { url: '/swagger/timers.yaml',        title: 'Timers' },
+        { url: '/swagger/users.yaml',         title: 'Users' },
+        { url: '/swagger/wheel_effects.yaml', title: 'Wheel Effects' },
+      ],
+      showDeveloperTools: 'always',
       defaultOpenAllTags: true,
       hideClientButton: true,
       hiddenClients: {

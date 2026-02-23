@@ -4,19 +4,248 @@ info:
   version: 0.9.0
 paths:
   /wheel-effects/self/history:
-    $ref: "../paths/wheel-effects/self/history.yaml"
-
+    get:
+      operationId: getOwnWheelEffectHistory
+      tags:
+        - WheelEffects
+      responses:
+        '200':
+          $ref: '#/components/responses/RolledWheelEffectsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /wheel-effects/{login}/history:
-    $ref: "../paths/wheel-effects/login/history.yaml"
-
+    get:
+      operationId: getWheelEffectHistoryByLogin
+      tags:
+        - WheelEffects
+      parameters:
+        - $ref: '#/components/parameters/Login'
+      responses:
+        '200':
+          $ref: '#/components/responses/RolledWheelEffectsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /wheel-effects/self/available:
-    $ref: "../paths/wheel-effects/self/available.yaml"
-
+    get:
+      operationId: getOwnAvailableWheelEffects
+      tags:
+        - WheelEffects
+      responses:
+        '200':
+          $ref: '#/components/responses/WheelEffectsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /wheel-effects/available/roll:
-    $ref: "../paths/wheel-effects/self/available/roll.yaml"
-
+    post:
+      operationId: rollAvailableWheelEffects
+      tags:
+        - WheelEffects
+      responses:
+        '200':
+          $ref: '#/components/responses/RolledWheelEffectsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /wheel-effects/available/roll/count:
-    $ref: "../paths/wheel-effects/self/available/roll/count.yaml"
-
+    get:
+      operationId: getAvailableWheelEffectRollsCount
+      tags:
+        - Effects
+      responses:
+        '200':
+          $ref: '#/components/responses/PointsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /wheel-effects/available/roll/apply:
-    $ref: "../paths/wheel-effects/self/available/roll/apply.yaml"
+    post:
+      operationId: applyAvailableWheelEffectRoll
+      tags:
+        - WheelEffects
+      requestBody:
+        $ref: '#/components/requestBodies/PointChangeByLoginsRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/FreePointChangeResultByLoginsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  schemas:
+    Name:
+      type: string
+      pattern: ^.+$
+      minLength: 1
+      maxLength: 70
+    WheelEffect:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+        description:
+          type: string
+      required:
+        - name
+    RolledWheelEffect:
+      allOf:
+        - $ref: '#/components/schemas/WheelEffect'
+        - type: object
+          properties:
+            position:
+              type: integer
+              format: int
+            rollDate:
+              type: string
+              format: date-time
+          required:
+            - rollDate
+    RolledWheelEffects:
+      type: array
+      items:
+        $ref: '#/components/schemas/RolledWheelEffect'
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    Login:
+      type: string
+      pattern: ^\w+$
+      minLength: 3
+      maxLength: 35
+    WheelEffects:
+      type: array
+      items:
+        $ref: '#/components/schemas/WheelEffect'
+    Points:
+      type: integer
+      format: int
+      minimum: 0
+    PointChange:
+      type: object
+      properties:
+        changeSource:
+          type: string
+        changeValue:
+          type: integer
+          format: int
+    PointChangeByLogin:
+      type: object
+      properties:
+        login:
+          $ref: '#/components/schemas/Login'
+        pointChange:
+          $ref: '#/components/schemas/PointChange'
+      required:
+        - login
+        - pointChange
+    PointChangeByLogins:
+      type: array
+      items:
+        $ref: '#/components/schemas/PointChangeByLogin'
+    PointChangeResult:
+      allOf:
+        - $ref: '#/components/schemas/PointChange'
+        - type: object
+          properties:
+            actualChangeValue:
+              type: integer
+              format: int
+            finalValue:
+              $ref: '#/components/schemas/Points'
+            changeDate:
+              type: string
+              format: date-time
+          required:
+            - actualChangeValue
+            - finalValue
+            - changeDate
+    FreePointChangeResult:
+      allOf:
+        - $ref: '#/components/schemas/PointChangeResult'
+        - type: object
+          properties:
+            changeSource:
+              enum:
+                - own-wheel-effect
+                - other-wheel-effect
+                - quest
+                - base-teleport
+                - sandstorm
+                - other
+            wheelEffectName:
+              $ref: '#/components/schemas/Name'
+    FreePointChangeResults:
+      type: array
+      items:
+        $ref: '#/components/schemas/FreePointChangeResult'
+  responses:
+    RolledWheelEffectsResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RolledWheelEffects'
+    ErrorResponse:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    WheelEffectsResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WheelEffects'
+    PointsResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Points'
+    FreePointChangeResultByLoginsResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FreePointChangeResults'
+  parameters:
+    Login:
+      name: login
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Login'
+  requestBodies:
+    PointChangeByLoginsRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PointChangeByLogins'

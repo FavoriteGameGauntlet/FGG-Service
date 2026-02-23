@@ -32,6 +32,10 @@ func (s *Error) SetMessage(val string) {
 
 type Login string
 
+type LoginBadRequest Error
+
+func (*LoginBadRequest) loginRes() {}
+
 type LoginInternalServerError Error
 
 func (*LoginInternalServerError) loginRes() {}

@@ -14,6 +14,8 @@ post:
           schema:
             type: string
           description: Session cookie
+    "400":
+      $ref: "../../components/responses/ErrorResponse.yaml"
     "401":
       $ref: "../../components/responses/ErrorResponse.yaml"
     "500":

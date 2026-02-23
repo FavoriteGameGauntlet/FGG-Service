@@ -41,7 +41,7 @@ func (c *Controller) SignUp(ctx context.Context, req auth.OptSignupUser) (
 //		return controller.SendJSONErrorResponse(ctx, err)
 //	}
 //
-//	doesExist, _ := controller.DoesUserSessionExist(ctx)
+//	doesExist, _ := controller.doesUserSessionExist(ctx)
 //
 //	if doesExist {
 //		err = common.NewSessionAlreadyExistsConflictError()
@@ -74,7 +74,7 @@ func (c *Controller) SignUp(ctx context.Context, req auth.OptSignupUser) (
 //
 //// Logout (POST /auth/logout)
 //func (controller.Server) Logout(ctx echo.Context) error {
-//	cookie, err := controller.GetSessionCookie(ctx)
+//	cookie, err := controller.getSessionCookie(ctx)
 //
 //	if err != nil {
 //		return controller.SendJSONErrorResponse(ctx, err)

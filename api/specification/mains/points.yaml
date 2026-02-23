@@ -4,31 +4,347 @@ info:
   version: 0.9.0
 paths:
   /points/self/info:
-    $ref: "../paths/points/self/info.yaml"
-
+    get:
+      operationId: getOwnPointInfo
+      tags:
+        - Points
+      responses:
+        '200':
+          $ref: '#/components/responses/PointInfoResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /points/{login}/info:
-    $ref: "../paths/points/login/info.yaml"
-
+    get:
+      operationId: getPointInfoByLogin
+      tags:
+        - Points
+      parameters:
+        - $ref: '#/components/parameters/Login'
+      responses:
+        '200':
+          $ref: '#/components/responses/PointInfoResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /points/self/territory-points:
-    $ref: "../paths/points/self/territory-points.yaml"
-
+    post:
+      operationId: changeOwnTerritoryPoints
+      tags:
+        - Points
+      requestBody:
+        $ref: '#/components/requestBodies/PointChangeRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/TerritoryPointChangeResultsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      operationId: getOwnTerritoryPoints
+      tags:
+        - Points
+      responses:
+        '200':
+          $ref: '#/components/responses/PointsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /points/self/territory-points/history:
-    $ref: "../paths/points/self/territory-points/history.yaml"
-
+    get:
+      operationId: getOwnTerritoryPointHistory
+      tags:
+        - Points
+      responses:
+        '200':
+          $ref: '#/components/responses/TerritoryPointChangeResultsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /points/{login}/territory-points/history:
-    $ref: "../paths/points/login/territory-points/history.yaml"
-
+    get:
+      operationId: getTerritoryPointHistoryByLogin
+      tags:
+        - Points
+      parameters:
+        - $ref: '#/components/parameters/Login'
+      responses:
+        '200':
+          $ref: '#/components/responses/TerritoryPointChangeResultsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /points/self/free-points:
-    $ref: "../paths/points/self/free-points.yaml"
-
+    post:
+      operationId: changeOwnFreePoints
+      tags:
+        - Points
+      requestBody:
+        $ref: '#/components/requestBodies/PointChangeRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/FreePointChangeResultsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      operationId: getOwnFreePoints
+      tags:
+        - Points
+      responses:
+        '200':
+          $ref: '#/components/responses/PointsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /points/self/free-points/history:
-    $ref: "../paths/points/self/free-points/history.yaml"
-
+    get:
+      operationId: getOwnFreePointHistory
+      tags:
+        - Points
+      responses:
+        '200':
+          $ref: '#/components/responses/FreePointChangeResultsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /points/{login}/free-points/history:
-    $ref: "../paths/points/login/free-points/history.yaml"
-
+    get:
+      operationId: getFreePointHistoryByLogin
+      tags:
+        - Points
+      parameters:
+        - $ref: '#/components/parameters/Login'
+      responses:
+        '200':
+          $ref: '#/components/responses/FreePointChangeResultsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /points/self/experience-points:
-    $ref: "../paths/points/self/experience-points.yaml"
-
+    post:
+      operationId: changeOwnExperiencePoints
+      tags:
+        - Points
+      requestBody:
+        $ref: '#/components/requestBodies/PointChangeRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PointChangeResultResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      operationId: getOwnExperiencePoints
+      tags:
+        - Points
+      responses:
+        '200':
+          $ref: '#/components/responses/PointsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /points/self/territory-hours:
-    $ref: "../paths/points/self/territory-hours.yaml"
+    post:
+      operationId: changeOwnTerritoryHours
+      tags:
+        - Points
+      requestBody:
+        $ref: '#/components/requestBodies/PointChangeRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PointChangeResultResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      operationId: getOwnTerritoryHours
+      tags:
+        - Points
+      responses:
+        '200':
+          $ref: '#/components/responses/PointsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  schemas:
+    Points:
+      type: integer
+      format: int
+      minimum: 0
+    PointInfo:
+      type: object
+      properties:
+        territoryPoints:
+          $ref: '#/components/schemas/Points'
+        freePoints:
+          $ref: '#/components/schemas/Points'
+        availableRolls:
+          $ref: '#/components/schemas/Points'
+        territoryHours:
+          $ref: '#/components/schemas/Points'
+        experiencePoints:
+          $ref: '#/components/schemas/Points'
+      required:
+        - territoryPoints
+        - freePoints
+        - availableRolls
+        - territoryHours
+        - experiencePoints
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    Login:
+      type: string
+      pattern: ^\w+$
+      minLength: 3
+      maxLength: 35
+    PointChange:
+      type: object
+      properties:
+        changeSource:
+          type: string
+        changeValue:
+          type: integer
+          format: int
+    PointChangeResult:
+      allOf:
+        - $ref: '#/components/schemas/PointChange'
+        - type: object
+          properties:
+            actualChangeValue:
+              type: integer
+              format: int
+            finalValue:
+              $ref: '#/components/schemas/Points'
+            changeDate:
+              type: string
+              format: date-time
+          required:
+            - actualChangeValue
+            - finalValue
+            - changeDate
+    TerritoryPointChangeResult:
+      allOf:
+        - $ref: '#/components/schemas/PointChangeResult'
+        - type: object
+          properties:
+            changeSource:
+              enum:
+                - territory-obtaining
+                - territory-loss
+                - other
+    TerritoryPointChangeResults:
+      type: array
+      items:
+        $ref: '#/components/schemas/TerritoryPointChangeResult'
+    Name:
+      type: string
+      pattern: ^.+$
+      minLength: 1
+      maxLength: 70
+    FreePointChangeResult:
+      allOf:
+        - $ref: '#/components/schemas/PointChangeResult'
+        - type: object
+          properties:
+            changeSource:
+              enum:
+                - own-wheel-effect
+                - other-wheel-effect
+                - quest
+                - base-teleport
+                - sandstorm
+                - other
+            wheelEffectName:
+              $ref: '#/components/schemas/Name'
+    FreePointChangeResults:
+      type: array
+      items:
+        $ref: '#/components/schemas/FreePointChangeResult'
+  responses:
+    PointInfoResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PointInfo'
+    ErrorResponse:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    PointsResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Points'
+    TerritoryPointChangeResultsResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TerritoryPointChangeResults'
+    FreePointChangeResultsResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FreePointChangeResults'
+    PointChangeResultResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PointChangeResult'
+  parameters:
+    Login:
+      name: login
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Login'
+  requestBodies:
+    PointChangeRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PointChange'

@@ -4,7 +4,103 @@ info:
   version: 0.9.0
 paths:
   /users/names:
-    $ref: "../paths/users/names.yaml"
-
+    get:
+      operationId: getUserInfos
+      tags:
+        - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/UserNamesResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /users/self/display-name:
-    $ref: "../paths/users/self/display-name.yaml"
+    post:
+      operationId: changeOwnDisplayName
+      tags:
+        - Users
+      requestBody:
+        $ref: '#/components/requestBodies/NameRequest'
+      responses:
+        '204':
+          description: Success.
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      operationId: getOwnDisplayName
+      tags:
+        - Users
+      responses:
+        '200':
+          $ref: '#/components/responses/NameResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  schemas:
+    Login:
+      type: string
+      pattern: ^\w+$
+      minLength: 3
+      maxLength: 35
+    Name:
+      type: string
+      pattern: ^.+$
+      minLength: 1
+      maxLength: 70
+    UserName:
+      type: object
+      properties:
+        login:
+          $ref: '#/components/schemas/Login'
+        display-name:
+          $ref: '#/components/schemas/Name'
+      required:
+        - login
+    UserNames:
+      type: array
+      items:
+        $ref: '#/components/schemas/UserName'
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+  responses:
+    UserNamesResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserNames'
+    ErrorResponse:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NameResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Name'
+  requestBodies:
+    NameRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Name'

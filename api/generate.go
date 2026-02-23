@@ -1,4 +1,11 @@
-package api
+package api_generating
+
+//go:generate redocly bundle specification/raw_mains/auth.yaml -o specification/mains/auth.yaml
+//go:generate redocly bundle specification/raw_mains/games.yaml -o specification/mains/games.yaml
+//go:generate redocly bundle specification/raw_mains/points.yaml -o specification/mains/points.yaml
+//go:generate redocly bundle specification/raw_mains/timers.yaml -o specification/mains/timers.yaml
+//go:generate redocly bundle specification/raw_mains/users.yaml -o specification/mains/users.yaml
+//go:generate redocly bundle specification/raw_mains/wheel_effects.yaml -o specification/mains/wheel_effects.yaml
 
 //go:generate go run github.com/ogen-go/ogen/cmd/ogen@latest --package auth --target generated/auth --config config.yaml --clean specification/mains/auth.yaml
 //go:generate go run github.com/ogen-go/ogen/cmd/ogen@latest --package games --target generated/games --config config.yaml --clean specification/mains/games.yaml
