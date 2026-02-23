@@ -1,6 +1,7 @@
 package common
 
 import (
+	"FGG-Service/src/timers/types"
 	"fmt"
 )
 
@@ -127,7 +128,7 @@ func NewSessionAlreadyExistsConflictError() error {
 	}
 }
 
-func NewCurrentTimerIncorrectStateError(timerState TimerStateType) error {
+func NewCurrentTimerIncorrectStateError(timerState typetimers.TimerStateType) error {
 	message := fmt.Sprintf(
 		"This action cannot be performed. The current timer is in the \"%s\" state.",
 		timerState)

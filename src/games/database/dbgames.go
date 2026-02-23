@@ -1,9 +1,9 @@
 package dbgames
 
 import (
-	"FGG-Service/src/common"
 	"FGG-Service/src/dbaccess"
 	"FGG-Service/src/games/types"
+	"FGG-Service/src/timers/types"
 	"database/sql"
 	"errors"
 	"time"
@@ -222,9 +222,9 @@ const GetGameSecondsSpentQuery = `
 
 func (db *Database) GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
 	row := dbaccess.QueryRow(GetGameSecondsSpentQuery,
-		common.TimerStateRunning,
-		common.TimerStatePaused,
-		common.TimerStateFinished,
+		typetimers.TimerStateRunning,
+		typetimers.TimerStatePaused,
+		typetimers.TimerStateFinished,
 		userId,
 		gameId)
 

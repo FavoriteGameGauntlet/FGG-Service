@@ -3,6 +3,7 @@ package dbtimers
 import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/dbaccess"
+	"FGG-Service/src/timers/types"
 	"time"
 )
 
@@ -25,13 +26,13 @@ const GetCurrentTimerQuery = `
 		AND t.State != ?
 `
 
-func (db *Database) GetCurrentTimerCommand(userId int) (timer common.Timer, err error) {
+func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, err error) {
 	row := dbaccess.QueryRow(
 		GetCurrentTimerQuery,
-		common.TimerStateRunning,
-		common.TimerStatePaused,
+		typetimers.TimerStateRunning,
+		typetimers.TimerStatePaused,
 		userId,
-		common.TimerStateFinished,
+		typetimers.TimerStateFinished,
 	)
 
 	var durationInS int
@@ -90,7 +91,7 @@ const ActTimerQuery = `
 
 func (db *Database) ActTimerCommand(
 	timerId int,
-	timerState common.TimerStateType,
+	timerState typetimers.TimerStateType,
 	remainingTime time.Duration) error {
 
 	_, err := dbaccess.Exec(
@@ -117,10 +118,10 @@ const GetCompletedTimerUsersQuery = `
 func (db *Database) GetCompletedTimerUsersCommand() (userIds []int, err error) {
 	rows, err := dbaccess.Query(
 		GetCompletedTimerUsersQuery,
-		common.TimerStateCreated,
-		common.TimerStateFinished,
-		common.TimerStateRunning,
-		common.TimerStatePaused,
+		typetimers.TimerStateCreated,
+		typetimers.TimerStateFinished,
+		typetimers.TimerStateRunning,
+		typetimers.TimerStatePaused,
 	)
 
 	if err != nil {
