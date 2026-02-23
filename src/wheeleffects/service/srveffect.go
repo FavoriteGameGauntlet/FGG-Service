@@ -1,4 +1,4 @@
-package srveffects
+package srvwheeleffects
 
 import (
 	"FGG-Service/src/common"
@@ -6,7 +6,7 @@ import (
 )
 
 type Service struct {
-	Database dbeffects.Database
+	Database dbwheeleffects.Database
 }
 
 func (s *Service) GetAvailableRollsCount(userId int) (count int, err error) {

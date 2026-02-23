@@ -1,4 +1,4 @@
-package dbeffects
+package dbwheeleffects
 
 import (
 	"FGG-Service/src/common"
