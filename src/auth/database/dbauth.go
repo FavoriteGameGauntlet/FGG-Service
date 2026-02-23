@@ -1,7 +1,7 @@
 package dbauth
 
 import (
-	"FGG-Service/src/common"
+	"FGG-Service/src/auth/types"
 	"FGG-Service/src/dbaccess"
 
 	"github.com/google/uuid"
@@ -16,7 +16,7 @@ const GetUserByNameQuery = `
 	WHERE Login = ?
 `
 
-func (db *Database) GetUserByNameCommand(userName string) (user common.User, err error) {
+func (db *Database) GetUserByNameCommand(userName string) (user typeauth.User, err error) {
 	row := dbaccess.QueryRow(GetUserByNameQuery, userName)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
@@ -30,7 +30,7 @@ const GetUserByEmailQuery = `
 	WHERE Email = ?
 `
 
-func (db *Database) GetUserByEmailCommand(userEmail string) (user common.User, err error) {
+func (db *Database) GetUserByEmailCommand(userEmail string) (user typeauth.User, err error) {
 	row := dbaccess.QueryRow(GetUserByEmailQuery, userEmail)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
@@ -45,7 +45,7 @@ const GetUserByLoginAndPasswordQuery = `
 		AND Password = ?
 `
 
-func (db *Database) GetUserByLoginAndPasswordCommand(login string, password string) (user common.User, err error) {
+func (db *Database) GetUserByLoginAndPasswordCommand(login string, password string) (user typeauth.User, err error) {
 	row := dbaccess.QueryRow(GetUserByLoginAndPasswordQuery, login, password)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
@@ -70,7 +70,7 @@ const GetUserSessionByIdQuery = `
 	WHERE Id = ?
 `
 
-func (db *Database) GetUserSessionByIdCommand(sessionId string) (userSession common.UserSession, err error) {
+func (db *Database) GetUserSessionByIdCommand(sessionId string) (userSession typeauth.UserSession, err error) {
 	row := dbaccess.QueryRow(GetUserSessionByIdQuery, sessionId)
 
 	err = row.Scan(&userSession.Id, &userSession.UserId)
@@ -83,7 +83,7 @@ const CreateUserSessionQuery = `
 	VALUES (?, ?)
 `
 
-func (db *Database) CreateUserSessionCommand(userId int) (userSession common.UserSession, err error) {
+func (db *Database) CreateUserSessionCommand(userId int) (userSession typeauth.UserSession, err error) {
 	sessionId := uuid.New().String()
 
 	_, err = dbaccess.Exec(CreateUserSessionQuery, sessionId, userId)
@@ -92,7 +92,7 @@ func (db *Database) CreateUserSessionCommand(userId int) (userSession common.Use
 		return
 	}
 
-	userSession = common.UserSession{
+	userSession = typeauth.UserSession{
 		Id:     sessionId,
 		UserId: userId,
 	}

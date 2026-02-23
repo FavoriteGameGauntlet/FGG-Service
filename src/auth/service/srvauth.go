@@ -2,6 +2,7 @@ package srvauth
 
 import (
 	"FGG-Service/src/auth/database"
+	"FGG-Service/src/auth/types"
 	"FGG-Service/src/common"
 	"database/sql"
 	"errors"
@@ -49,6 +50,32 @@ func (s *Service) GetSessionCookie(ctx echo.Context) (*http.Cookie, error) {
 	return cookie, nil
 }
 
+func (s *Service) GetUserId(ctx echo.Context) (userId int, err error) {
+	cookie, err := ctx.Cookie(common.SessionCookieName)
+
+	if err != nil {
+		err = common.NewCookieNotFoundUnauthorizedError()
+		return
+	}
+
+	sessionId := cookie.Value
+
+	userSession, err := s.GetUserSessionById(sessionId)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return
+	}
+
+	if err != nil {
+		return
+	}
+
+	userId = userSession.UserId
+
+	return
+}
+
 func (s *Service) CreateUser(login string, email string, password string) error {
 	user, err := s.Database.GetUserByNameCommand(login)
 
@@ -75,13 +102,13 @@ func (s *Service) CreateUser(login string, email string, password string) error 
 	return err
 }
 
-func (s *Service) GetUserSessionById(sessionId string) (userSession common.UserSession, err error) {
+func (s *Service) GetUserSessionById(sessionId string) (userSession typeauth.UserSession, err error) {
 	userSession, err = s.Database.GetUserSessionByIdCommand(sessionId)
 
 	return
 }
 
-func (s *Service) CreateSession(userLogin string, userPassword string) (userSession common.UserSession, err error) {
+func (s *Service) CreateSession(userLogin string, userPassword string) (userSession typeauth.UserSession, err error) {
 	user, err := s.Database.GetUserByLoginAndPasswordCommand(userLogin, userPassword)
 
 	if errors.Is(err, sql.ErrNoRows) {

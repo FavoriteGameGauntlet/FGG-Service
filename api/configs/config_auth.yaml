@@ -1,4 +1,4 @@
-package: auth
+package: genauth
 output: generated/auth/auth.gen.go
 generate:
   echo-server: true

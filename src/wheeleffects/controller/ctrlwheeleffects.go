@@ -1,4 +1,4 @@
-package wheeleffects
+package ctrlwheeleffects
 
 import (
 	"FGG-Service/api/generated/auth"
@@ -46,7 +46,7 @@ func (c *Controller) GetOwnWheelEffectHistory(ctx echo.Context) error {
 }
 
 // GetWheelEffectHistoryByLogin (GET /wheel-effects/{login}/history)
-func (c *Controller) GetWheelEffectHistoryByLogin(ctx echo.Context, login auth.Login) error {
+func (c *Controller) GetWheelEffectHistoryByLogin(ctx echo.Context, login genauth.Login) error {
 
 	return nil
 }

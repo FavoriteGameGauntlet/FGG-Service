@@ -37,16 +37,16 @@ func SendJSONErrorResponse(ctx echo.Context, err error) error {
 	return ctx.JSON(apiCode, apiError)
 }
 
-func convertToError(err error) auth.Error {
+func convertToError(err error) genauth.Error {
 	var appError AppError
 	if errors.As(err, &appError) {
-		return auth.Error{
+		return genauth.Error{
 			Code:    appError.GetCode(),
 			Message: appError.GetMessage(),
 		}
 	}
 
-	return auth.Error{
+	return genauth.Error{
 		Code:    "UNEXPECTED",
 		Message: err.Error(),
 	}

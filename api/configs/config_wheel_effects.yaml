@@ -1,4 +1,4 @@
-package: effects
+package: genwheeleffects
 output: generated/wheel_effects/wheel_effects.gen.go
 generate:
   echo-server: true

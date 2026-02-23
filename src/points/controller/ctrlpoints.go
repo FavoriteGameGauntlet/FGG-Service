@@ -1,4 +1,4 @@
-package points
+package ctrlpoints
 
 import (
 	"FGG-Service/api/generated/auth"
@@ -82,19 +82,19 @@ func (c *Controller) GetOwnTerritoryPointHistory(ctx echo.Context) error {
 }
 
 // GetFreePointHistoryByLogin (GET /points/{login}/free-points/history)
-func (c *Controller) GetFreePointHistoryByLogin(ctx echo.Context, login auth.Login) error {
+func (c *Controller) GetFreePointHistoryByLogin(ctx echo.Context, login genauth.Login) error {
 
 	return nil
 }
 
 // GetPointInfoByLogin (GET /points/{login}/info)
-func (c *Controller) GetPointInfoByLogin(ctx echo.Context, login auth.Login) error {
+func (c *Controller) GetPointInfoByLogin(ctx echo.Context, login genauth.Login) error {
 
 	return nil
 }
 
 // GetTerritoryPointHistoryByLogin (GET /points/{login}/territory-points/history)
-func (c *Controller) GetTerritoryPointHistoryByLogin(ctx echo.Context, login auth.Login) error {
+func (c *Controller) GetTerritoryPointHistoryByLogin(ctx echo.Context, login genauth.Login) error {
 
 	return nil
 }

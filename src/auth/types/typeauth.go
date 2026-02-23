@@ -1,4 +1,4 @@
-package common
+package typeauth
 
 type User struct {
 	Id          int

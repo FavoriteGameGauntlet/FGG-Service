@@ -3,6 +3,7 @@ package dbgames
 import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/dbaccess"
+	"FGG-Service/src/games/types"
 	"database/sql"
 	"errors"
 	"time"
@@ -50,7 +51,7 @@ const GetGameQuery = `
 	WHERE Name = ?
 `
 
-func (db *Database) GetGameCommand(name string) (game common.Game, err error) {
+func (db *Database) GetGameCommand(name string) (game typegames.CurrentGame, err error) {
 	row := dbaccess.QueryRow(GetGameQuery, name)
 
 	err = row.Scan(&game.Id, &game.Name)
@@ -113,7 +114,7 @@ const GetUnplayedGamesQuery = `
 	WHERE ug.UserId = ?
 `
 
-func (db *Database) GetUnplayedGamesCommand(userId int) (games common.UnplayedGames, err error) {
+func (db *Database) GetUnplayedGamesCommand(userId int) (games typegames.WishlistGames, err error) {
 	rows, err := dbaccess.Query(GetUnplayedGamesQuery, userId)
 
 	if err != nil {
@@ -121,7 +122,7 @@ func (db *Database) GetUnplayedGamesCommand(userId int) (games common.UnplayedGa
 	}
 
 	for rows.Next() {
-		game := common.UnplayedGame{}
+		game := typegames.WishlistGame{}
 		err = rows.Scan(&game.Id, &game.GameId, &game.Name)
 
 		if err != nil {
@@ -159,21 +160,21 @@ const GetCurrentGameQuery = `
 		AND gh.State NOT IN (?, ?)
 `
 
-func (db *Database) GetCurrentGameCommand(userId int) (games common.Games, err error) {
+func (db *Database) GetCurrentGameCommand(userId int) (games typegames.CurrentGames, err error) {
 	games, err = db.getHistoryGames(userId, GetCurrentGameQuery)
 
 	return
 }
 
-func (db *Database) getHistoryGames(userId int, query string) (games common.Games, err error) {
-	rows, err := dbaccess.Query(query, userId, common.GameStateFinished, common.GameStateCancelled)
+func (db *Database) getHistoryGames(userId int, query string) (games typegames.CurrentGames, err error) {
+	rows, err := dbaccess.Query(query, userId, typegames.GameStateFinished, typegames.GameStateCancelled)
 
 	if err != nil {
 		return
 	}
 
 	for rows.Next() {
-		game := common.Game{}
+		game := typegames.CurrentGame{}
 		var finishDateString *string
 		err = rows.Scan(&game.Id, &game.Name, &game.State, &finishDateString)
 
@@ -253,7 +254,7 @@ const CancelCurrentGameQuery = `
 `
 
 func (db *Database) CancelCurrentGameCommand(userId int, gameId int) error {
-	_, err := dbaccess.Exec(CancelCurrentGameQuery, common.GameStateCancelled, userId, gameId)
+	_, err := dbaccess.Exec(CancelCurrentGameQuery, typegames.GameStateCancelled, userId, gameId)
 
 	return err
 }
@@ -267,7 +268,7 @@ const FinishCurrentGameQuery = `
 `
 
 func (db *Database) FinishCurrentGameCommand(userId int, gameId int) error {
-	_, err := dbaccess.Exec(FinishCurrentGameQuery, common.GameStateFinished, userId, gameId)
+	_, err := dbaccess.Exec(FinishCurrentGameQuery, typegames.GameStateFinished, userId, gameId)
 
 	return err
 }
@@ -285,7 +286,7 @@ const GetGameHistoryQuery = `
 	ORDER BY gh.FinishDate NULLS FIRST
 `
 
-func (db *Database) GetGameHistoryCommand(userId int) (games common.Games, err error) {
+func (db *Database) GetGameHistoryCommand(userId int) (games typegames.CurrentGames, err error) {
 	games, err = db.getHistoryGames(userId, GetGameHistoryQuery)
 
 	if errors.Is(err, sql.ErrNoRows) {

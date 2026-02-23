@@ -1,4 +1,4 @@
-package users
+package ctrlusers
 
 import (
 	"FGG-Service/src/users/service"

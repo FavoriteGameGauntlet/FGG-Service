@@ -1,4 +1,4 @@
-package timers
+package ctrltimers
 
 import (
 	"FGG-Service/src/timers/service"

@@ -1,4 +1,4 @@
-package: timers
+package: gentimers
 output: generated/timers/timers.gen.go
 generate:
   echo-server: true
