@@ -1,8 +1,8 @@
 package dbwheeleffects
 
 import (
-	"FGG-Service/src/common"
 	"FGG-Service/src/dbaccess"
+	"FGG-Service/src/wheeleffects/types"
 	"time"
 )
 
@@ -39,15 +39,15 @@ const GetAvailableEffectsQuery = `
 				AND Position = 0)
 `
 
-func (db *Database) GetAvailableEffectsCommand(userId int) (effects common.Effects, err error) {
-	rows, err := dbaccess.Query(GetAvailableEffectsQuery, userId)
+func (db *Database) GetAvailableEffectsCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
+	rows, err := dbaccess.Query(GetAvailableEffectsQuery, userId, userId)
 
 	if err != nil {
 		return nil, err
 	}
 
 	for rows.Next() {
-		effect := common.Effect{}
+		effect := typewheeleffects.WheelEffect{}
 		err = rows.Scan(&effect.Id, &effect.Name, &effect.Description)
 
 		if err != nil {
@@ -69,7 +69,7 @@ const GetEffectHistoryQuery = `
 	WHERE weh.UserId = ?
 `
 
-func (db *Database) GetEffectHistoryCommand(userId int) (effects common.RolledEffects, err error) {
+func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
 	rows, err := dbaccess.Query(GetEffectHistoryQuery, userId)
 
 	if err != nil {
@@ -77,7 +77,7 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects common.RolledEf
 	}
 
 	for rows.Next() {
-		effect := common.RolledEffect{}
+		effect := typewheeleffects.RolledWheelEffect{}
 		var rollDateString string
 		err = rows.Scan(&effect.Name, &effect.Description, &rollDateString)
 
@@ -121,7 +121,7 @@ const MakeEffectRollQuery = `
 	LIMIT 5
 `
 
-func (db *Database) MakeEffectRollCommand(userId int) (effects common.Effects, err error) {
+func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
 	rows, err := dbaccess.Query(MakeEffectRollQuery, userId)
 
 	if err != nil {
@@ -129,7 +129,7 @@ func (db *Database) MakeEffectRollCommand(userId int) (effects common.Effects, e
 	}
 
 	for rows.Next() {
-		effect := common.Effect{}
+		effect := typewheeleffects.WheelEffect{}
 		err = rows.Scan(&effect.Id, &effect.Name, &effect.Description)
 
 		if err != nil {

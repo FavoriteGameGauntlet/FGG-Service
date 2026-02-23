@@ -6,6 +6,7 @@ import (
 	srvauth "FGG-Service/src/auth/service"
 	"FGG-Service/src/common"
 	"FGG-Service/src/wheeleffects/service"
+	"FGG-Service/src/wheeleffects/types"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -39,7 +40,7 @@ func (c *Controller) RollAvailableWheelEffects(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, effectsDto)
 }
 
-func convertEffectsToDto(effects common.Effects) genwheeleffects.WheelEffects {
+func convertEffectsToDto(effects typewheeleffects.WheelEffects) genwheeleffects.WheelEffects {
 	effectsDto := make(genwheeleffects.WheelEffects, len(effects))
 
 	for i, effect := range effects {
@@ -100,7 +101,7 @@ func (c *Controller) GetOwnWheelEffectHistory(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, effectsDto)
 }
 
-func convertRolledEffectsToDto(effects common.RolledEffects) genwheeleffects.RolledWheelEffects {
+func convertRolledEffectsToDto(effects typewheeleffects.RolledWheelEffects) genwheeleffects.RolledWheelEffects {
 	effectsDto := make(genwheeleffects.RolledWheelEffects, len(effects))
 
 	for i, effect := range effects {
