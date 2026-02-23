@@ -9,97 +9,73 @@ import (
 	geneffects "FGG-Service/api/generated/wheel_effects"
 	ctrlauth "FGG-Service/src/auth/controller"
 	"FGG-Service/src/dbaccess"
-	ctrleffects "FGG-Service/src/effects/controller"
 	ctrlgames "FGG-Service/src/games/controller"
 	ctrlpoints "FGG-Service/src/points/controller"
 	ctrltimers "FGG-Service/src/timers/controller"
 	ctrlusers "FGG-Service/src/users/controller"
+	ctrleffects "FGG-Service/src/wheeleffects/controller"
 	"embed"
-	"io/fs"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 //go:embed index.html
-var indexHTML []byte
-
-//go:embed api/specification/mains
+//go:embed api/specification
 var scalarUI embed.FS
 
 func main() {
-	authController := new(ctrlauth.Controller)
-	gamesController := new(ctrlgames.Controller)
-	pointsController := new(ctrlpoints.Controller)
-	timersController := new(ctrltimers.Controller)
-	usersController := new(ctrlusers.Controller)
-	wheelEffectsController := new(ctrleffects.Controller)
+	e := echo.New()
 
-	authServer, err := genauth.NewServer(authController)
+	authController := ctrlauth.NewController()
+	genauth.RegisterHandlers(e, &authController)
 
-	if err != nil {
-		panic(err)
-	}
+	gamesController := ctrlgames.NewController()
+	gengames.RegisterHandlers(e, &gamesController)
 
-	gamesServer, err := gengames.NewServer(gamesController)
+	pointsController := ctrlpoints.NewController()
+	genpoints.RegisterHandlers(e, &pointsController)
 
-	if err != nil {
-		panic(err)
-	}
+	timersController := ctrltimers.NewController()
+	gentimers.RegisterHandlers(e, &timersController)
 
-	pointsServer, err := genpoints.NewServer(pointsController)
+	usersController := ctrlusers.NewController()
+	genusers.RegisterHandlers(e, &usersController)
 
-	if err != nil {
-		panic(err)
-	}
+	effectsController := ctrleffects.NewController()
+	geneffects.RegisterHandlers(e, &effectsController)
 
-	timersServer, err := gentimers.NewServer(timersController)
-
-	if err != nil {
-		panic(err)
-	}
-
-	usersServer, err := genusers.NewServer(usersController)
-
-	if err != nil {
-		panic(err)
-	}
-
-	wheelEffectsServer, err := geneffects.NewServer(wheelEffectsController)
-
-	if err != nil {
-		panic(err)
-	}
-
-	mux := http.NewServeMux()
-
-	mux.Handle("/auth", authServer)
-	mux.Handle("/games", gamesServer)
-	mux.Handle("/points", pointsServer)
-	mux.Handle("/timers", timersServer)
-	mux.Handle("/users", usersServer)
-	mux.Handle("/wheel-effects", wheelEffectsServer)
-
-	sub, _ := fs.Sub(scalarUI, "api/specification/mains")
-	mux.HandleFunc("/scalar/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/scalar/" {
-			_, _ = w.Write(indexHTML)
-			return
-		}
-		http.StripPrefix("/scalar/", http.FileServer(http.FS(sub))).ServeHTTP(w, r)
-	})
-
-	mux.HandleFunc("/scalar", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/scalar/", http.StatusMovedPermanently)
-	})
+	addScalarRoutes(e)
+	fixCORS(e)
 
 	dbaccess.Init()
 	defer dbaccess.Close()
 	//StartTimerFinisherScheduler()
 
-	err = http.ListenAndServe(":8080", mux)
+	e.HideBanner = true
+	err := e.Start(":8080")
 
 	if err != nil {
 		panic(err)
 	}
+
+	defer func(e *echo.Echo) {
+		_ = e.Close()
+	}(e)
+}
+
+func addScalarRoutes(e *echo.Echo) {
+	fileServer := http.FileServer(http.FS(scalarUI))
+	e.GET("/api/specification/*", echo.WrapHandler(fileServer))
+	e.GET("/scalar/*", echo.WrapHandler(http.StripPrefix("/scalar", fileServer)))
+	e.GET("/scalar", func(c echo.Context) error {
+		return c.Redirect(http.StatusMovedPermanently, "/scalar/")
+	})
+}
+
+func fixCORS(e *echo.Echo) {
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{AllowOrigins: []string{"*"}}))
 }
 
 //func StartTimerFinisherScheduler() {

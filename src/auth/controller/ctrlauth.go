@@ -1,34 +1,35 @@
 package auth
 
 import (
-	"FGG-Service/api/generated/auth"
 	"FGG-Service/src/auth/service"
-	"context"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Controller struct {
 	Service srvauth.Service
 }
 
-// Login POST /auth/login
-func (c *Controller) Login(ctx context.Context, req auth.OptLoginUser) (
-	auth.LoginRes, error) {
-
-	return nil, nil
+func NewController() Controller {
+	return Controller{}
 }
 
-// Logout POST /auth/logout
-func (c *Controller) Logout(ctx context.Context) (
-	auth.LogoutRes, error) {
+// Login (POST /auth/login)
+func (c *Controller) Login(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// SignUp POST /auth/signup
-func (c *Controller) SignUp(ctx context.Context, req auth.OptSignupUser) (
-	auth.SignUpRes, error) {
+// Logout (POST /auth/logout)
+func (c *Controller) Logout(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
+}
+
+// SignUp (POST /auth/signup)
+func (c *Controller) SignUp(ctx echo.Context) error {
+
+	return nil
 }
 
 //// Login (POST /auth/login)

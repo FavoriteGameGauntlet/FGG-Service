@@ -1,0 +1,5 @@
+package: auth
+output: generated/auth/auth.gen.go
+generate:
+  echo-server: true
+  models: true

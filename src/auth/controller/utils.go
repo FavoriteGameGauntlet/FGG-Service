@@ -67,37 +67,3 @@ package auth
 //
 //	return
 //}
-//
-//func doesUserSessionExist(ctx context.Context) (doesExist bool, err error) {
-//	cookie, err := getSessionCookie(ctx)
-//
-//	if err != nil {
-//		err = common.NewCookieNotFoundUnauthorizedError()
-//		return
-//	}
-//
-//	sessionId := cookie.Value
-//	_, err = auth_service.GetUserSessionById(sessionId)
-//
-//	if errors.Is(err, sql.ErrNoRows) {
-//		err = nil
-//		return
-//	}
-//
-//	if err != nil {
-//		return
-//	}
-//
-//	doesExist = true
-//	return
-//}
-//
-//func getSessionCookie(ctx context.Context) (*http.Cookie, error) {
-//	cookie, err := ctx.Cookie(SessionCookieName)
-//
-//	if err != nil {
-//		return nil, common.NewCookieNotFoundUnauthorizedError()
-//	}
-//
-//	return cookie, nil
-//}

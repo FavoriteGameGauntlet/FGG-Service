@@ -1,83 +1,78 @@
 package games
 
 import (
-	"FGG-Service/api/generated/games"
+	"FGG-Service/api/generated/auth"
 	"FGG-Service/src/games/service"
-	"context"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Controller struct {
 	Service srvgames.Service
 }
 
+func NewController() Controller {
+	return Controller{}
+}
+
+// GetOwnCurrentGame (GET /games/self/current)
+func (c *Controller) GetOwnCurrentGame(ctx echo.Context) error {
+
+	return nil
+}
+
+// CancelOwnCurrentGame (POST /games/self/current/cancel)
+func (c *Controller) CancelOwnCurrentGame(ctx echo.Context) error {
+
+	return nil
+}
+
+// FinishOwnCurrentGame (POST /games/self/current/finish)
+func (c *Controller) FinishOwnCurrentGame(ctx echo.Context) error {
+
+	return nil
+}
+
+// RollNewCurrentGame (POST /games/self/current/roll)
+func (c *Controller) RollNewCurrentGame(ctx echo.Context) error {
+
+	return nil
+}
+
+// GetOwnGameHistory (GET /games/self/history)
+func (c *Controller) GetOwnGameHistory(ctx echo.Context) error {
+
+	return nil
+}
+
+// GetOwnWishlistGames (GET /games/self/wishlist)
+func (c *Controller) GetOwnWishlistGames(ctx echo.Context) error {
+
+	return nil
+}
+
 // AddOwnWishlistGame (POST /games/self/wishlist)
-func (c *Controller) AddOwnWishlistGame(ctx context.Context, req games.OptWishlistGame) (
-	games.AddOwnWishlistGameRes, error) {
+func (c *Controller) AddOwnWishlistGame(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// CancelOwnCurrentGame POST /games/self/current/cancel
-func (c *Controller) CancelOwnCurrentGame(ctx context.Context) (
-	games.CancelOwnCurrentGameRes, error) {
+// GetCurrentGameByLogin (GET /games/{login}/current)
+func (c *Controller) GetCurrentGameByLogin(ctx echo.Context, login auth.Login) error {
 
-	return nil, nil
+	return nil
 }
 
-// FinishOwnCurrentGame POST /games/self/current/finish
-func (c *Controller) FinishOwnCurrentGame(ctx context.Context) (
-	games.FinishOwnCurrentGameRes, error) {
+// GetGameHistoryByLogin (GET /games/{login}/history)
+func (c *Controller) GetGameHistoryByLogin(ctx echo.Context, login auth.Login) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetCurrentGameByLogin GET /games/{login}/current
-func (c *Controller) GetCurrentGameByLogin(ctx context.Context, params games.GetCurrentGameByLoginParams) (
-	games.GetCurrentGameByLoginRes, error) {
+// GetWishlistGamesByLogin (GET /games/{login}/wishlist)
+func (c *Controller) GetWishlistGamesByLogin(ctx echo.Context, login auth.Login) error {
 
-	return nil, nil
-}
-
-// GetGameHistoryByLogin GET /games/{login}/history
-func (c *Controller) GetGameHistoryByLogin(ctx context.Context, params games.GetGameHistoryByLoginParams) (
-	games.GetGameHistoryByLoginRes, error) {
-
-	return nil, nil
-}
-
-// GetOwnCurrentGame GET /games/self/current
-func (c *Controller) GetOwnCurrentGame(ctx context.Context) (
-	games.GetOwnCurrentGameRes, error) {
-
-	return nil, nil
-}
-
-// GetOwnGameHistory GET /games/self/history
-func (c *Controller) GetOwnGameHistory(ctx context.Context) (
-	games.GetOwnGameHistoryRes, error) {
-
-	return nil, nil
-}
-
-// GetOwnWishlistGames GET /games/self/wishlist
-func (c *Controller) GetOwnWishlistGames(ctx context.Context) (
-	games.GetOwnWishlistGamesRes, error) {
-
-	return nil, nil
-}
-
-// GetWishlistGamesByLogin GET /games/{login}/wishlist
-func (c *Controller) GetWishlistGamesByLogin(ctx context.Context, params games.GetWishlistGamesByLoginParams) (
-	games.GetWishlistGamesByLoginRes, error) {
-
-	return nil, nil
-}
-
-// RollNewCurrentGame POST /games/self/current/roll
-func (c *Controller) RollNewCurrentGame(ctx context.Context) (
-	games.RollNewCurrentGameRes, error) {
-
-	return nil, nil
+	return nil
 }
 
 //// GetCurrentGame (GET /games/current)

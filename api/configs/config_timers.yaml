@@ -1,0 +1,5 @@
+package: timers
+output: generated/timers/timers.gen.go
+generate:
+  echo-server: true
+  models: true

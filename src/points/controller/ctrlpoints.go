@@ -1,109 +1,100 @@
 package points
 
 import (
-	"FGG-Service/api/generated/points"
+	"FGG-Service/api/generated/auth"
 	"FGG-Service/src/points/service"
-	"context"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Controller struct {
 	Service srvpoints.Service
 }
 
-// ChangeOwnExperiencePoints POST /points/self/experience-points
-func (c *Controller) ChangeOwnExperiencePoints(ctx context.Context, req points.OptPointChange) (
-	points.ChangeOwnExperiencePointsRes, error) {
-
-	return nil, nil
+func NewController() Controller {
+	return Controller{}
 }
 
-// ChangeOwnFreePoints POST /points/self/free-points
-func (c *Controller) ChangeOwnFreePoints(ctx context.Context, req points.OptPointChange) (
-	points.ChangeOwnFreePointsRes, error) {
+// GetOwnExperiencePoints (GET /points/self/experience-points)
+func (c *Controller) GetOwnExperiencePoints(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// ChangeOwnTerritoryHours POST /points/self/territory-hours
-func (c *Controller) ChangeOwnTerritoryHours(ctx context.Context, req points.OptPointChange) (
-	points.ChangeOwnTerritoryHoursRes, error) {
+// ChangeOwnExperiencePoints (POST /points/self/experience-points)
+func (c *Controller) ChangeOwnExperiencePoints(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// ChangeOwnTerritoryPoints POST /points/self/territory-points
-func (c *Controller) ChangeOwnTerritoryPoints(ctx context.Context, req points.OptPointChange) (
-	points.ChangeOwnTerritoryPointsRes, error) {
+// GetOwnFreePoints (GET /points/self/free-points)
+func (c *Controller) GetOwnFreePoints(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetFreePointHistoryByLogin GET /points/{login}/free-points/history
-func (c *Controller) GetFreePointHistoryByLogin(ctx context.Context, params points.GetFreePointHistoryByLoginParams) (
-	points.GetFreePointHistoryByLoginRes, error) {
+// ChangeOwnFreePoints (POST /points/self/free-points)
+func (c *Controller) ChangeOwnFreePoints(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetOwnExperiencePoints GET /points/self/experience-points
-func (c *Controller) GetOwnExperiencePoints(ctx context.Context) (
-	points.GetOwnExperiencePointsRes, error) {
+// GetOwnFreePointHistory (GET /points/self/free-points/history)
+func (c *Controller) GetOwnFreePointHistory(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetOwnFreePointHistory GET /points/self/free-points/history
-func (c *Controller) GetOwnFreePointHistory(ctx context.Context) (
-	points.GetOwnFreePointHistoryRes, error) {
+// GetOwnPointInfo (GET /points/self/info)
+func (c *Controller) GetOwnPointInfo(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetOwnFreePoints GET /points/self/free-points
-func (c *Controller) GetOwnFreePoints(ctx context.Context) (
-	points.GetOwnFreePointsRes, error) {
+// GetOwnTerritoryHours (GET /points/self/territory-hours)
+func (c *Controller) GetOwnTerritoryHours(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetOwnPointInfo GET /points/self/info
-func (c *Controller) GetOwnPointInfo(ctx context.Context) (
-	points.GetOwnPointInfoRes, error) {
+// ChangeOwnTerritoryHours (POST /points/self/territory-hours)
+func (c *Controller) ChangeOwnTerritoryHours(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetOwnTerritoryHours GET /points/self/territory-hours
-func (c *Controller) GetOwnTerritoryHours(ctx context.Context) (
-	points.GetOwnTerritoryHoursRes, error) {
+// GetOwnTerritoryPoints (GET /points/self/territory-points)
+func (c *Controller) GetOwnTerritoryPoints(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetOwnTerritoryPointHistory GET /points/self/territory-points/history
-func (c *Controller) GetOwnTerritoryPointHistory(ctx context.Context) (
-	points.GetOwnTerritoryPointHistoryRes, error) {
+// ChangeOwnTerritoryPoints (POST /points/self/territory-points)
+func (c *Controller) ChangeOwnTerritoryPoints(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetOwnTerritoryPoints GET /points/self/territory-points
-func (c *Controller) GetOwnTerritoryPoints(ctx context.Context) (
-	points.GetOwnTerritoryPointsRes, error) {
+// GetOwnTerritoryPointHistory (GET /points/self/territory-points/history)
+func (c *Controller) GetOwnTerritoryPointHistory(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetPointInfoByLogin GET /points/{login}/info
-func (c *Controller) GetPointInfoByLogin(ctx context.Context, params points.GetPointInfoByLoginParams) (
-	points.GetPointInfoByLoginRes, error) {
+// GetFreePointHistoryByLogin (GET /points/{login}/free-points/history)
+func (c *Controller) GetFreePointHistoryByLogin(ctx echo.Context, login auth.Login) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetTerritoryPointHistoryByLogin GET /points/{login}/territory-points/history
-func (c *Controller) GetTerritoryPointHistoryByLogin(ctx context.Context, params points.GetTerritoryPointHistoryByLoginParams) (
-	points.GetTerritoryPointHistoryByLoginRes, error) {
+// GetPointInfoByLogin (GET /points/{login}/info)
+func (c *Controller) GetPointInfoByLogin(ctx echo.Context, login auth.Login) error {
 
-	return nil, nil
+	return nil
+}
+
+// GetTerritoryPointHistoryByLogin (GET /points/{login}/territory-points/history)
+func (c *Controller) GetTerritoryPointHistoryByLogin(ctx echo.Context, login auth.Login) error {
+
+	return nil
 }

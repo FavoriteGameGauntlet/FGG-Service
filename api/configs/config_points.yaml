@@ -1,0 +1,5 @@
+package: points
+output: generated/points/points.gen.go
+generate:
+  echo-server: true
+  models: true

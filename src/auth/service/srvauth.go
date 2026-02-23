@@ -11,6 +11,22 @@ type Service struct {
 	Database dbauth.Database
 }
 
+func (s *Service) DoesUserSessionExist(sessionId string) (doesExist bool, err error) {
+	_, err = s.GetUserSessionById(sessionId)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = nil
+		return
+	}
+
+	if err != nil {
+		return
+	}
+
+	doesExist = true
+	return
+}
+
 func (s *Service) CreateUser(login string, email string, password string) error {
 	user, err := s.Database.GetUserByNameCommand(login)
 

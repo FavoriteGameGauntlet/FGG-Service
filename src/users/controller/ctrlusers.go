@@ -1,32 +1,33 @@
 package users
 
 import (
-	"FGG-Service/api/generated/users"
 	"FGG-Service/src/users/service"
-	"context"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Controller struct {
 	Service srvusers.Service
 }
 
-// ChangeOwnDisplayName POST /users/self/display-name
-func (c *Controller) ChangeOwnDisplayName(ctx context.Context, req users.OptName) (
-	users.ChangeOwnDisplayNameRes, error) {
-
-	return nil, nil
+func NewController() Controller {
+	return Controller{}
 }
 
-// GetOwnDisplayName GET /users/self/display-name
-func (c *Controller) GetOwnDisplayName(ctx context.Context) (
-	users.GetOwnDisplayNameRes, error) {
+// GetUserInfos (GET /users/names)
+func (c *Controller) GetUserInfos(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// GetUserInfos GET /users/names
-func (c *Controller) GetUserInfos(ctx context.Context) (
-	users.GetUserInfosRes, error) {
+// GetOwnDisplayName (GET /users/self/display-name)
+func (c *Controller) GetOwnDisplayName(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
+}
+
+// ChangeOwnDisplayName (POST /users/self/display-name)
+func (c *Controller) ChangeOwnDisplayName(ctx echo.Context) error {
+
+	return nil
 }

@@ -1,34 +1,35 @@
 package timers
 
 import (
-	"FGG-Service/api/generated/timers"
 	"FGG-Service/src/timers/service"
-	"context"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Controller struct {
 	Service srvtimers.Service
 }
 
-// GetOwnCurrentTimer GET /timers/self/current
-func (c *Controller) GetOwnCurrentTimer(ctx context.Context) (
-	timers.GetOwnCurrentTimerRes, error) {
-
-	return nil, nil
+func NewController() Controller {
+	return Controller{}
 }
 
-// PauseOwnCurrentTimer POST /timers/self/current/pause
-func (c *Controller) PauseOwnCurrentTimer(ctx context.Context) (
-	timers.PauseOwnCurrentTimerRes, error) {
+// GetOwnCurrentTimer (GET /timers/self/current)
+func (c *Controller) GetOwnCurrentTimer(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
 }
 
-// StartOwnCurrentTimer POST /timers/self/current/start
-func (c *Controller) StartOwnCurrentTimer(ctx context.Context) (
-	timers.StartOwnCurrentTimerRes, error) {
+// PauseOwnCurrentTimer (POST /timers/self/current/pause)
+func (c *Controller) PauseOwnCurrentTimer(ctx echo.Context) error {
 
-	return nil, nil
+	return nil
+}
+
+// StartOwnCurrentTimer (POST /timers/self/current/start)
+func (c *Controller) StartOwnCurrentTimer(ctx echo.Context) error {
+
+	return nil
 }
 
 //// GetCurrentTimer (GET /timers/current)
