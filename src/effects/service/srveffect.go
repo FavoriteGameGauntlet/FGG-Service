@@ -2,7 +2,7 @@ package srveffects
 
 import (
 	"FGG-Service/src/common"
-	"FGG-Service/src/wheel-effects/database"
+	"FGG-Service/src/effects/database"
 )
 
 type Service struct {

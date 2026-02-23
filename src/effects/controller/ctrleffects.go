@@ -2,7 +2,7 @@ package effects
 
 import (
 	"FGG-Service/api/generated/wheel_effects"
-	"FGG-Service/src/wheel-effects/service"
+	"FGG-Service/src/effects/service"
 	"context"
 )
 

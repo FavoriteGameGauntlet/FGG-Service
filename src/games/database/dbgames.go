@@ -2,7 +2,7 @@ package dbgames
 
 import (
 	"FGG-Service/src/common"
-	"FGG-Service/src/db_access"
+	"FGG-Service/src/dbaccess"
 	"database/sql"
 	"errors"
 	"time"
@@ -23,7 +23,7 @@ const DoesGameExistQuery = `
 	END AS DoesExist`
 
 func (db *Database) DoesGameExistCommand(gameName string) (doesExist bool, err error) {
-	row := db_access.QueryRow(DoesGameExistQuery, gameName)
+	row := dbaccess.QueryRow(DoesGameExistQuery, gameName)
 
 	err = row.Scan(&doesExist)
 
@@ -36,7 +36,7 @@ const CreateGameQuery = `
 `
 
 func (db *Database) CreateGameCommand(name string) error {
-	_, err := db_access.Exec(
+	_, err := dbaccess.Exec(
 		CreateGameQuery,
 		name,
 	)
@@ -51,7 +51,7 @@ const GetGameQuery = `
 `
 
 func (db *Database) GetGameCommand(name string) (game common.Game, err error) {
-	row := db_access.QueryRow(GetGameQuery, name)
+	row := dbaccess.QueryRow(GetGameQuery, name)
 
 	err = row.Scan(&game.Id, &game.Name)
 
@@ -72,7 +72,7 @@ const DoesUnplayedGameExistQuery = `
 	END AS DoesExist`
 
 func (db *Database) DoesUnplayedGameExistCommand(userId int, gameName string) (doesExist bool, err error) {
-	row := db_access.QueryRow(DoesUnplayedGameExistQuery, userId, gameName)
+	row := dbaccess.QueryRow(DoesUnplayedGameExistQuery, userId, gameName)
 
 	err = row.Scan(&doesExist)
 
@@ -85,7 +85,7 @@ const CreateUnplayedGameQuery = `
 `
 
 func (db *Database) CreateUnplayedGameCommand(userId int, gameId int) error {
-	_, err := db_access.Exec(
+	_, err := dbaccess.Exec(
 		CreateUnplayedGameQuery,
 		userId,
 		gameId,
@@ -101,7 +101,7 @@ const DeleteUnplayedGameQuery = `
 `
 
 func (db *Database) DeleteUnplayedGameCommand(userId int, gameId int) error {
-	_, err := db_access.Exec(DeleteUnplayedGameQuery, userId, gameId)
+	_, err := dbaccess.Exec(DeleteUnplayedGameQuery, userId, gameId)
 
 	return err
 }
@@ -114,7 +114,7 @@ const GetUnplayedGamesQuery = `
 `
 
 func (db *Database) GetUnplayedGamesCommand(userId int) (games common.UnplayedGames, err error) {
-	rows, err := db_access.Query(GetUnplayedGamesQuery, userId)
+	rows, err := dbaccess.Query(GetUnplayedGamesQuery, userId)
 
 	if err != nil {
 		return
@@ -142,7 +142,7 @@ const CreateCurrentGameQuery = `
 `
 
 func (db *Database) CreateCurrentGameCommand(userId int, gameId int) error {
-	_, err := db_access.Exec(CreateCurrentGameQuery, userId, gameId)
+	_, err := dbaccess.Exec(CreateCurrentGameQuery, userId, gameId)
 
 	return err
 }
@@ -166,7 +166,7 @@ func (db *Database) GetCurrentGameCommand(userId int) (games common.Games, err e
 }
 
 func (db *Database) getHistoryGames(userId int, query string) (games common.Games, err error) {
-	rows, err := db_access.Query(query, userId, common.GameStateFinished, common.GameStateCancelled)
+	rows, err := dbaccess.Query(query, userId, common.GameStateFinished, common.GameStateCancelled)
 
 	if err != nil {
 		return
@@ -183,7 +183,7 @@ func (db *Database) getHistoryGames(userId int, query string) (games common.Game
 		}
 
 		var finishDate *time.Time
-		finishDate, err = common.ConvertToNullableDate(finishDateString)
+		finishDate, err = dbaccess.ConvertToNullableDate(finishDateString)
 
 		if err != nil {
 			_ = rows.Close()
@@ -220,7 +220,7 @@ const GetGameSecondsSpentQuery = `
 `
 
 func (db *Database) GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
-	row := db_access.QueryRow(GetGameSecondsSpentQuery,
+	row := dbaccess.QueryRow(GetGameSecondsSpentQuery,
 		common.TimerStateRunning,
 		common.TimerStatePaused,
 		common.TimerStateFinished,
@@ -253,7 +253,7 @@ const CancelCurrentGameQuery = `
 `
 
 func (db *Database) CancelCurrentGameCommand(userId int, gameId int) error {
-	_, err := db_access.Exec(CancelCurrentGameQuery, common.GameStateCancelled, userId, gameId)
+	_, err := dbaccess.Exec(CancelCurrentGameQuery, common.GameStateCancelled, userId, gameId)
 
 	return err
 }
@@ -267,7 +267,7 @@ const FinishCurrentGameQuery = `
 `
 
 func (db *Database) FinishCurrentGameCommand(userId int, gameId int) error {
-	_, err := db_access.Exec(FinishCurrentGameQuery, common.GameStateFinished, userId, gameId)
+	_, err := dbaccess.Exec(FinishCurrentGameQuery, common.GameStateFinished, userId, gameId)
 
 	return err
 }

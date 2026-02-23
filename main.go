@@ -8,12 +8,12 @@ import (
 	genusers "FGG-Service/api/generated/users"
 	geneffects "FGG-Service/api/generated/wheel_effects"
 	ctrlauth "FGG-Service/src/auth/controller"
-	"FGG-Service/src/db_access"
+	"FGG-Service/src/dbaccess"
+	ctrleffects "FGG-Service/src/effects/controller"
 	ctrlgames "FGG-Service/src/games/controller"
 	ctrlpoints "FGG-Service/src/points/controller"
 	ctrltimers "FGG-Service/src/timers/controller"
 	ctrlusers "FGG-Service/src/users/controller"
-	ctrleffects "FGG-Service/src/wheel-effects/controller"
 	"embed"
 	"io/fs"
 	"net/http"
@@ -91,8 +91,8 @@ func main() {
 		http.Redirect(w, r, "/scalar/", http.StatusMovedPermanently)
 	})
 
-	db_access.Init()
-	defer db_access.Close()
+	dbaccess.Init()
+	defer dbaccess.Close()
 	//StartTimerFinisherScheduler()
 
 	err = http.ListenAndServe(":8080", mux)

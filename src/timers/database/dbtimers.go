@@ -2,7 +2,7 @@ package dbtimers
 
 import (
 	"FGG-Service/src/common"
-	"FGG-Service/src/db_access"
+	"FGG-Service/src/dbaccess"
 	"time"
 )
 
@@ -26,7 +26,7 @@ const GetCurrentTimerQuery = `
 `
 
 func (db *Database) GetCurrentTimerCommand(userId int) (timer common.Timer, err error) {
-	row := db_access.QueryRow(
+	row := dbaccess.QueryRow(
 		GetCurrentTimerQuery,
 		common.TimerStateRunning,
 		common.TimerStatePaused,
@@ -49,7 +49,7 @@ func (db *Database) GetCurrentTimerCommand(userId int) (timer common.Timer, err 
 		return
 	}
 
-	lastActionDate, err := common.ConvertToDate(lastActionDateString)
+	lastActionDate, err := dbaccess.ConvertToDate(lastActionDateString)
 
 	if err != nil {
 		return
@@ -68,7 +68,7 @@ const CreateCurrentTimerQuery = `
 `
 
 func (db *Database) CreateCurrentTimerCommand(userId int, gameId int) error {
-	_, err := db_access.Exec(
+	_, err := dbaccess.Exec(
 		CreateCurrentTimerQuery,
 		userId,
 		gameId,
@@ -93,7 +93,7 @@ func (db *Database) ActTimerCommand(
 	timerState common.TimerStateType,
 	remainingTime time.Duration) error {
 
-	_, err := db_access.Exec(
+	_, err := dbaccess.Exec(
 		ActTimerQuery,
 		timerState,
 		remainingTime.Seconds(),
@@ -115,7 +115,7 @@ const GetCompletedTimerUsersQuery = `
 `
 
 func (db *Database) GetCompletedTimerUsersCommand() (userIds []int, err error) {
-	rows, err := db_access.Query(
+	rows, err := dbaccess.Query(
 		GetCompletedTimerUsersQuery,
 		common.TimerStateCreated,
 		common.TimerStateFinished,

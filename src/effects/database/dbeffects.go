@@ -2,7 +2,7 @@ package dbeffects
 
 import (
 	"FGG-Service/src/common"
-	"FGG-Service/src/db_access"
+	"FGG-Service/src/dbaccess"
 	"time"
 )
 
@@ -16,7 +16,7 @@ const GetAvailableRollsCountQuery = `
 `
 
 func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err error) {
-	row := db_access.QueryRow(GetAvailableRollsCountQuery, userId)
+	row := dbaccess.QueryRow(GetAvailableRollsCountQuery, userId)
 
 	err = row.Scan(&count)
 
@@ -40,7 +40,7 @@ const GetAvailableEffectsQuery = `
 `
 
 func (db *Database) GetAvailableEffectsCommand(userId int) (effects common.Effects, err error) {
-	rows, err := db_access.Query(GetAvailableEffectsQuery, userId)
+	rows, err := dbaccess.Query(GetAvailableEffectsQuery, userId)
 
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ const GetEffectHistoryQuery = `
 `
 
 func (db *Database) GetEffectHistoryCommand(userId int) (effects common.RolledEffects, err error) {
-	rows, err := db_access.Query(GetEffectHistoryQuery, userId)
+	rows, err := dbaccess.Query(GetEffectHistoryQuery, userId)
 
 	if err != nil {
 		return
@@ -87,7 +87,7 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects common.RolledEf
 		}
 
 		var rollDate time.Time
-		rollDate, err = common.ConvertToDate(rollDateString)
+		rollDate, err = dbaccess.ConvertToDate(rollDateString)
 
 		if err != nil {
 			_ = rows.Close()
@@ -122,7 +122,7 @@ const MakeEffectRollQuery = `
 `
 
 func (db *Database) MakeEffectRollCommand(userId int) (effects common.Effects, err error) {
-	rows, err := db_access.Query(MakeEffectRollQuery, userId)
+	rows, err := dbaccess.Query(MakeEffectRollQuery, userId)
 
 	if err != nil {
 		return
@@ -151,7 +151,7 @@ const DecreaseAvailableRollsValueQuery = `
 `
 
 func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
-	_, err := db_access.Exec(DecreaseAvailableRollsValueQuery, userId)
+	_, err := dbaccess.Exec(DecreaseAvailableRollsValueQuery, userId)
 
 	return err
 }
