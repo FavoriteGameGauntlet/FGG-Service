@@ -1,0 +1,22 @@
+post:
+  operationId: login
+  tags: [ Auth ]
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/LoginUser.yaml"
+  responses:
+    "204":
+      description: Success.
+      headers:
+        Set-Cookie:
+          schema:
+            type: string
+          description: Session cookie
+    "400":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+    "401":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../components/responses/ErrorResponse.yaml"

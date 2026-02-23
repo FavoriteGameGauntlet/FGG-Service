@@ -1,0 +1,6 @@
+allOf:
+  - $ref: "./PointChangeResult.yaml"
+  - type: object
+    properties:
+      changeSource:
+        enum: [ "territory-obtaining", "territory-loss", "other" ]

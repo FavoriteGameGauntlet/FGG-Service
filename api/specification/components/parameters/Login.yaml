@@ -1,0 +1,5 @@
+name: login
+in: path
+required: true
+schema:
+  $ref: '../schemas/Login.yaml'

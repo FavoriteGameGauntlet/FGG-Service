@@ -1,0 +1,7 @@
+type: object
+properties:
+  changeSource:
+    type: string
+  changeValue:
+    type: integer
+    format: int

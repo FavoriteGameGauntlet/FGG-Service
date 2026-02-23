@@ -1,0 +1,7 @@
+type: object
+properties:
+  login:
+    $ref: "./Login.yaml"
+  password:
+    $ref: "./Password.yaml"
+required: [ login, password ]

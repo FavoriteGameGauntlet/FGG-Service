@@ -1,0 +1,5 @@
+package: gengames
+output: generated/games/games.gen.go
+generate:
+  echo-server: true
+  models: true

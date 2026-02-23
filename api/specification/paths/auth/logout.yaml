@@ -1,0 +1,15 @@
+post:
+  operationId: logout
+  tags: [ Auth ]
+  responses:
+    "204":
+      description: Success.
+      headers:
+        Set-Cookie:
+          schema:
+            type: string
+          description: Session cookie
+    "401":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../components/responses/ErrorResponse.yaml"

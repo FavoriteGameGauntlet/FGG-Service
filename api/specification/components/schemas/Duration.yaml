@@ -1,0 +1,4 @@
+type: string
+format: duration
+example: PT2h10m5s
+description: The duration notation as defined by ISO 8601
