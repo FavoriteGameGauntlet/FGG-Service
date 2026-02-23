@@ -5,13 +5,25 @@ import (
 	"FGG-Service/src/common"
 	"database/sql"
 	"errors"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Service struct {
 	Database dbauth.Database
 }
 
-func (s *Service) DoesUserSessionExist(sessionId string) (doesExist bool, err error) {
+func (s *Service) DoesUserSessionExist(ctx echo.Context) (doesExist bool, err error) {
+	cookie, err := s.GetSessionCookie(ctx)
+
+	if err != nil {
+		err = common.NewCookieNotFoundUnauthorizedError()
+		return
+	}
+
+	sessionId := cookie.Value
+
 	_, err = s.GetUserSessionById(sessionId)
 
 	if errors.Is(err, sql.ErrNoRows) {
@@ -25,6 +37,16 @@ func (s *Service) DoesUserSessionExist(sessionId string) (doesExist bool, err er
 
 	doesExist = true
 	return
+}
+
+func (s *Service) GetSessionCookie(ctx echo.Context) (*http.Cookie, error) {
+	cookie, err := ctx.Cookie(common.SessionCookieName)
+
+	if err != nil {
+		return nil, common.NewCookieNotFoundUnauthorizedError()
+	}
+
+	return cookie, nil
 }
 
 func (s *Service) CreateUser(login string, email string, password string) error {

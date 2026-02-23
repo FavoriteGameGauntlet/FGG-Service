@@ -3,7 +3,7 @@ package common
 type User struct {
 	Id          int
 	Login       string
-	DisplayName string
+	DisplayName *string
 	Email       string
 }
 

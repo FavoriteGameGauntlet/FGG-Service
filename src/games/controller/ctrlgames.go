@@ -80,13 +80,13 @@ func (c *Controller) GetWishlistGamesByLogin(ctx echo.Context, login auth.Login)
 //	userId, err := controller.GetUserId(ctx)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	game, err := game_service.GetCurrentGame(userId)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	gameDto := convertGameToDto(game)
@@ -108,13 +108,13 @@ func (c *Controller) GetWishlistGamesByLogin(ctx echo.Context, login auth.Login)
 //	userId, err := controller.GetUserId(ctx)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	err = game_service.CancelCurrentGame(userId)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	return ctx.NoContent(http.StatusNoContent)
@@ -125,13 +125,13 @@ func (c *Controller) GetWishlistGamesByLogin(ctx echo.Context, login auth.Login)
 //	userId, err := controller.GetUserId(ctx)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	err = game_service.FinishCurrentGame(userId)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	return ctx.NoContent(http.StatusNoContent)
@@ -142,13 +142,13 @@ func (c *Controller) GetWishlistGamesByLogin(ctx echo.Context, login auth.Login)
 //	userId, err := controller.GetUserId(ctx)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	games, err := game_service.GetGameHistory(userId)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	gamesDto := convertGamesToDto(games)
@@ -171,13 +171,13 @@ func (c *Controller) GetWishlistGamesByLogin(ctx echo.Context, login auth.Login)
 //	userId, err := controller.GetUserId(ctx)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	game, err := game_service.MakeGameRoll(userId)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	gameDto := convertGameToDto(game)
@@ -190,13 +190,13 @@ func (c *Controller) GetWishlistGamesByLogin(ctx echo.Context, login auth.Login)
 //	userId, err := controller.GetUserId(ctx)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	games, err := game_service.GetUnplayedGames(userId)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	gamesDto := convertWishlistGamesToDto(games)
@@ -221,7 +221,7 @@ func (c *Controller) GetWishlistGamesByLogin(ctx echo.Context, login auth.Login)
 //	userId, err := controller.GetUserId(ctx)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	var gameDto api.WishlistGame
@@ -229,7 +229,7 @@ func (c *Controller) GetWishlistGamesByLogin(ctx echo.Context, login auth.Login)
 //
 //	if err != nil {
 //		err = common.NewBadRequestError(err.Error())
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	game := convertWishlistGameFromDto(gameDto)
@@ -237,13 +237,13 @@ func (c *Controller) GetWishlistGamesByLogin(ctx echo.Context, login auth.Login)
 //	err = validator.ValidateName(game.Name)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	err = game_service.CreateUnplayedGame(userId, game)
 //
 //	if err != nil {
-//		return controller.SendJSONErrorResponse(ctx, err)
+//		return common.SendJSONErrorResponse(ctx, err)
 //	}
 //
 //	return ctx.NoContent(http.StatusNoContent)

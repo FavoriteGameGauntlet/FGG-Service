@@ -1,47 +1,5 @@
 package auth
 
-//func SendJSONErrorResponse(ctx echo.Context, err error) error {
-//	var badRequestError *common.BadRequestError
-//	var unauthorizedError *common.UnauthorizedError
-//	var notFoundError *common.NotFoundError
-//	var conflictError *common.ConflictError
-//	var unprocessableError *common.UnprocessableError
-//
-//	apiCode := http.StatusInternalServerError
-//
-//	switch {
-//	case errors.As(err, &badRequestError):
-//		apiCode = http.StatusBadRequest
-//	case errors.As(err, &unauthorizedError):
-//		apiCode = http.StatusUnauthorized
-//	case errors.As(err, &notFoundError):
-//		apiCode = http.StatusNotFound
-//	case errors.As(err, &conflictError):
-//		apiCode = http.StatusConflict
-//	case errors.As(err, &unprocessableError):
-//		apiCode = http.StatusUnprocessableEntity
-//	}
-//
-//	apiError := convertToError(err)
-//
-//	return ctx.JSON(apiCode, apiError)
-//}
-//
-//func convertToError(err error) api.Error {
-//	var appError common.AppError
-//	if errors.As(err, &appError) {
-//		return api.Error{
-//			Code:    appError.GetCode(),
-//			Message: appError.GetMessage(),
-//		}
-//	}
-//
-//	return api.Error{
-//		Code:    "UNEXPECTED",
-//		Message: err.Error(),
-//	}
-//}
-//
 //func GetUserId(ctx echo.Context) (userId int, err error) {
 //	cookie, err := ctx.Cookie(SessionCookieName)
 //
