@@ -181,6 +181,15 @@ func NewUserEmailAlreadyExistsError() error {
 	}
 }
 
+func NewAvailableRollsExistError() error {
+	return &ConflictError{
+		&BaseError{
+			Code:    "AVAILABLE_ROLLS_EXIST",
+			Message: "You have available rolls. You need to use them.",
+		},
+	}
+}
+
 type UnprocessableError struct {
 	*BaseError
 }

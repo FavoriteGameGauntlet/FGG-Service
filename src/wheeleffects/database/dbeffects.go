@@ -3,6 +3,8 @@ package dbwheeleffects
 import (
 	"FGG-Service/src/dbaccess"
 	"FGG-Service/src/wheeleffects/types"
+	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -19,6 +21,11 @@ func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err er
 	row := dbaccess.QueryRow(GetAvailableRollsCountQuery, userId)
 
 	err = row.Scan(&count)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		count = 0
+		err = nil
+	}
 
 	return
 }

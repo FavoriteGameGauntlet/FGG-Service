@@ -60,7 +60,19 @@ func (c *Controller) ApplyAvailableWheelEffectRoll(ctx echo.Context) error {
 
 // GetAvailableWheelEffectRollsCount (GET /wheel-effects/available/roll/count)
 func (c *Controller) GetAvailableWheelEffectRollsCount(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	userId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	count, err := c.Service.GetAvailableRollsCount(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, count)
 }
 
 // GetAvailableWheelEffects (GET /wheel-effects/available)
