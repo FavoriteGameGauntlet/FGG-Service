@@ -5,6 +5,7 @@ import (
 	"FGG-Service/src/games/database"
 	"FGG-Service/src/timers/database"
 	"FGG-Service/src/timers/types"
+	dbwheeleffects "FGG-Service/src/wheeleffects/database"
 	"database/sql"
 	"errors"
 	"time"
@@ -14,7 +15,8 @@ import (
 
 type Service struct {
 	Database               dbtimers.Database
-	GameDatabase           dbgames.Database
+	GamesDatabase          dbgames.Database
+	WheelEffectsDatabase   dbwheeleffects.Database
 	TimerFinisherScheduler gocron.Scheduler
 }
 
@@ -49,7 +51,7 @@ func (s *Service) StartTimerFinisherScheduler() {
 }
 
 func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, err error) {
-	games, err := s.GameDatabase.GetCurrentGameCommand(userId)
+	games, err := s.GamesDatabase.GetCurrentGameCommand(userId)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		err = common.NewCurrentGameNotFoundError()
@@ -69,6 +71,17 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, e
 	}
 
 	if !errors.Is(err, sql.ErrNoRows) {
+		return
+	}
+
+	count, err := s.WheelEffectsDatabase.GetAvailableRollsCountCommand(userId)
+
+	if err != nil {
+		return
+	}
+
+	if count > 0 {
+		err = common.NewAvailableRollsExistError()
 		return
 	}
 
