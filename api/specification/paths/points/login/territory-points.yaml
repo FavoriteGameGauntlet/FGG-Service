@@ -1,30 +1,28 @@
 post:
-  operationId: addUserWishlistGame
-  tags: [ Games ]
+  operationId: changeUserTerritoryPoints
+  tags: [ Points ]
   parameters:
     - $ref: "../../../components/parameters/Login.yaml"
   requestBody:
-    $ref: "../../../components/requests/WishlistGameRequest.yaml"
+    $ref: "../../../components/requests/PointChangeRequest.yaml"
   responses:
-    "204":
-      description: Success.
+    "200":
+      $ref: "../../../components/responses/TerritoryPointChangeResultsResponse.yaml"
     "401":
       $ref: "../../../components/responses/ErrorResponse.yaml"
-    "404":
+    "409":
       $ref: "../../../components/responses/ErrorResponse.yaml"
     "500":
       $ref: "../../../components/responses/ErrorResponse.yaml"
 get:
-  operationId: getUserWishlistGames
-  tags: [ Games ]
+  operationId: getUserTerritoryPoints
+  tags: [ Points ]
   parameters:
     - $ref: "../../../components/parameters/Login.yaml"
   responses:
     "200":
-      $ref: "../../../components/responses/WishlistGamesResponse.yaml"
+      $ref: "../../../components/responses/PointsResponse.yaml"
     "401":
-      $ref: "../../../components/responses/ErrorResponse.yaml"
-    "404":
       $ref: "../../../components/responses/ErrorResponse.yaml"
     "500":
       $ref: "../../../components/responses/ErrorResponse.yaml"

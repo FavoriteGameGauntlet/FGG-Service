@@ -1,23 +1,11 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.9.0
+  version: 0.10.0
 paths:
-  /points/self/info:
-    get:
-      operationId: getOwnPointInfo
-      tags:
-        - Points
-      responses:
-        '200':
-          $ref: '#/components/responses/PointInfoResponse'
-        '401':
-          $ref: '#/components/responses/ErrorResponse'
-        '500':
-          $ref: '#/components/responses/ErrorResponse'
   /points/{login}/info:
     get:
-      operationId: getPointInfoByLogin
+      operationId: getUserPointInfo
       tags:
         - Points
       parameters:
@@ -31,11 +19,27 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /points/self/territory-points:
-    post:
-      operationId: changeOwnTerritoryPoints
+  /points/all/info:
+    get:
+      operationId: getAllPointInfo
       tags:
         - Points
+      responses:
+        '200':
+          $ref: '#/components/responses/PointInfoByLoginsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+  /points/{login}/territory-points:
+    post:
+      operationId: changeUserTerritoryPoints
+      tags:
+        - Points
+      parameters:
+        - $ref: '#/components/parameters/Login'
       requestBody:
         $ref: '#/components/requestBodies/PointChangeRequest'
       responses:
@@ -48,31 +52,21 @@ paths:
         '500':
           $ref: '#/components/responses/ErrorResponse'
     get:
-      operationId: getOwnTerritoryPoints
+      operationId: getUserTerritoryPoints
       tags:
         - Points
+      parameters:
+        - $ref: '#/components/parameters/Login'
       responses:
         '200':
           $ref: '#/components/responses/PointsResponse'
-        '401':
-          $ref: '#/components/responses/ErrorResponse'
-        '500':
-          $ref: '#/components/responses/ErrorResponse'
-  /points/self/territory-points/history:
-    get:
-      operationId: getOwnTerritoryPointHistory
-      tags:
-        - Points
-      responses:
-        '200':
-          $ref: '#/components/responses/TerritoryPointChangeResultsResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
   /points/{login}/territory-points/history:
     get:
-      operationId: getTerritoryPointHistoryByLogin
+      operationId: getUserTerritoryPointHistory
       tags:
         - Points
       parameters:
@@ -86,9 +80,9 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /points/self/free-points:
+  /points/free-points:
     post:
-      operationId: changeOwnFreePoints
+      operationId: changeFreePoints
       tags:
         - Points
       requestBody:
@@ -103,7 +97,7 @@ paths:
         '500':
           $ref: '#/components/responses/ErrorResponse'
     get:
-      operationId: getOwnFreePoints
+      operationId: getFreePoints
       tags:
         - Points
       responses:
@@ -113,21 +107,9 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /points/self/free-points/history:
-    get:
-      operationId: getOwnFreePointHistory
-      tags:
-        - Points
-      responses:
-        '200':
-          $ref: '#/components/responses/FreePointChangeResultsResponse'
-        '401':
-          $ref: '#/components/responses/ErrorResponse'
-        '500':
-          $ref: '#/components/responses/ErrorResponse'
   /points/{login}/free-points/history:
     get:
-      operationId: getFreePointHistoryByLogin
+      operationId: getUserFreePointHistory
       tags:
         - Points
       parameters:
@@ -141,9 +123,9 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /points/self/experience-points:
+  /points/experience-points:
     post:
-      operationId: changeOwnExperiencePoints
+      operationId: changeExperiencePoints
       tags:
         - Points
       requestBody:
@@ -158,7 +140,7 @@ paths:
         '500':
           $ref: '#/components/responses/ErrorResponse'
     get:
-      operationId: getOwnExperiencePoints
+      operationId: getExperiencePoints
       tags:
         - Points
       responses:
@@ -168,9 +150,9 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /points/self/territory-hours:
+  /points/territory-hours:
     post:
-      operationId: changeOwnTerritoryHours
+      operationId: changeTerritoryHours
       tags:
         - Points
       requestBody:
@@ -185,7 +167,7 @@ paths:
         '500':
           $ref: '#/components/responses/ErrorResponse'
     get:
-      operationId: getOwnTerritoryHours
+      operationId: getTerritoryHours
       tags:
         - Points
       responses:
@@ -197,6 +179,11 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
 components:
   schemas:
+    Login:
+      type: string
+      pattern: ^\w+$
+      minLength: 3
+      maxLength: 35
     Points:
       type: integer
       format: int
@@ -230,17 +217,21 @@ components:
       required:
         - code
         - message
-    Login:
-      type: string
-      pattern: ^\w+$
-      minLength: 3
-      maxLength: 35
+    PointInfoByLogins:
+      type: array
+      items:
+        type: object
+        properties:
+          login:
+            $ref: '#/components/schemas/Login'
+          pointInfo:
+            $ref: '#/components/schemas/PointInfo'
     PointChange:
       type: object
       properties:
         changeSource:
           type: string
-        changeValue:
+        desiredChangeValue:
           type: integer
           format: int
     PointChangeResult:
@@ -298,6 +289,13 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/FreePointChangeResult'
+  parameters:
+    Login:
+      name: login
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Login'
   responses:
     PointInfoResponse:
       description: Success.
@@ -311,6 +309,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    PointInfoByLoginsResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PointInfoByLogins'
     PointsResponse:
       description: Success.
       content:
@@ -335,13 +339,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PointChangeResult'
-  parameters:
-    Login:
-      name: login
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/Login'
   requestBodies:
     PointChangeRequest:
       content:

@@ -1,11 +1,9 @@
 get:
-  operationId: getUserPointInfo
+  operationId: getAllPointInfo
   tags: [ Points ]
-  parameters:
-    - $ref: "../../../components/parameters/Login.yaml"
   responses:
     "200":
-      $ref: "../../../components/responses/PointInfoResponse.yaml"
+      $ref: "../../../components/responses/PointInfoByLoginsResponse.yaml"
     "401":
       $ref: "../../../components/responses/ErrorResponse.yaml"
     "404":

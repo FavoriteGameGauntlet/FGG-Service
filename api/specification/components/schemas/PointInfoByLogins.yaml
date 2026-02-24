@@ -4,6 +4,5 @@ items:
   properties:
     login:
       $ref: "./Login.yaml"
-    currentGame:
-      $ref: "./CurrentGame.yaml"
-  required: [ login ]
+    pointInfo:
+      $ref: "./PointInfo.yaml"

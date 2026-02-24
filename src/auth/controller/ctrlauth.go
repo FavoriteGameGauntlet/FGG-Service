@@ -15,8 +15,8 @@ type Controller struct {
 	Service srvauth.Service
 }
 
-func NewController() Controller {
-	return Controller{}
+func NewController() *Controller {
+	return new(Controller)
 }
 
 // Login (POST /auth/login)

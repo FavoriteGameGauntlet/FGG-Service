@@ -1,11 +1,9 @@
 get:
-  operationId: getUserTerritoryPointHistory
-  tags: [ Points ]
-  parameters:
-    - $ref: "../../../../components/parameters/Login.yaml"
+  operationId: getAvailableWheelEffectRollsCount
+  tags: [ WheelEffects ]
   responses:
     "200":
-      $ref: "../../../../components/responses/TerritoryPointChangeResultsResponse.yaml"
+      $ref: "../../../../components/responses/PointsResponse.yaml"
     "401":
       $ref: "../../../../components/responses/ErrorResponse.yaml"
     "404":

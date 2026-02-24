@@ -1,5 +1,5 @@
 get:
-  operationId: getWheelEffectHistoryByLogin
+  operationId: getUserWheelEffectHistory
   tags: [ WheelEffects ]
   parameters:
     - $ref: "../../../components/parameters/Login.yaml"

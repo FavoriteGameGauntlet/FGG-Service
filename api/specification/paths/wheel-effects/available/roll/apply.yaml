@@ -1,0 +1,16 @@
+post:
+  operationId: applyAvailableWheelEffectRoll
+  tags: [ WheelEffects ]
+  requestBody:
+    $ref: "../../../../components/requests/PointChangeByLoginsRequest.yaml"
+  responses:
+    "200":
+      $ref: "../../../../components/responses/FreePointChangeResultByLoginsResponse.yaml"
+    "401":
+      $ref: "../../../../components/responses/ErrorResponse.yaml"
+    "404":
+      $ref: "../../../../components/responses/ErrorResponse.yaml"
+    "409":
+      $ref: "../../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../../components/responses/ErrorResponse.yaml"

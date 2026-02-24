@@ -2,6 +2,6 @@ type: object
 properties:
   login:
     $ref: "./Login.yaml"
-  display-name:
+  displayName:
     $ref: "./Name.yaml"
 required: [ login ]

@@ -1,11 +1,9 @@
-get:
-  operationId: getUserPointInfo
-  tags: [ Points ]
-  parameters:
-    - $ref: "../../../components/parameters/Login.yaml"
+post:
+  operationId: cancelCurrentGame
+  tags: [ Games ]
   responses:
-    "200":
-      $ref: "../../../components/responses/PointInfoResponse.yaml"
+    "204":
+      description: Success.
     "401":
       $ref: "../../../components/responses/ErrorResponse.yaml"
     "404":

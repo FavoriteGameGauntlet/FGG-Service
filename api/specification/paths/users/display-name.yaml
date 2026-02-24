@@ -1,0 +1,26 @@
+post:
+  operationId: changeDisplayName
+  tags: [ Users ]
+  requestBody:
+    $ref: "../../components/requests/NameRequest.yaml"
+  responses:
+    "204":
+      description: Success.
+    "401":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+    "409":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+get:
+  operationId: getDisplayName
+  tags: [ Users ]
+  responses:
+    "200":
+      $ref: "../../components/responses/NameResponse.yaml"
+    "401":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+    "404":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../components/responses/ErrorResponse.yaml"

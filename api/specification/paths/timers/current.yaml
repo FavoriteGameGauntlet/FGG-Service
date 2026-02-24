@@ -1,0 +1,12 @@
+get:
+  operationId: getCurrentTimer
+  tags: [ Timers ]
+  responses:
+    "200":
+      $ref: "../../components/responses/TimerResponse.yaml"
+    "401":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+    "404":
+      $ref: "../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../components/responses/ErrorResponse.yaml"

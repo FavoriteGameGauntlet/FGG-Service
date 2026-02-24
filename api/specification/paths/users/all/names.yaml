@@ -1,0 +1,10 @@
+get:
+  operationId: getAllUserNames
+  tags: [ Users ]
+  responses:
+    '200':
+      $ref: "../../../components/responses/UserNamesResponse.yaml"
+    "401":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../components/responses/ErrorResponse.yaml"

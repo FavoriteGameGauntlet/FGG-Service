@@ -1,14 +1,14 @@
-get:
-  operationId: getUserPointInfo
-  tags: [ Points ]
-  parameters:
-    - $ref: "../../../components/parameters/Login.yaml"
+post:
+  operationId: rollAvailableWheelEffects
+  tags: [ WheelEffects ]
   responses:
     "200":
-      $ref: "../../../components/responses/PointInfoResponse.yaml"
+      $ref: "../../../components/responses/RolledWheelEffectsResponse.yaml"
     "401":
       $ref: "../../../components/responses/ErrorResponse.yaml"
     "404":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "409":
       $ref: "../../../components/responses/ErrorResponse.yaml"
     "500":
       $ref: "../../../components/responses/ErrorResponse.yaml"
