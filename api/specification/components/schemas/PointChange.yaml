@@ -2,6 +2,6 @@ type: object
 properties:
   changeSource:
     type: string
-  changeValue:
+  desiredChangeValue:
     type: integer
     format: int

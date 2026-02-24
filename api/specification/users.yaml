@@ -1,11 +1,11 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.9.0
+  version: 0.10.0
 paths:
-  /users/names:
+  /users/all/names:
     get:
-      operationId: getUserInfos
+      operationId: getAllUserNames
       tags:
         - Users
       responses:
@@ -15,9 +15,9 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /users/self/display-name:
+  /users/display-name:
     post:
-      operationId: changeOwnDisplayName
+      operationId: changeDisplayName
       tags:
         - Users
       requestBody:
@@ -32,7 +32,7 @@ paths:
         '500':
           $ref: '#/components/responses/ErrorResponse'
     get:
-      operationId: getOwnDisplayName
+      operationId: getDisplayName
       tags:
         - Users
       responses:
@@ -61,7 +61,7 @@ components:
       properties:
         login:
           $ref: '#/components/schemas/Login'
-        display-name:
+        displayName:
           $ref: '#/components/schemas/Name'
       required:
         - login

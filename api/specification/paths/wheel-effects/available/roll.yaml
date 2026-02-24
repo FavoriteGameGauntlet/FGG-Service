@@ -1,0 +1,14 @@
+post:
+  operationId: rollAvailableWheelEffects
+  tags: [ WheelEffects ]
+  responses:
+    "200":
+      $ref: "../../../components/responses/RolledWheelEffectsResponse.yaml"
+    "401":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "404":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "409":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../components/responses/ErrorResponse.yaml"

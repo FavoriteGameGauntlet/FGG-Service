@@ -1,3 +1,0 @@
-allOf:
-  - $ref: "./Login.yaml"
-  - $ref: "./FreePointChangeResult.yaml"

@@ -1,7 +1,7 @@
 package ctrlwheeleffects
 
 import (
-	"FGG-Service/api/generated/auth"
+	gengames "FGG-Service/api/generated/games"
 	genwheeleffects "FGG-Service/api/generated/wheel_effects"
 	srvauth "FGG-Service/src/auth/service"
 	"FGG-Service/src/common"
@@ -17,8 +17,8 @@ type Controller struct {
 	AuthService srvauth.Service
 }
 
-func NewController() Controller {
-	return Controller{}
+func NewController() *Controller {
+	return new(Controller)
 }
 
 // RollAvailableWheelEffects (POST /wheel-effects/available/roll)
@@ -63,8 +63,8 @@ func (c *Controller) GetAvailableWheelEffectRollsCount(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNotImplemented)
 }
 
-// GetOwnAvailableWheelEffects (GET /wheel-effects/self/available)
-func (c *Controller) GetOwnAvailableWheelEffects(ctx echo.Context) error {
+// GetAvailableWheelEffects (GET /wheel-effects/available)
+func (c *Controller) GetAvailableWheelEffects(ctx echo.Context) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
@@ -82,8 +82,8 @@ func (c *Controller) GetOwnAvailableWheelEffects(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, effectsDto)
 }
 
-// GetOwnWheelEffectHistory (GET /wheel-effects/self/history)
-func (c *Controller) GetOwnWheelEffectHistory(ctx echo.Context) error {
+// GetUserWheelEffectHistory (GET /wheel-effects/{login}/history)
+func (c *Controller) GetUserWheelEffectHistory(ctx echo.Context, _ gengames.Login) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
@@ -116,9 +116,4 @@ func convertRolledEffectsToDto(effects typewheeleffects.RolledWheelEffects) genw
 	}
 
 	return effectsDto
-}
-
-// GetWheelEffectHistoryByLogin (GET /wheel-effects/{login}/history)
-func (c *Controller) GetWheelEffectHistoryByLogin(ctx echo.Context, _ genauth.Login) error {
-	return ctx.NoContent(http.StatusNotImplemented)
 }

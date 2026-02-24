@@ -1,5 +1,5 @@
 get:
-  operationId: getFreePointHistoryByLogin
+  operationId: getUserFreePointHistory
   tags: [ Points ]
   parameters:
     - $ref: "../../../../components/parameters/Login.yaml"

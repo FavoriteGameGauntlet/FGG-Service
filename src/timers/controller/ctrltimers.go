@@ -16,12 +16,15 @@ type Controller struct {
 	AuthService srvauth.Service
 }
 
-func NewController() Controller {
-	return Controller{}
+func NewController() *Controller {
+	s := srvtimers.NewService()
+	as := new(srvauth.Service)
+
+	return &Controller{*s, *as}
 }
 
-// GetOwnCurrentTimer (GET /timers/self/current)
-func (c *Controller) GetOwnCurrentTimer(ctx echo.Context) error {
+// GetCurrentTimer (GET /timers/current)
+func (c *Controller) GetCurrentTimer(ctx echo.Context) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
@@ -48,8 +51,8 @@ func ConvertTimerToDto(timer typetimers.Timer) gentimers.Timer {
 	}
 }
 
-// PauseOwnCurrentTimer (POST /timers/self/current/pause)
-func (c *Controller) PauseOwnCurrentTimer(ctx echo.Context) error {
+// PauseCurrentTimer (POST /timers/current/pause)
+func (c *Controller) PauseCurrentTimer(ctx echo.Context) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
@@ -67,8 +70,8 @@ func (c *Controller) PauseOwnCurrentTimer(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, timerActionDto)
 }
 
-// StartOwnCurrentTimer (POST /timers/self/current/start)
-func (c *Controller) StartOwnCurrentTimer(ctx echo.Context) error {
+// StartCurrentTimer (POST /timers/current/start)
+func (c *Controller) StartCurrentTimer(ctx echo.Context) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {

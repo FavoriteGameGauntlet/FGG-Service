@@ -1,5 +1,5 @@
 get:
-  operationId: getGameHistoryByLogin
+  operationId: getUserGameHistory
   tags: [ Games ]
   parameters:
     - $ref: "../../../components/parameters/Login.yaml"

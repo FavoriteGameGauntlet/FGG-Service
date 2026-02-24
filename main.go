@@ -29,29 +29,28 @@ func main() {
 	e := echo.New()
 
 	authController := ctrlauth.NewController()
-	genauth.RegisterHandlers(e, &authController)
+	genauth.RegisterHandlers(e, authController)
 
 	gamesController := ctrlgames.NewController()
-	gengames.RegisterHandlers(e, &gamesController)
+	gengames.RegisterHandlers(e, gamesController)
 
 	pointsController := ctrlpoints.NewController()
-	genpoints.RegisterHandlers(e, &pointsController)
+	genpoints.RegisterHandlers(e, pointsController)
 
 	timersController := ctrltimers.NewController()
-	gentimers.RegisterHandlers(e, &timersController)
+	gentimers.RegisterHandlers(e, timersController)
 
 	usersController := ctrlusers.NewController()
-	genusers.RegisterHandlers(e, &usersController)
+	genusers.RegisterHandlers(e, usersController)
 
 	effectsController := ctrleffects.NewController()
-	geneffects.RegisterHandlers(e, &effectsController)
+	geneffects.RegisterHandlers(e, effectsController)
 
 	addScalarRoutes(e)
 	fixCORS(e)
 
 	dbaccess.Init()
 	defer dbaccess.Close()
-	//StartTimerFinisherScheduler()
 
 	e.HideBanner = true
 	err := e.Start(":8080")
@@ -77,23 +76,3 @@ func addScalarRoutes(e *echo.Echo) {
 func fixCORS(e *echo.Echo) {
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{AllowOrigins: []string{"*"}}))
 }
-
-//func StartTimerFinisherScheduler() {
-//	scheduler, err := gocron.NewScheduler()
-//
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//	_, err = scheduler.NewJob(
-//		gocron.DurationJob(1*time.Second),
-//		gocron.NewTask(timer_service.StopAllCompletedTimers),
-//		gocron.WithSingletonMode(gocron.LimitModeReschedule),
-//	)
-//
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//	scheduler.Start()
-//}

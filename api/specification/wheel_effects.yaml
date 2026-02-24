@@ -1,23 +1,11 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.9.0
+  version: 0.10.0
 paths:
-  /wheel-effects/self/history:
-    get:
-      operationId: getOwnWheelEffectHistory
-      tags:
-        - WheelEffects
-      responses:
-        '200':
-          $ref: '#/components/responses/RolledWheelEffectsResponse'
-        '401':
-          $ref: '#/components/responses/ErrorResponse'
-        '500':
-          $ref: '#/components/responses/ErrorResponse'
   /wheel-effects/{login}/history:
     get:
-      operationId: getWheelEffectHistoryByLogin
+      operationId: getUserWheelEffectHistory
       tags:
         - WheelEffects
       parameters:
@@ -31,9 +19,9 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /wheel-effects/self/available:
+  /wheel-effects/available:
     get:
-      operationId: getOwnAvailableWheelEffects
+      operationId: getAvailableWheelEffects
       tags:
         - WheelEffects
       responses:
@@ -63,7 +51,7 @@ paths:
     get:
       operationId: getAvailableWheelEffectRollsCount
       tags:
-        - Effects
+        - WheelEffects
       responses:
         '200':
           $ref: '#/components/responses/PointsResponse'
@@ -93,6 +81,11 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
 components:
   schemas:
+    Login:
+      type: string
+      pattern: ^\w+$
+      minLength: 3
+      maxLength: 35
     Name:
       type: string
       pattern: ^.+$
@@ -134,11 +127,6 @@ components:
       required:
         - code
         - message
-    Login:
-      type: string
-      pattern: ^\w+$
-      minLength: 3
-      maxLength: 35
     WheelEffects:
       type: array
       items:
@@ -152,23 +140,21 @@ components:
       properties:
         changeSource:
           type: string
-        changeValue:
+        desiredChangeValue:
           type: integer
           format: int
-    PointChangeByLogin:
-      type: object
-      properties:
-        login:
-          $ref: '#/components/schemas/Login'
-        pointChange:
-          $ref: '#/components/schemas/PointChange'
-      required:
-        - login
-        - pointChange
     PointChangeByLogins:
       type: array
       items:
-        $ref: '#/components/schemas/PointChangeByLogin'
+        type: object
+        properties:
+          login:
+            $ref: '#/components/schemas/Login'
+          pointChange:
+            $ref: '#/components/schemas/PointChange'
+        required:
+          - login
+          - pointChange
     PointChangeResult:
       allOf:
         - $ref: '#/components/schemas/PointChange'
@@ -201,10 +187,25 @@ components:
                 - other
             wheelEffectName:
               $ref: '#/components/schemas/Name'
-    FreePointChangeResults:
+    FreePointChangeResultByLogins:
       type: array
       items:
-        $ref: '#/components/schemas/FreePointChangeResult'
+        type: object
+        properties:
+          login:
+            $ref: '#/components/schemas/Login'
+          changeResult:
+            $ref: '#/components/schemas/FreePointChangeResult'
+        required:
+          - login
+          - changeResult
+  parameters:
+    Login:
+      name: login
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Login'
   responses:
     RolledWheelEffectsResponse:
       description: Success.
@@ -235,14 +236,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/FreePointChangeResults'
-  parameters:
-    Login:
-      name: login
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/Login'
+            $ref: '#/components/schemas/FreePointChangeResultByLogins'
   requestBodies:
     PointChangeByLoginsRequest:
       content:

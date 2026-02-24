@@ -1,5 +1,21 @@
+post:
+  operationId: addUserWishlistGame
+  tags: [ Games ]
+  parameters:
+    - $ref: "../../../components/parameters/Login.yaml"
+  requestBody:
+    $ref: "../../../components/requests/WishlistGameRequest.yaml"
+  responses:
+    "204":
+      description: Success.
+    "401":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "404":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
 get:
-  operationId: getWishlistGamesByLogin
+  operationId: getUserWishlistGames
   tags: [ Games ]
   parameters:
     - $ref: "../../../components/parameters/Login.yaml"

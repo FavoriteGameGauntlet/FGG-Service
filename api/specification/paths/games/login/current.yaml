@@ -1,5 +1,5 @@
 get:
-  operationId: getCurrentGameByLogin
+  operationId: getUserCurrentGame
   tags: [ Games ]
   parameters:
     - $ref: "../../../components/parameters/Login.yaml"

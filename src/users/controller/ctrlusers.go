@@ -11,21 +11,21 @@ type Controller struct {
 	Service srvusers.Service
 }
 
-func NewController() Controller {
-	return Controller{}
+func NewController() *Controller {
+	return new(Controller)
 }
 
-// GetUserInfos (GET /users/names)
-func (c *Controller) GetUserInfos(ctx echo.Context) error {
+// GetAllUserNames (GET /users/all/names)
+func (c *Controller) GetAllUserNames(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNotImplemented)
 }
 
-// GetOwnDisplayName (GET /users/self/display-name)
-func (c *Controller) GetOwnDisplayName(ctx echo.Context) error {
+// GetDisplayName (GET /users/display-name)
+func (c *Controller) GetDisplayName(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNotImplemented)
 }
 
-// ChangeOwnDisplayName (POST /users/self/display-name)
-func (c *Controller) ChangeOwnDisplayName(ctx echo.Context) error {
+// ChangeDisplayName (POST /users/display-name)
+func (c *Controller) ChangeDisplayName(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNotImplemented)
 }

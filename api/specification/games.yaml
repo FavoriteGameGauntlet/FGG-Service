@@ -1,13 +1,15 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.9.0
+  version: 0.10.0
 paths:
-  /games/self/wishlist:
+  /games/{login}/wishlist:
     post:
-      operationId: addOwnWishlistGame
+      operationId: addUserWishlistGame
       tags:
         - Games
+      parameters:
+        - $ref: '#/components/parameters/Login'
       requestBody:
         $ref: '#/components/requestBodies/WishlistGameRequest'
       responses:
@@ -15,22 +17,12 @@ paths:
           description: Success.
         '401':
           $ref: '#/components/responses/ErrorResponse'
-        '500':
-          $ref: '#/components/responses/ErrorResponse'
-    get:
-      operationId: getOwnWishlistGames
-      tags:
-        - Games
-      responses:
-        '200':
-          $ref: '#/components/responses/WishlistGamesResponse'
-        '401':
+        '404':
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /games/{login}/wishlist:
     get:
-      operationId: getWishlistGamesByLogin
+      operationId: getUserWishlistGames
       tags:
         - Games
       parameters:
@@ -38,20 +30,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/WishlistGamesResponse'
-        '401':
-          $ref: '#/components/responses/ErrorResponse'
-        '404':
-          $ref: '#/components/responses/ErrorResponse'
-        '500':
-          $ref: '#/components/responses/ErrorResponse'
-  /games/self/current:
-    get:
-      operationId: getOwnCurrentGame
-      tags:
-        - Games
-      responses:
-        '200':
-          $ref: '#/components/responses/CurrentGameResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '404':
@@ -60,7 +38,7 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
   /games/{login}/current:
     get:
-      operationId: getCurrentGameByLogin
+      operationId: getUserCurrentGame
       tags:
         - Games
       parameters:
@@ -74,7 +52,21 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /games/self/current/roll:
+  /games/all/current:
+    get:
+      operationId: getAllCurrentGame
+      tags:
+        - Games
+      responses:
+        '200':
+          $ref: '#/components/responses/CurrentGameByLoginsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+  /games/current/roll:
     post:
       operationId: rollNewCurrentGame
       tags:
@@ -90,9 +82,9 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /games/self/current/finish:
+  /games/current/finish:
     post:
-      operationId: finishOwnCurrentGame
+      operationId: finishCurrentGame
       tags:
         - Games
       responses:
@@ -106,9 +98,9 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /games/self/current/cancel:
+  /games/current/cancel:
     post:
-      operationId: cancelOwnCurrentGame
+      operationId: cancelCurrentGame
       tags:
         - Games
       responses:
@@ -120,21 +112,9 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /games/self/history:
-    get:
-      operationId: getOwnGameHistory
-      tags:
-        - Games
-      responses:
-        '200':
-          $ref: '#/components/responses/CurrentGamesResponse'
-        '401':
-          $ref: '#/components/responses/ErrorResponse'
-        '500':
-          $ref: '#/components/responses/ErrorResponse'
   /games/{login}/history:
     get:
-      operationId: getGameHistoryByLogin
+      operationId: getUserGameHistory
       tags:
         - Games
       parameters:
@@ -150,6 +130,11 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
 components:
   schemas:
+    Login:
+      type: string
+      pattern: ^\w+$
+      minLength: 3
+      maxLength: 35
     Name:
       type: string
       pattern: ^.+$
@@ -176,11 +161,6 @@ components:
       required:
         - code
         - message
-    Login:
-      type: string
-      pattern: ^\w+$
-      minLength: 3
-      maxLength: 35
     Duration:
       type: string
       format: duration
@@ -206,10 +186,28 @@ components:
         - name
         - state
         - timeSpent
+    CurrentGameByLogins:
+      type: array
+      items:
+        type: object
+        properties:
+          login:
+            $ref: '#/components/schemas/Login'
+          currentGame:
+            $ref: '#/components/schemas/CurrentGame'
+        required:
+          - login
     CurrentGames:
       type: array
       items:
         $ref: '#/components/schemas/CurrentGame'
+  parameters:
+    Login:
+      name: login
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Login'
   responses:
     WishlistGamesResponse:
       description: Success.
@@ -229,6 +227,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CurrentGame'
+    CurrentGameByLoginsResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CurrentGameByLogins'
     CurrentGamesResponse:
       description: Success.
       content:
@@ -241,10 +245,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WishlistGame'
-  parameters:
-    Login:
-      name: login
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/Login'

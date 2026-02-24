@@ -1,7 +1,0 @@
-type: object
-properties:
-  login:
-    $ref: "./Login.yaml"
-  pointChange:
-    $ref: "./PointChange.yaml"
-required: [ login, pointChange ]

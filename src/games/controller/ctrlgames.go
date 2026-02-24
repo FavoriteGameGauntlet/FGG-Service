@@ -1,7 +1,6 @@
 package ctrlgames
 
 import (
-	"FGG-Service/api/generated/auth"
 	"FGG-Service/api/generated/games"
 	"FGG-Service/src/auth/service"
 	"FGG-Service/src/common"
@@ -18,12 +17,12 @@ type Controller struct {
 	AuthService srvauth.Service
 }
 
-func NewController() Controller {
-	return Controller{}
+func NewController() *Controller {
+	return new(Controller)
 }
 
-// GetOwnCurrentGame (GET /games/self/current)
-func (c *Controller) GetOwnCurrentGame(ctx echo.Context) error {
+// GetUserCurrentGame (GET /games/{login}/current)
+func (c *Controller) GetUserCurrentGame(ctx echo.Context, _ gengames.Login) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
@@ -50,8 +49,8 @@ func convertGameToDto(game typegames.CurrentGame) gengames.CurrentGame {
 	}
 }
 
-// CancelOwnCurrentGame (POST /games/self/current/cancel)
-func (c *Controller) CancelOwnCurrentGame(ctx echo.Context) error {
+// CancelCurrentGame (POST /games/current/cancel)
+func (c *Controller) CancelCurrentGame(ctx echo.Context) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
@@ -67,8 +66,8 @@ func (c *Controller) CancelOwnCurrentGame(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-// FinishOwnCurrentGame (POST /games/self/current/finish)
-func (c *Controller) FinishOwnCurrentGame(ctx echo.Context) error {
+// FinishCurrentGame (POST /games/current/finish)
+func (c *Controller) FinishCurrentGame(ctx echo.Context) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
@@ -84,7 +83,7 @@ func (c *Controller) FinishOwnCurrentGame(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-// RollNewCurrentGame (POST /games/self/current/roll)
+// RollNewCurrentGame (POST /games/current/roll)
 func (c *Controller) RollNewCurrentGame(ctx echo.Context) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
@@ -103,8 +102,8 @@ func (c *Controller) RollNewCurrentGame(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, gameDto)
 }
 
-// GetOwnGameHistory (GET /games/self/history)
-func (c *Controller) GetOwnGameHistory(ctx echo.Context) error {
+// GetUserGameHistory (GET /games/{login}/history)
+func (c *Controller) GetUserGameHistory(ctx echo.Context, _ gengames.Login) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
@@ -132,8 +131,8 @@ func convertGamesToDto(games typegames.CurrentGames) gengames.CurrentGames {
 	return gamesDto
 }
 
-// GetOwnWishlistGames (GET /games/self/wishlist)
-func (c *Controller) GetOwnWishlistGames(ctx echo.Context) error {
+// GetUserWishlistGames (GET /games/{login}/wishlist)
+func (c *Controller) GetUserWishlistGames(ctx echo.Context, _ gengames.Login) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
@@ -163,8 +162,8 @@ func convertWishlistGamesToDto(games typegames.WishlistGames) gengames.WishlistG
 	return gamesDto
 }
 
-// AddOwnWishlistGame (POST /games/self/wishlist)
-func (c *Controller) AddOwnWishlistGame(ctx echo.Context) error {
+// AddUserWishlistGame (POST /games/{login}/wishlist)
+func (c *Controller) AddUserWishlistGame(ctx echo.Context, _ gengames.Login) error {
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
@@ -202,17 +201,7 @@ func convertWishlistGameFromDto(gameDto gengames.WishlistGame) typegames.Wishlis
 	}
 }
 
-// GetCurrentGameByLogin (GET /games/{login}/current)
-func (c *Controller) GetCurrentGameByLogin(ctx echo.Context, _ genauth.Login) error {
-	return ctx.NoContent(http.StatusNotImplemented)
-}
-
-// GetGameHistoryByLogin (GET /games/{login}/history)
-func (c *Controller) GetGameHistoryByLogin(ctx echo.Context, _ genauth.Login) error {
-	return ctx.NoContent(http.StatusNotImplemented)
-}
-
-// GetWishlistGamesByLogin (GET /games/{login}/wishlist)
-func (c *Controller) GetWishlistGamesByLogin(ctx echo.Context, _ genauth.Login) error {
+// GetAllCurrentGame (GET /games/all/current)
+func (c *Controller) GetAllCurrentGame(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNotImplemented)
 }

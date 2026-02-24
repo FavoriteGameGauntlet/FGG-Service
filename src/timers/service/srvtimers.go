@@ -7,11 +7,45 @@ import (
 	"FGG-Service/src/timers/types"
 	"database/sql"
 	"errors"
+	"time"
+
+	"github.com/go-co-op/gocron/v2"
 )
 
 type Service struct {
-	Database     dbtimers.Database
-	GameDatabase dbgames.Database
+	Database               dbtimers.Database
+	GameDatabase           dbgames.Database
+	TimerFinisherScheduler gocron.Scheduler
+}
+
+func NewService() *Service {
+	s := new(Service)
+
+	s.StartTimerFinisherScheduler()
+
+	return s
+}
+
+func (s *Service) StartTimerFinisherScheduler() {
+	scheduler, err := gocron.NewScheduler()
+
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = scheduler.NewJob(
+		gocron.DurationJob(1*time.Second),
+		gocron.NewTask(s.StopAllCompletedTimers),
+		gocron.WithSingletonMode(gocron.LimitModeReschedule),
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	s.TimerFinisherScheduler = scheduler
+
+	scheduler.Start()
 }
 
 func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, err error) {
