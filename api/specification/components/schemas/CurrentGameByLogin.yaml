@@ -1,0 +1,7 @@
+type: object
+properties:
+  login:
+    $ref: "./Login.yaml"
+  currentGame:
+    $ref: "./CurrentGame.yaml"
+required: [ login, currentGame ]

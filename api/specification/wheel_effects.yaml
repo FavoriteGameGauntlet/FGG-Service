@@ -201,10 +201,20 @@ components:
                 - other
             wheelEffectName:
               $ref: '#/components/schemas/Name'
-    FreePointChangeResults:
+    FreePointChangeResultByLogin:
+      type: object
+      properties:
+        login:
+          $ref: '#/components/schemas/Login'
+        changeResult:
+          $ref: '#/components/schemas/FreePointChangeResult'
+      required:
+        - login
+        - changeResult
+    FreePointChangeResultByLogins:
       type: array
       items:
-        $ref: '#/components/schemas/FreePointChangeResult'
+        $ref: '#/components/schemas/FreePointChangeResultByLogin'
   responses:
     RolledWheelEffectsResponse:
       description: Success.
@@ -235,7 +245,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/FreePointChangeResults'
+            $ref: '#/components/schemas/FreePointChangeResultByLogins'
   parameters:
     Login:
       name: login

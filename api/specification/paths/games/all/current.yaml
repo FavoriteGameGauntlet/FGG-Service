@@ -1,11 +1,9 @@
 get:
-  operationId: getUserGameHistory
+  operationId: getAllCurrentGame
   tags: [ Games ]
-  parameters:
-    - $ref: "../../../components/parameters/Login.yaml"
   responses:
     "200":
-      $ref: "../../../components/responses/CurrentGamesResponse.yaml"
+      $ref: "../../../components/responses/CurrentGameByLoginsResponse.yaml"
     "401":
       $ref: "../../../components/responses/ErrorResponse.yaml"
     "404":

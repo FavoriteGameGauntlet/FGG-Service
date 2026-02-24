@@ -1,3 +1,7 @@
-allOf:
-  - $ref: "./Login.yaml"
-  - $ref: "./FreePointChangeResult.yaml"
+type: object
+properties:
+  login:
+    $ref: "./Login.yaml"
+  changeResult:
+    $ref: "./FreePointChangeResult.yaml"
+required: [ login, changeResult ]

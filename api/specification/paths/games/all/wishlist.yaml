@@ -1,10 +1,12 @@
 get:
-  operationId: getOwnGameHistory
+  operationId: getAllWishlistGames
   tags: [ Games ]
   responses:
     "200":
-      $ref: "../../../components/responses/CurrentGamesResponse.yaml"
+      $ref: "../../../components/responses/WishlistGamesByLoginsResponse.yaml"
     "401":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "404":
       $ref: "../../../components/responses/ErrorResponse.yaml"
     "500":
       $ref: "../../../components/responses/ErrorResponse.yaml"
