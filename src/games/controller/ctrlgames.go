@@ -203,5 +203,21 @@ func convertWishlistGameFromDto(gameDto gengames.WishlistGame) typegames.Wishlis
 
 // GetAllCurrentGame (GET /games/all/current)
 func (c *Controller) GetAllCurrentGame(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+
+	userId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	game, err := c.Service.GetCurrentGame(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	gameDto := convertGameToDto(game)
+
+	return ctx.JSON(http.StatusOK, gameDto)
+	//return ctx.NoContent(http.StatusNotImplemented)
 }
