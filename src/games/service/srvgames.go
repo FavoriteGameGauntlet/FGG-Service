@@ -12,7 +12,7 @@ import (
 )
 
 type Service struct {
-	Database     dbgames.Database
+	Database     dbgames.IDatabase
 	TimerService srvtimers.Service
 }
 

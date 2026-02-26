@@ -9,6 +9,22 @@ import (
 	"time"
 )
 
+type IDatabase interface {
+	DoesGameExistCommand(gameName string) (doesExist bool, err error)
+	CreateGameCommand(name string) error
+	GetGameCommand(gameName string) (game typegames.CurrentGame, err error)
+	DoesUnplayedGameExistCommand(userId int, gameName string) (doesExist bool, err error)
+	CreateUnplayedGameCommand(userId int, gameId int) error
+	DeleteUnplayedGameCommand(userId int, gameId int) error
+	GetUnplayedGamesCommand(userId int) (games typegames.WishlistGames, err error)
+	CreateCurrentGameCommand(userId int, gameId int) error
+	GetCurrentGameCommand(userId int) (games typegames.CurrentGames, err error)
+	GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error)
+	CancelCurrentGameCommand(userId int, gameId int) error
+	FinishCurrentGameCommand(userId int, gameId int) error
+	GetGameHistoryCommand(userId int) (games typegames.CurrentGames, err error)
+}
+
 type Database struct {
 }
 
