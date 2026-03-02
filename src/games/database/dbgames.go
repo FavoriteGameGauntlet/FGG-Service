@@ -295,3 +295,12 @@ func (db *Database) GetGameHistoryCommand(userId int) (games typegames.CurrentGa
 
 	return
 }
+
+// Конечная точка должна получать текущие игры для всех пользователей и возвращать их.
+const GetAllCurrentGameQuery = `
+	SELECT
+		g.Id,
+		g.Name,
+		gh.State
+	FROM GameHistory gh
+`
