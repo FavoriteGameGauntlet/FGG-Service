@@ -9,6 +9,22 @@ import (
 	"time"
 )
 
+type IDatabase interface {
+	DoesGameExistCommand(gameName string) (doesExist bool, err error)
+	CreateGameCommand(name string) error
+	GetWishlistGameCommand(name string) (game typegames.WishlistGame, err error)
+	DoesWishlistGameExistCommand(userId int, gameName string) (doesExist bool, err error)
+	CreateWishlistGameCommand(userId int, gameId int) error
+	DeleteUnplayedGameCommand(userId int, gameId int) error
+	GetUnplayedGamesCommand(userId int) (games typegames.WishlistGames, err error)
+	CreateCurrentGameCommand(userId int, gameId int) error
+	GetCurrentGameCommand(userId int) (games typegames.CurrentGames, err error)
+	GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error)
+	CancelCurrentGameCommand(userId int, gameId int) error
+	FinishCurrentGameCommand(userId int, gameId int) error
+	GetGameHistoryCommand(userId int) (games typegames.CurrentGames, err error)
+}
+
 type Database struct {
 }
 
@@ -45,16 +61,16 @@ func (db *Database) CreateGameCommand(name string) error {
 	return err
 }
 
-const GetGameQuery = `
+const GetWishlistGameQuery = `
 	SELECT Id, Name
 	FROM Games
 	WHERE Name = ?
 `
 
-func (db *Database) GetGameCommand(name string) (game typegames.CurrentGame, err error) {
-	row := dbaccess.QueryRow(GetGameQuery, name)
+func (db *Database) GetWishlistGameCommand(name string) (game typegames.WishlistGame, err error) {
+	row := dbaccess.QueryRow(GetWishlistGameQuery, name)
 
-	err = row.Scan(&game.Id, &game.Name)
+	err = row.Scan(&game.GameId, &game.Name)
 
 	return
 }
@@ -72,7 +88,7 @@ const DoesUnplayedGameExistQuery = `
 		ELSE false
 	END AS DoesExist`
 
-func (db *Database) DoesUnplayedGameExistCommand(userId int, gameName string) (doesExist bool, err error) {
+func (db *Database) DoesWishlistGameExistCommand(userId int, gameName string) (doesExist bool, err error) {
 	row := dbaccess.QueryRow(DoesUnplayedGameExistQuery, userId, gameName)
 
 	err = row.Scan(&doesExist)
@@ -85,7 +101,7 @@ const CreateUnplayedGameQuery = `
 	VALUES (?, ?)
 `
 
-func (db *Database) CreateUnplayedGameCommand(userId int, gameId int) error {
+func (db *Database) CreateWishlistGameCommand(userId int, gameId int) error {
 	_, err := dbaccess.Exec(
 		CreateUnplayedGameQuery,
 		userId,

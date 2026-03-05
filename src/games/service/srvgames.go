@@ -12,60 +12,40 @@ import (
 )
 
 type Service struct {
-	Database     dbgames.Database
+	Database     dbgames.IDatabase
 	TimerService srvtimers.Service
 }
 
-func (s *Service) AddUnplayedGames(userId int, games typegames.WishlistGames) error {
-	numberOfGames := len(games)
-	errorCount := 0
-
-	var err error
-	for _, game := range games {
-		err = s.CreateUnplayedGame(userId, game)
-
-		if err != nil {
-			errorCount++
-		}
-	}
-
-	if errorCount == numberOfGames {
-		return err
-	}
-
-	return nil
-}
-
-func (s *Service) CreateUnplayedGame(userId int, unplayedGame typegames.WishlistGame) error {
-	doesExist, err := s.Database.DoesUnplayedGameExistCommand(userId, unplayedGame.Name)
+func (s *Service) AddWishlistGame(userId int, wishlistGame typegames.WishlistGame) error {
+	doesExist, err := s.Database.DoesWishlistGameExistCommand(userId, wishlistGame.Name)
 
 	if err != nil {
 		return err
 	}
 
 	if doesExist {
-		return common.NewUnplayedGameAlreadyExistsError(unplayedGame.Name)
+		return common.NewWishlistGameAlreadyExistsError(wishlistGame.Name)
 	}
 
-	doesExist, err = s.Database.DoesGameExistCommand(unplayedGame.Name)
+	doesExist, err = s.Database.DoesGameExistCommand(wishlistGame.Name)
 
 	if err != nil {
 		return err
 	}
 
-	game := typegames.CurrentGame{}
+	game := typegames.WishlistGame{}
 
 	if doesExist {
-		game, err = s.Database.GetGameCommand(unplayedGame.Name)
+		game, err = s.Database.GetWishlistGameCommand(wishlistGame.Name)
 	} else {
-		game, err = s.createGame(unplayedGame)
+		game, err = s.createAndGetGame(wishlistGame)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	err = s.Database.CreateUnplayedGameCommand(userId, game.Id)
+	err = s.Database.CreateWishlistGameCommand(userId, game.GameId)
 
 	return err
 }
@@ -74,14 +54,14 @@ func (s *Service) GetUnplayedGames(userId int) (typegames.WishlistGames, error) 
 	return s.Database.GetUnplayedGamesCommand(userId)
 }
 
-func (s *Service) createGame(unplayedGame typegames.WishlistGame) (game typegames.CurrentGame, err error) {
-	err = s.Database.CreateGameCommand(unplayedGame.Name)
+func (s *Service) createAndGetGame(wishlistGame typegames.WishlistGame) (game typegames.WishlistGame, err error) {
+	err = s.Database.CreateGameCommand(wishlistGame.Name)
 
 	if err != nil {
 		return
 	}
 
-	game, err = s.Database.GetGameCommand(unplayedGame.Name)
+	game, err = s.Database.GetWishlistGameCommand(wishlistGame.Name)
 
 	return
 }
