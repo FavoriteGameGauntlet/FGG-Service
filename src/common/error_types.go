@@ -141,7 +141,7 @@ func NewCurrentTimerIncorrectStateError(timerState typetimers.TimerStateType) er
 	}
 }
 
-func NewUnplayedGameAlreadyExistsError(gameName string) error {
+func NewWishlistGameAlreadyExistsError(gameName string) error {
 	message := fmt.Sprintf(
 		"The unplayed game \"%s\" has already been added.",
 		gameName)

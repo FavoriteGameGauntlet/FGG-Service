@@ -186,7 +186,7 @@ func (c *Controller) AddUserWishlistGame(ctx echo.Context, _ gengames.Login) err
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	err = c.Service.CreateUnplayedGame(userId, game)
+	err = c.Service.AddWishlistGame(userId, game)
 
 	if err != nil {
 		return common.SendJSONErrorResponse(ctx, err)
