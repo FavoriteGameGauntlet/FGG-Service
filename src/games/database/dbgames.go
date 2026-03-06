@@ -302,5 +302,14 @@ const GetAllCurrentGameQuery = `
 		g.Id,
 		g.Name,
 		gh.State
+		gh.UserID
 	FROM GameHistory gh
+		INNER JOIN Games g ON gh.GameId = g.Id
+	WHERE g.State IN (?, ?)
 `
+
+func (db *Database) GetAllCurrentGameCommand(userId int) (games typegames.CurrentGames, err error) {
+	games, err = db.getHistoryGames(userId, GetAllCurrentGameQuery)
+
+	return
+}
