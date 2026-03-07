@@ -44,3 +44,7 @@ func (s *Service) MakeEffectRoll(userId int) (effects typewheeleffects.WheelEffe
 
 	return
 }
+
+func (s *Service) GetLastRolledWheelEffects(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
+	return s.Database.GetLastRolledWheelEffectsCommand(userId)
+}

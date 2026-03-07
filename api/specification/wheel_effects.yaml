@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.10.0
+  version: 0.11.0
 paths:
   /wheel-effects/{login}/history:
     get:
@@ -61,6 +61,20 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
+  /wheel-effects/available/roll/last:
+    get:
+      operationId: getLastRolledWheelEffects
+      tags:
+        - WheelEffects
+      responses:
+        '200':
+          $ref: '#/components/responses/RolledWheelEffectsResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /wheel-effects/available/roll/apply:
     post:
       operationId: applyAvailableWheelEffectRoll
@@ -111,6 +125,8 @@ components:
             rollDate:
               type: string
               format: date-time
+            isApplied:
+              type: boolean
           required:
             - rollDate
     RolledWheelEffects:
