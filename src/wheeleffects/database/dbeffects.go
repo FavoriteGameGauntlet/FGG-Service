@@ -162,3 +162,51 @@ func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
 
 	return err
 }
+
+const GetLastRolledWheelEffectsQuery = `
+	SELECT we.Id, we.Name, we.Description, lwe.RollDate, lwe.Position, lwe.IsApplied
+	FROM LastWheelEffects lwe
+		INNER JOIN WheelEffects we ON we.Id = lwe.WheelEffectId
+	WHERE lwe.UserId = ?
+`
+
+func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
+	rows, err := dbaccess.Query(GetLastRolledWheelEffectsQuery, userId)
+
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		effect := typewheeleffects.RolledWheelEffect{}
+
+		var rollDateString string
+		err = rows.Scan(
+			&effect.Id,
+			&effect.Name,
+			&effect.Description,
+			&rollDateString,
+			&effect.Position,
+			&effect.IsApplied)
+
+		if err != nil {
+			_ = rows.Close()
+			return
+		}
+
+		var rollDate time.Time
+		rollDate, err = dbaccess.ConvertToDate(rollDateString)
+
+		if err != nil {
+			_ = rows.Close()
+			return
+		}
+
+		effect.RollDate = rollDate
+
+		effects = append(effects, effect)
+	}
+
+	_ = rows.Close()
+	return
+}

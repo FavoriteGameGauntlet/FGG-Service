@@ -15,5 +15,8 @@ paths:
   /wheel-effects/available/roll/count:
     $ref: "../paths/wheel-effects/available/roll/count.yaml"
 
+  /wheel-effects/available/roll/last:
+    $ref: "../paths/wheel-effects/available/roll/last.yaml"
+
   /wheel-effects/available/roll/apply:
     $ref: "../paths/wheel-effects/available/roll/apply.yaml"
