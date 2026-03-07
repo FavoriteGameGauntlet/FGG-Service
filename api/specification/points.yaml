@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.10.0
+  version: 0.11.0
 paths:
   /points/{login}/info:
     get:
