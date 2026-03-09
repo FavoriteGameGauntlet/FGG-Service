@@ -77,8 +77,7 @@ func ValidateEmail(email string) error {
 	return nil
 }
 
-var passwordLetterRegex = regexp.MustCompile(`\w`)
-var passwordDigitRegex = regexp.MustCompile(`\d`)
+var passwordLetterRegex = regexp.MustCompile(`^[\w\d !"#$%&'()*+,-.=/:;<?>@\[\\\]^_|{}~]+$`)
 
 func ValidatePassword(password string) error {
 	if len(password) < 8 {
@@ -93,12 +92,7 @@ func ValidatePassword(password string) error {
 
 	if !passwordLetterRegex.MatchString(password) {
 		return common.NewPasswordUnprocessableError(
-			"The password doesn't contain letters.")
-	}
-
-	if !passwordDigitRegex.MatchString(password) {
-		return common.NewPasswordUnprocessableError(
-			"The password doesn't contain digits.")
+			"The password must contain only Latin letters, numbers, and special symbols ( !\"#$%&'()*+,-./:;<=>?@[]\\^_{|}~).")
 	}
 
 	return nil

@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.11.2
+  version: 0.11.3
 paths:
   /auth/signup:
     post:
@@ -74,7 +74,7 @@ components:
       maxLength: 35
     Password:
       type: string
-      pattern: ^(?=.*\w)(?=.*\d).+$
+      pattern: ^[\w\d !"#$%&'()*+,-.=/:;<?>@[\]^_|{}~]+$
       minLength: 8
       maxLength: 35
     SignupUser:
@@ -118,7 +118,7 @@ components:
             $ref: '#/components/schemas/SignupUser'
   responses:
     ErrorResponse:
-      description: Error
+      description: Error.
       content:
         application/json:
           schema:
