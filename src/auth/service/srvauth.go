@@ -99,6 +99,12 @@ func (s *Service) CreateUser(login string, email string, password string) error 
 
 	err = s.Database.CreateUserCommand(login, email, password)
 
+	if err != nil {
+		return err
+	}
+
+	err = s.Database.CreateUserStatsCommand(login)
+
 	return err
 }
 
