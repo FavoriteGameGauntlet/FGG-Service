@@ -64,6 +64,17 @@ func (db *Database) CreateUserCommand(login string, email string, password strin
 	return err
 }
 
+const CreateUserStatsQuery = `
+	INSERT INTO UserStats (UserId)
+	SELECT Id FROM Users WHERE Login = ?
+`
+
+func (db *Database) CreateUserStatsCommand(login string) error {
+	_, err := dbaccess.Exec(CreateUserStatsQuery, login)
+
+	return err
+}
+
 const GetUserSessionByIdQuery = `
 	SELECT Id, UserId
 	FROM UserSessions
