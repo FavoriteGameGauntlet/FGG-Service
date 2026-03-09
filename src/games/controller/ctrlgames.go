@@ -210,7 +210,7 @@ func (c *Controller) GetAllCurrentGame(ctx echo.Context) error {
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	game, err := c.Service.GetCurrentGame(userId)
+	game, err := c.Service.GetAllCurrentGame(userId)
 
 	if err != nil {
 		return common.SendJSONErrorResponse(ctx, err)
@@ -219,5 +219,4 @@ func (c *Controller) GetAllCurrentGame(ctx echo.Context) error {
 	gameDto := convertGameToDto(game)
 
 	return ctx.JSON(http.StatusOK, gameDto)
-	//return ctx.NoContent(http.StatusNotImplemented)
 }
