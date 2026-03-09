@@ -77,7 +77,7 @@ func (s *Service) GetUserId(ctx echo.Context) (userId int, err error) {
 }
 
 func (s *Service) CreateUser(login string, email string, password string) error {
-	user, err := s.Database.GetUserByNameCommand(login)
+	user, err := s.Database.GetUserByLoginCommand(login)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err
@@ -129,4 +129,20 @@ func (s *Service) DeleteUserSession(userSessionId string) error {
 	err := s.Database.DeleteUserSessionCommand(userSessionId)
 
 	return err
+}
+
+func (s *Service) GetUserIdByLogin(userLogin string) (userId int, err error) {
+	user, err := s.Database.GetUserByLoginCommand(userLogin)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = common.NewUserLoginNotFoundError(userLogin)
+		return
+	}
+
+	if err != nil {
+		return
+	}
+
+	userId = user.Id
+	return
 }

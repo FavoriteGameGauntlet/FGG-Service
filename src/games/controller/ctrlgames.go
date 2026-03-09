@@ -18,7 +18,10 @@ type Controller struct {
 }
 
 func NewController() *Controller {
-	return new(Controller)
+	return &Controller{
+		Service:     srvgames.NewService(),
+		AuthService: srvauth.Service{},
+	}
 }
 
 // GetUserCurrentGame (GET /games/{login}/current)
@@ -103,8 +106,19 @@ func (c *Controller) RollNewCurrentGame(ctx echo.Context) error {
 }
 
 // GetUserGameHistory (GET /games/{login}/history)
-func (c *Controller) GetUserGameHistory(ctx echo.Context, _ gengames.Login) error {
-	userId, err := c.AuthService.GetUserId(ctx)
+func (c *Controller) GetUserGameHistory(ctx echo.Context, login gengames.Login) error {
+	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	if !doesExist {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserIdByLogin(login)
 
 	if err != nil {
 		return common.SendJSONErrorResponse(ctx, err)

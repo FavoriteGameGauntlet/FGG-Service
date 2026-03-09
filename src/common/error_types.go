@@ -115,6 +115,19 @@ func NewAvailableRollsNotFoundError() error {
 	}
 }
 
+func NewUserLoginNotFoundError(userLogin string) error {
+	message := fmt.Sprintf(
+		"The user login \"%s\" wasn't found.",
+		userLogin)
+
+	return &NotFoundError{
+		&BaseError{
+			Code:    "USER_LOGIN_NOT_FOUND",
+			Message: message,
+		},
+	}
+}
+
 type ConflictError struct {
 	*BaseError
 }
