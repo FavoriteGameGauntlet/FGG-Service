@@ -10,14 +10,14 @@ import (
 type Database struct {
 }
 
-const GetUserByNameQuery = `
+const GetUserByLoginQuery = `
 	SELECT Id, Login, DisplayName, Email
 	FROM Users
 	WHERE Login = ?
 `
 
-func (db *Database) GetUserByNameCommand(userName string) (user typeauth.User, err error) {
-	row := dbaccess.QueryRow(GetUserByNameQuery, userName)
+func (db *Database) GetUserByLoginCommand(userLogin string) (user typeauth.User, err error) {
+	row := dbaccess.QueryRow(GetUserByLoginQuery, userLogin)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
 

@@ -16,6 +16,13 @@ type Service struct {
 	TimerService srvtimers.Service
 }
 
+func NewService() Service {
+	return Service{
+		Database:     new(dbgames.Database),
+		TimerService: srvtimers.Service{},
+	}
+}
+
 func (s *Service) AddWishlistGame(userId int, wishlistGame typegames.WishlistGame) error {
 	doesExist, err := s.Database.DoesWishlistGameExistCommand(userId, wishlistGame.Name)
 
