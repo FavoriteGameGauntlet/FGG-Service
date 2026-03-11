@@ -222,30 +222,17 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 	return
 }
 
-func (s *Service) GetAllCurrentGame(userId int) (game typegames.CurrentGame, err error) {
-	games, err := s.Database.GetAllCurrentGameCommand(userId)
+func (s *Service) GetAllCurrentGame() (game typegames.CurrentGames, err error) {
+	games, err := s.Database.GetAllCurrentGameCommand()
 
 	if errors.Is(err, sql.ErrNoRows) || len(games) == 0 {
-		err = common.NewCurrentGameNotFoundError() // вот тут я хз че происходит и надо ли оно нам вообще
+		err = common.NewCurrentGameNotFoundError()
 		return
 	}
 
 	if err != nil {
 		return
 	}
-	// и вот тут тоже хз, немного интеллекта не хватает
-
-	//game = games[0]
-	// надо ли вот эту строчку
-	//timeSpent, err := s.Database.GetGameTimeSpentCommand(userId, game.Id)
-
-	/*
-		if err != nil {
-			return
-		}
-	*/
-
-	//game.TimeSpent = timeSpent
 
 	return
 }

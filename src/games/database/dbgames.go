@@ -301,15 +301,44 @@ const GetAllCurrentGameQuery = `
 	SELECT
 		g.Id,
 		g.Name,
-		gh.State
+		gh.State,
 		gh.UserID
 	FROM GameHistory gh
 		INNER JOIN Games g ON gh.GameId = g.Id
-	WHERE g.State IN (?, ?)
+	WHERE gh.State NOT IN (?, ?)
 `
 
-func (db *Database) GetAllCurrentGameCommand(userId int) (games typegames.CurrentGames, err error) {
-	games, err = db.getHistoryGames(userId, GetAllCurrentGameQuery)
+func (db *Database) GetAllCurrentGameCommand() (games typegames.CurrentGames, err error) {
+	rows, err := dbaccess.Query(GetAllCurrentGameQuery, typegames.GameStateFinished, typegames.GameStateCancelled)
+
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		game := typegames.CurrentGame{}
+		var finishDateString *string
+		err = rows.Scan(&game.Id, &game.Name, &game.State, &finishDateString)
+
+		if err != nil {
+			_ = rows.Close()
+			return
+		}
+
+		var finishDate *time.Time
+		finishDate, err = dbaccess.ConvertToNullableDate(finishDateString)
+
+		if err != nil {
+			_ = rows.Close()
+			return
+		}
+
+		game.FinishDate = finishDate
+
+		games = append(games, game)
+	}
+
+	_ = rows.Close()
 
 	return
 }

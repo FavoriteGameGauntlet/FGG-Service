@@ -203,20 +203,11 @@ func convertWishlistGameFromDto(gameDto gengames.WishlistGame) typegames.Wishlis
 
 // GetAllCurrentGame (GET /games/all/current)
 func (c *Controller) GetAllCurrentGame(ctx echo.Context) error {
-
-	userId, err := c.AuthService.GetUserId(ctx)
-
-	if err != nil {
-		return common.SendJSONErrorResponse(ctx, err)
-	}
-
-	game, err := c.Service.GetAllCurrentGame(userId)
+	games, err := c.Service.GetAllCurrentGame()
 
 	if err != nil {
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	gameDto := convertGameToDto(game)
-
-	return ctx.JSON(http.StatusOK, gameDto)
+	return ctx.JSON(http.StatusOK, games)
 }
