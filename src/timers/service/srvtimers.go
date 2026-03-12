@@ -76,16 +76,16 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, e
 		return
 	}
 
-	count, err := s.WheelEffectsDatabase.GetAvailableRollsCountCommand(userId)
+	_, err = s.WheelEffectsDatabase.GetAvailableRollsCountCommand(userId)
 
 	if err != nil {
 		return
 	}
 
-	if count > 0 {
-		err = common.NewAvailableRollsExistError()
-		return
-	}
+	//if count > 0 {
+	//	err = common.NewAvailableRollsExistError()
+	//	return
+	//}
 
 	err = s.Database.CreateCurrentTimerCommand(userId, game.Id)
 
