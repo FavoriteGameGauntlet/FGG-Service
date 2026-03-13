@@ -18,6 +18,8 @@ func Init() {
 		panic(err)
 	}
 
+	db.SetMaxOpenConns(1)
+
 	err = db.Ping()
 
 	if err != nil {

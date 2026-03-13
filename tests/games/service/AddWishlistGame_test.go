@@ -26,7 +26,7 @@ func TestSrvGames_AddWishlistGame_AlreadyExists(test *testing.T) {
 		test.Fatalf("No error found")
 	}
 
-	if errors.Is(err, common.NewWishlistGameAlreadyExistsError(wishlistGame.Name)) {
+	if errors.Is(err, common.NewWishlistGameAlreadyExistsConflictError(wishlistGame.Name)) {
 		test.Fatalf("Unexpected error: %v", err)
 	}
 

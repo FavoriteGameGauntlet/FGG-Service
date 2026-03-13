@@ -84,7 +84,7 @@ func (s *Service) CreateUser(login string, email string, password string) error 
 	}
 
 	if user.Login != "" {
-		return common.NewUserNameAlreadyExistsError()
+		return common.NewUserNameAlreadyExistsConflictError()
 	}
 
 	user, err = s.Database.GetUserByEmailCommand(email)
@@ -94,7 +94,7 @@ func (s *Service) CreateUser(login string, email string, password string) error 
 	}
 
 	if user.Email != "" {
-		return common.NewUserEmailAlreadyExistsError()
+		return common.NewUserEmailAlreadyExistsConflictError()
 	}
 
 	err = s.Database.CreateUserCommand(login, email, password)

@@ -40,11 +40,23 @@ func (s *Service) MakeEffectRoll(userId int) (effects typewheeleffects.WheelEffe
 		return
 	}
 
+	if len(effects) < 5 {
+		err = common.NewNotEnoughAvailableWheelEffectsConflictError()
+		return
+	}
+
 	err = s.Database.DecreaseAvailableRollsValueCommand(userId)
 
 	return
 }
 
 func (s *Service) GetLastRolledWheelEffects(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
-	return s.Database.GetLastRolledWheelEffectsCommand(userId)
+	effects, err = s.Database.GetLastRolledWheelEffectsCommand(userId)
+
+	if err == nil && len(effects) == 0 {
+		err = common.NewLastWheelEffectsNotFoundError()
+		return
+	}
+
+	return
 }

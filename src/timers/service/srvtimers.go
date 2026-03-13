@@ -83,7 +83,7 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, e
 	}
 
 	//if count > 0 {
-	//	err = common.NewAvailableRollsExistError()
+	//	err = common.NewAvailableRollsExistConflictError()
 	//	return
 	//}
 
@@ -164,7 +164,7 @@ func (s *Service) actCurrentTimer(
 
 	for _, state := range incorrectStates {
 		if timer.State == state {
-			err = common.NewCurrentTimerIncorrectStateError(timer.State)
+			err = common.NewCurrentTimerIncorrectStateConflictError(timer.State)
 			return
 		}
 	}
