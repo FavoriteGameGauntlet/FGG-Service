@@ -31,7 +31,7 @@ func (s *Service) AddWishlistGame(userId int, wishlistGame typegames.WishlistGam
 	}
 
 	if doesExist {
-		return common.NewWishlistGameAlreadyExistsError(wishlistGame.Name)
+		return common.NewWishlistGameAlreadyExistsConflictError(wishlistGame.Name)
 	}
 
 	doesExist, err = s.Database.DoesGameExistCommand(wishlistGame.Name)
@@ -172,7 +172,7 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 	}
 
 	if game.Name != "" {
-		err = common.NewCurrentGameAlreadyExistsError()
+		err = common.NewCurrentGameAlreadyExistsConflictError()
 		return
 	}
 
