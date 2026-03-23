@@ -201,7 +201,7 @@ func convertWishlistGameFromDto(gameDto gengames.WishlistGame) typegames.Wishlis
 	}
 }
 
-// GetAllCurrentGame (GET /games/all/current)
+// GetAllCurrentGame (GET /games/all/current) аыв
 func (c *Controller) GetAllCurrentGame(ctx echo.Context) error {
 	games, err := c.Service.GetAllCurrentGame()
 
