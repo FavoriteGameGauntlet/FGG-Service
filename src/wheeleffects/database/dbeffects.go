@@ -18,7 +18,8 @@ const GetAvailableRollsCountQuery = `
 `
 
 func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err error) {
-	row := dbaccess.QueryRow("GetAvailableRollsCountQuery", GetAvailableRollsCountQuery, userId)
+	queryName := "GetAvailableRollsCountQuery"
+	row := dbaccess.QueryRow(queryName, GetAvailableRollsCountQuery, userId)
 
 	err = row.Scan(&count)
 
@@ -26,6 +27,8 @@ func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err er
 		count = 0
 		err = nil
 	}
+
+	dbaccess.LogDbResult(queryName, count, err)
 
 	return
 }
@@ -47,10 +50,11 @@ const GetAvailableEffectsQuery = `
 `
 
 func (db *Database) GetAvailableEffectsCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
-	rows, err := dbaccess.Query("GetAvailableEffectsQuery", GetAvailableEffectsQuery, userId, userId)
+	queryName := "GetAvailableEffectsQuery"
+	rows, err := dbaccess.Query(queryName, GetAvailableEffectsQuery, userId, userId)
 
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	for rows.Next() {
@@ -58,12 +62,16 @@ func (db *Database) GetAvailableEffectsCommand(userId int) (effects typewheeleff
 		err = rows.Scan(&effect.Id, &effect.Name, &effect.Description)
 
 		if err != nil {
+			dbaccess.LogDbResult(queryName, effects, err)
+
 			_ = rows.Close()
 			return
 		}
 
 		effects = append(effects, effect)
 	}
+
+	dbaccess.LogDbResult(queryName, effects, err)
 
 	_ = rows.Close()
 	return
@@ -77,7 +85,8 @@ const GetEffectHistoryQuery = `
 `
 
 func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
-	rows, err := dbaccess.Query("GetEffectHistoryQuery", GetEffectHistoryQuery, userId)
+	queryName := "GetEffectHistoryQuery"
+	rows, err := dbaccess.Query(queryName, GetEffectHistoryQuery, userId)
 
 	if err != nil {
 		return
@@ -89,6 +98,8 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffect
 		err = rows.Scan(&effect.Name, &effect.Description, &rollDateString)
 
 		if err != nil {
+			dbaccess.LogDbResult(queryName, effects, err)
+
 			_ = rows.Close()
 			return
 		}
@@ -97,6 +108,8 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffect
 		rollDate, err = dbaccess.ConvertToDate(rollDateString)
 
 		if err != nil {
+			dbaccess.LogDbResult(queryName, effects, err)
+
 			_ = rows.Close()
 			return
 		}
@@ -105,6 +118,8 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffect
 
 		effects = append(effects, effect)
 	}
+
+	dbaccess.LogDbResult(queryName, effects, err)
 
 	_ = rows.Close()
 	return
@@ -129,7 +144,8 @@ const MakeEffectRollQuery = `
 `
 
 func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
-	rows, err := dbaccess.Query("MakeEffectRollQuery", MakeEffectRollQuery, userId)
+	queryName := "MakeEffectRollQuery"
+	rows, err := dbaccess.Query(queryName, MakeEffectRollQuery, userId)
 
 	if err != nil {
 		return
@@ -140,12 +156,16 @@ func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.
 		err = rows.Scan(&effect.Id, &effect.Name, &effect.Description)
 
 		if err != nil {
+			dbaccess.LogDbResult(queryName, effects, err)
+
 			_ = rows.Close()
 			return
 		}
 
 		effects = append(effects, effect)
 	}
+
+	dbaccess.LogDbResult(queryName, effects, err)
 
 	_ = rows.Close()
 	return
@@ -158,7 +178,10 @@ const DecreaseAvailableRollsValueQuery = `
 `
 
 func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
-	_, err := dbaccess.Exec("DecreaseAvailableRollsValueQuery", DecreaseAvailableRollsValueQuery, userId)
+	queryName := "DecreaseAvailableRollsValueQuery"
+	_, err := dbaccess.Exec(queryName, DecreaseAvailableRollsValueQuery, userId)
+
+	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
@@ -171,7 +194,8 @@ const GetLastRolledWheelEffectsQuery = `
 `
 
 func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
-	rows, err := dbaccess.Query("GetLastRolledWheelEffectsQuery", GetLastRolledWheelEffectsQuery, userId)
+	queryName := "GetLastRolledWheelEffectsQuery"
+	rows, err := dbaccess.Query(queryName, GetLastRolledWheelEffectsQuery, userId)
 
 	if err != nil {
 		return
@@ -190,6 +214,8 @@ func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewh
 			&effect.IsApplied)
 
 		if err != nil {
+			dbaccess.LogDbResult(queryName, effects, err)
+
 			_ = rows.Close()
 			return
 		}
@@ -198,6 +224,8 @@ func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewh
 		rollDate, err = dbaccess.ConvertToDate(rollDateString)
 
 		if err != nil {
+			dbaccess.LogDbResult(queryName, effects, err)
+
 			_ = rows.Close()
 			return
 		}
@@ -206,6 +234,8 @@ func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewh
 
 		effects = append(effects, effect)
 	}
+
+	dbaccess.LogDbResult(queryName, effects, err)
 
 	_ = rows.Close()
 	return

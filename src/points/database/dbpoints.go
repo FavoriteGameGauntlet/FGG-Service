@@ -12,7 +12,10 @@ const IncreaseAvailableRollsQuery = `
 `
 
 func (db *Database) IncreaseAvailableRollsCommand(userId int) error {
-	_, err := dbaccess.Exec("IncreaseAvailableRollsQuery", IncreaseAvailableRollsQuery, userId)
+	queryName := "IncreaseAvailableRollsQuery"
+	_, err := dbaccess.Exec(queryName, IncreaseAvailableRollsQuery, userId)
+
+	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
@@ -24,7 +27,10 @@ const IncreaseTerritoryHoursQuery = `
 `
 
 func (db *Database) IncreaseTerritoryHoursCommand(userId int, changeValue int) error {
-	_, err := dbaccess.Exec("IncreaseTerritoryHoursQuery", IncreaseTerritoryHoursQuery, changeValue, userId)
+	queryName := "IncreaseTerritoryHoursQuery"
+	_, err := dbaccess.Exec(queryName, IncreaseTerritoryHoursQuery, changeValue, userId)
+
+	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
@@ -36,7 +42,10 @@ const IncreaseExperiencePointsQuery = `
 `
 
 func (db *Database) IncreaseExperiencePointsCommand(userId int, changeValue int) error {
-	_, err := dbaccess.Exec("IncreaseExperiencePointsQuery", IncreaseExperiencePointsQuery, changeValue, userId)
+	queryName := "IncreaseExperiencePointsQuery"
+	_, err := dbaccess.Exec(queryName, IncreaseExperiencePointsQuery, changeValue, userId)
+
+	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }

@@ -1,6 +1,7 @@
 package dbaccess
 
 import (
+	typeauth "FGG-Service/src/auth/types"
 	"database/sql"
 	"log/slog"
 
@@ -45,9 +46,13 @@ func Init() func() {
 }
 
 func Exec(queryName string, query string, args ...any) (sql.Result, error) {
-	slog.Info(queryName, "args", args)
+	queryArgs, logArgs := getArgs(args...)
 
-	result, err := db.Exec(query, args...)
+	if queryName != "GetCompletedTimerUsersQuery" {
+		slog.Info(queryName, "args", logArgs)
+	}
+
+	result, err := db.Exec(query, queryArgs...)
 
 	if err != nil {
 		slog.Error(queryName, "error", err)
@@ -57,9 +62,13 @@ func Exec(queryName string, query string, args ...any) (sql.Result, error) {
 }
 
 func Query(queryName string, query string, args ...any) (*sql.Rows, error) {
-	slog.Info(queryName, "args", args)
+	queryArgs, logArgs := getArgs(args...)
 
-	rows, err := db.Query(query, args...)
+	if queryName != "GetCompletedTimerUsersQuery" {
+		slog.Info(queryName, "args", logArgs)
+	}
+
+	rows, err := db.Query(query, queryArgs...)
 
 	if err != nil {
 		slog.Error(queryName, "error", err)
@@ -69,7 +78,28 @@ func Query(queryName string, query string, args ...any) (*sql.Rows, error) {
 }
 
 func QueryRow(queryName string, query string, args ...any) *sql.Row {
-	slog.Info(queryName, "args", args)
+	queryArgs, logArgs := getArgs(args...)
 
-	return db.QueryRow(query, args...)
+	if queryName != "GetCompletedTimerUsersQuery" {
+		slog.Info(queryName, "args", logArgs)
+	}
+
+	return db.QueryRow(query, queryArgs...)
+}
+
+func getArgs(args ...any) ([]any, []any) {
+	logArgs := make([]any, len(args))
+	queryArgs := make([]any, len(args))
+
+	for i, arg := range args {
+		if p, ok := arg.(typeauth.Password); ok {
+			logArgs[i] = "***"
+			queryArgs[i] = p.Value
+		} else {
+			logArgs[i] = arg
+			queryArgs[i] = arg
+		}
+	}
+
+	return queryArgs, logArgs
 }

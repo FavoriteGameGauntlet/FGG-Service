@@ -14,7 +14,10 @@ const ChangeDisplayNameQuery = `
 `
 
 func (db *Database) ChangeDisplayNameCommand(userId int, displayName string) error {
-	_, err := dbaccess.Exec("ChangeDisplayNameQuery", ChangeDisplayNameQuery, displayName, userId)
+	queryName := "ChangeDisplayNameQuery"
+	_, err := dbaccess.Exec(queryName, ChangeDisplayNameQuery, displayName, userId)
+
+	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
@@ -26,9 +29,12 @@ const GetDisplayNameQuery = `
 `
 
 func (db *Database) GetDisplayNameCommand(userId int) (displayName string, err error) {
-	row := dbaccess.QueryRow("GetDisplayNameQuery", GetDisplayNameQuery, userId)
+	queryName := "GetDisplayNameQuery"
+	row := dbaccess.QueryRow(queryName, GetDisplayNameQuery, userId)
 
 	err = row.Scan(&displayName)
+
+	dbaccess.LogDbResult(queryName, displayName, err)
 
 	return
 }

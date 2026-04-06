@@ -154,8 +154,6 @@ func (db *Database) GetUnplayedGamesCommand(userId int) (games typegames.Wishlis
 		err = rows.Scan(&game.Id, &game.GameId, &game.Name)
 
 		if err != nil {
-			dbaccess.LogDbResult(queryName, games, err)
-
 			_ = rows.Close()
 			return
 		}
@@ -196,7 +194,8 @@ const GetCurrentGameQuery = `
 `
 
 func (db *Database) GetCurrentGameCommand(userId int) (games typegames.CurrentGames, err error) {
-	games, err = db.getHistoryGames("GetCurrentGameQuery", GetCurrentGameQuery, userId)
+	queryName := "GetCurrentGameQuery"
+	games, err = db.getHistoryGames(queryName, GetCurrentGameQuery, userId)
 
 	return
 }
@@ -205,8 +204,6 @@ func (db *Database) getHistoryGames(queryName string, query string, userId int) 
 	rows, err := dbaccess.Query(queryName, query, userId, typegames.GameStateFinished, typegames.GameStateCancelled)
 
 	if err != nil {
-		dbaccess.LogDbResult(queryName, games, err)
-
 		return
 	}
 
