@@ -30,7 +30,19 @@ func (c *Controller) GetAllUserNames(ctx echo.Context) error {
 
 // GetDisplayName (GET /users/display-name)
 func (c *Controller) GetDisplayName(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	userId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	displayName, err := c.Service.GetDisplayName(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, displayName)
 }
 
 // ChangeDisplayName (POST /users/display-name)
