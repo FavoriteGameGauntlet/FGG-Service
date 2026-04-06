@@ -27,7 +27,9 @@ const GetCurrentTimerQuery = `
 `
 
 func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, err error) {
+	queryName := "GetCurrentTimerQuery"
 	row := dbaccess.QueryRow(
+		queryName,
 		GetCurrentTimerQuery,
 		typetimers.TimerStateRunning,
 		typetimers.TimerStatePaused,
@@ -47,18 +49,24 @@ func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, 
 	)
 
 	if err != nil {
+		dbaccess.LogDbResult(queryName, timer, err)
+
 		return
 	}
 
 	lastActionDate, err := dbaccess.ConvertToDate(lastActionDateString)
 
 	if err != nil {
+		dbaccess.LogDbResult(queryName, timer, err)
+
 		return
 	}
 
 	timer.Duration = time.Duration(durationInS) * time.Second
 	timer.LastActionDate = lastActionDate
 	timer.RemainingTime = time.Duration(remainingTimeInS) * time.Second
+
+	dbaccess.LogDbResult(queryName, timer, err)
 
 	return
 }
@@ -69,13 +77,17 @@ const CreateCurrentTimerQuery = `
 `
 
 func (db *Database) CreateCurrentTimerCommand(userId int, gameId int) error {
+	queryName := "CreateCurrentTimerQuery"
 	_, err := dbaccess.Exec(
+		queryName,
 		CreateCurrentTimerQuery,
 		userId,
 		gameId,
 		common.DefaultTimerDurationInS,
 		common.DefaultTimerDurationInS,
 	)
+
+	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
@@ -94,12 +106,16 @@ func (db *Database) ActTimerCommand(
 	timerState typetimers.TimerStateType,
 	remainingTime time.Duration) error {
 
+	queryName := "ActTimerQuery"
 	_, err := dbaccess.Exec(
+		queryName,
 		ActTimerQuery,
 		timerState,
 		remainingTime.Seconds(),
 		timerId,
 	)
+
+	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
@@ -116,7 +132,9 @@ const GetCompletedTimerUsersQuery = `
 `
 
 func (db *Database) GetCompletedTimerUsersCommand() (userIds []int, err error) {
+	queryName := "GetCompletedTimerUsersQuery"
 	rows, err := dbaccess.Query(
+		queryName,
 		GetCompletedTimerUsersQuery,
 		typetimers.TimerStateCreated,
 		typetimers.TimerStateFinished,
@@ -133,6 +151,8 @@ func (db *Database) GetCompletedTimerUsersCommand() (userIds []int, err error) {
 		err = rows.Scan(&userId)
 
 		if err != nil {
+			dbaccess.LogDbResult(queryName, userIds, err)
+
 			continue
 		}
 

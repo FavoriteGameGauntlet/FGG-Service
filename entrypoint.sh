@@ -2,6 +2,7 @@
 set -e
 
 mkdir -p /app/data
+mkdir -p /app/logs
 
 if [ ! -f /app/data/FGG.db ]; then
   sqlite3 /app/data/FGG.db < /app/src/dbaccess/FGG.sql
