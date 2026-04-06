@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.11.5
+  version: 0.12.0
 paths:
   /users/all/names:
     get:
@@ -21,7 +21,7 @@ paths:
       tags:
         - Users
       requestBody:
-        $ref: '#/components/requestBodies/NameRequest'
+        $ref: '#/components/requestBodies/ChangeNameRequest'
       responses:
         '204':
           description: Success.
@@ -79,6 +79,13 @@ components:
       required:
         - code
         - message
+    ChangeName:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+      required:
+        - name
   responses:
     UserNamesResponse:
       description: Success.
@@ -99,8 +106,8 @@ components:
           schema:
             $ref: '#/components/schemas/Name'
   requestBodies:
-    NameRequest:
+    ChangeNameRequest:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Name'
+            $ref: '#/components/schemas/ChangeName'
