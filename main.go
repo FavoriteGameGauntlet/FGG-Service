@@ -15,7 +15,9 @@ import (
 	ctrlusers "FGG-Service/src/users/controller"
 	ctrleffects "FGG-Service/src/wheeleffects/controller"
 	"embed"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -49,8 +51,11 @@ func main() {
 	addScalarRoutes(e)
 	fixCORS(e)
 
-	dbaccess.Init()
-	defer dbaccess.Close()
+	dbCloseFunc := dbaccess.Init()
+	defer dbCloseFunc()
+
+	closeFileFunc := CreateFileAndLogger()
+	defer closeFileFunc()
 
 	e.HideBanner = true
 	err := e.Start(":8080")
@@ -62,6 +67,23 @@ func main() {
 	defer func(e *echo.Echo) {
 		_ = e.Close()
 	}(e)
+}
+
+func CreateFileAndLogger() func() {
+	file, err := os.OpenFile("data/logs.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+
+	if err != nil {
+		panic(err)
+	}
+
+	handler := slog.NewJSONHandler(file, &slog.HandlerOptions{Level: slog.LevelDebug})
+	logger := slog.New(handler)
+
+	slog.SetDefault(logger)
+
+	return func() {
+		_ = file.Close()
+	}
 }
 
 func addScalarRoutes(e *echo.Echo) {

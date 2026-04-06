@@ -17,7 +17,7 @@ const GetUserByLoginQuery = `
 `
 
 func (db *Database) GetUserByLoginCommand(userLogin string) (user typeauth.User, err error) {
-	row := dbaccess.QueryRow(GetUserByLoginQuery, userLogin)
+	row := dbaccess.QueryRow("GetUserByLoginQuery", GetUserByLoginQuery, userLogin)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
 
@@ -31,7 +31,7 @@ const GetUserByEmailQuery = `
 `
 
 func (db *Database) GetUserByEmailCommand(userEmail string) (user typeauth.User, err error) {
-	row := dbaccess.QueryRow(GetUserByEmailQuery, userEmail)
+	row := dbaccess.QueryRow("GetUserByEmailQuery", GetUserByEmailQuery, userEmail)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
 
@@ -46,7 +46,7 @@ const GetUserByLoginAndPasswordQuery = `
 `
 
 func (db *Database) GetUserByLoginAndPasswordCommand(login string, password string) (user typeauth.User, err error) {
-	row := dbaccess.QueryRow(GetUserByLoginAndPasswordQuery, login, password)
+	row := dbaccess.QueryRow("GetUserByLoginAndPasswordQuery", GetUserByLoginAndPasswordQuery, login, password)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
 
@@ -59,7 +59,7 @@ const CreateUserQuery = `
 `
 
 func (db *Database) CreateUserCommand(login string, email string, password string) error {
-	_, err := dbaccess.Exec(CreateUserQuery, login, email, password)
+	_, err := dbaccess.Exec("CreateUserQuery", CreateUserQuery, login, email, password)
 
 	return err
 }
@@ -70,7 +70,7 @@ const CreateUserStatsQuery = `
 `
 
 func (db *Database) CreateUserStatsCommand(login string) error {
-	_, err := dbaccess.Exec(CreateUserStatsQuery, login)
+	_, err := dbaccess.Exec("CreateUserStatsQuery", CreateUserStatsQuery, login)
 
 	return err
 }
@@ -82,7 +82,7 @@ const GetUserSessionByIdQuery = `
 `
 
 func (db *Database) GetUserSessionByIdCommand(sessionId string) (userSession typeauth.UserSession, err error) {
-	row := dbaccess.QueryRow(GetUserSessionByIdQuery, sessionId)
+	row := dbaccess.QueryRow("GetUserSessionByIdQuery", GetUserSessionByIdQuery, sessionId)
 
 	err = row.Scan(&userSession.Id, &userSession.UserId)
 
@@ -97,7 +97,7 @@ const CreateUserSessionQuery = `
 func (db *Database) CreateUserSessionCommand(userId int) (userSession typeauth.UserSession, err error) {
 	sessionId := uuid.New().String()
 
-	_, err = dbaccess.Exec(CreateUserSessionQuery, sessionId, userId)
+	_, err = dbaccess.Exec("CreateUserSessionQuery", CreateUserSessionQuery, sessionId, userId)
 
 	if err != nil {
 		return
@@ -117,7 +117,7 @@ const DeleteUserSessionQuery = `
 `
 
 func (db *Database) DeleteUserSessionCommand(sessionId string) error {
-	_, err := dbaccess.Exec(DeleteUserSessionQuery, sessionId)
+	_, err := dbaccess.Exec("DeleteUserSessionQuery", DeleteUserSessionQuery, sessionId)
 
 	return err
 }

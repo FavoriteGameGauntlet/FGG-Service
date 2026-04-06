@@ -2,6 +2,7 @@ package dbaccess
 
 import (
 	"database/sql"
+	"log/slog"
 
 	_ "modernc.org/sqlite"
 )
@@ -10,7 +11,7 @@ var db *sql.DB
 
 const Path = "file:data/FGG.db"
 
-func Init() {
+func Init() func() {
 	var err error
 	db, err = sql.Open("sqlite", Path)
 
@@ -37,22 +38,38 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
-}
 
-func Close() {
-	if db != nil {
+	return func() {
 		_ = db.Close()
 	}
 }
 
-func Exec(query string, args ...any) (sql.Result, error) {
-	return db.Exec(query, args...)
+func Exec(queryName string, query string, args ...any) (sql.Result, error) {
+	slog.Info(queryName, "args", args)
+
+	result, err := db.Exec(query, args...)
+
+	if err != nil {
+		slog.Error(queryName, "error", err)
+	}
+
+	return result, err
 }
 
-func Query(query string, args ...any) (*sql.Rows, error) {
-	return db.Query(query, args...)
+func Query(queryName string, query string, args ...any) (*sql.Rows, error) {
+	slog.Info(queryName, "args", args)
+
+	rows, err := db.Query(query, args...)
+
+	if err != nil {
+		slog.Error(queryName, "error", err)
+	}
+
+	return rows, err
 }
 
-func QueryRow(query string, args ...any) *sql.Row {
+func QueryRow(queryName string, query string, args ...any) *sql.Row {
+	slog.Info(queryName, "args", args)
+
 	return db.QueryRow(query, args...)
 }

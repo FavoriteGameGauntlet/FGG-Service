@@ -18,7 +18,7 @@ const GetAvailableRollsCountQuery = `
 `
 
 func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err error) {
-	row := dbaccess.QueryRow(GetAvailableRollsCountQuery, userId)
+	row := dbaccess.QueryRow("GetAvailableRollsCountQuery", GetAvailableRollsCountQuery, userId)
 
 	err = row.Scan(&count)
 
@@ -47,7 +47,7 @@ const GetAvailableEffectsQuery = `
 `
 
 func (db *Database) GetAvailableEffectsCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
-	rows, err := dbaccess.Query(GetAvailableEffectsQuery, userId, userId)
+	rows, err := dbaccess.Query("GetAvailableEffectsQuery", GetAvailableEffectsQuery, userId, userId)
 
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ const GetEffectHistoryQuery = `
 `
 
 func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
-	rows, err := dbaccess.Query(GetEffectHistoryQuery, userId)
+	rows, err := dbaccess.Query("GetEffectHistoryQuery", GetEffectHistoryQuery, userId)
 
 	if err != nil {
 		return
@@ -129,7 +129,7 @@ const MakeEffectRollQuery = `
 `
 
 func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
-	rows, err := dbaccess.Query(MakeEffectRollQuery, userId)
+	rows, err := dbaccess.Query("MakeEffectRollQuery", MakeEffectRollQuery, userId)
 
 	if err != nil {
 		return
@@ -158,7 +158,7 @@ const DecreaseAvailableRollsValueQuery = `
 `
 
 func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
-	_, err := dbaccess.Exec(DecreaseAvailableRollsValueQuery, userId)
+	_, err := dbaccess.Exec("DecreaseAvailableRollsValueQuery", DecreaseAvailableRollsValueQuery, userId)
 
 	return err
 }
@@ -171,7 +171,7 @@ const GetLastRolledWheelEffectsQuery = `
 `
 
 func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
-	rows, err := dbaccess.Query(GetLastRolledWheelEffectsQuery, userId)
+	rows, err := dbaccess.Query("GetLastRolledWheelEffectsQuery", GetLastRolledWheelEffectsQuery, userId)
 
 	if err != nil {
 		return

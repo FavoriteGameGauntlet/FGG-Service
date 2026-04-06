@@ -28,6 +28,7 @@ const GetCurrentTimerQuery = `
 
 func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, err error) {
 	row := dbaccess.QueryRow(
+		"GetCurrentTimerQuery",
 		GetCurrentTimerQuery,
 		typetimers.TimerStateRunning,
 		typetimers.TimerStatePaused,
@@ -70,6 +71,7 @@ const CreateCurrentTimerQuery = `
 
 func (db *Database) CreateCurrentTimerCommand(userId int, gameId int) error {
 	_, err := dbaccess.Exec(
+		"CreateCurrentTimerQuery",
 		CreateCurrentTimerQuery,
 		userId,
 		gameId,
@@ -95,6 +97,7 @@ func (db *Database) ActTimerCommand(
 	remainingTime time.Duration) error {
 
 	_, err := dbaccess.Exec(
+		"ActTimerQuery",
 		ActTimerQuery,
 		timerState,
 		remainingTime.Seconds(),
@@ -117,6 +120,7 @@ const GetCompletedTimerUsersQuery = `
 
 func (db *Database) GetCompletedTimerUsersCommand() (userIds []int, err error) {
 	rows, err := dbaccess.Query(
+		"GetCompletedTimerUsersQuery",
 		GetCompletedTimerUsersQuery,
 		typetimers.TimerStateCreated,
 		typetimers.TimerStateFinished,

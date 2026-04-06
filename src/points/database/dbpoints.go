@@ -12,7 +12,7 @@ const IncreaseAvailableRollsQuery = `
 `
 
 func (db *Database) IncreaseAvailableRollsCommand(userId int) error {
-	_, err := dbaccess.Exec(IncreaseAvailableRollsQuery, userId)
+	_, err := dbaccess.Exec("IncreaseAvailableRollsQuery", IncreaseAvailableRollsQuery, userId)
 
 	return err
 }
@@ -24,7 +24,7 @@ const IncreaseTerritoryHoursQuery = `
 `
 
 func (db *Database) IncreaseTerritoryHoursCommand(userId int, changeValue int) error {
-	_, err := dbaccess.Exec(IncreaseTerritoryHoursQuery, changeValue, userId)
+	_, err := dbaccess.Exec("IncreaseTerritoryHoursQuery", IncreaseTerritoryHoursQuery, changeValue, userId)
 
 	return err
 }
@@ -36,7 +36,7 @@ const IncreaseExperiencePointsQuery = `
 `
 
 func (db *Database) IncreaseExperiencePointsCommand(userId int, changeValue int) error {
-	_, err := dbaccess.Exec(IncreaseExperiencePointsQuery, changeValue, userId)
+	_, err := dbaccess.Exec("IncreaseExperiencePointsQuery", IncreaseExperiencePointsQuery, changeValue, userId)
 
 	return err
 }

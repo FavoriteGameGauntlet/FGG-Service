@@ -1,6 +1,9 @@
 package dbaccess
 
-import "time"
+import (
+	"log/slog"
+	"time"
+)
 
 func ConvertToNullableDate(dateString *string) (date *time.Time, err error) {
 	if dateString != nil {
@@ -27,4 +30,12 @@ func ConvertToDate(dateString string) (date time.Time, err error) {
 	date = notNilFinishDate
 
 	return
+}
+
+func LogDbResult(queryName string, result any, err error) {
+	if err != nil {
+		slog.Error(queryName, "error", err)
+	} else {
+		slog.Info(queryName, "result", result)
+	}
 }
