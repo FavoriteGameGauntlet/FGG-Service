@@ -7,6 +7,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// ChangeName defines model for ChangeName.
+type ChangeName struct {
+	Name Name `json:"name"`
+}
+
 // Error defines model for Error.
 type Error struct {
 	Code    string `json:"code"`
@@ -37,11 +42,11 @@ type NameResponse = Name
 // UserNamesResponse defines model for UserNamesResponse.
 type UserNamesResponse = UserNames
 
-// NameRequest defines model for NameRequest.
-type NameRequest = Name
+// ChangeNameRequest defines model for ChangeNameRequest.
+type ChangeNameRequest = ChangeName
 
 // ChangeDisplayNameJSONRequestBody defines body for ChangeDisplayName for application/json ContentType.
-type ChangeDisplayNameJSONRequestBody = Name
+type ChangeDisplayNameJSONRequestBody = ChangeName
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {

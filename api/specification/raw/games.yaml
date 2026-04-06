@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.11.5
+  version: 0.12.0
 paths:
   /games/{login}/wishlist:
     $ref: "../paths/games/login/wishlist.yaml"
