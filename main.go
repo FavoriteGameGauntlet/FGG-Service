@@ -15,10 +15,10 @@ import (
 	ctrlusers "FGG-Service/src/users/controller"
 	ctrleffects "FGG-Service/src/wheeleffects/controller"
 	"embed"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
@@ -67,7 +67,14 @@ func registerHandlers(e *echo.Echo) {
 }
 
 func createFileAndStartLogger() *os.File {
-	filename := fmt.Sprintf("logs/%s.txt", time.Now().Format("2006-01-02"))
+	execPath, err := os.Executable()
+
+	if err != nil {
+		panic(err)
+	}
+
+	logsDir := filepath.Join(filepath.Dir(execPath), "logs")
+	filename := filepath.Join(logsDir, time.Now().Format("2006-01-02")+".txt")
 	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	if err != nil {
