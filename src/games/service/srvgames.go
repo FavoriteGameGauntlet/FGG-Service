@@ -225,8 +225,8 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 func (s *Service) GetAllCurrentGames() (game typegames.CurrentGames, err error) {
 	games, err := s.Database.GetAllCurrentGamesCommand()
 
-	if errors.Is(err, sql.ErrNoRows) || len(games) == 0 {
-		err = common.NewCurrentGameNotFoundError()
+	if len(games) == 0 {
+		
 		return
 	}
 
