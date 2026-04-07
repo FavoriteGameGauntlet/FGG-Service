@@ -2,8 +2,8 @@ package dbgames
 
 import (
 	"FGG-Service/src/dbaccess"
-	"FGG-Service/src/games/types"
-	"FGG-Service/src/timers/types"
+	typegames "FGG-Service/src/games/types"
+	typetimers "FGG-Service/src/timers/types"
 	"database/sql"
 	"errors"
 	"time"
@@ -297,7 +297,7 @@ func (db *Database) GetGameHistoryCommand(userId int) (games typegames.CurrentGa
 }
 
 // Конечная точка должна получать текущие игры для всех пользователей и возвращать их.
-const GetAllCurrentGameQuery = `
+const GetAllCurrentGamesQuery = `
 	SELECT
 		g.Id,
 		g.Name,
@@ -308,8 +308,8 @@ const GetAllCurrentGameQuery = `
 	WHERE gh.State NOT IN (?, ?)
 `
 
-func (db *Database) GetAllCurrentGameCommand() (games typegames.CurrentGames, err error) {
-	rows, err := dbaccess.Query(GetAllCurrentGameQuery, typegames.GameStateFinished, typegames.GameStateCancelled)
+func (db *Database) GetAllCurrentGamesCommand() (games typegames.CurrentGames, err error) {
+	rows, err := dbaccess.Query(GetAllCurrentGamesQuery, typegames.GameStateFinished, typegames.GameStateCancelled)
 
 	if err != nil {
 		return
