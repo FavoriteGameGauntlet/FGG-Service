@@ -2,8 +2,8 @@ package dbgames
 
 import (
 	"FGG-Service/src/dbaccess"
-	"FGG-Service/src/games/types"
-	"FGG-Service/src/timers/types"
+	typegames "FGG-Service/src/games/types"
+	typetimers "FGG-Service/src/timers/types"
 	"database/sql"
 	"errors"
 	"time"
@@ -347,6 +347,53 @@ func (db *Database) GetGameHistoryCommand(userId int) (games typegames.CurrentGa
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
 	}
+
+	return
+}
+
+// Конечная точка должна получать текущие игры для всех пользователей и возвращать их.
+const GetAllCurrentGamesQuery = `
+	SELECT
+		g.Id,
+		g.Name,
+		gh.State,
+		gh.UserID
+	FROM GameHistory gh
+		INNER JOIN Games g ON gh.GameId = g.Id
+	WHERE gh.State NOT IN (?, ?)
+`
+
+func (db *Database) GetAllCurrentGamesCommand() (games typegames.CurrentGames, err error) {
+	rows, err := dbaccess.Query(GetAllCurrentGamesQuery, typegames.GameStateFinished, typegames.GameStateCancelled)
+
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		game := typegames.CurrentGame{}
+		var finishDateString *string
+		err = rows.Scan(&game.Id, &game.Name, &game.State, &finishDateString)
+
+		if err != nil {
+			_ = rows.Close()
+			return
+		}
+
+		var finishDate *time.Time
+		finishDate, err = dbaccess.ConvertToNullableDate(finishDateString)
+
+		if err != nil {
+			_ = rows.Close()
+			return
+		}
+
+		game.FinishDate = finishDate
+
+		games = append(games, game)
+	}
+
+	_ = rows.Close()
 
 	return
 }

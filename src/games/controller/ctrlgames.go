@@ -1,11 +1,11 @@
 package ctrlgames
 
 import (
-	"FGG-Service/api/generated/games"
-	"FGG-Service/src/auth/service"
+	gengames "FGG-Service/api/generated/games"
+	srvauth "FGG-Service/src/auth/service"
 	"FGG-Service/src/common"
-	"FGG-Service/src/games/service"
-	"FGG-Service/src/games/types"
+	srvgames "FGG-Service/src/games/service"
+	typegames "FGG-Service/src/games/types"
 	"FGG-Service/src/validator"
 	"net/http"
 
@@ -217,5 +217,11 @@ func convertWishlistGameFromDto(gameDto gengames.WishlistGame) typegames.Wishlis
 
 // GetAllCurrentGame (GET /games/all/current)
 func (c *Controller) GetAllCurrentGame(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	games, err := c.Service.GetAllCurrentGames()
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, games)
 }
