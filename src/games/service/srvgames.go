@@ -209,12 +209,11 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 	return
 }
 
-func (s *Service) GetAllCurrentGames() (game typegames.CurrentGames, err error) {
-	games, err := s.Database.GetAllCurrentGamesCommand()
+func (s *Service) GetAllCurrentGames() (games typegames.CurrentGames, err error) {
+	games, err = s.Database.GetAllCurrentGamesCommand()
 
-	if len(games) == 0 {
-		
-		return
+	if errors.Is(err, sql.ErrNoRows) {
+		err = nil
 	}
 
 	return
