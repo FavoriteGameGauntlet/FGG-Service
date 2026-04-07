@@ -2,9 +2,9 @@ package srvgames
 
 import (
 	"FGG-Service/src/common"
-	dbgames "FGG-Service/src/games/database"
-	typegames "FGG-Service/src/games/types"
-	srvtimers "FGG-Service/src/timers/service"
+	"FGG-Service/src/games/database"
+	"FGG-Service/src/games/types"
+	"FGG-Service/src/timers/service"
 	"database/sql"
 	"errors"
 	"math/rand"
@@ -205,17 +205,6 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 	game.Id = randomUnplayedGame.GameId
 	game.Name = randomUnplayedGame.Name
 	game.State = typegames.GameStateStarted
-
-	return
-}
-
-func (s *Service) GetAllCurrentGames() (game typegames.CurrentGames, err error) {
-	games, err := s.Database.GetAllCurrentGamesCommand()
-
-	if len(games) == 0 {
-		
-		return
-	}
 
 	return
 }
