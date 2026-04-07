@@ -11,3 +11,18 @@ type UserSession struct {
 	Id     string
 	UserId int
 }
+
+type Password struct {
+	Value string
+}
+
+type LoginUser struct {
+	Login    string
+	Password Password
+}
+
+type SignupUser struct {
+	Email    string
+	Login    string
+	Password Password
+}

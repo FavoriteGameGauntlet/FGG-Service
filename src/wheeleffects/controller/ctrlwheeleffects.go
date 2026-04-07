@@ -35,12 +35,12 @@ func (c *Controller) RollAvailableWheelEffects(ctx echo.Context) error {
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	effectsDto := convertEffectsToDto(effects)
+	effectsDto := convertWheelEffectsToDto(effects)
 
 	return ctx.JSON(http.StatusOK, effectsDto)
 }
 
-func convertEffectsToDto(effects typewheeleffects.WheelEffects) genwheeleffects.WheelEffects {
+func convertWheelEffectsToDto(effects typewheeleffects.WheelEffects) genwheeleffects.WheelEffects {
 	effectsDto := make(genwheeleffects.WheelEffects, len(effects))
 
 	for i, effect := range effects {
@@ -56,6 +56,25 @@ func convertEffectsToDto(effects typewheeleffects.WheelEffects) genwheeleffects.
 // ApplyAvailableWheelEffectRoll (POST /wheel-effects/available/roll/apply)
 func (c *Controller) ApplyAvailableWheelEffectRoll(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNotImplemented)
+}
+
+// GetLastRolledWheelEffects (POST /wheel-effects/available/roll/last)
+func (c *Controller) GetLastRolledWheelEffects(ctx echo.Context) error {
+	userId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	effects, err := c.Service.GetLastRolledWheelEffects(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	effectsDto := convertRolledWheelEffectsToDto(effects)
+
+	return ctx.JSON(http.StatusOK, effectsDto)
 }
 
 // GetAvailableWheelEffectRollsCount (GET /wheel-effects/available/roll/count)
@@ -89,7 +108,7 @@ func (c *Controller) GetAvailableWheelEffects(ctx echo.Context) error {
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	effectsDto := convertEffectsToDto(effects)
+	effectsDto := convertWheelEffectsToDto(effects)
 
 	return ctx.JSON(http.StatusOK, effectsDto)
 }
@@ -108,22 +127,21 @@ func (c *Controller) GetUserWheelEffectHistory(ctx echo.Context, _ gengames.Logi
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	effectsDto := convertRolledEffectsToDto(effects)
+	effectsDto := convertRolledWheelEffectsToDto(effects)
 
 	return ctx.JSON(http.StatusOK, effectsDto)
 }
 
-func convertRolledEffectsToDto(effects typewheeleffects.RolledWheelEffects) genwheeleffects.RolledWheelEffects {
+func convertRolledWheelEffectsToDto(effects typewheeleffects.RolledWheelEffects) genwheeleffects.RolledWheelEffects {
 	effectsDto := make(genwheeleffects.RolledWheelEffects, len(effects))
 
 	for i, effect := range effects {
-		position := i - 2
-
 		effectsDto[i] = genwheeleffects.RolledWheelEffect{
 			Name:        effect.Name,
 			Description: effect.Description,
-			Position:    &position,
 			RollDate:    effect.RollDate,
+			Position:    effect.Position,
+			IsApplied:   effect.IsApplied,
 		}
 	}
 

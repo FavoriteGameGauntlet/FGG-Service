@@ -8,4 +8,6 @@ allOf:
       rollDate:
         type: string
         format: date-time
+      isApplied:
+        type: boolean
     required: [ rollDate ]

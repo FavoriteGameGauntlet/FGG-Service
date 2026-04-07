@@ -10,16 +10,19 @@ import (
 type Database struct {
 }
 
-const GetUserByNameQuery = `
+const GetUserByLoginQuery = `
 	SELECT Id, Login, DisplayName, Email
 	FROM Users
 	WHERE Login = ?
 `
 
-func (db *Database) GetUserByNameCommand(userName string) (user typeauth.User, err error) {
-	row := dbaccess.QueryRow(GetUserByNameQuery, userName)
+func (db *Database) GetUserByLoginCommand(userLogin string) (user typeauth.User, err error) {
+	queryName := "GetUserByLoginQuery"
+	row := dbaccess.QueryRow(queryName, GetUserByLoginQuery, userLogin)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
+
+	dbaccess.LogDbResult(queryName, user, err)
 
 	return
 }
@@ -31,9 +34,12 @@ const GetUserByEmailQuery = `
 `
 
 func (db *Database) GetUserByEmailCommand(userEmail string) (user typeauth.User, err error) {
-	row := dbaccess.QueryRow(GetUserByEmailQuery, userEmail)
+	queryName := "GetUserByEmailQuery"
+	row := dbaccess.QueryRow(queryName, GetUserByEmailQuery, userEmail)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
+
+	dbaccess.LogDbResult(queryName, user, err)
 
 	return
 }
@@ -45,10 +51,13 @@ const GetUserByLoginAndPasswordQuery = `
 		AND Password = ?
 `
 
-func (db *Database) GetUserByLoginAndPasswordCommand(login string, password string) (user typeauth.User, err error) {
-	row := dbaccess.QueryRow(GetUserByLoginAndPasswordQuery, login, password)
+func (db *Database) GetUserByLoginAndPasswordCommand(loginUser typeauth.LoginUser) (user typeauth.User, err error) {
+	queryName := "GetUserByLoginAndPasswordQuery"
+	row := dbaccess.QueryRow(queryName, GetUserByLoginAndPasswordQuery, loginUser.Login, loginUser.Password)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
+
+	dbaccess.LogDbResult(queryName, user, err)
 
 	return
 }
@@ -58,8 +67,25 @@ const CreateUserQuery = `
 	VALUES (?, ?, ?)
 `
 
-func (db *Database) CreateUserCommand(login string, email string, password string) error {
-	_, err := dbaccess.Exec(CreateUserQuery, login, email, password)
+func (db *Database) CreateUserCommand(signupUser typeauth.SignupUser) error {
+	queryName := "CreateUserQuery"
+	_, err := dbaccess.Exec(queryName, CreateUserQuery, signupUser.Login, signupUser.Email, signupUser.Password)
+
+	dbaccess.LogDbResult(queryName, nil, err)
+
+	return err
+}
+
+const CreateUserStatsQuery = `
+	INSERT INTO UserStats (UserId)
+	SELECT Id FROM Users WHERE Login = ?
+`
+
+func (db *Database) CreateUserStatsCommand(login string) error {
+	queryName := "CreateUserStatsQuery"
+	_, err := dbaccess.Exec(queryName, CreateUserStatsQuery, login)
+
+	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
@@ -71,9 +97,12 @@ const GetUserSessionByIdQuery = `
 `
 
 func (db *Database) GetUserSessionByIdCommand(sessionId string) (userSession typeauth.UserSession, err error) {
-	row := dbaccess.QueryRow(GetUserSessionByIdQuery, sessionId)
+	queryName := "GetUserSessionByIdQuery"
+	row := dbaccess.QueryRow(queryName, GetUserSessionByIdQuery, sessionId)
 
 	err = row.Scan(&userSession.Id, &userSession.UserId)
+
+	dbaccess.LogDbResult(queryName, userSession, err)
 
 	return
 }
@@ -84,9 +113,9 @@ const CreateUserSessionQuery = `
 `
 
 func (db *Database) CreateUserSessionCommand(userId int) (userSession typeauth.UserSession, err error) {
+	queryName := "CreateUserSessionQuery"
 	sessionId := uuid.New().String()
-
-	_, err = dbaccess.Exec(CreateUserSessionQuery, sessionId, userId)
+	_, err = dbaccess.Exec(queryName, CreateUserSessionQuery, sessionId, userId)
 
 	if err != nil {
 		return
@@ -97,6 +126,8 @@ func (db *Database) CreateUserSessionCommand(userId int) (userSession typeauth.U
 		UserId: userId,
 	}
 
+	dbaccess.LogDbResult(queryName, userSession, err)
+
 	return
 }
 
@@ -106,7 +137,10 @@ const DeleteUserSessionQuery = `
 `
 
 func (db *Database) DeleteUserSessionCommand(sessionId string) error {
-	_, err := dbaccess.Exec(DeleteUserSessionQuery, sessionId)
+	queryName := "DeleteUserSessionQuery"
+	_, err := dbaccess.Exec(queryName, DeleteUserSessionQuery, sessionId)
+
+	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }

@@ -15,8 +15,13 @@ import (
 	ctrlusers "FGG-Service/src/users/controller"
 	ctrleffects "FGG-Service/src/wheeleffects/controller"
 	"embed"
+	"log/slog"
 	"net/http"
+	"os"
+	"path/filepath"
+	"time"
 
+	"github.com/go-co-op/gocron/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -27,41 +32,88 @@ var scalarUI embed.FS
 
 func main() {
 	e := echo.New()
+	e.HideBanner = true
 
-	authController := ctrlauth.NewController()
-	genauth.RegisterHandlers(e, authController)
-
-	gamesController := ctrlgames.NewController()
-	gengames.RegisterHandlers(e, gamesController)
-
-	pointsController := ctrlpoints.NewController()
-	genpoints.RegisterHandlers(e, pointsController)
-
-	timersController := ctrltimers.NewController()
-	gentimers.RegisterHandlers(e, timersController)
-
-	usersController := ctrlusers.NewController()
-	genusers.RegisterHandlers(e, usersController)
-
-	effectsController := ctrleffects.NewController()
-	geneffects.RegisterHandlers(e, effectsController)
-
+	registerHandlers(e)
 	addScalarRoutes(e)
 	fixCORS(e)
 
-	dbaccess.Init()
-	defer dbaccess.Close()
+	dbCloseFunc := dbaccess.Init()
+	defer dbCloseFunc()
 
-	e.HideBanner = true
-	err := e.Start(":8080")
+	f := createFileAndStartLogger()
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
+
+	startLogScheduler()
+
+	defer func(e *echo.Echo) {
+		_ = e.Close()
+	}(e)
+
+	if err := e.Start(":8080"); err != nil {
+		panic(err)
+	}
+}
+
+func registerHandlers(e *echo.Echo) {
+	genauth.RegisterHandlers(e, ctrlauth.NewController())
+	gengames.RegisterHandlers(e, ctrlgames.NewController())
+	genpoints.RegisterHandlers(e, ctrlpoints.NewController())
+	gentimers.RegisterHandlers(e, ctrltimers.NewController())
+	genusers.RegisterHandlers(e, ctrlusers.NewController())
+	geneffects.RegisterHandlers(e, ctrleffects.NewController())
+}
+
+func createFileAndStartLogger() *os.File {
+	execPath, err := os.Executable()
 
 	if err != nil {
 		panic(err)
 	}
 
-	defer func(e *echo.Echo) {
-		_ = e.Close()
-	}(e)
+	logsDir := filepath.Join(filepath.Dir(execPath), "logs")
+	filename := filepath.Join(logsDir, time.Now().Format("2006-01-02")+".txt")
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+
+	if err != nil {
+		panic(err)
+	}
+
+	handler := slog.NewJSONHandler(file, &slog.HandlerOptions{Level: slog.LevelDebug})
+	logger := slog.New(handler)
+
+	slog.SetDefault(logger)
+
+	return file
+}
+
+func startLogScheduler() {
+	scheduler, err := gocron.NewScheduler()
+
+	if err != nil {
+		panic(err)
+	}
+
+	var currentFile *os.File
+
+	_, err = scheduler.NewJob(
+		gocron.DailyJob(1, gocron.NewAtTimes(gocron.NewAtTime(0, 0, 0))),
+		gocron.NewTask(func() {
+			if currentFile != nil {
+				_ = currentFile.Close()
+			}
+
+			currentFile = createFileAndStartLogger()
+		}),
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	scheduler.Start()
 }
 
 func addScalarRoutes(e *echo.Echo) {

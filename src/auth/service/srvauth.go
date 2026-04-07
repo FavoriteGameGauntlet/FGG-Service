@@ -76,28 +76,34 @@ func (s *Service) GetUserId(ctx echo.Context) (userId int, err error) {
 	return
 }
 
-func (s *Service) CreateUser(login string, email string, password string) error {
-	user, err := s.Database.GetUserByNameCommand(login)
+func (s *Service) CreateUser(signupUser typeauth.SignupUser) error {
+	user, err := s.Database.GetUserByLoginCommand(signupUser.Login)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
 
 	if user.Login != "" {
-		return common.NewUserNameAlreadyExistsError()
+		return common.NewUserNameAlreadyExistsConflictError()
 	}
 
-	user, err = s.Database.GetUserByEmailCommand(email)
+	user, err = s.Database.GetUserByEmailCommand(signupUser.Email)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
 
 	if user.Email != "" {
-		return common.NewUserEmailAlreadyExistsError()
+		return common.NewUserEmailAlreadyExistsConflictError()
 	}
 
-	err = s.Database.CreateUserCommand(login, email, password)
+	err = s.Database.CreateUserCommand(signupUser)
+
+	if err != nil {
+		return err
+	}
+
+	err = s.Database.CreateUserStatsCommand(signupUser.Login)
 
 	return err
 }
@@ -108,8 +114,8 @@ func (s *Service) GetUserSessionById(sessionId string) (userSession typeauth.Use
 	return
 }
 
-func (s *Service) CreateSession(userLogin string, userPassword string) (userSession typeauth.UserSession, err error) {
-	user, err := s.Database.GetUserByLoginAndPasswordCommand(userLogin, userPassword)
+func (s *Service) CreateSession(loginUser typeauth.LoginUser) (userSession typeauth.UserSession, err error) {
+	user, err := s.Database.GetUserByLoginAndPasswordCommand(loginUser)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		err = common.NewWrongDataUnprocessableError()
@@ -129,4 +135,20 @@ func (s *Service) DeleteUserSession(userSessionId string) error {
 	err := s.Database.DeleteUserSessionCommand(userSessionId)
 
 	return err
+}
+
+func (s *Service) GetUserIdByLogin(userLogin string) (userId int, err error) {
+	user, err := s.Database.GetUserByLoginCommand(userLogin)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = common.NewUserLoginNotFoundError(userLogin)
+		return
+	}
+
+	if err != nil {
+		return
+	}
+
+	userId = user.Id
+	return
 }

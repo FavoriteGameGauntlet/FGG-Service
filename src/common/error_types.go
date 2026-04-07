@@ -115,6 +115,37 @@ func NewAvailableRollsNotFoundError() error {
 	}
 }
 
+func NewUserLoginNotFoundError(userLogin string) error {
+	message := fmt.Sprintf(
+		"The user login \"%s\" wasn't found.",
+		userLogin)
+
+	return &NotFoundError{
+		&BaseError{
+			Code:    "USER_LOGIN_NOT_FOUND",
+			Message: message,
+		},
+	}
+}
+
+func NewLastWheelEffectsNotFoundError() error {
+	return &NotFoundError{
+		&BaseError{
+			Code:    "LAST_WHEEL_EFFECTS_NOT_FOUND",
+			Message: "The last wheel effects not found. Try to roll wheel effects.",
+		},
+	}
+}
+
+func NewDisplayNameNotFoundError() error {
+	return &NotFoundError{
+		&BaseError{
+			Code:    "DISPLAY_NAME_NOT_FOUND",
+			Message: "The user have not added a display name.",
+		},
+	}
+}
+
 type ConflictError struct {
 	*BaseError
 }
@@ -128,7 +159,7 @@ func NewSessionAlreadyExistsConflictError() error {
 	}
 }
 
-func NewCurrentTimerIncorrectStateError(timerState typetimers.TimerStateType) error {
+func NewCurrentTimerIncorrectStateConflictError(timerState typetimers.TimerStateType) error {
 	message := fmt.Sprintf(
 		"This action cannot be performed. The current timer is in the \"%s\" state.",
 		timerState)
@@ -141,7 +172,7 @@ func NewCurrentTimerIncorrectStateError(timerState typetimers.TimerStateType) er
 	}
 }
 
-func NewUnplayedGameAlreadyExistsError(gameName string) error {
+func NewWishlistGameAlreadyExistsConflictError(gameName string) error {
 	message := fmt.Sprintf(
 		"The unplayed game \"%s\" has already been added.",
 		gameName)
@@ -154,7 +185,7 @@ func NewUnplayedGameAlreadyExistsError(gameName string) error {
 	}
 }
 
-func NewCurrentGameAlreadyExistsError() error {
+func NewCurrentGameAlreadyExistsConflictError() error {
 	return &ConflictError{
 		&BaseError{
 			Code:    "CURRENT_GAME_ALREADY_EXISTS",
@@ -163,7 +194,7 @@ func NewCurrentGameAlreadyExistsError() error {
 	}
 }
 
-func NewUserNameAlreadyExistsError() error {
+func NewUserNameAlreadyExistsConflictError() error {
 	return &ConflictError{
 		&BaseError{
 			Code:    "USER_NAME_ALREADY_EXISTS",
@@ -172,7 +203,7 @@ func NewUserNameAlreadyExistsError() error {
 	}
 }
 
-func NewUserEmailAlreadyExistsError() error {
+func NewUserEmailAlreadyExistsConflictError() error {
 	return &ConflictError{
 		&BaseError{
 			Code:    "USER_EMAIL_ALREADY_EXISTS",
@@ -181,11 +212,20 @@ func NewUserEmailAlreadyExistsError() error {
 	}
 }
 
-func NewAvailableRollsExistError() error {
+func NewAvailableRollsExistConflictError() error {
 	return &ConflictError{
 		&BaseError{
 			Code:    "AVAILABLE_ROLLS_EXIST",
 			Message: "You have available rolls. You need to use them.",
+		},
+	}
+}
+
+func NewNotEnoughAvailableWheelEffectsConflictError() error {
+	return &ConflictError{
+		&BaseError{
+			Code:    "NOT_ENOUGH_AVAILABLE_WHEEL_EFFECTS",
+			Message: "You have not enough available wheel effects to roll. Contact with the administrator.",
 		},
 	}
 }

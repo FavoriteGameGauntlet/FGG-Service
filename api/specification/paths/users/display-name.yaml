@@ -2,7 +2,7 @@ post:
   operationId: changeDisplayName
   tags: [ Users ]
   requestBody:
-    $ref: "../../components/requests/NameRequest.yaml"
+    $ref: "../../components/requests/ChangeNameRequest.yaml"
   responses:
     "204":
       description: Success.

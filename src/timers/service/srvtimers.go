@@ -3,6 +3,7 @@ package srvtimers
 import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/games/database"
+	dbpoints "FGG-Service/src/points/database"
 	"FGG-Service/src/timers/database"
 	"FGG-Service/src/timers/types"
 	dbwheeleffects "FGG-Service/src/wheeleffects/database"
@@ -16,6 +17,7 @@ import (
 type Service struct {
 	Database               dbtimers.Database
 	GamesDatabase          dbgames.Database
+	PointsDatabase         dbpoints.Database
 	WheelEffectsDatabase   dbwheeleffects.Database
 	TimerFinisherScheduler gocron.Scheduler
 }
@@ -74,16 +76,16 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, e
 		return
 	}
 
-	count, err := s.WheelEffectsDatabase.GetAvailableRollsCountCommand(userId)
+	_, err = s.WheelEffectsDatabase.GetAvailableRollsCountCommand(userId)
 
 	if err != nil {
 		return
 	}
 
-	if count > 0 {
-		err = common.NewAvailableRollsExistError()
-		return
-	}
+	//if count > 0 {
+	//	err = common.NewAvailableRollsExistConflictError()
+	//	return
+	//}
 
 	err = s.Database.CreateCurrentTimerCommand(userId, game.Id)
 
@@ -162,7 +164,7 @@ func (s *Service) actCurrentTimer(
 
 	for _, state := range incorrectStates {
 		if timer.State == state {
-			err = common.NewCurrentTimerIncorrectStateError(timer.State)
+			err = common.NewCurrentTimerIncorrectStateConflictError(timer.State)
 			return
 		}
 	}
@@ -191,7 +193,10 @@ func (s *Service) StopAllCompletedTimers() error {
 	}
 
 	for _, userId := range userIds {
-		_, err = s.StopCurrentTimer(userId)
+		_, _ = s.StopCurrentTimer(userId)
+		_ = s.PointsDatabase.IncreaseAvailableRollsCommand(userId)
+		_ = s.PointsDatabase.IncreaseTerritoryHoursCommand(userId, common.DefaultTerritoryHoursIncreasing)
+		_ = s.PointsDatabase.IncreaseExperiencePointsCommand(userId, common.DefaultExperiencePointsIncreasing)
 	}
 
 	return nil
