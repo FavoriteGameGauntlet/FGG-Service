@@ -48,8 +48,10 @@ func (m *DatabaseMock) DeleteUnplayedGameCommand(userId int, gameId int) error {
 }
 
 func (m *DatabaseMock) GetUnplayedGamesCommand(userId int) (games typegames.WishlistGames, err error) {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(userId)
+	games = args.Get(0).(typegames.WishlistGames)
+	err = args.Error(1)
+	return
 }
 
 func (m *DatabaseMock) CreateCurrentGameCommand(userId int, gameId int) error {
