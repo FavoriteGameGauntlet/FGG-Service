@@ -55,7 +55,7 @@ func (s *Service) StartTimerFinisherScheduler() {
 func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, err error) {
 	games, err := s.GamesDatabase.GetCurrentGameCommand(userId)
 
-	if errors.Is(err, sql.ErrNoRows) {
+	if errors.Is(err, sql.ErrNoRows) || len(games) == 0 {
 		err = common.NewCurrentGameNotFoundError()
 		return
 	}
