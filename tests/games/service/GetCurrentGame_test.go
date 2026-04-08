@@ -6,7 +6,6 @@ import (
 	"FGG-Service/src/games/types"
 	"FGG-Service/tests/games/mock"
 	"database/sql"
-	"errors"
 	"testing"
 	"time"
 
@@ -21,8 +20,6 @@ type GetCurrentGameTestCase struct {
 	ExpectedErrorAs interface{}
 	ExpectedErrorIs error
 }
-
-var dbError = errors.New("database connection lost")
 
 var GetCurrentGameTestCases = []GetCurrentGameTestCase{
 	{
