@@ -2,3 +2,5 @@
 .idea
 data
 api/generate-oapi-codegen.bat
+/.claude/worktrees/heuristic-buck/
+/logs/
