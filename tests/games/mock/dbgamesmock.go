@@ -58,13 +58,17 @@ func (m *DatabaseMock) CreateCurrentGameCommand(userId int, gameId int) error {
 }
 
 func (m *DatabaseMock) GetCurrentGameCommand(userId int) (games typegames.CurrentGames, err error) {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(userId)
+	games = args.Get(0).(typegames.CurrentGames)
+	err = args.Error(1)
+	return
 }
 
 func (m *DatabaseMock) GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(userId, gameId)
+	timeSpent = args.Get(0).(time.Duration)
+	err = args.Error(1)
+	return
 }
 
 func (m *DatabaseMock) CancelCurrentGameCommand(userId int, gameId int) error {
