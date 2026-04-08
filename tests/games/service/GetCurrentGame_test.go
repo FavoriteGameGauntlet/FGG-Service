@@ -9,212 +9,157 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
-// GetCurrentGameCommand returns sql.ErrNoRows. The CurrentGameNotFoundError will return.
-func TestSrvGames_GetCurrentGame_NotFound_NoRows(test *testing.T) {
-	// Arrange
-	userId := 1
-
-	databaseMock := Initialize_GetCurrentGame_DatabaseMock_NotFound_NoRows()
-	sut := srvgames.Service{Database: databaseMock}
-
-	// Act
-	_, err := sut.GetCurrentGame(userId)
-
-	// Assert
-	if err == nil {
-		test.Fatalf("No error found")
-	}
-
-	var notFoundError *common.NotFoundError
-	if !errors.As(err, &notFoundError) {
-		test.Fatalf("Unexpected error type: %v", err)
-	}
-
-	databaseMock.AssertExpectations(test)
+type GetCurrentGameTestCase struct {
+	Name            string
+	UserId          int
+	SetupMock       func() *dbgamesmock.DatabaseMock
+	ExpectedGame    *typegames.CurrentGame
+	ExpectedErrorAs interface{}
+	ExpectedErrorIs error
 }
 
-func Initialize_GetCurrentGame_DatabaseMock_NotFound_NoRows() *dbgamesmock.DatabaseMock {
-	databaseMock := new(dbgamesmock.DatabaseMock)
+var dbError = errors.New("database connection lost")
 
-	databaseMock.
-		On(
-			"GetCurrentGameCommand",
-			1).
-		Return(
-			typegames.CurrentGames{}, sql.ErrNoRows)
+var GetCurrentGameTestCases = []GetCurrentGameTestCase{
+	{
+		// GetCurrentGameCommand returns sql.ErrNoRows. The CurrentGameNotFoundError will return.
+		Name:   "NotFound_NoRows",
+		UserId: 1,
+		SetupMock: func() *dbgamesmock.DatabaseMock {
+			databaseMock := new(dbgamesmock.DatabaseMock)
 
-	return databaseMock
+			databaseMock.
+				On("GetCurrentGameCommand",
+					1).
+				Return(typegames.CurrentGames{}, sql.ErrNoRows)
+
+			return databaseMock
+		},
+		ExpectedErrorAs: new(common.NotFoundError),
+	},
+	{
+		// GetCurrentGameCommand returns an empty list. The CurrentGameNotFoundError will return.
+		Name:   "NotFound_EmptyList",
+		UserId: 1,
+		SetupMock: func() *dbgamesmock.DatabaseMock {
+			databaseMock := new(dbgamesmock.DatabaseMock)
+
+			databaseMock.
+				On("GetCurrentGameCommand",
+					1).
+				Return(typegames.CurrentGames{}, nil)
+
+			return databaseMock
+		},
+		ExpectedErrorAs: new(common.NotFoundError),
+	},
+	{
+		// GetCurrentGameCommand returns a database error. The error will return.
+		Name:   "DatabaseError",
+		UserId: 1,
+		SetupMock: func() *dbgamesmock.DatabaseMock {
+			databaseMock := new(dbgamesmock.DatabaseMock)
+
+			databaseMock.
+				On("GetCurrentGameCommand",
+					1).
+				Return(typegames.CurrentGames{
+					typegames.CurrentGame{
+						Id:    1,
+						Name:  "Half-Life 1",
+						State: typegames.GameStateStarted}},
+					dbError)
+
+			return databaseMock
+		},
+		ExpectedErrorIs: dbError,
+	},
+	{
+		// GetCurrentGameCommand succeeds. GetGameTimeSpentCommand returns a database error. The error will return.
+		Name:   "TimeSpentDatabaseError",
+		UserId: 1,
+		SetupMock: func() *dbgamesmock.DatabaseMock {
+			databaseMock := new(dbgamesmock.DatabaseMock)
+
+			databaseMock.
+				On("GetCurrentGameCommand",
+					1).
+				Return(typegames.CurrentGames{
+					typegames.CurrentGame{
+						Id:    1,
+						Name:  "Half-Life 1",
+						State: typegames.GameStateStarted}},
+					nil)
+			databaseMock.
+				On("GetGameTimeSpentCommand",
+					1, 1).
+				Return(time.Duration(0), dbError)
+
+			return databaseMock
+		},
+		ExpectedErrorIs: dbError,
+	},
+	{
+		// GetCurrentGameCommand and GetGameTimeSpentCommand succeed. The current game with TimeSpent will return.
+		Name:   "SuccessReturn",
+		UserId: 1,
+		SetupMock: func() *dbgamesmock.DatabaseMock {
+			databaseMock := new(dbgamesmock.DatabaseMock)
+
+			databaseMock.
+				On("GetCurrentGameCommand",
+					1).
+				Return(typegames.CurrentGames{
+					typegames.CurrentGame{
+						Id:    1,
+						Name:  "Half-Life 1",
+						State: typegames.GameStateStarted}},
+					nil)
+			databaseMock.
+				On("GetGameTimeSpentCommand",
+					1, 1).
+				Return(2*time.Hour, nil)
+
+			return databaseMock
+		},
+		ExpectedGame: &typegames.CurrentGame{
+			Id:        1,
+			Name:      "Half-Life 1",
+			State:     typegames.GameStateStarted,
+			TimeSpent: 2 * time.Hour},
+	},
 }
 
-// GetCurrentGameCommand returns an empty list. The CurrentGameNotFoundError will return.
-func TestSrvGames_GetCurrentGame_NotFound_EmptyList(test *testing.T) {
-	// Arrange
-	userId := 1
+func TestSrvGames_GetCurrentGame(test *testing.T) {
+	for _, testCase := range GetCurrentGameTestCases {
+		test.Run(testCase.Name, func(test *testing.T) {
+			// Arrange
+			databaseMock := testCase.SetupMock()
+			sut := srvgames.Service{Database: databaseMock}
 
-	databaseMock := Initialize_GetCurrentGame_DatabaseMock_NotFound_EmptyList()
-	sut := srvgames.Service{Database: databaseMock}
+			// Act
+			game, err := sut.GetCurrentGame(testCase.UserId)
 
-	// Act
-	_, err := sut.GetCurrentGame(userId)
+			// Assert
+			if testCase.ExpectedErrorAs != nil {
+				require.Error(test, err)
+				require.ErrorAs(test, err, &testCase.ExpectedErrorAs)
+			}
 
-	// Assert
-	if err == nil {
-		test.Fatalf("No error found")
+			if testCase.ExpectedErrorIs != nil {
+				require.ErrorIs(test, err, testCase.ExpectedErrorIs)
+			}
+
+			if testCase.ExpectedGame != nil {
+				require.NoError(test, err)
+				require.Equal(test, *testCase.ExpectedGame, game)
+			}
+
+			databaseMock.AssertExpectations(test)
+		})
 	}
-
-	var notFoundError *common.NotFoundError
-	if !errors.As(err, &notFoundError) {
-		test.Fatalf("Unexpected error type: %v", err)
-	}
-
-	databaseMock.AssertExpectations(test)
-}
-
-func Initialize_GetCurrentGame_DatabaseMock_NotFound_EmptyList() *dbgamesmock.DatabaseMock {
-	databaseMock := new(dbgamesmock.DatabaseMock)
-
-	databaseMock.
-		On(
-			"GetCurrentGameCommand",
-			1).
-		Return(
-			typegames.CurrentGames{}, nil)
-
-	return databaseMock
-}
-
-// GetCurrentGameCommand returns a database error. The error will return.
-func TestSrvGames_GetCurrentGame_DatabaseError(test *testing.T) {
-	// Arrange
-	userId := 1
-	dbError := errors.New("database connection lost")
-
-	databaseMock := Initialize_GetCurrentGame_DatabaseMock_DatabaseError(dbError)
-	sut := srvgames.Service{Database: databaseMock}
-
-	// Act
-	_, err := sut.GetCurrentGame(userId)
-
-	// Assert
-	if err == nil {
-		test.Fatalf("No error found")
-	}
-
-	if !errors.Is(err, dbError) {
-		test.Fatalf("Unexpected error: %v", err)
-	}
-
-	databaseMock.AssertExpectations(test)
-}
-
-func Initialize_GetCurrentGame_DatabaseMock_DatabaseError(dbError error) *dbgamesmock.DatabaseMock {
-	databaseMock := new(dbgamesmock.DatabaseMock)
-
-	databaseMock.
-		On(
-			"GetCurrentGameCommand",
-			1).
-		Return(
-			typegames.CurrentGames{typegames.CurrentGame{Id: 1, Name: "Half-Life 1", State: typegames.GameStateStarted}},
-			dbError)
-
-	return databaseMock
-}
-
-// GetCurrentGameCommand succeeds. GetGameTimeSpentCommand returns a database error. The error will return.
-func TestSrvGames_GetCurrentGame_TimeSpentDatabaseError(test *testing.T) {
-	// Arrange
-	userId := 1
-	dbError := errors.New("database connection lost")
-
-	databaseMock := Initialize_GetCurrentGame_DatabaseMock_TimeSpentDatabaseError(dbError)
-	sut := srvgames.Service{Database: databaseMock}
-
-	// Act
-	_, err := sut.GetCurrentGame(userId)
-
-	// Assert
-	if err == nil {
-		test.Fatalf("No error found")
-	}
-
-	if !errors.Is(err, dbError) {
-		test.Fatalf("Unexpected error: %v", err)
-	}
-
-	databaseMock.AssertExpectations(test)
-}
-
-func Initialize_GetCurrentGame_DatabaseMock_TimeSpentDatabaseError(dbError error) *dbgamesmock.DatabaseMock {
-	databaseMock := new(dbgamesmock.DatabaseMock)
-
-	databaseMock.
-		On(
-			"GetCurrentGameCommand",
-			1).
-		Return(
-			typegames.CurrentGames{typegames.CurrentGame{Id: 1, Name: "Half-Life 1", State: typegames.GameStateStarted}},
-			nil)
-	databaseMock.
-		On(
-			"GetGameTimeSpentCommand",
-			1, 1).
-		Return(
-			time.Duration(0), dbError)
-
-	return databaseMock
-}
-
-// GetCurrentGameCommand and GetGameTimeSpentCommand succeed. The current game with TimeSpent will return.
-func TestSrvGames_GetCurrentGame_SuccessReturn(test *testing.T) {
-	// Arrange
-	userId := 1
-	expectedTimeSpent := 2 * time.Hour
-
-	databaseMock := Initialize_GetCurrentGame_DatabaseMock_SuccessReturn(expectedTimeSpent)
-	sut := srvgames.Service{Database: databaseMock}
-
-	// Act
-	game, err := sut.GetCurrentGame(userId)
-
-	// Assert
-	if err != nil {
-		test.Fatalf("Unexpected error: %v", err)
-	}
-
-	if game.Id != 1 {
-		test.Fatalf("Unexpected game id: %d", game.Id)
-	}
-
-	if game.Name != "Half-Life 1" {
-		test.Fatalf("Unexpected game name: %s", game.Name)
-	}
-
-	if game.TimeSpent != expectedTimeSpent {
-		test.Fatalf("Unexpected time spent: %v", game.TimeSpent)
-	}
-
-	databaseMock.AssertExpectations(test)
-}
-
-func Initialize_GetCurrentGame_DatabaseMock_SuccessReturn(timeSpent time.Duration) *dbgamesmock.DatabaseMock {
-	databaseMock := new(dbgamesmock.DatabaseMock)
-
-	databaseMock.
-		On(
-			"GetCurrentGameCommand",
-			1).
-		Return(
-			typegames.CurrentGames{typegames.CurrentGame{Id: 1, Name: "Half-Life 1", State: typegames.GameStateStarted}},
-			nil)
-	databaseMock.
-		On(
-			"GetGameTimeSpentCommand",
-			1, 1).
-		Return(
-			timeSpent, nil)
-
-	return databaseMock
 }
