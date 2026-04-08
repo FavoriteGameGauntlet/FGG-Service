@@ -13,7 +13,7 @@ import (
 )
 
 type Controller struct {
-	Service     srvgames.Service
+	Service     *srvgames.Service
 	AuthService srvauth.Service
 }
 

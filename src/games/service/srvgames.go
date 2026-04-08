@@ -11,16 +11,23 @@ import (
 	"time"
 )
 
-type Service struct {
-	Database     dbgames.IDatabase
-	TimerService srvtimers.Service
+type ICurrentGameService interface {
+	GetCurrentGame(userId int) (typegames.CurrentGame, error)
 }
 
-func NewService() Service {
-	return Service{
+type Service struct {
+	Database           dbgames.IDatabase
+	TimerService       srvtimers.IService
+	CurrentGameService ICurrentGameService
+}
+
+func NewService() *Service {
+	s := &Service{
 		Database:     new(dbgames.Database),
-		TimerService: srvtimers.Service{},
+		TimerService: srvtimers.NewService(),
 	}
+	s.CurrentGameService = s
+	return s
 }
 
 func (s *Service) AddWishlistGame(userId int, wishlistGame typegames.WishlistGame) error {
@@ -99,7 +106,7 @@ func (s *Service) GetCurrentGame(userId int) (game typegames.CurrentGame, err er
 }
 
 func (s *Service) CancelCurrentGame(userId int) error {
-	game, err := s.GetCurrentGame(userId)
+	game, err := s.CurrentGameService.GetCurrentGame(userId)
 
 	if err != nil {
 		return err
@@ -121,7 +128,7 @@ func (s *Service) CancelCurrentGame(userId int) error {
 }
 
 func (s *Service) FinishCurrentGame(userId int) error {
-	game, err := s.GetCurrentGame(userId)
+	game, err := s.CurrentGameService.GetCurrentGame(userId)
 
 	if err != nil {
 		return err
@@ -164,7 +171,7 @@ func (s *Service) GetGameHistory(userId int) (games typegames.CurrentGames, err 
 }
 
 func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err error) {
-	game, err = s.GetCurrentGame(userId)
+	game, err = s.CurrentGameService.GetCurrentGame(userId)
 
 	var notFoundError *common.NotFoundError
 	if err != nil && !errors.As(err, &notFoundError) {

@@ -1,7 +1,7 @@
 package dbgamesmock
 
 import (
-	typegames "FGG-Service/src/games/types"
+	"FGG-Service/src/games/types"
 	"time"
 
 	"github.com/stretchr/testify/mock"
@@ -74,8 +74,8 @@ func (m *DatabaseMock) GetGameTimeSpentCommand(userId int, gameId int) (timeSpen
 }
 
 func (m *DatabaseMock) CancelCurrentGameCommand(userId int, gameId int) error {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(userId, gameId)
+	return args.Error(0)
 }
 
 func (m *DatabaseMock) FinishCurrentGameCommand(userId int, gameId int) error {
