@@ -136,7 +136,7 @@ func TestSrvGames_GetCurrentGame(test *testing.T) {
 		test.Run(testCase.Name, func(test *testing.T) {
 			// Arrange
 			databaseMock := testCase.SetupMock()
-			sut := srvgames.Service{Database: databaseMock}
+			sut := srvgames.QueryService{Database: databaseMock}
 
 			// Act
 			game, err := sut.GetCurrentGame(testCase.UserId)
