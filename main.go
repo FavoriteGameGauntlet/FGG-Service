@@ -68,11 +68,12 @@ func registerHandlers(e *echo.Echo) {
 
 func createFileAndStartLogger() *os.File {
 	//execPath, err := os.Executable()
-
+	//
 	//if err != nil {
 	//	panic(err)
 	//}
-
+	//
+	//logsDir := filepath.Join(filepath.Dir(execPath), "logs")
 	logsDir := filepath.Join("logs")
 	filename := filepath.Join(logsDir, time.Now().Format("2006-01-02")+".txt")
 	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
