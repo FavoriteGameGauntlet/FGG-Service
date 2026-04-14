@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type GetUnplayedGamesTestCase struct {
+type GetWishlistGamesTestCase struct {
 	Name            string
 	UserId          int
 	SetupMock       func() *dbgamesmock.DatabaseMock
@@ -17,16 +17,16 @@ type GetUnplayedGamesTestCase struct {
 	ExpectedErrorIs error
 }
 
-var GetUnplayedGamesTestCases = []GetUnplayedGamesTestCase{
+var GetWishlistGamesTestCases = []GetWishlistGamesTestCase{
 	{
-		// GetUnplayedGamesCommand returns a database error. The error will return.
+		// GetWishlistGamesCommand returns a database error. The error will return.
 		Name:   "DatabaseError",
 		UserId: 1,
 		SetupMock: func() *dbgamesmock.DatabaseMock {
 			databaseMock := new(dbgamesmock.DatabaseMock)
 
 			databaseMock.
-				On("GetUnplayedGamesCommand",
+				On("GetWishlistGamesCommand",
 					1).
 				Return(typegames.WishlistGames{}, dbError)
 
@@ -35,14 +35,14 @@ var GetUnplayedGamesTestCases = []GetUnplayedGamesTestCase{
 		ExpectedErrorIs: dbError,
 	},
 	{
-		// GetUnplayedGamesCommand returns an empty list. An empty list will return.
+		// GetWishlistGamesCommand returns an empty list. An empty list will return.
 		Name:   "EmptyList",
 		UserId: 1,
 		SetupMock: func() *dbgamesmock.DatabaseMock {
 			databaseMock := new(dbgamesmock.DatabaseMock)
 
 			databaseMock.
-				On("GetUnplayedGamesCommand",
+				On("GetWishlistGamesCommand",
 					1).
 				Return(typegames.WishlistGames{}, nil)
 
@@ -51,14 +51,14 @@ var GetUnplayedGamesTestCases = []GetUnplayedGamesTestCase{
 		ExpectedGames: typegames.WishlistGames{},
 	},
 	{
-		// GetUnplayedGamesCommand succeeds. The list of unplayed games will return.
+		// GetWishlistGamesCommand succeeds. The list of wishlist games will return.
 		Name:   "SuccessReturn",
 		UserId: 1,
 		SetupMock: func() *dbgamesmock.DatabaseMock {
 			databaseMock := new(dbgamesmock.DatabaseMock)
 
 			databaseMock.
-				On("GetUnplayedGamesCommand",
+				On("GetWishlistGamesCommand",
 					1).
 				Return(typegames.WishlistGames{
 					{Id: 1, GameId: 10, Name: "Half-Life 1"},
@@ -74,15 +74,15 @@ var GetUnplayedGamesTestCases = []GetUnplayedGamesTestCase{
 	},
 }
 
-func TestSrvGames_GetUnplayedGames(test *testing.T) {
-	for _, testCase := range GetUnplayedGamesTestCases {
+func TestSrvGames_GetWishlistGames(test *testing.T) {
+	for _, testCase := range GetWishlistGamesTestCases {
 		test.Run(testCase.Name, func(test *testing.T) {
 			// Arrange
 			databaseMock := testCase.SetupMock()
-			sut := srvgames.Service{Database: databaseMock}
+			sut := srvgames.GettingService{Database: databaseMock}
 
 			// Act
-			games, err := sut.GetUnplayedGames(testCase.UserId)
+			games, err := sut.GetWishlistGames(testCase.UserId)
 
 			// Assert
 			if testCase.ExpectedErrorIs != nil {

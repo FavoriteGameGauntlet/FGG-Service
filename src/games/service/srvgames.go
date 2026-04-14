@@ -5,21 +5,22 @@ import (
 	"FGG-Service/src/games/database"
 	"FGG-Service/src/games/types"
 	"FGG-Service/src/timers/service"
-	"database/sql"
 	"errors"
 	"math/rand"
 	"time"
 )
 
 type Service struct {
-	Database     dbgames.IDatabase
-	TimerService srvtimers.Service
+	Database       dbgames.IDatabase
+	TimerService   srvtimers.IService
+	GettingService IGettingService
 }
 
 func NewService() Service {
 	return Service{
-		Database:     new(dbgames.Database),
-		TimerService: srvtimers.Service{},
+		Database:       new(dbgames.Database),
+		TimerService:   srvtimers.NewService(),
+		GettingService: NewGettingService(),
 	}
 }
 
@@ -58,7 +59,7 @@ func (s *Service) AddWishlistGame(userId int, wishlistGame typegames.WishlistGam
 }
 
 func (s *Service) GetUnplayedGames(userId int) (typegames.WishlistGames, error) {
-	return s.Database.GetUnplayedGamesCommand(userId)
+	return s.GettingService.GetWishlistGames(userId)
 }
 
 func (s *Service) createAndGetGame(wishlistGame typegames.WishlistGame) (game typegames.WishlistGame, err error) {
@@ -73,33 +74,12 @@ func (s *Service) createAndGetGame(wishlistGame typegames.WishlistGame) (game ty
 	return
 }
 
-func (s *Service) GetCurrentGame(userId int) (game typegames.CurrentGame, err error) {
-	games, err := s.Database.GetCurrentGameCommand(userId)
-
-	if errors.Is(err, sql.ErrNoRows) || len(games) == 0 {
-		err = common.NewCurrentGameNotFoundError()
-		return
-	}
-
-	if err != nil {
-		return
-	}
-
-	game = games[0]
-
-	timeSpent, err := s.Database.GetGameTimeSpentCommand(userId, game.Id)
-
-	if err != nil {
-		return
-	}
-
-	game.TimeSpent = timeSpent
-
-	return
+func (s *Service) GetCurrentGame(userId int) (typegames.CurrentGame, error) {
+	return s.GettingService.GetCurrentGame(userId)
 }
 
 func (s *Service) CancelCurrentGame(userId int) error {
-	game, err := s.GetCurrentGame(userId)
+	game, err := s.GettingService.GetCurrentGame(userId)
 
 	if err != nil {
 		return err
@@ -121,7 +101,7 @@ func (s *Service) CancelCurrentGame(userId int) error {
 }
 
 func (s *Service) FinishCurrentGame(userId int) error {
-	game, err := s.GetCurrentGame(userId)
+	game, err := s.GettingService.GetCurrentGame(userId)
 
 	if err != nil {
 		return err
@@ -164,7 +144,7 @@ func (s *Service) GetGameHistory(userId int) (games typegames.CurrentGames, err 
 }
 
 func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err error) {
-	game, err = s.GetCurrentGame(userId)
+	game, err = s.GettingService.GetCurrentGame(userId)
 
 	var notFoundError *common.NotFoundError
 	if err != nil && !errors.As(err, &notFoundError) {
@@ -176,7 +156,7 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 		return
 	}
 
-	unplayedGames, err := s.Database.GetUnplayedGamesCommand(userId)
+	unplayedGames, err := s.GettingService.GetWishlistGames(userId)
 
 	if err != nil {
 		return

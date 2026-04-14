@@ -3,16 +3,20 @@ package srvtimers
 import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/games/database"
-	dbpoints "FGG-Service/src/points/database"
+	"FGG-Service/src/points/database"
 	"FGG-Service/src/timers/database"
 	"FGG-Service/src/timers/types"
-	dbwheeleffects "FGG-Service/src/wheeleffects/database"
+	"FGG-Service/src/wheeleffects/database"
 	"database/sql"
 	"errors"
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
 )
+
+type IService interface {
+	ForceStopCurrentTimer(userId int) (typetimers.Timer, error)
+}
 
 type Service struct {
 	Database               dbtimers.Database
