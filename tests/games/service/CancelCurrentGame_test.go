@@ -4,7 +4,7 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/games/service"
 	"FGG-Service/src/games/types"
-	typetimers "FGG-Service/src/timers/types"
+	"FGG-Service/src/timers/types"
 	"FGG-Service/tests/games/mock"
 	"FGG-Service/tests/games/mock/srvgames"
 	"FGG-Service/tests/timers/mock"
@@ -16,7 +16,7 @@ import (
 type CancelCurrentGameTestCase struct {
 	Name            string
 	UserId          int
-	SetupMock       func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.QueryServiceMock)
+	SetupMock       func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.GettingServiceMock)
 	ExpectedErrorAs interface{}
 	ExpectedErrorIs error
 }
@@ -26,17 +26,17 @@ var CancelCurrentGameTestCases = []CancelCurrentGameTestCase{
 		// GetCurrentGame returns the CurrentGameNotFoundError. The error will return.
 		Name:   "GetCurrentGame_NotFound",
 		UserId: 1,
-		SetupMock: func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.QueryServiceMock) {
+		SetupMock: func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.GettingServiceMock) {
 			databaseMock := new(dbgamesmock.DatabaseMock)
 			timerServiceMock := new(srvtimersmock.ServiceMock)
-			queryServiceMock := new(srvgamesmock.QueryServiceMock)
+			gettingServiceMock := new(srvgamesmock.GettingServiceMock)
 
-			queryServiceMock.
+			gettingServiceMock.
 				On("GetCurrentGame",
 					1).
 				Return(typegames.CurrentGame{}, common.NewCurrentGameNotFoundError())
 
-			return databaseMock, timerServiceMock, queryServiceMock
+			return databaseMock, timerServiceMock, gettingServiceMock
 		},
 		ExpectedErrorAs: new(common.NotFoundError),
 	},
@@ -44,17 +44,17 @@ var CancelCurrentGameTestCases = []CancelCurrentGameTestCase{
 		// GetCurrentGame returns a database error. The error will return.
 		Name:   "GetCurrentGame_DatabaseError",
 		UserId: 1,
-		SetupMock: func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.QueryServiceMock) {
+		SetupMock: func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.GettingServiceMock) {
 			databaseMock := new(dbgamesmock.DatabaseMock)
 			timerServiceMock := new(srvtimersmock.ServiceMock)
-			queryServiceMock := new(srvgamesmock.QueryServiceMock)
+			gettingServiceMock := new(srvgamesmock.GettingServiceMock)
 
-			queryServiceMock.
+			gettingServiceMock.
 				On("GetCurrentGame",
 					1).
 				Return(typegames.CurrentGame{}, dbError)
 
-			return databaseMock, timerServiceMock, queryServiceMock
+			return databaseMock, timerServiceMock, gettingServiceMock
 		},
 		ExpectedErrorIs: dbError,
 	},
@@ -62,12 +62,12 @@ var CancelCurrentGameTestCases = []CancelCurrentGameTestCase{
 		// GetCurrentGame succeeds. ForceStopCurrentTimer returns a database error. The error will return.
 		Name:   "ForceStopCurrentTimer_DatabaseError",
 		UserId: 1,
-		SetupMock: func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.QueryServiceMock) {
+		SetupMock: func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.GettingServiceMock) {
 			databaseMock := new(dbgamesmock.DatabaseMock)
 			timerServiceMock := new(srvtimersmock.ServiceMock)
-			queryServiceMock := new(srvgamesmock.QueryServiceMock)
+			gettingServiceMock := new(srvgamesmock.GettingServiceMock)
 
-			queryServiceMock.
+			gettingServiceMock.
 				On("GetCurrentGame",
 					1).
 				Return(typegames.CurrentGame{
@@ -80,7 +80,7 @@ var CancelCurrentGameTestCases = []CancelCurrentGameTestCase{
 					1).
 				Return(typetimers.Timer{}, dbError)
 
-			return databaseMock, timerServiceMock, queryServiceMock
+			return databaseMock, timerServiceMock, gettingServiceMock
 		},
 		ExpectedErrorIs: dbError,
 	},
@@ -88,12 +88,12 @@ var CancelCurrentGameTestCases = []CancelCurrentGameTestCase{
 		// GetCurrentGame and ForceStopCurrentTimer succeed. CancelCurrentGameCommand returns a database error. The error will return.
 		Name:   "CancelCurrentGameCommand_DatabaseError",
 		UserId: 1,
-		SetupMock: func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.QueryServiceMock) {
+		SetupMock: func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.GettingServiceMock) {
 			databaseMock := new(dbgamesmock.DatabaseMock)
 			timerServiceMock := new(srvtimersmock.ServiceMock)
-			queryServiceMock := new(srvgamesmock.QueryServiceMock)
+			gettingServiceMock := new(srvgamesmock.GettingServiceMock)
 
-			queryServiceMock.
+			gettingServiceMock.
 				On("GetCurrentGame",
 					1).
 				Return(typegames.CurrentGame{Id: 1, Name: "Half-Life 1", State: typegames.GameStateStarted}, nil)
@@ -106,7 +106,7 @@ var CancelCurrentGameTestCases = []CancelCurrentGameTestCase{
 					1, 1).
 				Return(dbError)
 
-			return databaseMock, timerServiceMock, queryServiceMock
+			return databaseMock, timerServiceMock, gettingServiceMock
 		},
 		ExpectedErrorIs: dbError,
 	},
@@ -114,12 +114,12 @@ var CancelCurrentGameTestCases = []CancelCurrentGameTestCase{
 		// GetCurrentGame, ForceStopCurrentTimer and CancelCurrentGameCommand succeed. Nil will return.
 		Name:   "SuccessReturn",
 		UserId: 1,
-		SetupMock: func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.QueryServiceMock) {
+		SetupMock: func() (*dbgamesmock.DatabaseMock, *srvtimersmock.ServiceMock, *srvgamesmock.GettingServiceMock) {
 			databaseMock := new(dbgamesmock.DatabaseMock)
 			timerServiceMock := new(srvtimersmock.ServiceMock)
-			queryServiceMock := new(srvgamesmock.QueryServiceMock)
+			gettingServiceMock := new(srvgamesmock.GettingServiceMock)
 
-			queryServiceMock.
+			gettingServiceMock.
 				On("GetCurrentGame",
 					1).
 				Return(typegames.CurrentGame{Id: 1, Name: "Half-Life 1", State: typegames.GameStateStarted}, nil)
@@ -132,7 +132,7 @@ var CancelCurrentGameTestCases = []CancelCurrentGameTestCase{
 					1, 1).
 				Return(nil)
 
-			return databaseMock, timerServiceMock, queryServiceMock
+			return databaseMock, timerServiceMock, gettingServiceMock
 		},
 	},
 }
@@ -141,11 +141,11 @@ func TestSrvGames_CancelCurrentGame(test *testing.T) {
 	for _, testCase := range CancelCurrentGameTestCases {
 		test.Run(testCase.Name, func(test *testing.T) {
 			// Arrange
-			databaseMock, timerServiceMock, queryServiceMock := testCase.SetupMock()
+			databaseMock, timerServiceMock, gettingServiceMock := testCase.SetupMock()
 			sut := srvgames.Service{
-				Database:           databaseMock,
-				TimerService:       timerServiceMock,
-				QueryService: queryServiceMock,
+				Database:       databaseMock,
+				TimerService:   timerServiceMock,
+				GettingService: gettingServiceMock,
 			}
 
 			// Act
@@ -167,7 +167,7 @@ func TestSrvGames_CancelCurrentGame(test *testing.T) {
 
 			databaseMock.AssertExpectations(test)
 			timerServiceMock.AssertExpectations(test)
-			queryServiceMock.AssertExpectations(test)
+			gettingServiceMock.AssertExpectations(test)
 		})
 	}
 }

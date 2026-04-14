@@ -8,15 +8,22 @@ import (
 	"errors"
 )
 
-type IQueryService interface {
+type IGettingService interface {
+	GetWishlistGames(userId int) (typegames.WishlistGames, error)
 	GetCurrentGame(userId int) (typegames.CurrentGame, error)
 }
 
-type QueryService struct {
+type GettingService struct {
 	Database dbgames.IDatabase
 }
 
-func (s *QueryService) GetCurrentGame(userId int) (game typegames.CurrentGame, err error) {
+func NewGettingService() IGettingService {
+	return &GettingService{
+		Database: new(dbgames.Database),
+	}
+}
+
+func (s *GettingService) GetCurrentGame(userId int) (game typegames.CurrentGame, err error) {
 	games, err := s.Database.GetCurrentGameCommand(userId)
 
 	if errors.Is(err, sql.ErrNoRows) || len(games) == 0 {
@@ -39,4 +46,8 @@ func (s *QueryService) GetCurrentGame(userId int) (game typegames.CurrentGame, e
 	game.TimeSpent = timeSpent
 
 	return
+}
+
+func (s *GettingService) GetWishlistGames(userId int) (typegames.WishlistGames, error) {
+	return s.Database.GetWishlistGamesCommand(userId)
 }

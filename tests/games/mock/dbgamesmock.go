@@ -47,7 +47,7 @@ func (m *DatabaseMock) DeleteUnplayedGameCommand(userId int, gameId int) error {
 	panic("implement me")
 }
 
-func (m *DatabaseMock) GetUnplayedGamesCommand(userId int) (games typegames.WishlistGames, err error) {
+func (m *DatabaseMock) GetWishlistGamesCommand(userId int) (games typegames.WishlistGames, err error) {
 	args := m.Called(userId)
 	games = args.Get(0).(typegames.WishlistGames)
 	err = args.Error(1)
