@@ -5,6 +5,7 @@ import (
 	"FGG-Service/src/games/database"
 	"FGG-Service/src/games/types"
 	"FGG-Service/src/timers/service"
+	"database/sql"
 	"errors"
 	"math/rand"
 	"time"
