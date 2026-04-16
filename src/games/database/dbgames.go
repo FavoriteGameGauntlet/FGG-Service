@@ -2,8 +2,8 @@ package dbgames
 
 import (
 	"FGG-Service/src/dbaccess"
-	typegames "FGG-Service/src/games/types"
-	typetimers "FGG-Service/src/timers/types"
+	"FGG-Service/src/games/types"
+	"FGG-Service/src/timers/types"
 	"database/sql"
 	"errors"
 	"time"

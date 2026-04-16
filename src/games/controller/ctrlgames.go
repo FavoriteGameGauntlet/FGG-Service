@@ -1,11 +1,11 @@
 package ctrlgames
 
 import (
-	gengames "FGG-Service/api/generated/games"
-	srvauth "FGG-Service/src/auth/service"
+	"FGG-Service/api/generated/games"
+	"FGG-Service/src/auth/service"
 	"FGG-Service/src/common"
-	srvgames "FGG-Service/src/games/service"
-	typegames "FGG-Service/src/games/types"
+	"FGG-Service/src/games/service"
+	"FGG-Service/src/games/types"
 	"FGG-Service/src/validator"
 	"net/http"
 

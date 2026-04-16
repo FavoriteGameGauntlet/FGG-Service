@@ -2,9 +2,9 @@ package srvgames
 
 import (
 	"FGG-Service/src/common"
-	dbgames "FGG-Service/src/games/database"
-	typegames "FGG-Service/src/games/types"
-	srvtimers "FGG-Service/src/timers/service"
+	"FGG-Service/src/games/database"
+	"FGG-Service/src/games/types"
+	"FGG-Service/src/timers/service"
 	"database/sql"
 	"errors"
 	"math/rand"
