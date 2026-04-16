@@ -28,7 +28,7 @@ const GetDisplayNameQuery = `
 	WHERE Id = ?
 `
 
-func (db *Database) GetDisplayNameCommand(userId int) (displayName string, err error) {
+func (db *Database) GetDisplayNameCommand(userId int) (displayName *string, err error) {
 	queryName := "GetDisplayNameQuery"
 	row := dbaccess.QueryRow(queryName, GetDisplayNameQuery, userId)
 

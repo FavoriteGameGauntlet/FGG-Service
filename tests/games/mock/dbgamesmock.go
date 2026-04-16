@@ -1,7 +1,7 @@
 package dbgamesmock
 
 import (
-	typegames "FGG-Service/src/games/types"
+	"FGG-Service/src/games/types"
 	"time"
 
 	"github.com/stretchr/testify/mock"
@@ -47,9 +47,11 @@ func (m *DatabaseMock) DeleteUnplayedGameCommand(userId int, gameId int) error {
 	panic("implement me")
 }
 
-func (m *DatabaseMock) GetUnplayedGamesCommand(userId int) (games typegames.WishlistGames, err error) {
-	//TODO implement me
-	panic("implement me")
+func (m *DatabaseMock) GetWishlistGamesCommand(userId int) (games typegames.WishlistGames, err error) {
+	args := m.Called(userId)
+	games = args.Get(0).(typegames.WishlistGames)
+	err = args.Error(1)
+	return
 }
 
 func (m *DatabaseMock) CreateCurrentGameCommand(userId int, gameId int) error {
@@ -58,18 +60,22 @@ func (m *DatabaseMock) CreateCurrentGameCommand(userId int, gameId int) error {
 }
 
 func (m *DatabaseMock) GetCurrentGameCommand(userId int) (games typegames.CurrentGames, err error) {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(userId)
+	games = args.Get(0).(typegames.CurrentGames)
+	err = args.Error(1)
+	return
 }
 
 func (m *DatabaseMock) GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(userId, gameId)
+	timeSpent = args.Get(0).(time.Duration)
+	err = args.Error(1)
+	return
 }
 
 func (m *DatabaseMock) CancelCurrentGameCommand(userId int, gameId int) error {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(userId, gameId)
+	return args.Error(0)
 }
 
 func (m *DatabaseMock) FinishCurrentGameCommand(userId int, gameId int) error {

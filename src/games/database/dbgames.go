@@ -16,7 +16,7 @@ type IDatabase interface {
 	DoesWishlistGameExistCommand(userId int, gameName string) (doesExist bool, err error)
 	CreateWishlistGameCommand(userId int, gameId int) error
 	DeleteUnplayedGameCommand(userId int, gameId int) error
-	GetUnplayedGamesCommand(userId int) (games typegames.WishlistGames, err error)
+	GetWishlistGamesCommand(userId int) (games typegames.WishlistGames, err error)
 	CreateCurrentGameCommand(userId int, gameId int) error
 	GetCurrentGameCommand(userId int) (games typegames.CurrentGames, err error)
 	GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error)
@@ -135,16 +135,16 @@ func (db *Database) DeleteUnplayedGameCommand(userId int, gameId int) error {
 	return err
 }
 
-const GetUnplayedGamesQuery = `
+const GetWishlistGamesQuery = `
 	SELECT ug.Id, g.Id, g.Name
 	FROM UnplayedGames ug
 		INNER JOIN Games g ON ug.GameId = g.Id
 	WHERE ug.UserId = ?
 `
 
-func (db *Database) GetUnplayedGamesCommand(userId int) (games typegames.WishlistGames, err error) {
-	queryName := "GetUnplayedGamesQuery"
-	rows, err := dbaccess.Query(queryName, GetUnplayedGamesQuery, userId)
+func (db *Database) GetWishlistGamesCommand(userId int) (games typegames.WishlistGames, err error) {
+	queryName := "GetWishlistGamesQuery"
+	rows, err := dbaccess.Query(queryName, GetWishlistGamesQuery, userId)
 
 	if err != nil {
 		return

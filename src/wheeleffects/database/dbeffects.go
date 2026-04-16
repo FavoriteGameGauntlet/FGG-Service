@@ -145,7 +145,7 @@ const MakeEffectRollQuery = `
 
 func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
 	queryName := "MakeEffectRollQuery"
-	rows, err := dbaccess.Query(queryName, MakeEffectRollQuery, userId)
+	rows, err := dbaccess.Query(queryName, MakeEffectRollQuery, userId, userId)
 
 	if err != nil {
 		return
