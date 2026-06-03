@@ -117,7 +117,7 @@ func (db *Database) ActTimerCommand(
 		queryName,
 		ActTimerQuery,
 		timerState,
-		remainingTime.Seconds(),
+		int(remainingTime.Seconds()),
 		timerId,
 	)
 
