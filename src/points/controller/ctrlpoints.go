@@ -26,7 +26,19 @@ func NewController() *Controller {
 
 // GetExperiencePoints (GET /points/experience-points)
 func (c *Controller) GetExperiencePoints(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	userId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	points, err := c.Service.GetExperiencePoints(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, points)
 }
 
 // ChangeExperiencePoints (POST /points/experience-points)
