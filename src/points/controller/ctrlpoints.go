@@ -94,7 +94,19 @@ func (c *Controller) ChangeFreePoints(ctx echo.Context) error {
 
 // GetFreePoints (GET /points/free-points)
 func (c *Controller) GetFreePoints(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	userId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	points, err := c.Service.GetFreePoints(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, points)
 }
 
 // GetUserFreePointHistory (GET /points/{login}/free-points/history)
