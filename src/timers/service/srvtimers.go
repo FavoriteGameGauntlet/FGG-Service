@@ -178,6 +178,9 @@ func (s *Service) actCurrentTimer(
 	}
 
 	remainingTime := timer.RemainingTime
+	if timer.State == typetimers.TimerStateRunning {
+		remainingTime -= time.Since(timer.LastActionDate)
+	}
 	if remainingTime < 0 {
 		remainingTime = 0
 	}
