@@ -5,3 +5,4 @@ properties:
   desiredChangeValue:
     type: integer
     format: int
+required: [ changeSource, desiredChangeValue ]

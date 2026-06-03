@@ -3,6 +3,7 @@ package common
 import (
 	"FGG-Service/src/timers/types"
 	"fmt"
+	"strings"
 )
 
 type AppError interface {
@@ -230,6 +231,34 @@ func NewNotEnoughAvailableWheelEffectsConflictError() error {
 	}
 }
 
+func NewWrongDesiredChangeValueConflictError(changeSource string, changeSourceRule string) error {
+	message := fmt.Sprintf(
+		"The desired change value is invalid. The value for '%s' should be %s.",
+		changeSource,
+		changeSourceRule)
+
+	return &ConflictError{
+		&BaseError{
+			Code:    "WRONG_DESIRED_CHANGE_VALUE",
+			Message: message,
+		},
+	}
+}
+
+func NewNotEnoughCurrentPointsConflictError(changeSource string, currentPoints int) error {
+	message := fmt.Sprintf(
+		"Not enough points for '%s' change source. It should be at least %d.",
+		changeSource,
+		currentPoints)
+
+	return &ConflictError{
+		&BaseError{
+			Code:    "NOT_ENOUGH_CURRENT_POINTS",
+			Message: message,
+		},
+	}
+}
+
 type UnprocessableError struct {
 	*BaseError
 }
@@ -293,6 +322,19 @@ func NewPasswordUnprocessableError(messageDetails string) error {
 	return &UnprocessableError{
 		&BaseError{
 			Code:    "INCORRECT_PASSWORD_FORMAT",
+			Message: message,
+		},
+	}
+}
+
+func NewExperienceChangeSourceUnprocessableError(possibleValues []string) error {
+	message := fmt.Sprintf(
+		"The change source doesn't match any of these: %s.",
+		strings.Join(possibleValues, ", "))
+
+	return &UnprocessableError{
+		&BaseError{
+			Code:    "INCORRECT_CHANGE_SOURCE_VALUE",
 			Message: message,
 		},
 	}

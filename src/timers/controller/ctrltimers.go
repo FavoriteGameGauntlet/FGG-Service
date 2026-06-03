@@ -37,12 +37,12 @@ func (c *Controller) GetCurrentTimer(ctx echo.Context) error {
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	timerDto := ConvertTimerToDto(timer)
+	timerDto := convertTimerToDto(timer)
 
 	return ctx.JSON(http.StatusOK, timerDto)
 }
 
-func ConvertTimerToDto(timer typetimers.Timer) gentimers.Timer {
+func convertTimerToDto(timer typetimers.Timer) gentimers.Timer {
 	return gentimers.Timer{
 		Duration:       common.DurationToISO8601(timer.Duration),
 		RemainingTime:  common.DurationToISO8601(timer.RemainingTime),
@@ -65,7 +65,7 @@ func (c *Controller) PauseCurrentTimer(ctx echo.Context) error {
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	timerActionDto := ConvertTimerToDto(timer)
+	timerActionDto := convertTimerToDto(timer)
 
 	return ctx.JSON(http.StatusOK, timerActionDto)
 }
@@ -84,7 +84,7 @@ func (c *Controller) StartCurrentTimer(ctx echo.Context) error {
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	timerActionDto := ConvertTimerToDto(timer)
+	timerActionDto := convertTimerToDto(timer)
 
 	return ctx.JSON(http.StatusOK, timerActionDto)
 }

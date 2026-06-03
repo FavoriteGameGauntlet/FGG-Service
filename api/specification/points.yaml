@@ -234,6 +234,9 @@ components:
         desiredChangeValue:
           type: integer
           format: int
+      required:
+        - changeSource
+        - desiredChangeValue
     PointChangeResult:
       allOf:
         - $ref: '#/components/schemas/PointChange'

@@ -35,17 +35,34 @@ func (db *Database) IncreaseTerritoryHoursCommand(userId int, changeValue int) e
 	return err
 }
 
-const IncreaseExperiencePointsQuery = `
+const ChangeExperiencePointsQuery = `
 	UPDATE UserStats
 	SET ExperiencePoints = ExperiencePoints + ?
 	WHERE UserId = ?
 `
 
-func (db *Database) IncreaseExperiencePointsCommand(userId int, changeValue int) error {
-	queryName := "IncreaseExperiencePointsQuery"
-	_, err := dbaccess.Exec(queryName, IncreaseExperiencePointsQuery, changeValue, userId)
+func (db *Database) ChangeExperiencePointsCommand(userId int, changeValue int) error {
+	queryName := "ChangeExperiencePointsQuery"
+	_, err := dbaccess.Exec(queryName, ChangeExperiencePointsQuery, changeValue, userId)
 
 	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
+}
+
+const GetExperiencePointsQuery = `
+	SELECT ExperiencePoints
+	FROM UserStats
+	WHERE UserId = ?
+`
+
+func (db *Database) GetExperiencePointsCommand(userId int) (points int, err error) {
+	queryName := "ExperiencePointsQuery"
+	row := dbaccess.QueryRow(queryName, GetExperiencePointsQuery, userId)
+
+	err = row.Scan(&points)
+
+	dbaccess.LogDbResult(queryName, points, err)
+
+	return
 }
