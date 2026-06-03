@@ -159,6 +159,9 @@ components:
         desiredChangeValue:
           type: integer
           format: int
+      required:
+        - changeSource
+        - desiredChangeValue
     PointChangeByLogins:
       type: array
       items:

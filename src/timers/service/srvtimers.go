@@ -200,7 +200,7 @@ func (s *Service) StopAllCompletedTimers() error {
 		_, _ = s.StopCurrentTimer(userId)
 		_ = s.PointsDatabase.IncreaseAvailableRollsCommand(userId)
 		_ = s.PointsDatabase.IncreaseTerritoryHoursCommand(userId, common.DefaultTerritoryHoursIncreasing)
-		_ = s.PointsDatabase.IncreaseExperiencePointsCommand(userId, common.DefaultExperiencePointsIncreasing)
+		_ = s.PointsDatabase.ChangeExperiencePointsCommand(userId, common.DefaultExperiencePointsIncreasing)
 	}
 
 	return nil

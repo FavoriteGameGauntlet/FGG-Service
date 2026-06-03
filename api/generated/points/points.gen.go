@@ -22,8 +22,8 @@ type Error struct {
 type FreePointChangeResult struct {
 	ActualChangeValue  int         `json:"actualChangeValue"`
 	ChangeDate         time.Time   `json:"changeDate"`
-	ChangeSource       interface{} `json:"changeSource,omitempty"`
-	DesiredChangeValue *int        `json:"desiredChangeValue,omitempty"`
+	ChangeSource       interface{} `json:"changeSource"`
+	DesiredChangeValue int         `json:"desiredChangeValue"`
 	FinalValue         Points      `json:"finalValue"`
 	WheelEffectName    *Name       `json:"wheelEffectName,omitempty"`
 }
@@ -39,16 +39,16 @@ type Name = string
 
 // PointChange defines model for PointChange.
 type PointChange struct {
-	ChangeSource       *string `json:"changeSource,omitempty"`
-	DesiredChangeValue *int    `json:"desiredChangeValue,omitempty"`
+	ChangeSource       string `json:"changeSource"`
+	DesiredChangeValue int    `json:"desiredChangeValue"`
 }
 
 // PointChangeResult defines model for PointChangeResult.
 type PointChangeResult struct {
 	ActualChangeValue  int       `json:"actualChangeValue"`
 	ChangeDate         time.Time `json:"changeDate"`
-	ChangeSource       *string   `json:"changeSource,omitempty"`
-	DesiredChangeValue *int      `json:"desiredChangeValue,omitempty"`
+	ChangeSource       string    `json:"changeSource"`
+	DesiredChangeValue int       `json:"desiredChangeValue"`
 	FinalValue         Points    `json:"finalValue"`
 }
 
@@ -74,8 +74,8 @@ type Points = int
 type TerritoryPointChangeResult struct {
 	ActualChangeValue  int         `json:"actualChangeValue"`
 	ChangeDate         time.Time   `json:"changeDate"`
-	ChangeSource       interface{} `json:"changeSource,omitempty"`
-	DesiredChangeValue *int        `json:"desiredChangeValue,omitempty"`
+	ChangeSource       interface{} `json:"changeSource"`
+	DesiredChangeValue int         `json:"desiredChangeValue"`
 	FinalValue         Points      `json:"finalValue"`
 }
 

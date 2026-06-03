@@ -1,19 +1,27 @@
 package ctrlpoints
 
 import (
-	gengames "FGG-Service/api/generated/games"
+	"FGG-Service/api/generated/games"
+	"FGG-Service/api/generated/points"
+	"FGG-Service/src/auth/service"
+	"FGG-Service/src/common"
 	"FGG-Service/src/points/service"
+	typepoints "FGG-Service/src/points/type"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type Controller struct {
-	Service srvpoints.Service
+	Service     srvpoints.Service
+	AuthService srvauth.Service
 }
 
 func NewController() *Controller {
-	return new(Controller)
+	s := srvpoints.NewService()
+	as := new(srvauth.Service)
+
+	return &Controller{*s, *as}
 }
 
 // GetExperiencePoints (GET /points/experience-points)
@@ -23,7 +31,48 @@ func (c *Controller) GetExperiencePoints(ctx echo.Context) error {
 
 // ChangeExperiencePoints (POST /points/experience-points)
 func (c *Controller) ChangeExperiencePoints(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	var pointChangeDto genpoints.PointChange
+	err := ctx.Bind(&pointChangeDto)
+
+	if err != nil {
+		err = common.NewBadRequestError(err.Error())
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	pointChange := convertDtoToPointChange(pointChangeDto)
+
+	changeResult, err := c.Service.ChangeExperiencePoints(userId, pointChange)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	changeResultDto := convertChangeResultToDto(changeResult)
+
+	return ctx.JSON(http.StatusOK, changeResultDto)
+}
+
+func convertDtoToPointChange(pointChangeDto genpoints.PointChange) typepoints.PointChange {
+	return typepoints.PointChange{
+		ChangeSource:       pointChangeDto.ChangeSource,
+		DesiredChangeValue: pointChangeDto.DesiredChangeValue,
+	}
+}
+
+func convertChangeResultToDto(changeResult typepoints.PointChangeResult) genpoints.PointChangeResult {
+	return genpoints.PointChangeResult{
+		ActualChangeValue:  changeResult.ActualChangeValue,
+		ChangeDate:         changeResult.ChangeDate,
+		ChangeSource:       changeResult.ChangeSource,
+		DesiredChangeValue: changeResult.DesiredChangeValue,
+		FinalValue:         changeResult.FinalValue,
+	}
 }
 
 // ChangeFreePoints (POST /points/free-points)

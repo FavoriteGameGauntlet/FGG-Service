@@ -7,4 +7,5 @@ const (
 	DefaultTimerDurationInS           = 30
 	DefaultTerritoryHoursIncreasing   = 2
 	DefaultExperiencePointsIncreasing = 2
+	DefaultExperiencePointsLevelUp    = -10
 )
