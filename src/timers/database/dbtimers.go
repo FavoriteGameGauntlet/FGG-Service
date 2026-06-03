@@ -7,6 +7,13 @@ import (
 	"time"
 )
 
+type IDatabase interface {
+	GetCurrentTimerCommand(userId int) (timer typetimers.Timer, err error)
+	CreateCurrentTimerCommand(userId int, gameId int) error
+	ActTimerCommand(timerId int, timerState typetimers.TimerStateType, remainingTime time.Duration) error
+	GetCompletedTimerUsersCommand() (userIds []int, err error)
+}
+
 type Database struct {
 }
 
@@ -16,11 +23,10 @@ const GetCurrentTimerQuery = `
 		t.State,
 		t.DurationInS,
 		t.LastActionDate,
-		CASE t.State
-			WHEN ? THEN t.RemainingTimeInS - (strftime('%s', 'now') - strftime('%s', t.LastActionDate))
-			WHEN ? THEN t.RemainingTimeInS
-			ELSE t.DurationInS
-		END AS RemainingTimeInS
+		CASE WHEN t.State IN (?, ?)
+	    	THEN t.RemainingTimeInS
+	    	ELSE t.DurationInS
+		END AS RemainingTime
 	FROM Timers t
 	WHERE UserId = ?
 		AND t.State != ?
