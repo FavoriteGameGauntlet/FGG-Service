@@ -5,6 +5,7 @@ import "FGG-Service/src/dbaccess"
 type IDatabase interface {
 	GetExperiencePointsCommand(userId int) (points int, err error)
 	ChangeExperiencePointsCommand(userId int, changeValue int) error
+	GetFreePointsCommand(userId int) (points int, err error)
 }
 
 type Database struct {
@@ -64,6 +65,23 @@ const GetExperiencePointsQuery = `
 func (db *Database) GetExperiencePointsCommand(userId int) (points int, err error) {
 	queryName := "ExperiencePointsQuery"
 	row := dbaccess.QueryRow(queryName, GetExperiencePointsQuery, userId)
+
+	err = row.Scan(&points)
+
+	dbaccess.LogDbResult(queryName, points, err)
+
+	return
+}
+
+const GetFreePointsQuery = `
+	SELECT FreePoints
+	FROM UserStats
+	WHERE UserId = ?
+`
+
+func (db *Database) GetFreePointsCommand(userId int) (points int, err error) {
+	queryName := "GetFreePointsQuery"
+	row := dbaccess.QueryRow(queryName, GetFreePointsQuery, userId)
 
 	err = row.Scan(&points)
 

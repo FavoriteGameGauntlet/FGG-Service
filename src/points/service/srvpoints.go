@@ -21,6 +21,10 @@ func (s *Service) GetExperiencePoints(userId int) (int, error) {
 	return s.Database.GetExperiencePointsCommand(userId)
 }
 
+func (s *Service) GetFreePoints(userId int) (int, error) {
+	return s.Database.GetFreePointsCommand(userId)
+}
+
 func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.PointChange) (
 	changeResult typepoints.PointChangeResult, err error) {
 
