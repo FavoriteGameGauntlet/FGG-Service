@@ -10,13 +10,15 @@ import (
 )
 
 type Service struct {
-	Database dbpoints.Database
+	Database dbpoints.IDatabase
 }
 
 func NewService() *Service {
-	s := new(Service)
+	return &Service{Database: new(dbpoints.Database)}
+}
 
-	return s
+func (s *Service) GetExperiencePoints(userId int) (int, error) {
+	return s.Database.GetExperiencePointsCommand(userId)
 }
 
 func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.PointChange) (

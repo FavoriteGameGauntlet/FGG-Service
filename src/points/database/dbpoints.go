@@ -2,6 +2,11 @@ package dbpoints
 
 import "FGG-Service/src/dbaccess"
 
+type IDatabase interface {
+	GetExperiencePointsCommand(userId int) (points int, err error)
+	ChangeExperiencePointsCommand(userId int, changeValue int) error
+}
+
 type Database struct {
 }
 
