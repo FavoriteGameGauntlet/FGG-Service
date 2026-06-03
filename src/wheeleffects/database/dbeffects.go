@@ -8,6 +8,15 @@ import (
 	"time"
 )
 
+type IDatabase interface {
+	GetAvailableRollsCountCommand(userId int) (count int, err error)
+	GetAvailableEffectsCommand(userId int) (effects typewheeleffects.WheelEffects, err error)
+	GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error)
+	MakeEffectRollCommand(userId int) (effects typewheeleffects.WheelEffects, err error)
+	DecreaseAvailableRollsValueCommand(userId int) error
+	GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error)
+}
+
 type Database struct {
 }
 

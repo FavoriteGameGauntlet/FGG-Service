@@ -19,15 +19,19 @@ type IService interface {
 }
 
 type Service struct {
-	Database               dbtimers.Database
-	GamesDatabase          dbgames.Database
+	Database               dbtimers.IDatabase
+	GamesDatabase          dbgames.IDatabase
 	PointsDatabase         dbpoints.Database
-	WheelEffectsDatabase   dbwheeleffects.Database
+	WheelEffectsDatabase   dbwheeleffects.IDatabase
 	TimerFinisherScheduler gocron.Scheduler
 }
 
 func NewService() *Service {
-	s := new(Service)
+	s := &Service{
+		Database:             new(dbtimers.Database),
+		GamesDatabase:        new(dbgames.Database),
+		WheelEffectsDatabase: new(dbwheeleffects.Database),
+	}
 
 	s.StartTimerFinisherScheduler()
 
@@ -174,6 +178,9 @@ func (s *Service) actCurrentTimer(
 	}
 
 	remainingTime := timer.RemainingTime
+	if timer.State == typetimers.TimerStateRunning {
+		remainingTime -= time.Since(timer.LastActionDate)
+	}
 	if remainingTime < 0 {
 		remainingTime = 0
 	}
