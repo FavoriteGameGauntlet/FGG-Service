@@ -70,6 +70,13 @@ type PointInfoByLogins = []struct {
 // Points defines model for Points.
 type Points = int
 
+// TerritoryHoursChange defines model for TerritoryHoursChange.
+type TerritoryHoursChange struct {
+	ChangeSource       string `json:"changeSource"`
+	DesiredChangeValue int    `json:"desiredChangeValue"`
+	IsSomeones         *bool  `json:"isSomeones,omitempty"`
+}
+
 // TerritoryPointChangeResult defines model for TerritoryPointChangeResult.
 type TerritoryPointChangeResult struct {
 	ActualChangeValue  int         `json:"actualChangeValue"`
@@ -106,6 +113,9 @@ type TerritoryPointChangeResultsResponse = TerritoryPointChangeResults
 // PointChangeRequest defines model for PointChangeRequest.
 type PointChangeRequest = PointChange
 
+// TerritoryHoursChangeRequest defines model for TerritoryHoursChangeRequest.
+type TerritoryHoursChangeRequest = TerritoryHoursChange
+
 // ChangeExperiencePointsJSONRequestBody defines body for ChangeExperiencePoints for application/json ContentType.
 type ChangeExperiencePointsJSONRequestBody = PointChange
 
@@ -113,7 +123,7 @@ type ChangeExperiencePointsJSONRequestBody = PointChange
 type ChangeFreePointsJSONRequestBody = PointChange
 
 // ChangeTerritoryHoursJSONRequestBody defines body for ChangeTerritoryHours for application/json ContentType.
-type ChangeTerritoryHoursJSONRequestBody = PointChange
+type ChangeTerritoryHoursJSONRequestBody = TerritoryHoursChange
 
 // ChangeUserTerritoryPointsJSONRequestBody defines body for ChangeUserTerritoryPoints for application/json ContentType.
 type ChangeUserTerritoryPointsJSONRequestBody = PointChange

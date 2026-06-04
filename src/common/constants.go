@@ -9,3 +9,5 @@ const (
 	DefaultExperiencePointsIncreasing = 2
 	DefaultExperiencePointsLevelUp    = -10
 )
+
+var DefaultTerritoryHoursSeizeDecreasingSlice = []int{-2, -4}

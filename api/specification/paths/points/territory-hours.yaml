@@ -2,7 +2,7 @@ post:
   operationId: changeTerritoryHours
   tags: [ Points ]
   requestBody:
-    $ref: "../../components/requests/PointChangeRequest.yaml"
+    $ref: "../../components/requests/TerritoryHoursChangeRequest.yaml"
   responses:
     "200":
       $ref: "../../components/responses/PointChangeResultResponse.yaml"

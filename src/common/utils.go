@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -81,5 +83,13 @@ func DurationToISO8601(duration time.Duration) string {
 	}
 
 	return result
+}
 
+func ConvertIntSliceToString(intSlice []int) string {
+	stringSlice := make([]string, len(intSlice))
+	for i, v := range intSlice {
+		stringSlice[i] = strconv.Itoa(v)
+	}
+
+	return strings.Join(stringSlice, ", ")
 }

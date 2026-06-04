@@ -1,0 +1,6 @@
+allOf:
+  - $ref: "PointChange.yaml"
+  - type: object
+    properties:
+      isSomeones:
+        type: boolean
