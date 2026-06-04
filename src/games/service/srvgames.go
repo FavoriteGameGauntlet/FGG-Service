@@ -5,6 +5,7 @@ import (
 	"FGG-Service/src/games/database"
 	"FGG-Service/src/games/types"
 	"FGG-Service/src/timers/service"
+	"database/sql"
 	"errors"
 	"math/rand"
 	"time"
@@ -185,6 +186,16 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 	game.Id = randomUnplayedGame.GameId
 	game.Name = randomUnplayedGame.Name
 	game.State = typegames.GameStateStarted
+
+	return
+}
+
+func (s *Service) GetAllCurrentGames() (games typegames.CurrentGames, err error) {
+	games, err = s.Database.GetAllCurrentGamesCommand()
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = nil
+	}
 
 	return
 }

@@ -23,6 +23,7 @@ type IDatabase interface {
 	CancelCurrentGameCommand(userId int, gameId int) error
 	FinishCurrentGameCommand(userId int, gameId int) error
 	GetGameHistoryCommand(userId int) (games typegames.CurrentGames, err error)
+	GetAllCurrentGamesCommand() (games typegames.CurrentGames, err error)
 }
 
 type Database struct {
@@ -195,13 +196,19 @@ const GetCurrentGameQuery = `
 
 func (db *Database) GetCurrentGameCommand(userId int) (games typegames.CurrentGames, err error) {
 	queryName := "GetCurrentGameQuery"
-	games, err = db.getHistoryGames(queryName, GetCurrentGameQuery, userId)
+	games, err = db.getHistoryGames(queryName, GetCurrentGameQuery, &userId)
 
 	return
 }
 
-func (db *Database) getHistoryGames(queryName string, query string, userId int) (games typegames.CurrentGames, err error) {
-	rows, err := dbaccess.Query(queryName, query, userId, typegames.GameStateFinished, typegames.GameStateCancelled)
+func (db *Database) getHistoryGames(queryName string, query string, userId *int) (games typegames.CurrentGames, err error) {
+	var rows *sql.Rows
+
+	if userId == nil {
+		rows, err = dbaccess.Query(queryName, query, typegames.GameStateFinished, typegames.GameStateCancelled)
+	} else {
+		rows, err = dbaccess.Query(queryName, query, userId, typegames.GameStateFinished, typegames.GameStateCancelled)
+	}
 
 	if err != nil {
 		return
@@ -342,11 +349,29 @@ const GetGameHistoryQuery = `
 
 func (db *Database) GetGameHistoryCommand(userId int) (games typegames.CurrentGames, err error) {
 	queryName := "GetGameHistoryQuery"
-	games, err = db.getHistoryGames(queryName, GetGameHistoryQuery, userId)
+	games, err = db.getHistoryGames(queryName, GetGameHistoryQuery, &userId)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
 	}
+
+	return
+}
+
+const GetAllCurrentGamesQuery = `
+	SELECT
+		g.Id,
+		g.Name,
+		gh.State,
+		gh.UserID
+	FROM GameHistory gh
+		INNER JOIN Games g ON gh.GameId = g.Id
+	WHERE gh.State NOT IN (?, ?)
+`
+
+func (db *Database) GetAllCurrentGamesCommand() (games typegames.CurrentGames, err error) {
+	queryName := "GetAllCurrentGamesQuery"
+	games, err = db.getHistoryGames(queryName, GetAllCurrentGamesQuery, nil)
 
 	return
 }
