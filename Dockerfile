@@ -8,4 +8,4 @@ COPY . .
 
 RUN CGO_ENABLED=1 go build
 
-ENTRYPOINT ["./FGG-Service"]
+ENTRYPOINT ["./fgg-server"]
