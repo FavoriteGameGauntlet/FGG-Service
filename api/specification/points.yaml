@@ -156,7 +156,7 @@ paths:
       tags:
         - Points
       requestBody:
-        $ref: '#/components/requestBodies/PointChangeRequest'
+        $ref: '#/components/requestBodies/TerritoryHoursChangeRequest'
       responses:
         '200':
           $ref: '#/components/responses/PointChangeResultResponse'
@@ -292,6 +292,13 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/FreePointChangeResult'
+    TerritoryHoursChange:
+      allOf:
+        - $ref: '#/components/schemas/PointChange'
+        - type: object
+          properties:
+            isSomeones:
+              type: boolean
   parameters:
     Login:
       name: login
@@ -348,3 +355,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PointChange'
+    TerritoryHoursChangeRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TerritoryHoursChange'

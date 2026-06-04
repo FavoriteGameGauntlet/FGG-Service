@@ -15,9 +15,20 @@ type PointChange struct {
 	DesiredChangeValue int
 }
 
+type TerritoryHoursChange struct {
+	ChangeSource       string
+	DesiredChangeValue int
+	IsSomeones         bool
+}
+
 const (
 	ExperienceChangeSourceLevelUp = "level-up"
 	ExperienceChangeSourceOther   = "other"
+
+	TerritoryHoursChangeSourceSeize = "seize"
+	TerritoryHoursChangeSourceOther = "other"
 )
 
 var ExperienceChangeSourceSlice = []string{ExperienceChangeSourceLevelUp, ExperienceChangeSourceOther}
+
+var TerritoryHoursChangeSourceSlice = []string{TerritoryHoursChangeSourceSeize, TerritoryHoursChangeSourceOther}

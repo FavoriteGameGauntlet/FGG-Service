@@ -327,7 +327,7 @@ func NewPasswordUnprocessableError(messageDetails string) error {
 	}
 }
 
-func NewExperienceChangeSourceUnprocessableError(possibleValues []string) error {
+func NewChangeSourceUnprocessableError(possibleValues []string) error {
 	message := fmt.Sprintf(
 		"The change source doesn't match any of these: %s.",
 		strings.Join(possibleValues, ", "))

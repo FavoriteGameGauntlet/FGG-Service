@@ -6,6 +6,8 @@ type IDatabase interface {
 	GetExperiencePointsCommand(userId int) (points int, err error)
 	ChangeExperiencePointsCommand(userId int, changeValue int) error
 	GetFreePointsCommand(userId int) (points int, err error)
+	GetTerritoryHoursCommand(userId int) (points int, err error)
+	ChangeTerritoryHoursCommand(userId int, changeValue int) error
 }
 
 type Database struct {
@@ -71,6 +73,38 @@ func (db *Database) GetExperiencePointsCommand(userId int) (points int, err erro
 	dbaccess.LogDbResult(queryName, points, err)
 
 	return
+}
+
+const GetTerritoryHoursQuery = `
+	SELECT TerritoryHours
+	FROM UserStats
+	WHERE UserId = ?
+`
+
+func (db *Database) GetTerritoryHoursCommand(userId int) (points int, err error) {
+	queryName := "GetTerritoryHoursQuery"
+	row := dbaccess.QueryRow(queryName, GetTerritoryHoursQuery, userId)
+
+	err = row.Scan(&points)
+
+	dbaccess.LogDbResult(queryName, points, err)
+
+	return
+}
+
+const ChangeTerritoryHoursQuery = `
+	UPDATE UserStats
+	SET TerritoryHours = TerritoryHours + ?
+	WHERE UserId = ?
+`
+
+func (db *Database) ChangeTerritoryHoursCommand(userId int, changeValue int) error {
+	queryName := "ChangeTerritoryHoursQuery"
+	_, err := dbaccess.Exec(queryName, ChangeTerritoryHoursQuery, changeValue, userId)
+
+	dbaccess.LogDbResult(queryName, nil, err)
+
+	return err
 }
 
 const GetFreePointsQuery = `

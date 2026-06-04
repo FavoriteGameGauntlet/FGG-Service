@@ -136,7 +136,38 @@ func (c *Controller) GetUserTerritoryPointHistory(ctx echo.Context, _ gengames.L
 
 // ChangeTerritoryHours (POST /points/territory-hours)
 func (c *Controller) ChangeTerritoryHours(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	var pointChangeDto genpoints.TerritoryHoursChange
+	err := ctx.Bind(&pointChangeDto)
+
+	if err != nil {
+		err = common.NewBadRequestError(err.Error())
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	pointChange := convertDtoToTerritoryHoursChange(pointChangeDto)
+	changeResult, err := c.Service.ChangeTerritoryHours(userId, pointChange)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	changeResultDto := convertChangeResultToDto(changeResult)
+
+	return ctx.JSON(http.StatusOK, changeResultDto)
+}
+
+func convertDtoToTerritoryHoursChange(dto genpoints.TerritoryHoursChange) typepoints.TerritoryHoursChange {
+	return typepoints.TerritoryHoursChange{
+		ChangeSource:       dto.ChangeSource,
+		DesiredChangeValue: dto.DesiredChangeValue,
+		IsSomeones:         dto.IsSomeones != nil && *dto.IsSomeones,
+	}
 }
 
 // GetTerritoryHours (GET /points/territory-points)

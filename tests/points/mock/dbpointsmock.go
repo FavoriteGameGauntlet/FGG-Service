@@ -24,3 +24,15 @@ func (m *DatabaseMock) GetFreePointsCommand(userId int) (points int, err error) 
 	err = args.Error(1)
 	return
 }
+
+func (m *DatabaseMock) GetTerritoryHoursCommand(userId int) (points int, err error) {
+	args := m.Called(userId)
+	points = args.Get(0).(int)
+	err = args.Error(1)
+	return
+}
+
+func (m *DatabaseMock) ChangeTerritoryHoursCommand(userId int, changeValue int) error {
+	args := m.Called(userId, changeValue)
+	return args.Error(0)
+}
