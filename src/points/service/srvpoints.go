@@ -25,6 +25,10 @@ func (s *Service) GetFreePoints(userId int) (int, error) {
 	return s.Database.GetFreePointsCommand(userId)
 }
 
+func (s *Service) GetTerritoryHours(userId int) (int, error) {
+	return s.Database.GetTerritoryHoursCommand(userId)
+}
+
 func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.TerritoryHoursChange) (
 	changeResult typepoints.PointChangeResult, err error) {
 
@@ -47,7 +51,7 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 
 	if pointChange.ChangeSource == typepoints.TerritoryHoursChangeSourceSeize {
 		if currentHours+pointChange.DesiredChangeValue < 0 {
-			err = common.NewNotEnoughCurrentPointsConflictError(pointChange.ChangeSource, pointChange.DesiredChangeValue)
+			err = common.NewNotEnoughCurrentPointsConflictError(pointChange.ChangeSource, -pointChange.DesiredChangeValue)
 			return
 		}
 	}

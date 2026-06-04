@@ -87,26 +87,14 @@ func convertChangeResultToDto(changeResult typepoints.PointChangeResult) genpoin
 	}
 }
 
-// ChangeFreePoints (POST /points/free-points)
-func (c *Controller) ChangeFreePoints(ctx echo.Context) error {
+// ChangeFreePoints (POST /points/{login}/free-points)
+func (c *Controller) ChangeFreePoints(ctx echo.Context, _ genpoints.Login) error {
 	return ctx.NoContent(http.StatusNotImplemented)
 }
 
-// GetFreePoints (GET /points/free-points)
-func (c *Controller) GetFreePoints(ctx echo.Context) error {
-	userId, err := c.AuthService.GetUserId(ctx)
-
-	if err != nil {
-		return common.SendJSONErrorResponse(ctx, err)
-	}
-
-	points, err := c.Service.GetFreePoints(userId)
-
-	if err != nil {
-		return common.SendJSONErrorResponse(ctx, err)
-	}
-
-	return ctx.JSON(http.StatusOK, points)
+// GetFreePoints (GET /points/{login}/free-points)
+func (c *Controller) GetFreePoints(ctx echo.Context, _ genpoints.Login) error {
+	return ctx.NoContent(http.StatusNotImplemented)
 }
 
 // GetUserFreePointHistory (GET /points/{login}/free-points/history)
@@ -124,7 +112,7 @@ func (c *Controller) ChangeUserTerritoryPoints(ctx echo.Context, _ gengames.Logi
 	return ctx.NoContent(http.StatusNotImplemented)
 }
 
-// GetUserTerritoryPoints (GET /points/{login}/territory-hours)
+// GetUserTerritoryPoints (GET /points/{login}/territory-points)
 func (c *Controller) GetUserTerritoryPoints(ctx echo.Context, _ gengames.Login) error {
 	return ctx.NoContent(http.StatusNotImplemented)
 }
@@ -170,9 +158,21 @@ func convertDtoToTerritoryHoursChange(dto genpoints.TerritoryHoursChange) typepo
 	}
 }
 
-// GetTerritoryHours (GET /points/territory-points)
+// GetTerritoryHours (GET /points/territory-hours)
 func (c *Controller) GetTerritoryHours(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	userId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	points, err := c.Service.GetTerritoryHours(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, points)
 }
 
 // GetAllPointInfo (GET /points/all/info)

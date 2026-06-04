@@ -1,0 +1,28 @@
+post:
+  operationId: changeFreePoints
+  tags: [ Points ]
+  parameters:
+    - $ref: "../../../components/parameters/Login.yaml"
+  requestBody:
+    $ref: "../../../components/requests/PointChangeRequest.yaml"
+  responses:
+    "200":
+      $ref: "../../../components/responses/FreePointChangeResultsResponse.yaml"
+    "401":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "409":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+get:
+  operationId: getFreePoints
+  tags: [ Points ]
+  parameters:
+    - $ref: "../../../components/parameters/Login.yaml"
+  responses:
+    "200":
+      $ref: "../../../components/responses/PointsResponse.yaml"
+    "401":
+      $ref: "../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../components/responses/ErrorResponse.yaml"

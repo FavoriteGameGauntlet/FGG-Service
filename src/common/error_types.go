@@ -245,11 +245,11 @@ func NewWrongDesiredChangeValueConflictError(changeSource string, changeSourceRu
 	}
 }
 
-func NewNotEnoughCurrentPointsConflictError(changeSource string, currentPoints int) error {
+func NewNotEnoughCurrentPointsConflictError(changeSource string, requiredPoints int) error {
 	message := fmt.Sprintf(
 		"Not enough points for '%s' change source. It should be at least %d.",
 		changeSource,
-		currentPoints)
+		requiredPoints)
 
 	return &ConflictError{
 		&BaseError{

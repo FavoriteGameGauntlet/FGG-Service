@@ -119,11 +119,11 @@ type TerritoryHoursChangeRequest = TerritoryHoursChange
 // ChangeExperiencePointsJSONRequestBody defines body for ChangeExperiencePoints for application/json ContentType.
 type ChangeExperiencePointsJSONRequestBody = PointChange
 
-// ChangeFreePointsJSONRequestBody defines body for ChangeFreePoints for application/json ContentType.
-type ChangeFreePointsJSONRequestBody = PointChange
-
 // ChangeTerritoryHoursJSONRequestBody defines body for ChangeTerritoryHours for application/json ContentType.
 type ChangeTerritoryHoursJSONRequestBody = TerritoryHoursChange
+
+// ChangeFreePointsJSONRequestBody defines body for ChangeFreePoints for application/json ContentType.
+type ChangeFreePointsJSONRequestBody = PointChange
 
 // ChangeUserTerritoryPointsJSONRequestBody defines body for ChangeUserTerritoryPoints for application/json ContentType.
 type ChangeUserTerritoryPointsJSONRequestBody = PointChange
@@ -140,17 +140,17 @@ type ServerInterface interface {
 	// (POST /points/experience-points)
 	ChangeExperiencePoints(ctx echo.Context) error
 
-	// (GET /points/free-points)
-	GetFreePoints(ctx echo.Context) error
-
-	// (POST /points/free-points)
-	ChangeFreePoints(ctx echo.Context) error
-
 	// (GET /points/territory-hours)
 	GetTerritoryHours(ctx echo.Context) error
 
 	// (POST /points/territory-hours)
 	ChangeTerritoryHours(ctx echo.Context) error
+
+	// (GET /points/{login}/free-points)
+	GetFreePoints(ctx echo.Context, login Login) error
+
+	// (POST /points/{login}/free-points)
+	ChangeFreePoints(ctx echo.Context, login Login) error
 
 	// (GET /points/{login}/free-points/history)
 	GetUserFreePointHistory(ctx echo.Context, login Login) error
@@ -200,24 +200,6 @@ func (w *ServerInterfaceWrapper) ChangeExperiencePoints(ctx echo.Context) error 
 	return err
 }
 
-// GetFreePoints converts echo context to params.
-func (w *ServerInterfaceWrapper) GetFreePoints(ctx echo.Context) error {
-	var err error
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetFreePoints(ctx)
-	return err
-}
-
-// ChangeFreePoints converts echo context to params.
-func (w *ServerInterfaceWrapper) ChangeFreePoints(ctx echo.Context) error {
-	var err error
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ChangeFreePoints(ctx)
-	return err
-}
-
 // GetTerritoryHours converts echo context to params.
 func (w *ServerInterfaceWrapper) GetTerritoryHours(ctx echo.Context) error {
 	var err error
@@ -233,6 +215,38 @@ func (w *ServerInterfaceWrapper) ChangeTerritoryHours(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ChangeTerritoryHours(ctx)
+	return err
+}
+
+// GetFreePoints converts echo context to params.
+func (w *ServerInterfaceWrapper) GetFreePoints(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login Login
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetFreePoints(ctx, login)
+	return err
+}
+
+// ChangeFreePoints converts echo context to params.
+func (w *ServerInterfaceWrapper) ChangeFreePoints(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "login" -------------
+	var login Login
+
+	err = runtime.BindStyledParameterWithOptions("simple", "login", ctx.Param("login"), &login, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter login: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ChangeFreePoints(ctx, login)
 	return err
 }
 
@@ -347,10 +361,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/points/all/info", wrapper.GetAllPointInfo)
 	router.GET(baseURL+"/points/experience-points", wrapper.GetExperiencePoints)
 	router.POST(baseURL+"/points/experience-points", wrapper.ChangeExperiencePoints)
-	router.GET(baseURL+"/points/free-points", wrapper.GetFreePoints)
-	router.POST(baseURL+"/points/free-points", wrapper.ChangeFreePoints)
 	router.GET(baseURL+"/points/territory-hours", wrapper.GetTerritoryHours)
 	router.POST(baseURL+"/points/territory-hours", wrapper.ChangeTerritoryHours)
+	router.GET(baseURL+"/points/:login/free-points", wrapper.GetFreePoints)
+	router.POST(baseURL+"/points/:login/free-points", wrapper.ChangeFreePoints)
 	router.GET(baseURL+"/points/:login/free-points/history", wrapper.GetUserFreePointHistory)
 	router.GET(baseURL+"/points/:login/info", wrapper.GetUserPointInfo)
 	router.GET(baseURL+"/points/:login/territory-points", wrapper.GetUserTerritoryPoints)
