@@ -13,9 +13,9 @@ type Service struct {
 }
 
 func NewService() *Service {
-	s := new(Service)
-
-	return s
+	return &Service{
+		Database: new(dbusers.Database),
+	}
 }
 
 func (s *Service) GetAllUserNames() (users typeusers.Users, err error) {
