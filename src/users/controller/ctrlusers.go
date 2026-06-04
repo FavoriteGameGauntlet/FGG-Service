@@ -5,6 +5,7 @@ import (
 	srvauth "FGG-Service/src/auth/service"
 	"FGG-Service/src/common"
 	"FGG-Service/src/users/service"
+	"FGG-Service/src/users/types"
 	"FGG-Service/src/validator"
 	"net/http"
 
@@ -25,7 +26,39 @@ func NewController() *Controller {
 
 // GetAllUserNames (GET /users/all/names)
 func (c *Controller) GetAllUserNames(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	if !doesExist {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	users, err := c.Service.GetAllUserNames()
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	usersDto := convertUsersToDto(users)
+
+	return ctx.JSON(http.StatusOK, usersDto)
+}
+
+func convertUsersToDto(users typeusers.Users) genusers.UserNames {
+	dto := make(genusers.UserNames, len(users))
+
+	for i, user := range users {
+		dto[i] = genusers.UserName{
+			Login:       user.Login,
+			DisplayName: user.DisplayName,
+		}
+	}
+
+	return dto
 }
 
 // GetDisplayName (GET /users/display-name)
