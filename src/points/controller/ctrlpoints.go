@@ -87,26 +87,14 @@ func convertChangeResultToDto(changeResult typepoints.PointChangeResult) genpoin
 	}
 }
 
-// ChangeFreePoints (POST /points/free-points)
-func (c *Controller) ChangeFreePoints(ctx echo.Context) error {
+// ChangeFreePoints (POST /points/{login}/free-points)
+func (c *Controller) ChangeFreePoints(ctx echo.Context, _ genpoints.Login) error {
 	return ctx.NoContent(http.StatusNotImplemented)
 }
 
-// GetFreePoints (GET /points/free-points)
-func (c *Controller) GetFreePoints(ctx echo.Context) error {
-	userId, err := c.AuthService.GetUserId(ctx)
-
-	if err != nil {
-		return common.SendJSONErrorResponse(ctx, err)
-	}
-
-	points, err := c.Service.GetFreePoints(userId)
-
-	if err != nil {
-		return common.SendJSONErrorResponse(ctx, err)
-	}
-
-	return ctx.JSON(http.StatusOK, points)
+// GetFreePoints (GET /points/{login}/free-points)
+func (c *Controller) GetFreePoints(ctx echo.Context, _ genpoints.Login) error {
+	return ctx.NoContent(http.StatusNotImplemented)
 }
 
 // GetUserFreePointHistory (GET /points/{login}/free-points/history)
