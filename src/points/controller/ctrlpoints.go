@@ -136,8 +136,31 @@ func (c *Controller) ChangeUserTerritoryPoints(ctx echo.Context, _ gengames.Logi
 }
 
 // GetUserTerritoryPoints (GET /points/{login}/territory-points)
-func (c *Controller) GetUserTerritoryPoints(ctx echo.Context, _ gengames.Login) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+func (c *Controller) GetUserTerritoryPoints(ctx echo.Context, login genpoints.Login) error {
+	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	if !doesExist {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserIdByLogin(login)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	points, err := c.Service.GetTerritoryPoints(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, points)
 }
 
 // GetUserTerritoryPointHistory (GET /points/{login}/territory-points/history)

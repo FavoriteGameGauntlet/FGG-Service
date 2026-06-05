@@ -29,6 +29,10 @@ func (s *Service) GetTerritoryHours(userId int) (int, error) {
 	return s.Database.GetTerritoryHoursCommand(userId)
 }
 
+func (s *Service) GetTerritoryPoints(userId int) (int, error) {
+	return s.Database.GetTerritoryPointsCommand(userId)
+}
+
 func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.TerritoryHoursChange) (
 	changeResult typepoints.PointChangeResult, err error) {
 
