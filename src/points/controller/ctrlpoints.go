@@ -93,8 +93,31 @@ func (c *Controller) ChangeFreePoints(ctx echo.Context, _ genpoints.Login) error
 }
 
 // GetFreePoints (GET /points/{login}/free-points)
-func (c *Controller) GetFreePoints(ctx echo.Context, _ genpoints.Login) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+func (c *Controller) GetFreePoints(ctx echo.Context, login genpoints.Login) error {
+	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	if !doesExist {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserIdByLogin(login)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	points, err := c.Service.GetFreePoints(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, points)
 }
 
 // GetUserFreePointHistory (GET /points/{login}/free-points/history)
