@@ -8,6 +8,7 @@ type IDatabase interface {
 	GetFreePointsCommand(userId int) (points int, err error)
 	GetTerritoryHoursCommand(userId int) (points int, err error)
 	ChangeTerritoryHoursCommand(userId int, changeValue int) error
+	GetTerritoryPointsCommand(userId int) (points int, err error)
 }
 
 type Database struct {
@@ -105,6 +106,23 @@ func (db *Database) ChangeTerritoryHoursCommand(userId int, changeValue int) err
 	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
+}
+
+const GetTerritoryPointsQuery = `
+	SELECT TerritoryPoints
+	FROM UserStats
+	WHERE UserId = ?
+`
+
+func (db *Database) GetTerritoryPointsCommand(userId int) (points int, err error) {
+	queryName := "GetTerritoryPointsQuery"
+	row := dbaccess.QueryRow(queryName, GetTerritoryPointsQuery, userId)
+
+	err = row.Scan(&points)
+
+	dbaccess.LogDbResult(queryName, points, err)
+
+	return
 }
 
 const GetFreePointsQuery = `
