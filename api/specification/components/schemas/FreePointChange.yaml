@@ -3,4 +3,7 @@ allOf:
   - type: object
     properties:
       wheelEffectName:
-        $ref: "./Name.yaml"
+        nullable: true
+        example: null
+        allOf:
+          - $ref: "./Name.yaml"

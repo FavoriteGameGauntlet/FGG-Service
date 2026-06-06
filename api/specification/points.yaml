@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.13.0
+  version: 0.14.0
 paths:
   /points/{login}/info:
     get:
@@ -289,7 +289,10 @@ components:
         - type: object
           properties:
             wheelEffectName:
-              $ref: '#/components/schemas/Name'
+              nullable: true
+              example: null
+              allOf:
+                - $ref: '#/components/schemas/Name'
     FreePointChangeResult:
       allOf:
         - $ref: '#/components/schemas/PointChangeResult'
@@ -324,6 +327,7 @@ components:
           properties:
             isSomeones:
               type: boolean
+              default: false
   parameters:
     Login:
       name: login
