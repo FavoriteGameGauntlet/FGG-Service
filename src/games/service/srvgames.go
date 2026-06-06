@@ -11,6 +11,17 @@ import (
 	"time"
 )
 
+type IService interface {
+	GetCurrentGame(userId int) (typegames.CurrentGame, error)
+	CancelCurrentGame(userId int) error
+	FinishCurrentGame(userId int) error
+	MakeGameRoll(userId int) (typegames.CurrentGame, error)
+	GetGameHistory(userId int) (typegames.CurrentGames, error)
+	GetUnplayedGames(userId int) (typegames.WishlistGames, error)
+	AddWishlistGame(userId int, wishlistGame typegames.WishlistGame) error
+	GetAllCurrentGames() (typegames.CurrentGames, error)
+}
+
 type Service struct {
 	Database       dbgames.IDatabase
 	TimerService   srvtimers.IService
