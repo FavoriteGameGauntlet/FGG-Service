@@ -28,8 +28,19 @@ func NewController() *Controller {
 }
 
 // GetUserCurrentGame (GET /games/{login}/current)
-func (c *Controller) GetUserCurrentGame(ctx echo.Context, _ gengames.Login) error {
-	userId, err := c.AuthService.GetUserId(ctx)
+func (c *Controller) GetUserCurrentGame(ctx echo.Context, login gengames.Login) error {
+	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	if !doesExist {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserIdByLogin(login)
 
 	if err != nil {
 		return common.SendJSONErrorResponse(ctx, err)
