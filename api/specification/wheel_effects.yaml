@@ -174,26 +174,9 @@ components:
         required:
           - login
           - pointChange
-    PointChangeResult:
-      allOf:
-        - $ref: '#/components/schemas/PointChange'
-        - type: object
-          properties:
-            actualChangeValue:
-              type: integer
-              format: int
-            finalValue:
-              $ref: '#/components/schemas/Points'
-            changeDate:
-              type: string
-              format: date-time
-          required:
-            - actualChangeValue
-            - finalValue
-            - changeDate
     FreePointChangeResult:
       allOf:
-        - $ref: '#/components/schemas/PointChangeResult'
+        - $ref: '#/components/schemas/PointChange'
         - type: object
           properties:
             changeSource:
@@ -206,6 +189,14 @@ components:
                 - other
             wheelEffectName:
               $ref: '#/components/schemas/Name'
+            actualChangeValue:
+              type: integer
+              format: int
+            finalValue:
+              $ref: '#/components/schemas/Points'
+          required:
+            - actualChangeValue
+            - finalValue
     FreePointChangeResultByLogins:
       type: array
       items:

@@ -6,6 +6,8 @@ type IDatabase interface {
 	GetExperiencePointsCommand(userId int) (points int, err error)
 	ChangeExperiencePointsCommand(userId int, changeValue int) error
 	GetFreePointsCommand(userId int) (points int, err error)
+	ChangeFreePointsCommand(userId int, changeValue int) error
+	AddFreePointHistoryCommand(userId int, changeSource string, changeValue int, actualChangeValue int, finalValue int) error
 	GetTerritoryHoursCommand(userId int) (points int, err error)
 	ChangeTerritoryHoursCommand(userId int, changeValue int) error
 	GetTerritoryPointsCommand(userId int) (points int, err error)
@@ -140,4 +142,33 @@ func (db *Database) GetFreePointsCommand(userId int) (points int, err error) {
 	dbaccess.LogDbResult(queryName, points, err)
 
 	return
+}
+
+const ChangeFreePointsQuery = `
+	UPDATE UserStats
+	SET FreePoints = FreePoints + ?
+	WHERE UserId = ?
+`
+
+func (db *Database) ChangeFreePointsCommand(userId int, changeValue int) error {
+	queryName := "ChangeFreePointsQuery"
+	_, err := dbaccess.Exec(queryName, ChangeFreePointsQuery, changeValue, userId)
+
+	dbaccess.LogDbResult(queryName, nil, err)
+
+	return err
+}
+
+const AddFreePointHistoryQuery = `
+	INSERT INTO FreePointHistory (UserId, ChangeSource, ChangeValue, ActualChangeValue, FinalValue)
+	VALUES (?, ?, ?, ?, ?)
+`
+
+func (db *Database) AddFreePointHistoryCommand(userId int, changeSource string, changeValue int, actualChangeValue int, finalValue int) error {
+	queryName := "AddFreePointHistoryQuery"
+	_, err := dbaccess.Exec(queryName, AddFreePointHistoryQuery, userId, changeSource, changeValue, actualChangeValue, finalValue)
+
+	dbaccess.LogDbResult(queryName, nil, err)
+
+	return err
 }

@@ -10,4 +10,7 @@ const (
 	DefaultExperiencePointsLevelUp    = -10
 )
 
-var DefaultTerritoryHoursSeizeDecreasingSlice = []int{-2, -4}
+var DefaultTerritoryHoursSeizeDecreaseSlice = []int{-2, -4}
+
+var _freePointsMinimum = 0
+var FreePointMinimum *int = &_freePointsMinimum

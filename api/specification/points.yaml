@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.12.5
+  version: 0.13.0
 paths:
   /points/{login}/info:
     get:
@@ -91,7 +91,7 @@ paths:
         $ref: '#/components/requestBodies/PointChangeRequest'
       responses:
         '200':
-          $ref: '#/components/responses/FreePointChangeResultsResponse'
+          $ref: '#/components/responses/FreePointChangeResultResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '409':
@@ -120,7 +120,7 @@ paths:
         - $ref: '#/components/parameters/Login'
       responses:
         '200':
-          $ref: '#/components/responses/FreePointChangeResultsResponse'
+          $ref: '#/components/responses/FreePointChangeHistoriesResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '404':
@@ -251,13 +251,9 @@ components:
               format: int
             finalValue:
               $ref: '#/components/schemas/Points'
-            changeDate:
-              type: string
-              format: date-time
           required:
             - actualChangeValue
             - finalValue
-            - changeDate
     TerritoryPointChangeResult:
       allOf:
         - $ref: '#/components/schemas/PointChangeResult'
@@ -279,7 +275,7 @@ components:
       maxLength: 70
     FreePointChangeResult:
       allOf:
-        - $ref: '#/components/schemas/PointChangeResult'
+        - $ref: '#/components/schemas/PointChange'
         - type: object
           properties:
             changeSource:
@@ -292,10 +288,28 @@ components:
                 - other
             wheelEffectName:
               $ref: '#/components/schemas/Name'
-    FreePointChangeResults:
+            actualChangeValue:
+              type: integer
+              format: int
+            finalValue:
+              $ref: '#/components/schemas/Points'
+          required:
+            - actualChangeValue
+            - finalValue
+    FreePointChangeHistory:
+      allOf:
+        - $ref: '#/components/schemas/FreePointChangeResult'
+        - type: object
+          properties:
+            changeDate:
+              type: string
+              format: date-time
+          required:
+            - changeDate
+    FreePointChangeHistories:
       type: array
       items:
-        $ref: '#/components/schemas/FreePointChangeResult'
+        $ref: '#/components/schemas/FreePointChangeHistory'
     TerritoryHoursChange:
       allOf:
         - $ref: '#/components/schemas/PointChange'
@@ -341,12 +355,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TerritoryPointChangeResults'
-    FreePointChangeResultsResponse:
+    FreePointChangeResultResponse:
       description: Success.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/FreePointChangeResults'
+            $ref: '#/components/schemas/FreePointChangeResult'
+    FreePointChangeHistoriesResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FreePointChangeHistories'
     PointChangeResultResponse:
       description: Success.
       content:
