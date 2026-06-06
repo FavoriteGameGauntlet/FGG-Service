@@ -4,3 +4,4 @@ allOf:
     properties:
       isSomeones:
         type: boolean
+        default: false

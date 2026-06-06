@@ -2,4 +2,4 @@ description: Success.
 content:
   application/json:
     schema:
-      $ref: "../schemas/TerritoryPointChangeResults.yaml"
+      $ref: "../schemas/TerritoryPointChangeHistories.yaml"

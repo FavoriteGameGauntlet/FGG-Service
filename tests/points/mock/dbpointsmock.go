@@ -30,8 +30,8 @@ func (m *DatabaseMock) ChangeFreePointsCommand(userId int, changeValue int) erro
 	return args.Error(0)
 }
 
-func (m *DatabaseMock) AddFreePointHistoryCommand(userId int, changeSource string, changeValue int, actualChangeValue int, finalValue int) error {
-	args := m.Called(userId, changeSource, changeValue, actualChangeValue, finalValue)
+func (m *DatabaseMock) AddFreePointHistoryCommand(userId int, sourceUserId int, changeSource string, changeValue int, actualChangeValue int, finalValue int, wheelEffectId *int) error {
+	args := m.Called(userId, sourceUserId, changeSource, changeValue, actualChangeValue, finalValue, wheelEffectId)
 	return args.Error(0)
 }
 

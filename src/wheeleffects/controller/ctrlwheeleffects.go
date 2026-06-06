@@ -18,7 +18,13 @@ type Controller struct {
 }
 
 func NewController() *Controller {
-	return new(Controller)
+	s := srvwheeleffects.NewService()
+	as := srvauth.NewService()
+
+	return &Controller{
+		*s,
+		*as,
+	}
 }
 
 // RollAvailableWheelEffects (POST /wheel-effects/available/roll)

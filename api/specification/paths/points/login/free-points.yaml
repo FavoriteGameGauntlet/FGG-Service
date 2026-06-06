@@ -4,7 +4,7 @@ post:
   parameters:
     - $ref: "../../../components/parameters/Login.yaml"
   requestBody:
-    $ref: "../../../components/requests/PointChangeRequest.yaml"
+    $ref: "../../../components/requests/FreePointChangeRequest.yaml"
   responses:
     "200":
       $ref: "../../../components/responses/FreePointChangeResultResponse.yaml"

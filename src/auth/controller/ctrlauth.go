@@ -17,7 +17,11 @@ type Controller struct {
 }
 
 func NewController() *Controller {
-	return new(Controller)
+	s := srvauth.NewService()
+
+	return &Controller{
+		*s,
+	}
 }
 
 // Login (POST /auth/login)

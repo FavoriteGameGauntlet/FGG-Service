@@ -4,16 +4,29 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/database"
 	"FGG-Service/src/points/type"
+	"FGG-Service/src/wheeleffects/service"
+	typewheeleffects "FGG-Service/src/wheeleffects/types"
 	"slices"
 	"strconv"
 )
 
+type IWheelEffectService interface {
+	GetEffectHistoryByEffectName(userId int, effectName string) (effect *typewheeleffects.RolledWheelEffect, err error)
+}
+
 type Service struct {
-	Database dbpoints.IDatabase
+	Database           dbpoints.IDatabase
+	WheelEffectService IWheelEffectService
 }
 
 func NewService() *Service {
-	return &Service{Database: new(dbpoints.Database)}
+	pdb := new(dbpoints.Database)
+	wes := srvwheeleffects.NewService()
+
+	return &Service{
+		pdb,
+		wes,
+	}
 }
 
 func (s *Service) GetExperiencePoints(userId int) (int, error) {
@@ -32,12 +45,36 @@ func (s *Service) GetTerritoryPoints(userId int) (int, error) {
 	return s.Database.GetTerritoryPointsCommand(userId)
 }
 
-func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.PointChange) (
+func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.FreePointChange) (
 	result typepoints.PointChangeResult, err error) {
 
 	if !slices.Contains(typepoints.FreePointsChangeSourceSlice, pointChange.ChangeSource) {
 		err = common.NewChangeSourceUnprocessableError(typepoints.FreePointsChangeSourceSlice)
 		return
+	}
+
+	var effectId *int
+	if pointChange.ChangeSource == typepoints.FreePointsChangeSourceOwnWheelEffect ||
+		pointChange.ChangeSource == typepoints.FreePointsChangeSourceOtherWheelEffect {
+		err = validateWheelEffectChange(pointChange)
+
+		if err != nil {
+			return
+		}
+
+		var effect *typewheeleffects.RolledWheelEffect
+		effect, err = s.WheelEffectService.GetEffectHistoryByEffectName(userId, *pointChange.WheelEffectName)
+
+		if err != nil {
+			return
+		}
+
+		if effect == nil {
+			err = common.NewWheelEffectNameNotFoundError()
+			return
+		}
+
+		effectId = &effect.Id
 	}
 
 	if pointChange.ChangeSource == typepoints.FreePointsChangeSourceBaseTeleport ||
@@ -76,10 +113,12 @@ func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.PointChang
 
 	err = s.Database.AddFreePointHistoryCommand(
 		userId,
+		pointChange.SourceUserId,
 		pointChange.ChangeSource,
 		pointChange.DesiredChangeValue,
 		changeValue,
-		finalValue)
+		finalValue,
+		effectId)
 
 	if err != nil {
 		return
@@ -95,7 +134,15 @@ func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.PointChang
 	return
 }
 
-func validateTeleportBaseOrSandstormChange(pointChange typepoints.PointChange) error {
+func validateWheelEffectChange(pointChange typepoints.FreePointChange) error {
+	if pointChange.WheelEffectName == nil {
+		return common.NewWheelEffectNameRequiredUnprocessableError(pointChange.ChangeSource)
+	}
+
+	return nil
+}
+
+func validateTeleportBaseOrSandstormChange(pointChange typepoints.FreePointChange) error {
 	if pointChange.DesiredChangeValue > 0 {
 		return common.NewWrongDesiredChangeValueConflictError(
 			pointChange.ChangeSource,
@@ -105,15 +152,15 @@ func validateTeleportBaseOrSandstormChange(pointChange typepoints.PointChange) e
 	return nil
 }
 
-func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.TerritoryHoursChange) (
+func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.TerritoryHourChange) (
 	changeResult typepoints.PointChangeResult, err error) {
 
-	if !slices.Contains(typepoints.TerritoryHoursChangeSourceSlice, pointChange.ChangeSource) {
-		err = common.NewChangeSourceUnprocessableError(typepoints.TerritoryHoursChangeSourceSlice)
+	if !slices.Contains(typepoints.TerritoryHourChangeSourceSlice, pointChange.ChangeSource) {
+		err = common.NewChangeSourceUnprocessableError(typepoints.TerritoryHourChangeSourceSlice)
 		return
 	}
 
-	if pointChange.ChangeSource == typepoints.TerritoryHoursChangeSourceSeize {
+	if pointChange.ChangeSource == typepoints.TerritoryHourChangeSourceSeize {
 		err = validateSeizeChange(pointChange)
 
 		if err != nil {
@@ -126,7 +173,7 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 		return
 	}
 
-	if pointChange.ChangeSource == typepoints.TerritoryHoursChangeSourceSeize {
+	if pointChange.ChangeSource == typepoints.TerritoryHourChangeSourceSeize {
 		if currentHours+pointChange.DesiredChangeValue < 0 {
 			err = common.NewNotEnoughCurrentPointsConflictError(
 				pointChange.ChangeSource,
@@ -153,7 +200,7 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 	return
 }
 
-func validateSeizeChange(pointChange typepoints.TerritoryHoursChange) error {
+func validateSeizeChange(pointChange typepoints.TerritoryHourChange) error {
 	if pointChange.DesiredChangeValue > 0 {
 		return common.NewWrongDesiredChangeValueConflictError(
 			pointChange.ChangeSource,

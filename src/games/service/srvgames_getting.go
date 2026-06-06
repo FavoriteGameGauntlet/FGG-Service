@@ -18,8 +18,10 @@ type GettingService struct {
 }
 
 func NewGettingService() IGettingService {
+	db := new(dbgames.Database)
+
 	return &GettingService{
-		Database: new(dbgames.Database),
+		Database: db,
 	}
 }
 
