@@ -12,7 +12,7 @@ type PointChange struct {
 	DesiredChangeValue int
 }
 
-type TerritoryHoursChange struct {
+type TerritoryHourChange struct {
 	ChangeSource       string
 	DesiredChangeValue int
 	IsSomeones         bool
@@ -22,8 +22,8 @@ const (
 	ExperienceChangeSourceLevelUp = "level-up"
 	ExperienceChangeSourceOther   = "other"
 
-	TerritoryHoursChangeSourceSeize = "seize"
-	TerritoryHoursChangeSourceOther = "other"
+	TerritoryHourChangeSourceSeize = "seize"
+	TerritoryHourChangeSourceOther = "other"
 
 	FreePointsChangeSourceQuestCompletion  = "quest"
 	FreePointsChangeSourceOwnWheelEffect   = "own-wheel-effect"
@@ -35,7 +35,7 @@ const (
 
 var ExperienceChangeSourceSlice = []string{ExperienceChangeSourceLevelUp, ExperienceChangeSourceOther}
 
-var TerritoryHoursChangeSourceSlice = []string{TerritoryHoursChangeSourceSeize, TerritoryHoursChangeSourceOther}
+var TerritoryHourChangeSourceSlice = []string{TerritoryHourChangeSourceSeize, TerritoryHourChangeSourceOther}
 
 var FreePointsChangeSourceSlice = []string{
 	FreePointsChangeSourceQuestCompletion,

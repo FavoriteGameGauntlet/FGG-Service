@@ -174,9 +174,22 @@ components:
         required:
           - login
           - pointChange
-    FreePointChangeResult:
+    PointChangeResult:
       allOf:
         - $ref: '#/components/schemas/PointChange'
+        - type: object
+          properties:
+            actualChangeValue:
+              type: integer
+              format: int
+            finalValue:
+              $ref: '#/components/schemas/Points'
+          required:
+            - actualChangeValue
+            - finalValue
+    FreePointChangeResult:
+      allOf:
+        - $ref: '#/components/schemas/PointChangeResult'
         - type: object
           properties:
             changeSource:
@@ -187,16 +200,6 @@ components:
                 - base-teleport
                 - sandstorm
                 - other
-            wheelEffectName:
-              $ref: '#/components/schemas/Name'
-            actualChangeValue:
-              type: integer
-              format: int
-            finalValue:
-              $ref: '#/components/schemas/Points'
-          required:
-            - actualChangeValue
-            - finalValue
     FreePointChangeResultByLogins:
       type: array
       items:

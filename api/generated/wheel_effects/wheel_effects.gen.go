@@ -24,7 +24,6 @@ type FreePointChangeResult struct {
 	ChangeSource       interface{} `json:"changeSource"`
 	DesiredChangeValue int         `json:"desiredChangeValue"`
 	FinalValue         Points      `json:"finalValue"`
-	WheelEffectName    *Name       `json:"wheelEffectName,omitempty"`
 }
 
 // FreePointChangeResultByLogins defines model for FreePointChangeResultByLogins.
@@ -49,6 +48,14 @@ type PointChange struct {
 type PointChangeByLogins = []struct {
 	Login       Login       `json:"login"`
 	PointChange PointChange `json:"pointChange"`
+}
+
+// PointChangeResult defines model for PointChangeResult.
+type PointChangeResult struct {
+	ActualChangeValue  int    `json:"actualChangeValue"`
+	ChangeSource       string `json:"changeSource"`
+	DesiredChangeValue int    `json:"desiredChangeValue"`
+	FinalValue         Points `json:"finalValue"`
 }
 
 // Points defines model for Points.

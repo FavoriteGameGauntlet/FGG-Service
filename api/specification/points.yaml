@@ -44,7 +44,7 @@ paths:
         $ref: '#/components/requestBodies/PointChangeRequest'
       responses:
         '200':
-          $ref: '#/components/responses/TerritoryPointChangeResultsResponse'
+          $ref: '#/components/responses/TerritoryPointChangeResultResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '409':
@@ -73,7 +73,7 @@ paths:
         - $ref: '#/components/parameters/Login'
       responses:
         '200':
-          $ref: '#/components/responses/TerritoryPointChangeResultsResponse'
+          $ref: '#/components/responses/TerritoryPointChangeHistoriesResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '404':
@@ -88,7 +88,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Login'
       requestBody:
-        $ref: '#/components/requestBodies/PointChangeRequest'
+        $ref: '#/components/requestBodies/FreePointChangeRequest'
       responses:
         '200':
           $ref: '#/components/responses/FreePointChangeResultResponse'
@@ -160,7 +160,7 @@ paths:
       tags:
         - Points
       requestBody:
-        $ref: '#/components/requestBodies/TerritoryHoursChangeRequest'
+        $ref: '#/components/requestBodies/TerritoryHourChangeRequest'
       responses:
         '200':
           $ref: '#/components/responses/PointChangeResultResponse'
@@ -264,18 +264,35 @@ components:
                 - territory-obtaining
                 - territory-loss
                 - other
-    TerritoryPointChangeResults:
+    TerritoryPointChangeHistory:
+      allOf:
+        - $ref: '#/components/schemas/TerritoryPointChangeResult'
+        - type: object
+          properties:
+            changeDate:
+              type: string
+              format: date-time
+          required:
+            - changeDate
+    TerritoryPointChangeHistories:
       type: array
       items:
-        $ref: '#/components/schemas/TerritoryPointChangeResult'
+        $ref: '#/components/schemas/TerritoryPointChangeHistory'
     Name:
       type: string
       pattern: ^.+$
       minLength: 1
       maxLength: 70
-    FreePointChangeResult:
+    FreePointChange:
       allOf:
         - $ref: '#/components/schemas/PointChange'
+        - type: object
+          properties:
+            wheelEffectName:
+              $ref: '#/components/schemas/Name'
+    FreePointChangeResult:
+      allOf:
+        - $ref: '#/components/schemas/PointChangeResult'
         - type: object
           properties:
             changeSource:
@@ -286,16 +303,6 @@ components:
                 - base-teleport
                 - sandstorm
                 - other
-            wheelEffectName:
-              $ref: '#/components/schemas/Name'
-            actualChangeValue:
-              type: integer
-              format: int
-            finalValue:
-              $ref: '#/components/schemas/Points'
-          required:
-            - actualChangeValue
-            - finalValue
     FreePointChangeHistory:
       allOf:
         - $ref: '#/components/schemas/FreePointChangeResult'
@@ -310,7 +317,7 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/FreePointChangeHistory'
-    TerritoryHoursChange:
+    TerritoryHourChange:
       allOf:
         - $ref: '#/components/schemas/PointChange'
         - type: object
@@ -349,12 +356,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Points'
-    TerritoryPointChangeResultsResponse:
+    TerritoryPointChangeResultResponse:
       description: Success.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/TerritoryPointChangeResults'
+            $ref: '#/components/schemas/TerritoryPointChangeResult'
+    TerritoryPointChangeHistoriesResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TerritoryPointChangeHistories'
     FreePointChangeResultResponse:
       description: Success.
       content:
@@ -379,8 +392,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PointChange'
-    TerritoryHoursChangeRequest:
+    FreePointChangeRequest:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/TerritoryHoursChange'
+            $ref: '#/components/schemas/FreePointChange'
+    TerritoryHourChangeRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TerritoryHourChange'

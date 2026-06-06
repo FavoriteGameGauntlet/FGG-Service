@@ -18,6 +18,13 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// FreePointChange defines model for FreePointChange.
+type FreePointChange struct {
+	ChangeSource       string `json:"changeSource"`
+	DesiredChangeValue int    `json:"desiredChangeValue"`
+	WheelEffectName    *Name  `json:"wheelEffectName,omitempty"`
+}
+
 // FreePointChangeHistories defines model for FreePointChangeHistories.
 type FreePointChangeHistories = []FreePointChangeHistory
 
@@ -28,7 +35,6 @@ type FreePointChangeHistory struct {
 	ChangeSource       interface{} `json:"changeSource"`
 	DesiredChangeValue int         `json:"desiredChangeValue"`
 	FinalValue         Points      `json:"finalValue"`
-	WheelEffectName    *Name       `json:"wheelEffectName,omitempty"`
 }
 
 // FreePointChangeResult defines model for FreePointChangeResult.
@@ -37,7 +43,6 @@ type FreePointChangeResult struct {
 	ChangeSource       interface{} `json:"changeSource"`
 	DesiredChangeValue int         `json:"desiredChangeValue"`
 	FinalValue         Points      `json:"finalValue"`
-	WheelEffectName    *Name       `json:"wheelEffectName,omitempty"`
 }
 
 // Login defines model for Login.
@@ -78,11 +83,23 @@ type PointInfoByLogins = []struct {
 // Points defines model for Points.
 type Points = int
 
-// TerritoryHoursChange defines model for TerritoryHoursChange.
-type TerritoryHoursChange struct {
+// TerritoryHourChange defines model for TerritoryHourChange.
+type TerritoryHourChange struct {
 	ChangeSource       string `json:"changeSource"`
 	DesiredChangeValue int    `json:"desiredChangeValue"`
 	IsSomeones         *bool  `json:"isSomeones,omitempty"`
+}
+
+// TerritoryPointChangeHistories defines model for TerritoryPointChangeHistories.
+type TerritoryPointChangeHistories = []TerritoryPointChangeHistory
+
+// TerritoryPointChangeHistory defines model for TerritoryPointChangeHistory.
+type TerritoryPointChangeHistory struct {
+	ActualChangeValue  int         `json:"actualChangeValue"`
+	ChangeDate         time.Time   `json:"changeDate"`
+	ChangeSource       interface{} `json:"changeSource"`
+	DesiredChangeValue int         `json:"desiredChangeValue"`
+	FinalValue         Points      `json:"finalValue"`
 }
 
 // TerritoryPointChangeResult defines model for TerritoryPointChangeResult.
@@ -92,9 +109,6 @@ type TerritoryPointChangeResult struct {
 	DesiredChangeValue int         `json:"desiredChangeValue"`
 	FinalValue         Points      `json:"finalValue"`
 }
-
-// TerritoryPointChangeResults defines model for TerritoryPointChangeResults.
-type TerritoryPointChangeResults = []TerritoryPointChangeResult
 
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse = Error
@@ -117,23 +131,29 @@ type PointInfoResponse = PointInfo
 // PointsResponse defines model for PointsResponse.
 type PointsResponse = Points
 
-// TerritoryPointChangeResultsResponse defines model for TerritoryPointChangeResultsResponse.
-type TerritoryPointChangeResultsResponse = TerritoryPointChangeResults
+// TerritoryPointChangeHistoriesResponse defines model for TerritoryPointChangeHistoriesResponse.
+type TerritoryPointChangeHistoriesResponse = TerritoryPointChangeHistories
+
+// TerritoryPointChangeResultResponse defines model for TerritoryPointChangeResultResponse.
+type TerritoryPointChangeResultResponse = TerritoryPointChangeResult
+
+// FreePointChangeRequest defines model for FreePointChangeRequest.
+type FreePointChangeRequest = FreePointChange
 
 // PointChangeRequest defines model for PointChangeRequest.
 type PointChangeRequest = PointChange
 
-// TerritoryHoursChangeRequest defines model for TerritoryHoursChangeRequest.
-type TerritoryHoursChangeRequest = TerritoryHoursChange
+// TerritoryHourChangeRequest defines model for TerritoryHourChangeRequest.
+type TerritoryHourChangeRequest = TerritoryHourChange
 
 // ChangeExperiencePointsJSONRequestBody defines body for ChangeExperiencePoints for application/json ContentType.
 type ChangeExperiencePointsJSONRequestBody = PointChange
 
 // ChangeTerritoryHoursJSONRequestBody defines body for ChangeTerritoryHours for application/json ContentType.
-type ChangeTerritoryHoursJSONRequestBody = TerritoryHoursChange
+type ChangeTerritoryHoursJSONRequestBody = TerritoryHourChange
 
 // ChangeFreePointsJSONRequestBody defines body for ChangeFreePoints for application/json ContentType.
-type ChangeFreePointsJSONRequestBody = PointChange
+type ChangeFreePointsJSONRequestBody = FreePointChange
 
 // ChangeUserTerritoryPointsJSONRequestBody defines body for ChangeUserTerritoryPoints for application/json ContentType.
 type ChangeUserTerritoryPointsJSONRequestBody = PointChange

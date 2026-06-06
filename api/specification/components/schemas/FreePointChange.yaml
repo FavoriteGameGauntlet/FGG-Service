@@ -1,0 +1,6 @@
+allOf:
+  - $ref: "PointChange.yaml"
+  - type: object
+    properties:
+      wheelEffectName:
+        $ref: "./Name.yaml"
