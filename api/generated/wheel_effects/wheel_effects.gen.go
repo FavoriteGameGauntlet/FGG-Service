@@ -21,7 +21,6 @@ type Error struct {
 // FreePointChangeResult defines model for FreePointChangeResult.
 type FreePointChangeResult struct {
 	ActualChangeValue  int         `json:"actualChangeValue"`
-	ChangeDate         time.Time   `json:"changeDate"`
 	ChangeSource       interface{} `json:"changeSource"`
 	DesiredChangeValue int         `json:"desiredChangeValue"`
 	FinalValue         Points      `json:"finalValue"`
@@ -50,15 +49,6 @@ type PointChange struct {
 type PointChangeByLogins = []struct {
 	Login       Login       `json:"login"`
 	PointChange PointChange `json:"pointChange"`
-}
-
-// PointChangeResult defines model for PointChangeResult.
-type PointChangeResult struct {
-	ActualChangeValue  int       `json:"actualChangeValue"`
-	ChangeDate         time.Time `json:"changeDate"`
-	ChangeSource       string    `json:"changeSource"`
-	DesiredChangeValue int       `json:"desiredChangeValue"`
-	FinalValue         Points    `json:"finalValue"`
 }
 
 // Points defines model for Points.

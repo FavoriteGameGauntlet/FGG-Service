@@ -1,10 +1,7 @@
 package typepoints
 
-import "time"
-
 type PointChangeResult struct {
 	ActualChangeValue  int
-	ChangeDate         time.Time
 	ChangeSource       string
 	DesiredChangeValue int
 	FinalValue         int
@@ -27,8 +24,24 @@ const (
 
 	TerritoryHoursChangeSourceSeize = "seize"
 	TerritoryHoursChangeSourceOther = "other"
+
+	FreePointsChangeSourceQuestCompletion  = "quest"
+	FreePointsChangeSourceOwnWheelEffect   = "own-wheel-effect"
+	FreePointsChangeSourceOtherWheelEffect = "other-wheel-effect"
+	FreePointsChangeSourceBaseTeleport     = "base-teleport"
+	FreePointsChangeSourceSandStorm        = "sandstorm"
+	FreePointsChangeSourceOther            = "other"
 )
 
 var ExperienceChangeSourceSlice = []string{ExperienceChangeSourceLevelUp, ExperienceChangeSourceOther}
 
 var TerritoryHoursChangeSourceSlice = []string{TerritoryHoursChangeSourceSeize, TerritoryHoursChangeSourceOther}
+
+var FreePointsChangeSourceSlice = []string{
+	FreePointsChangeSourceQuestCompletion,
+	FreePointsChangeSourceOwnWheelEffect,
+	FreePointsChangeSourceOtherWheelEffect,
+	FreePointsChangeSourceBaseTeleport,
+	FreePointsChangeSourceSandStorm,
+	FreePointsChangeSourceOther,
+}

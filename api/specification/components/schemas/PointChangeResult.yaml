@@ -7,7 +7,4 @@ allOf:
         format: int
       finalValue:
         $ref: "./Points.yaml"
-      changeDate:
-        type: string
-        format: date-time
-    required: [ actualChangeValue, finalValue, changeDate ]
+    required: [ actualChangeValue, finalValue ]

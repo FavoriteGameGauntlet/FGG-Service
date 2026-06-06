@@ -1,0 +1,8 @@
+allOf:
+  - $ref: "./FreePointChangeResult.yaml"
+  - type: object
+    properties:
+      changeDate:
+        type: string
+        format: date-time
+    required: [ changeDate ]

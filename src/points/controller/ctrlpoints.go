@@ -80,7 +80,6 @@ func convertDtoToPointChange(pointChangeDto genpoints.PointChange) typepoints.Po
 func convertChangeResultToDto(changeResult typepoints.PointChangeResult) genpoints.PointChangeResult {
 	return genpoints.PointChangeResult{
 		ActualChangeValue:  changeResult.ActualChangeValue,
-		ChangeDate:         changeResult.ChangeDate,
 		ChangeSource:       changeResult.ChangeSource,
 		DesiredChangeValue: changeResult.DesiredChangeValue,
 		FinalValue:         changeResult.FinalValue,
@@ -88,8 +87,52 @@ func convertChangeResultToDto(changeResult typepoints.PointChangeResult) genpoin
 }
 
 // ChangeFreePoints (POST /points/{login}/free-points)
-func (c *Controller) ChangeFreePoints(ctx echo.Context, _ genpoints.Login) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+func (c *Controller) ChangeFreePoints(ctx echo.Context, login genpoints.Login) error {
+	var pointChangeDto genpoints.PointChange
+	err := ctx.Bind(&pointChangeDto)
+
+	if err != nil {
+		err = common.NewBadRequestError(err.Error())
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	if !doesExist {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserIdByLogin(login)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	pointChange := convertDtoToPointChange(pointChangeDto)
+
+	changeResult, err := c.Service.ChangeFreePoints(userId, pointChange)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	changeResultDto := convertFreePointChangeResultToDto(changeResult)
+
+	return ctx.JSON(http.StatusOK, changeResultDto)
+}
+
+func convertFreePointChangeResultToDto(changeResult typepoints.PointChangeResult) genpoints.FreePointChangeResult {
+	return genpoints.FreePointChangeResult{
+		ActualChangeValue:  changeResult.ActualChangeValue,
+		ChangeSource:       changeResult.ChangeSource,
+		DesiredChangeValue: changeResult.DesiredChangeValue,
+		FinalValue:         changeResult.FinalValue,
+	}
 }
 
 // GetFreePoints (GET /points/{login}/free-points)

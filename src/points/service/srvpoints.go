@@ -6,7 +6,6 @@ import (
 	"FGG-Service/src/points/type"
 	"slices"
 	"strconv"
-	"time"
 )
 
 type Service struct {
@@ -33,6 +32,79 @@ func (s *Service) GetTerritoryPoints(userId int) (int, error) {
 	return s.Database.GetTerritoryPointsCommand(userId)
 }
 
+func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.PointChange) (
+	result typepoints.PointChangeResult, err error) {
+
+	if !slices.Contains(typepoints.FreePointsChangeSourceSlice, pointChange.ChangeSource) {
+		err = common.NewChangeSourceUnprocessableError(typepoints.FreePointsChangeSourceSlice)
+		return
+	}
+
+	if pointChange.ChangeSource == typepoints.FreePointsChangeSourceBaseTeleport ||
+		pointChange.ChangeSource == typepoints.FreePointsChangeSourceSandStorm {
+		err = validateTeleportBaseOrSandstormChange(pointChange)
+
+		if err != nil {
+			return
+		}
+	}
+
+	currentPoints, err := s.Database.GetFreePointsCommand(userId)
+
+	if err != nil {
+		return
+	}
+
+	// We assume that the current points are greater and subtract the smaller from the larger
+	finalValue := currentPoints + pointChange.DesiredChangeValue
+	changeValue := pointChange.DesiredChangeValue
+	if common.FreePointMinimum != nil {
+		pointMinimum := *common.FreePointMinimum
+
+		if finalValue < pointMinimum {
+			finalValue = pointMinimum
+			// The current points are not enough, we calculate how many points are between the current and the minimum
+			changeValue = pointMinimum - currentPoints
+		}
+	}
+
+	err = s.Database.ChangeFreePointsCommand(userId, changeValue)
+
+	if err != nil {
+		return
+	}
+
+	err = s.Database.AddFreePointHistoryCommand(
+		userId,
+		pointChange.ChangeSource,
+		pointChange.DesiredChangeValue,
+		changeValue,
+		finalValue)
+
+	if err != nil {
+		return
+	}
+
+	result = typepoints.PointChangeResult{
+		ActualChangeValue:  changeValue,
+		ChangeSource:       pointChange.ChangeSource,
+		DesiredChangeValue: pointChange.DesiredChangeValue,
+		FinalValue:         finalValue,
+	}
+
+	return
+}
+
+func validateTeleportBaseOrSandstormChange(pointChange typepoints.PointChange) error {
+	if pointChange.DesiredChangeValue > 0 {
+		return common.NewWrongDesiredChangeValueConflictError(
+			pointChange.ChangeSource,
+			"zero or less")
+	}
+
+	return nil
+}
+
 func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.TerritoryHoursChange) (
 	changeResult typepoints.PointChangeResult, err error) {
 
@@ -43,6 +115,7 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 
 	if pointChange.ChangeSource == typepoints.TerritoryHoursChangeSourceSeize {
 		err = validateSeizeChange(pointChange)
+
 		if err != nil {
 			return
 		}
@@ -55,7 +128,9 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 
 	if pointChange.ChangeSource == typepoints.TerritoryHoursChangeSourceSeize {
 		if currentHours+pointChange.DesiredChangeValue < 0 {
-			err = common.NewNotEnoughCurrentPointsConflictError(pointChange.ChangeSource, -pointChange.DesiredChangeValue)
+			err = common.NewNotEnoughCurrentPointsConflictError(
+				pointChange.ChangeSource,
+				-pointChange.DesiredChangeValue)
 			return
 		}
 	}
@@ -70,7 +145,6 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 
 	changeResult = typepoints.PointChangeResult{
 		ActualChangeValue:  actualChangeValue,
-		ChangeDate:         time.Now(),
 		ChangeSource:       pointChange.ChangeSource,
 		DesiredChangeValue: pointChange.DesiredChangeValue,
 		FinalValue:         currentHours + actualChangeValue,
@@ -82,7 +156,8 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 func validateSeizeChange(pointChange typepoints.TerritoryHoursChange) error {
 	if pointChange.DesiredChangeValue > 0 {
 		return common.NewWrongDesiredChangeValueConflictError(
-			typepoints.TerritoryHoursChangeSourceSeize, "zero or less")
+			pointChange.ChangeSource,
+			"zero or less")
 	}
 
 	penaltyPoints := 0
@@ -90,15 +165,15 @@ func validateSeizeChange(pointChange typepoints.TerritoryHoursChange) error {
 		penaltyPoints = 1
 	}
 
-	if !slices.Contains(common.DefaultTerritoryHoursSeizeDecreasingSlice, pointChange.DesiredChangeValue+penaltyPoints) {
-		decreasingSlice := make([]int, len(common.DefaultTerritoryHoursSeizeDecreasingSlice))
-		for i, v := range common.DefaultTerritoryHoursSeizeDecreasingSlice {
-			decreasingSlice[i] = v - penaltyPoints
+	if !slices.Contains(common.DefaultTerritoryHoursSeizeDecreaseSlice, pointChange.DesiredChangeValue+penaltyPoints) {
+		decreaseSlice := make([]int, len(common.DefaultTerritoryHoursSeizeDecreaseSlice))
+		for i, v := range common.DefaultTerritoryHoursSeizeDecreaseSlice {
+			decreaseSlice[i] = v - penaltyPoints
 		}
 
 		return common.NewWrongDesiredChangeValueConflictError(
-			typepoints.TerritoryHoursChangeSourceSeize,
-			"one of: "+common.ConvertIntSliceToString(decreasingSlice))
+			pointChange.ChangeSource,
+			"one of: "+common.ConvertIntSliceToString(decreaseSlice))
 	}
 
 	return nil
@@ -114,6 +189,7 @@ func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.Poin
 
 	if pointChange.ChangeSource == typepoints.ExperienceChangeSourceLevelUp {
 		err = validateLevelUpChange(pointChange)
+
 		if err != nil {
 			return
 		}
@@ -145,7 +221,6 @@ func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.Poin
 	finalValue := currentPoints + actualChangeValue
 	changeResult = typepoints.PointChangeResult{
 		ActualChangeValue:  actualChangeValue,
-		ChangeDate:         time.Now(),
 		ChangeSource:       pointChange.ChangeSource,
 		DesiredChangeValue: pointChange.DesiredChangeValue,
 		FinalValue:         finalValue,
@@ -157,8 +232,9 @@ func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.Poin
 func validateLevelUpChange(pointChange typepoints.PointChange) error {
 	if pointChange.DesiredChangeValue != common.DefaultExperiencePointsLevelUp {
 		return common.NewWrongDesiredChangeValueConflictError(
-			typepoints.ExperienceChangeSourceLevelUp,
+			pointChange.ChangeSource,
 			strconv.Itoa(common.DefaultExperiencePointsLevelUp))
 	}
+
 	return nil
 }

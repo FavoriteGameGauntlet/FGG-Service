@@ -1,8 +1,14 @@
 allOf:
-  - $ref: "./PointChangeResult.yaml"
+  - $ref: "./PointChange.yaml"
   - type: object
     properties:
       changeSource:
         enum: [ "own-wheel-effect", "other-wheel-effect", "quest", "base-teleport", "sandstorm", "other" ]
       wheelEffectName:
         $ref: "./Name.yaml"
+      actualChangeValue:
+        type: integer
+        format: int
+      finalValue:
+        $ref: "./Points.yaml"
+    required: [ actualChangeValue, finalValue ]
