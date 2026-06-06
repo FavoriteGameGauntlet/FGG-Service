@@ -35,14 +35,16 @@ func (s *Service) GetTerritoryPoints(userId int) (int, error) {
 func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.PointChange) (
 	result typepoints.PointChangeResult, err error) {
 
-	if pointChange.DesiredChangeValue > 0 {
-		if !slices.Contains(typepoints.FreePointsGainSourceSlice, pointChange.ChangeSource) {
-			err = common.NewChangeSourceUnprocessableError(typepoints.FreePointsGainSourceSlice)
-			return
-		}
-	} else {
-		if !slices.Contains(typepoints.FreePointsLossSourceSlice, pointChange.ChangeSource) {
-			err = common.NewChangeSourceUnprocessableError(typepoints.FreePointsLossSourceSlice)
+	if !slices.Contains(typepoints.FreePointsChangeSourceSlice, pointChange.ChangeSource) {
+		err = common.NewChangeSourceUnprocessableError(typepoints.FreePointsChangeSourceSlice)
+		return
+	}
+
+	if pointChange.ChangeSource == typepoints.FreePointsChangeSourceBaseTeleport ||
+		pointChange.ChangeSource == typepoints.FreePointsChangeSourceSandStorm {
+		err = validateTeleportBaseOrSandstormChange(pointChange)
+
+		if err != nil {
 			return
 		}
 	}
@@ -72,7 +74,12 @@ func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.PointChang
 		return
 	}
 
-	err = s.Database.AddFreePointHistoryCommand(userId, pointChange.ChangeSource, pointChange.DesiredChangeValue, changeValue, finalValue)
+	err = s.Database.AddFreePointHistoryCommand(
+		userId,
+		pointChange.ChangeSource,
+		pointChange.DesiredChangeValue,
+		changeValue,
+		finalValue)
 
 	if err != nil {
 		return
@@ -88,6 +95,16 @@ func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.PointChang
 	return
 }
 
+func validateTeleportBaseOrSandstormChange(pointChange typepoints.PointChange) error {
+	if pointChange.DesiredChangeValue > 0 {
+		return common.NewWrongDesiredChangeValueConflictError(
+			pointChange.ChangeSource,
+			"zero or less")
+	}
+
+	return nil
+}
+
 func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.TerritoryHoursChange) (
 	changeResult typepoints.PointChangeResult, err error) {
 
@@ -98,6 +115,7 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 
 	if pointChange.ChangeSource == typepoints.TerritoryHoursChangeSourceSeize {
 		err = validateSeizeChange(pointChange)
+
 		if err != nil {
 			return
 		}
@@ -110,7 +128,9 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 
 	if pointChange.ChangeSource == typepoints.TerritoryHoursChangeSourceSeize {
 		if currentHours+pointChange.DesiredChangeValue < 0 {
-			err = common.NewNotEnoughCurrentPointsConflictError(pointChange.ChangeSource, -pointChange.DesiredChangeValue)
+			err = common.NewNotEnoughCurrentPointsConflictError(
+				pointChange.ChangeSource,
+				-pointChange.DesiredChangeValue)
 			return
 		}
 	}
@@ -136,7 +156,8 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 func validateSeizeChange(pointChange typepoints.TerritoryHoursChange) error {
 	if pointChange.DesiredChangeValue > 0 {
 		return common.NewWrongDesiredChangeValueConflictError(
-			typepoints.TerritoryHoursChangeSourceSeize, "zero or less")
+			pointChange.ChangeSource,
+			"zero or less")
 	}
 
 	penaltyPoints := 0
@@ -151,7 +172,7 @@ func validateSeizeChange(pointChange typepoints.TerritoryHoursChange) error {
 		}
 
 		return common.NewWrongDesiredChangeValueConflictError(
-			typepoints.TerritoryHoursChangeSourceSeize,
+			pointChange.ChangeSource,
 			"one of: "+common.ConvertIntSliceToString(decreaseSlice))
 	}
 
@@ -168,6 +189,7 @@ func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.Poin
 
 	if pointChange.ChangeSource == typepoints.ExperienceChangeSourceLevelUp {
 		err = validateLevelUpChange(pointChange)
+
 		if err != nil {
 			return
 		}
@@ -210,8 +232,9 @@ func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.Poin
 func validateLevelUpChange(pointChange typepoints.PointChange) error {
 	if pointChange.DesiredChangeValue != common.DefaultExperiencePointsLevelUp {
 		return common.NewWrongDesiredChangeValueConflictError(
-			typepoints.ExperienceChangeSourceLevelUp,
+			pointChange.ChangeSource,
 			strconv.Itoa(common.DefaultExperiencePointsLevelUp))
 	}
+
 	return nil
 }

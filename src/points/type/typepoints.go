@@ -25,25 +25,23 @@ const (
 	TerritoryHoursChangeSourceSeize = "seize"
 	TerritoryHoursChangeSourceOther = "other"
 
-	FreePointsChangeSourceQuestCompletion = "quest-completion"
-	FreePointsChangeSourceWheelEffect     = "wheel-effect"
-	FreePointsChangeSourceNoPathToBase    = "no-path-to-base"
-	FreePointsChangeSourceOther           = "other"
+	FreePointsChangeSourceQuestCompletion  = "quest"
+	FreePointsChangeSourceOwnWheelEffect   = "own-wheel-effect"
+	FreePointsChangeSourceOtherWheelEffect = "other-wheel-effect"
+	FreePointsChangeSourceBaseTeleport     = "base-teleport"
+	FreePointsChangeSourceSandStorm        = "sandstorm"
+	FreePointsChangeSourceOther            = "other"
 )
 
 var ExperienceChangeSourceSlice = []string{ExperienceChangeSourceLevelUp, ExperienceChangeSourceOther}
 
 var TerritoryHoursChangeSourceSlice = []string{TerritoryHoursChangeSourceSeize, TerritoryHoursChangeSourceOther}
 
-var FreePointsGainSourceSlice = []string{
+var FreePointsChangeSourceSlice = []string{
 	FreePointsChangeSourceQuestCompletion,
-	FreePointsChangeSourceWheelEffect,
-	FreePointsChangeSourceOther,
-}
-
-var FreePointsLossSourceSlice = []string{
-	FreePointsChangeSourceQuestCompletion,
-	FreePointsChangeSourceWheelEffect,
-	FreePointsChangeSourceNoPathToBase,
+	FreePointsChangeSourceOwnWheelEffect,
+	FreePointsChangeSourceOtherWheelEffect,
+	FreePointsChangeSourceBaseTeleport,
+	FreePointsChangeSourceSandStorm,
 	FreePointsChangeSourceOther,
 }

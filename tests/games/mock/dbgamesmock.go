@@ -83,6 +83,13 @@ func (m *DatabaseMock) FinishCurrentGameCommand(userId int, gameId int) error {
 	panic("implement me")
 }
 
+func (m *DatabaseMock) GetAllCurrentGamesCommand() (games typegames.CurrentGames, err error) {
+	args := m.Called()
+	games = args.Get(0).(typegames.CurrentGames)
+	err = args.Error(1)
+	return
+}
+
 func (m *DatabaseMock) GetGameHistoryCommand(userId int) (games typegames.CurrentGames, err error) {
 	//TODO implement me
 	panic("implement me")

@@ -23,14 +23,14 @@ type ChangeFreePointsTestCase struct {
 
 var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 	{
-		// Gain source 'no-path-to-base' is not allowed. Unprocessable error returns.
-		Name:   "Gain_InvalidSource_UnprocessableError",
+		// Gain with 'base-teleport' is not allowed — only loss is valid. Conflict error returns.
+		Name:   "Gain_BaseTeleport_ConflictError",
 		UserId: 1,
-		Change: typepoints.PointChange{ChangeSource: "no-path-to-base", DesiredChangeValue: 5},
+		Change: typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceBaseTeleport, DesiredChangeValue: 5},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			return new(dbpointsmock.DatabaseMock)
 		},
-		ExpectedErrorCode: "INCORRECT_CHANGE_SOURCE_VALUE",
+		ExpectedErrorCode: "WRONG_DESIRED_CHANGE_VALUE",
 	},
 	{
 		// Gain with completely invalid source. Unprocessable error returns.
@@ -56,7 +56,7 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 		// GetFreePointsCommand returns a database error.
 		Name:   "Gain_DatabaseError",
 		UserId: 1,
-		Change: typepoints.PointChange{ChangeSource: "quest-completion", DesiredChangeValue: 5},
+		Change: typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(0, dbError)
@@ -65,30 +65,30 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 		ExpectedErrorCode: "",
 	},
 	{
-		// Gain with 'quest-completion'. Success.
-		Name:   "Gain_QuestCompletion_Success",
+		// Gain with 'quest'. Success.
+		Name:   "Gain_Quest_Success",
 		UserId: 1,
-		Change: typepoints.PointChange{ChangeSource: "quest-completion", DesiredChangeValue: 10},
+		Change: typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 10},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(5, nil)
 			databaseMock.On("ChangeFreePointsCommand", 1, 10).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 1, "quest-completion", 10, 10, 15).Return(nil)
+			databaseMock.On("AddFreePointHistoryCommand", 1, typepoints.FreePointsChangeSourceQuestCompletion, 10, 10, 15).Return(nil)
 			return databaseMock
 		},
 		ExpectedActualChange: ptr(10),
 		ExpectedFinalValue:   ptr(15),
 	},
 	{
-		// Gain with 'wheel-effect'. Success.
-		Name:   "Gain_WheelEffect_Success",
+		// Gain with 'own-wheel-effect'. Success.
+		Name:   "Gain_OwnWheelEffect_Success",
 		UserId: 1,
-		Change: typepoints.PointChange{ChangeSource: "wheel-effect", DesiredChangeValue: 3},
+		Change: typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceOwnWheelEffect, DesiredChangeValue: 3},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(10, nil)
 			databaseMock.On("ChangeFreePointsCommand", 1, 3).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 1, "wheel-effect", 3, 3, 13).Return(nil)
+			databaseMock.On("AddFreePointHistoryCommand", 1, typepoints.FreePointsChangeSourceOwnWheelEffect, 3, 3, 13).Return(nil)
 			return databaseMock
 		},
 		ExpectedActualChange: ptr(3),
@@ -98,27 +98,27 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 		// Gain with 'other'. Success.
 		Name:   "Gain_Other_Success",
 		UserId: 1,
-		Change: typepoints.PointChange{ChangeSource: "other", DesiredChangeValue: 7},
+		Change: typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: 7},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(0, nil)
 			databaseMock.On("ChangeFreePointsCommand", 1, 7).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 1, "other", 7, 7, 7).Return(nil)
+			databaseMock.On("AddFreePointHistoryCommand", 1, typepoints.FreePointsChangeSourceOther, 7, 7, 7).Return(nil)
 			return databaseMock
 		},
 		ExpectedActualChange: ptr(7),
 		ExpectedFinalValue:   ptr(7),
 	},
 	{
-		// Loss with 'no-path-to-base'. Success.
-		Name:   "Loss_NoPathToBase_Success",
+		// Loss with 'base-teleport'. Success.
+		Name:   "Loss_BaseTeleport_Success",
 		UserId: 1,
-		Change: typepoints.PointChange{ChangeSource: "no-path-to-base", DesiredChangeValue: -5},
+		Change: typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceBaseTeleport, DesiredChangeValue: -5},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(10, nil)
 			databaseMock.On("ChangeFreePointsCommand", 1, -5).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 1, "no-path-to-base", -5, -5, 5).Return(nil)
+			databaseMock.On("AddFreePointHistoryCommand", 1, typepoints.FreePointsChangeSourceBaseTeleport, -5, -5, 5).Return(nil)
 			return databaseMock
 		},
 		ExpectedActualChange: ptr(-5),
@@ -128,12 +128,12 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 		// Loss exceeds current points — clamped to minimum (0). Success.
 		Name:   "Loss_ClampedToMinimum_Success",
 		UserId: 1,
-		Change: typepoints.PointChange{ChangeSource: "quest-completion", DesiredChangeValue: -20},
+		Change: typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: -20},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(5, nil)
 			databaseMock.On("ChangeFreePointsCommand", 1, -5).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 1, "quest-completion", -20, -5, 0).Return(nil)
+			databaseMock.On("AddFreePointHistoryCommand", 1, typepoints.FreePointsChangeSourceQuestCompletion, -20, -5, 0).Return(nil)
 			return databaseMock
 		},
 		ExpectedActualChange: ptr(-5),
@@ -143,12 +143,12 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 		// Minimum disabled — loss can take points below 0. Success.
 		Name:   "Loss_MinimumDisabled_Success",
 		UserId: 1,
-		Change: typepoints.PointChange{ChangeSource: "no-path-to-base", DesiredChangeValue: -20},
+		Change: typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceSandStorm, DesiredChangeValue: -20},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(5, nil)
 			databaseMock.On("ChangeFreePointsCommand", 1, -20).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 1, "no-path-to-base", -20, -20, -15).Return(nil)
+			databaseMock.On("AddFreePointHistoryCommand", 1, typepoints.FreePointsChangeSourceSandStorm, -20, -20, -15).Return(nil)
 			return databaseMock
 		},
 		SetupMinimum: func() (restore func()) {
@@ -161,14 +161,14 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 	},
 	{
 		// Zero change with valid loss source. Success, no actual change.
-		Name:   "Zero_QuestCompletion_Success",
+		Name:   "Zero_Quest_Success",
 		UserId: 1,
-		Change: typepoints.PointChange{ChangeSource: "quest-completion", DesiredChangeValue: 0},
+		Change: typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 0},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(10, nil)
 			databaseMock.On("ChangeFreePointsCommand", 1, 0).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 1, "quest-completion", 0, 0, 10).Return(nil)
+			databaseMock.On("AddFreePointHistoryCommand", 1, typepoints.FreePointsChangeSourceQuestCompletion, 0, 0, 10).Return(nil)
 			return databaseMock
 		},
 		ExpectedActualChange: ptr(0),
