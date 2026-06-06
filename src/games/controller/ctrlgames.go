@@ -13,8 +13,8 @@ import (
 )
 
 type Controller struct {
-	Service     srvgames.Service
-	AuthService srvauth.Service
+	Service     srvgames.IService
+	AuthService srvauth.IService
 }
 
 func NewController() *Controller {
@@ -22,8 +22,8 @@ func NewController() *Controller {
 	as := srvauth.NewService()
 
 	return &Controller{
-		*s,
-		*as,
+		s,
+		as,
 	}
 }
 
@@ -191,8 +191,19 @@ func convertWishlistGamesToDto(games typegames.WishlistGames) gengames.WishlistG
 }
 
 // AddUserWishlistGame (POST /games/{login}/wishlist)
-func (c *Controller) AddUserWishlistGame(ctx echo.Context, _ gengames.Login) error {
-	userId, err := c.AuthService.GetUserId(ctx)
+func (c *Controller) AddUserWishlistGame(ctx echo.Context, login gengames.Login) error {
+	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	if !doesExist {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserIdByLogin(login)
 
 	if err != nil {
 		return common.SendJSONErrorResponse(ctx, err)

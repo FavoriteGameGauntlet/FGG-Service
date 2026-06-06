@@ -11,6 +11,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type IService interface {
+	DoesUserSessionExist(ctx echo.Context) (bool, error)
+	GetUserId(ctx echo.Context) (int, error)
+	GetUserIdByLogin(login string) (int, error)
+}
+
 type Service struct {
 	Database dbauth.Database
 }
