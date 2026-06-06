@@ -150,7 +150,7 @@ func NewDisplayNameNotFoundError() error {
 func NewWheelEffectNameNotFoundError() error {
 	return &NotFoundError{
 		&BaseError{
-			Code:    "WHEEL_EFFECT_NAME_REQUIRED",
+			Code:    "WHEEL_EFFECT_NAME_NOT_FOUND",
 			Message: "The wheel effect name not found. Change it or try again later.",
 		},
 	}

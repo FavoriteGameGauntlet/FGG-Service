@@ -22,7 +22,7 @@ type Error struct {
 type FreePointChange struct {
 	ChangeSource       string `json:"changeSource"`
 	DesiredChangeValue int    `json:"desiredChangeValue"`
-	WheelEffectName    *Name  `json:"wheelEffectName,omitempty"`
+	WheelEffectName    *Name  `json:"wheelEffectName"`
 }
 
 // FreePointChangeHistories defines model for FreePointChangeHistories.
