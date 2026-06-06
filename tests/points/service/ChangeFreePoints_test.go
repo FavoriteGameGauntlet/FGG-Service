@@ -139,7 +139,7 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			weMock.On("GetEffectHistoryByEffectName", 1, "unknown-effect").Return(nil, nil)
 			return weMock
 		},
-		ExpectedErrorCode: "WHEEL_EFFECT_NAME_REQUIRED",
+		ExpectedErrorCode: "WHEEL_EFFECT_NAME_NOT_FOUND",
 	},
 	{
 		// Gain with 'other-wheel-effect', non-zero SourceUserId. Success.
