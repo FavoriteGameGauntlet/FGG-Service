@@ -147,6 +147,15 @@ func NewDisplayNameNotFoundError() error {
 	}
 }
 
+func NewWheelEffectNameNotFoundError() error {
+	return &NotFoundError{
+		&BaseError{
+			Code:    "WHEEL_EFFECT_NAME_REQUIRED",
+			Message: "The wheel effect name not found. Change it or try again later.",
+		},
+	}
+}
+
 type ConflictError struct {
 	*BaseError
 }
@@ -335,6 +344,19 @@ func NewChangeSourceUnprocessableError(possibleValues []string) error {
 	return &UnprocessableError{
 		&BaseError{
 			Code:    "INCORRECT_CHANGE_SOURCE_VALUE",
+			Message: message,
+		},
+	}
+}
+
+func NewWheelEffectNameRequiredUnprocessableError(changeSource string) error {
+	message := fmt.Sprintf(
+		"A wheel effect name is required to do '%s' change source.",
+		changeSource)
+
+	return &UnprocessableError{
+		&BaseError{
+			Code:    "WHEEL_EFFECT_NAME_REQUIRED",
 			Message: message,
 		},
 	}

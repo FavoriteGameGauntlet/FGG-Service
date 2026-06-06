@@ -7,7 +7,14 @@ type IDatabase interface {
 	ChangeExperiencePointsCommand(userId int, changeValue int) error
 	GetFreePointsCommand(userId int) (points int, err error)
 	ChangeFreePointsCommand(userId int, changeValue int) error
-	AddFreePointHistoryCommand(userId int, changeSource string, changeValue int, actualChangeValue int, finalValue int) error
+	AddFreePointHistoryCommand(
+		userId int,
+		sourceUserId int,
+		changeSource string,
+		changeValue int,
+		actualChangeValue int,
+		finalValue int,
+		wheelEffectId *int) error
 	GetTerritoryHoursCommand(userId int) (points int, err error)
 	ChangeTerritoryHoursCommand(userId int, changeValue int) error
 	GetTerritoryPointsCommand(userId int) (points int, err error)
@@ -160,13 +167,38 @@ func (db *Database) ChangeFreePointsCommand(userId int, changeValue int) error {
 }
 
 const AddFreePointHistoryQuery = `
-	INSERT INTO FreePointHistory (UserId, ChangeSource, ChangeValue, ActualChangeValue, FinalValue)
-	VALUES (?, ?, ?, ?, ?)
+	INSERT INTO FreePointHistory (
+		UserId,
+	    SourceUserId,
+		ChangeSource,
+		ChangeValue,
+		ActualChangeValue,
+		FinalValue,
+	  	WheelEffectId
+	)
+	VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
-func (db *Database) AddFreePointHistoryCommand(userId int, changeSource string, changeValue int, actualChangeValue int, finalValue int) error {
+func (db *Database) AddFreePointHistoryCommand(
+	userId int,
+	sourceUserId int,
+	changeSource string,
+	changeValue int,
+	actualChangeValue int,
+	finalValue int,
+	wheelEffectId *int) error {
+
 	queryName := "AddFreePointHistoryQuery"
-	_, err := dbaccess.Exec(queryName, AddFreePointHistoryQuery, userId, changeSource, changeValue, actualChangeValue, finalValue)
+	_, err := dbaccess.Exec(
+		queryName,
+		AddFreePointHistoryQuery,
+		userId,
+		sourceUserId,
+		changeSource,
+		changeValue,
+		actualChangeValue,
+		finalValue,
+		wheelEffectId)
 
 	dbaccess.LogDbResult(queryName, nil, err)
 

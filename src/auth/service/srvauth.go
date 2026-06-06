@@ -15,6 +15,14 @@ type Service struct {
 	Database dbauth.Database
 }
 
+func NewService() *Service {
+	db := new(dbauth.Database)
+
+	return &Service{
+		Database: *db,
+	}
+}
+
 func (s *Service) DoesUserSessionExist(ctx echo.Context) (doesExist bool, err error) {
 	cookie, err := s.GetSessionCookie(ctx)
 

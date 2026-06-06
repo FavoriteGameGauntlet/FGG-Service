@@ -134,6 +134,44 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffect
 	return
 }
 
+const GetEffectHistoryByEffectNameQuery = `
+	SELECT we.Name, we.Description, weh.RollDate
+	FROM WheelEffectHistory weh
+		INNER JOIN WheelEffects we ON weh.WheelEffectId = we.Id
+	WHERE weh.UserId = ?
+		AND we.Name = ?
+	ORDER BY weh.RollDate DESC
+`
+
+func (db *Database) GetEffectHistoryByEffectNameCommand(userId int, effectName string) (effect typewheeleffects.RolledWheelEffect, err error) {
+	queryName := "GetEffectHistoryByEffectNameQuery"
+	row := dbaccess.QueryRow(queryName, GetEffectHistoryByEffectNameQuery, userId, effectName)
+
+	var rollDateString string
+	err = row.Scan(&effect.Name, &effect.Description, &rollDateString)
+
+	if err != nil {
+		dbaccess.LogDbResult(queryName, effect, err)
+
+		return
+	}
+
+	var rollDate time.Time
+	rollDate, err = dbaccess.ConvertToDate(rollDateString)
+
+	if err != nil {
+		dbaccess.LogDbResult(queryName, effect, err)
+
+		return
+	}
+
+	effect.RollDate = rollDate
+
+	dbaccess.LogDbResult(queryName, effect, err)
+
+	return
+}
+
 const MakeEffectRollQuery = `
 	SELECT we.Id, we.Name, we.Description
 	FROM WheelEffects we

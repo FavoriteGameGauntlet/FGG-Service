@@ -18,6 +18,8 @@ type GetExperiencePointsTestCase struct {
 
 func ptr(v int) *int { return &v }
 
+func ptrStr(v string) *string { return &v }
+
 var GetExperiencePointsTestCases = []GetExperiencePointsTestCase{
 	{
 		// GetExperiencePointsCommand returns a database error. The error will return.

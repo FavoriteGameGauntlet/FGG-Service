@@ -4,10 +4,20 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/wheeleffects/database"
 	"FGG-Service/src/wheeleffects/types"
+	"database/sql"
+	"errors"
 )
 
 type Service struct {
 	Database dbwheeleffects.Database
+}
+
+func NewService() *Service {
+	db := new(dbwheeleffects.Database)
+
+	return &Service{
+		Database: *db,
+	}
 }
 
 func (s *Service) GetAvailableRollsCount(userId int) (count int, err error) {
@@ -20,6 +30,23 @@ func (s *Service) GetAvailableEffects(userId int) (typewheeleffects.WheelEffects
 
 func (s *Service) GetEffectHistory(userId int) (typewheeleffects.RolledWheelEffects, error) {
 	return s.Database.GetEffectHistoryCommand(userId)
+}
+
+func (s *Service) GetEffectHistoryByEffectName(userId int, effectName string) (effect *typewheeleffects.RolledWheelEffect, err error) {
+	notNilEffect, err := s.Database.GetEffectHistoryByEffectNameCommand(userId, effectName)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = nil
+		return
+	}
+
+	if err != nil {
+		return
+	}
+
+	effect = &notNilEffect
+
+	return
 }
 
 func (s *Service) MakeEffectRoll(userId int) (effects typewheeleffects.WheelEffects, err error) {

@@ -19,9 +19,12 @@ type Controller struct {
 
 func NewController() *Controller {
 	s := srvpoints.NewService()
-	as := new(srvauth.Service)
+	as := srvauth.NewService()
 
-	return &Controller{*s, *as}
+	return &Controller{
+		*s,
+		*as,
+	}
 }
 
 // GetExperiencePoints (GET /points/experience-points)
@@ -88,7 +91,7 @@ func convertChangeResultToDto(changeResult typepoints.PointChangeResult) genpoin
 
 // ChangeFreePoints (POST /points/{login}/free-points)
 func (c *Controller) ChangeFreePoints(ctx echo.Context, login genpoints.Login) error {
-	var pointChangeDto genpoints.PointChange
+	var pointChangeDto genpoints.FreePointChange
 	err := ctx.Bind(&pointChangeDto)
 
 	if err != nil {
@@ -96,14 +99,9 @@ func (c *Controller) ChangeFreePoints(ctx echo.Context, login genpoints.Login) e
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+	sourceUserId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
-		return common.SendJSONErrorResponse(ctx, err)
-	}
-
-	if !doesExist {
-		err = common.NewActiveSessionNotFoundUnauthorizedError()
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
@@ -113,7 +111,7 @@ func (c *Controller) ChangeFreePoints(ctx echo.Context, login genpoints.Login) e
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	pointChange := convertDtoToPointChange(pointChangeDto)
+	pointChange := convertDtoToFreePointChange(sourceUserId, pointChangeDto)
 
 	changeResult, err := c.Service.ChangeFreePoints(userId, pointChange)
 
@@ -124,6 +122,15 @@ func (c *Controller) ChangeFreePoints(ctx echo.Context, login genpoints.Login) e
 	changeResultDto := convertFreePointChangeResultToDto(changeResult)
 
 	return ctx.JSON(http.StatusOK, changeResultDto)
+}
+
+func convertDtoToFreePointChange(sourceUserId int, pointChangeDto genpoints.FreePointChange) typepoints.FreePointChange {
+	return typepoints.FreePointChange{
+		SourceUserId:       sourceUserId,
+		ChangeSource:       pointChangeDto.ChangeSource,
+		DesiredChangeValue: pointChangeDto.DesiredChangeValue,
+		WheelEffectName:    pointChangeDto.WheelEffectName,
+	}
 }
 
 func convertFreePointChangeResultToDto(changeResult typepoints.PointChangeResult) genpoints.FreePointChangeResult {

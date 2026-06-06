@@ -13,8 +13,10 @@ type Service struct {
 }
 
 func NewService() *Service {
+	db := new(dbusers.Database)
+
 	return &Service{
-		Database: new(dbusers.Database),
+		Database: db,
 	}
 }
 

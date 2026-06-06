@@ -18,6 +18,13 @@ type TerritoryHourChange struct {
 	IsSomeones         bool
 }
 
+type FreePointChange struct {
+	SourceUserId       int
+	ChangeSource       string
+	DesiredChangeValue int
+	WheelEffectName    *string
+}
+
 const (
 	ExperienceChangeSourceLevelUp = "level-up"
 	ExperienceChangeSourceOther   = "other"

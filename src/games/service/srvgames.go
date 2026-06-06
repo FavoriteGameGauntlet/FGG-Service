@@ -17,11 +17,15 @@ type Service struct {
 	GettingService IGettingService
 }
 
-func NewService() Service {
-	return Service{
-		Database:       new(dbgames.Database),
-		TimerService:   srvtimers.NewService(),
-		GettingService: NewGettingService(),
+func NewService() *Service {
+	db := new(dbgames.Database)
+	ts := srvtimers.NewService()
+	gs := NewGettingService()
+
+	return &Service{
+		Database:       db,
+		TimerService:   ts,
+		GettingService: gs,
 	}
 }
 

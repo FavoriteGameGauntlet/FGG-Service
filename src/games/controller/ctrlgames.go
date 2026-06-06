@@ -18,9 +18,12 @@ type Controller struct {
 }
 
 func NewController() *Controller {
+	s := srvgames.NewService()
+	as := srvauth.NewService()
+
 	return &Controller{
-		Service:     srvgames.NewService(),
-		AuthService: srvauth.Service{},
+		*s,
+		*as,
 	}
 }
 

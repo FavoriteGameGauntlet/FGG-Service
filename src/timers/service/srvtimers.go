@@ -27,10 +27,14 @@ type Service struct {
 }
 
 func NewService() *Service {
+	db := new(dbtimers.Database)
+	gdb := new(dbgames.Database)
+	wedb := new(dbwheeleffects.Database)
+
 	s := &Service{
-		Database:             new(dbtimers.Database),
-		GamesDatabase:        new(dbgames.Database),
-		WheelEffectsDatabase: new(dbwheeleffects.Database),
+		Database:             db,
+		GamesDatabase:        gdb,
+		WheelEffectsDatabase: wedb,
 	}
 
 	s.StartTimerFinisherScheduler()

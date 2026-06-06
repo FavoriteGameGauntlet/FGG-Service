@@ -19,9 +19,12 @@ type Controller struct {
 
 func NewController() *Controller {
 	s := srvusers.NewService()
-	as := new(srvauth.Service)
+	as := srvauth.NewService()
 
-	return &Controller{*s, *as}
+	return &Controller{
+		*s,
+		*as,
+	}
 }
 
 // GetAllUserNames (GET /users/all/names)
