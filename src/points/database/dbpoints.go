@@ -18,7 +18,7 @@ type IDatabase interface {
 		actualChangeValue int,
 		finalValue int,
 		wheelEffectId *int) error
-	GetFreePointHistoryCommand(userId int) (history typepoints.FreePointChangeHistories, err error)
+	GetFreePointHistoryCommand(userId int) (history typepoints.PointChangeHistories, err error)
 	GetTerritoryHoursCommand(userId int) (points int, err error)
 	ChangeTerritoryHoursCommand(userId int, changeValue int) error
 	GetTerritoryPointsCommand(userId int) (points int, err error)
@@ -30,6 +30,7 @@ type IDatabase interface {
 		changeValue int,
 		actualChangeValue int,
 		finalValue int) error
+	GetTerritoryPointHistoryCommand(userId int) (history typepoints.PointChangeHistories, err error)
 	GetPointInfoCommand(userId int) (info typepoints.PointInfo, err error)
 	GetAllPointInfoCommand() (infos typepoints.PointInfoByLogins, err error)
 }
@@ -199,6 +200,57 @@ func (db *Database) AddTerritoryPointHistoryCommand(
 	return err
 }
 
+const GetTerritoryPointHistoryQuery = `
+	SELECT
+		ActualChangeValue,
+		ChangeDate,
+		ChangeSource,
+		ChangeValue,
+		FinalValue
+	FROM TerritoryPointHistory
+	WHERE UserId = ?
+	ORDER BY ChangeDate DESC
+`
+
+func (db *Database) GetTerritoryPointHistoryCommand(userId int) (history typepoints.PointChangeHistories, err error) {
+	queryName := "GetTerritoryPointHistoryQuery"
+	rows, err := dbaccess.Query(queryName, GetTerritoryPointHistoryQuery, userId)
+
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		entry := typepoints.PointChangeHistory{}
+		var changeDateString string
+		err = rows.Scan(
+			&entry.ActualChangeValue,
+			&changeDateString,
+			&entry.ChangeSource,
+			&entry.DesiredChangeValue,
+			&entry.FinalValue)
+
+		if err != nil {
+			_ = rows.Close()
+			return
+		}
+
+		entry.ChangeDate, err = dbaccess.ConvertToDate(changeDateString)
+
+		if err != nil {
+			_ = rows.Close()
+			return
+		}
+
+		history = append(history, entry)
+	}
+
+	dbaccess.LogDbResult(queryName, history, err)
+
+	_ = rows.Close()
+	return
+}
+
 const GetPointInfoQuery = `
 	SELECT TerritoryPoints, FreePoints, AvailableRolls, TerritoryHours, ExperiencePoints
 	FROM UserStats
@@ -342,7 +394,7 @@ const GetFreePointHistoryQuery = `
 	ORDER BY ChangeDate DESC
 `
 
-func (db *Database) GetFreePointHistoryCommand(userId int) (history typepoints.FreePointChangeHistories, err error) {
+func (db *Database) GetFreePointHistoryCommand(userId int) (history typepoints.PointChangeHistories, err error) {
 	queryName := "GetFreePointHistoryQuery"
 	rows, err := dbaccess.Query(queryName, GetFreePointHistoryQuery, userId)
 
@@ -351,7 +403,7 @@ func (db *Database) GetFreePointHistoryCommand(userId int) (history typepoints.F
 	}
 
 	for rows.Next() {
-		entry := typepoints.FreePointChangeHistory{}
+		entry := typepoints.PointChangeHistory{}
 		var changeDateString string
 		err = rows.Scan(
 			&entry.ActualChangeValue,

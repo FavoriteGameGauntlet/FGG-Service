@@ -3,3 +3,9 @@ content:
   application/json:
     schema:
       $ref: "../schemas/TerritoryPointChangeHistories.yaml"
+    example:
+      - changeSource: territory-obtaining
+        desiredChangeValue: 2
+        actualChangeValue: 2
+        finalValue: 12
+        changeDate: "2026-06-07T08:09:10.123Z"

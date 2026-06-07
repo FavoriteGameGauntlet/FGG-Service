@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type GetUserFreePointHistoryTestCase struct {
+type GetUserTerritoryPointHistoryTestCase struct {
 	Name            string
 	UserId          int
 	SetupMock       func() *dbpointsmock.DatabaseMock
@@ -18,24 +18,24 @@ type GetUserFreePointHistoryTestCase struct {
 	ExpectedErrorIs error
 }
 
-var freePointChangeHistoryEntry = typepoints.PointChangeHistory{
+var territoryPointChangeHistoryEntry = typepoints.PointChangeHistory{
 	ActualChangeValue:  10,
 	ChangeDate:         time.Date(2026, 6, 1, 12, 0, 0, 0, time.UTC),
-	ChangeSource:       typepoints.FreePointsChangeSourceQuestCompletion,
+	ChangeSource:       typepoints.TerritoryPointChangeSourceObtaining,
 	DesiredChangeValue: 10,
 	FinalValue:         20,
 }
 
-var GetUserFreePointHistoryTestCases = []GetUserFreePointHistoryTestCase{
+var GetUserTerritoryPointHistoryTestCases = []GetUserTerritoryPointHistoryTestCase{
 	{
-		// GetFreePointHistoryCommand returns a database error. The error will return.
+		// GetTerritoryPointHistoryCommand returns a database error. The error will return.
 		Name:   "DatabaseError",
 		UserId: 1,
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 
 			databaseMock.
-				On("GetFreePointHistoryCommand", 1).
+				On("GetTerritoryPointHistoryCommand", 1).
 				Return(typepoints.PointChangeHistories{}, dbError)
 
 			return databaseMock
@@ -43,14 +43,14 @@ var GetUserFreePointHistoryTestCases = []GetUserFreePointHistoryTestCase{
 		ExpectedErrorIs: dbError,
 	},
 	{
-		// GetFreePointHistoryCommand returns an empty list. An empty list will return.
+		// GetTerritoryPointHistoryCommand returns an empty list. An empty list will return.
 		Name:   "EmptyList",
 		UserId: 1,
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 
 			databaseMock.
-				On("GetFreePointHistoryCommand", 1).
+				On("GetTerritoryPointHistoryCommand", 1).
 				Return(typepoints.PointChangeHistories{}, nil)
 
 			return databaseMock
@@ -58,31 +58,31 @@ var GetUserFreePointHistoryTestCases = []GetUserFreePointHistoryTestCase{
 		ExpectedHistory: typepoints.PointChangeHistories{},
 	},
 	{
-		// GetFreePointHistoryCommand succeeds. The list of free point change history entries will return.
+		// GetTerritoryPointHistoryCommand succeeds. The list of territory point change history entries will return.
 		Name:   "SuccessReturn",
 		UserId: 1,
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 
 			databaseMock.
-				On("GetFreePointHistoryCommand", 1).
-				Return(typepoints.PointChangeHistories{freePointChangeHistoryEntry}, nil)
+				On("GetTerritoryPointHistoryCommand", 1).
+				Return(typepoints.PointChangeHistories{territoryPointChangeHistoryEntry}, nil)
 
 			return databaseMock
 		},
-		ExpectedHistory: typepoints.PointChangeHistories{freePointChangeHistoryEntry},
+		ExpectedHistory: typepoints.PointChangeHistories{territoryPointChangeHistoryEntry},
 	},
 }
 
-func TestSrvPoints_GetUserFreePointHistory(test *testing.T) {
-	for _, testCase := range GetUserFreePointHistoryTestCases {
+func TestSrvPoints_GetUserTerritoryPointHistory(test *testing.T) {
+	for _, testCase := range GetUserTerritoryPointHistoryTestCases {
 		test.Run(testCase.Name, func(test *testing.T) {
 			// Arrange
 			databaseMock := testCase.SetupMock()
 			sut := srvpoints.Service{Database: databaseMock}
 
 			// Act
-			history, err := sut.GetUserFreePointHistory(testCase.UserId)
+			history, err := sut.GetUserTerritoryPointHistory(testCase.UserId)
 
 			// Assert
 			if testCase.ExpectedErrorIs != nil {
