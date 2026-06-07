@@ -255,8 +255,46 @@ func convertPointInfoToDto(info typepoints.PointInfo) genpoints.PointInfo {
 }
 
 // ChangeUserTerritoryPoints (POST /points/{login}/territory-points)
-func (c *Controller) ChangeUserTerritoryPoints(ctx echo.Context, _ gengames.Login) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+func (c *Controller) ChangeUserTerritoryPoints(ctx echo.Context, login genpoints.Login) error {
+	var pointChangeDto genpoints.PointChange
+	err := ctx.Bind(&pointChangeDto)
+
+	if err != nil {
+		err = common.NewBadRequestError(err.Error())
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	sourceUserId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserIdByLogin(login)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	pointChange := convertDtoToTerritoryPointChange(sourceUserId, pointChangeDto)
+
+	changeResult, err := c.Service.ChangeTerritoryPoints(userId, pointChange)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	changeResultDto := convertChangeResultToDto(changeResult)
+
+	return ctx.JSON(http.StatusOK, changeResultDto)
+}
+
+func convertDtoToTerritoryPointChange(sourceUserId int, pointChangeDto genpoints.PointChange) typepoints.TerritoryPointChange {
+	return typepoints.TerritoryPointChange{
+		SourceUserId:       sourceUserId,
+		ChangeSource:       pointChangeDto.ChangeSource,
+		DesiredChangeValue: pointChangeDto.DesiredChangeValue,
+	}
 }
 
 // GetUserTerritoryPoints (GET /points/{login}/territory-points)

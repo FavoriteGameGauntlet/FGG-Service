@@ -212,6 +212,87 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 	return
 }
 
+func (s *Service) ChangeTerritoryPoints(userId int, pointChange typepoints.TerritoryPointChange) (
+	changeResult typepoints.PointChangeResult, err error) {
+
+	if !slices.Contains(typepoints.TerritoryPointChangeSourceSlice, pointChange.ChangeSource) {
+		err = common.NewChangeSourceUnprocessableError(typepoints.TerritoryPointChangeSourceSlice)
+		return
+	}
+
+	if pointChange.ChangeSource == typepoints.TerritoryPointChangeSourceObtaining {
+		err = validateTerritoryObtainingChange(pointChange)
+
+		if err != nil {
+			return
+		}
+	}
+
+	if pointChange.ChangeSource == typepoints.TerritoryPointChangeSourceLoss {
+		err = validateTerritoryLossChange(pointChange)
+
+		if err != nil {
+			return
+		}
+	}
+
+	currentPoints, err := s.Database.GetTerritoryPointsCommand(userId)
+
+	if err != nil {
+		return
+	}
+
+	actualChangeValue := max(pointChange.DesiredChangeValue, -currentPoints)
+	finalValue := currentPoints + actualChangeValue
+
+	err = s.Database.ChangeTerritoryPointsCommand(userId, actualChangeValue)
+
+	if err != nil {
+		return
+	}
+
+	err = s.Database.AddTerritoryPointHistoryCommand(
+		userId,
+		pointChange.SourceUserId,
+		pointChange.ChangeSource,
+		pointChange.DesiredChangeValue,
+		actualChangeValue,
+		finalValue)
+
+	if err != nil {
+		return
+	}
+
+	changeResult = typepoints.PointChangeResult{
+		ActualChangeValue:  actualChangeValue,
+		ChangeSource:       pointChange.ChangeSource,
+		DesiredChangeValue: pointChange.DesiredChangeValue,
+		FinalValue:         finalValue,
+	}
+
+	return
+}
+
+func validateTerritoryObtainingChange(pointChange typepoints.TerritoryPointChange) error {
+	if pointChange.DesiredChangeValue < 0 {
+		return common.NewWrongDesiredChangeValueConflictError(
+			pointChange.ChangeSource,
+			"zero or more")
+	}
+
+	return nil
+}
+
+func validateTerritoryLossChange(pointChange typepoints.TerritoryPointChange) error {
+	if pointChange.DesiredChangeValue > 0 {
+		return common.NewWrongDesiredChangeValueConflictError(
+			pointChange.ChangeSource,
+			"zero or less")
+	}
+
+	return nil
+}
+
 func validateSeizeChange(pointChange typepoints.TerritoryHourChange) error {
 	if pointChange.DesiredChangeValue > 0 {
 		return common.NewWrongDesiredChangeValueConflictError(
