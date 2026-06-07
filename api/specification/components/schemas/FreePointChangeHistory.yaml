@@ -6,3 +6,9 @@ allOf:
         type: string
         format: date-time
     required: [ changeDate ]
+example:
+  changeSource: quest
+  desiredChangeValue: 2
+  actualChangeValue: 2
+  finalValue: 12
+  changeDate: "2026-06-07T08:09:10.123Z"
