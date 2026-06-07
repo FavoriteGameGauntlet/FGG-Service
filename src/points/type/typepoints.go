@@ -25,6 +25,14 @@ type FreePointChange struct {
 	WheelEffectName    *string
 }
 
+type PointInfo struct {
+	TerritoryPoints  int
+	FreePoints       int
+	AvailableRolls   int
+	TerritoryHours   int
+	ExperiencePoints int
+}
+
 const (
 	ExperienceChangeSourceLevelUp = "level-up"
 	ExperienceChangeSourceOther   = "other"
