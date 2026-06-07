@@ -274,6 +274,12 @@ components:
               format: date-time
           required:
             - changeDate
+      example:
+        changeSource: territory-obtaining
+        desiredChangeValue: 2
+        actualChangeValue: 2
+        finalValue: 12
+        changeDate: '2026-06-07T08:09:10.123Z'
     TerritoryPointChangeHistories:
       type: array
       items:
@@ -378,6 +384,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TerritoryPointChangeHistories'
+          example:
+            - changeSource: territory-obtaining
+              desiredChangeValue: 2
+              actualChangeValue: 2
+              finalValue: 12
+              changeDate: '2026-06-07T08:09:10.123Z'
     FreePointChangeResultResponse:
       description: Success.
       content:

@@ -33,7 +33,7 @@ type TerritoryPointChange struct {
 	DesiredChangeValue int
 }
 
-type FreePointChangeHistory struct {
+type PointChangeHistory struct {
 	ActualChangeValue  int
 	ChangeDate         time.Time
 	ChangeSource       string
@@ -41,7 +41,7 @@ type FreePointChangeHistory struct {
 	FinalValue         int
 }
 
-type FreePointChangeHistories = []FreePointChangeHistory
+type PointChangeHistories = []PointChangeHistory
 
 type PointInfo struct {
 	TerritoryPoints  int

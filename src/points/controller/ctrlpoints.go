@@ -1,12 +1,11 @@
 package ctrlpoints
 
 import (
-	"FGG-Service/api/generated/games"
 	"FGG-Service/api/generated/points"
 	"FGG-Service/src/auth/service"
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/service"
-	typepoints "FGG-Service/src/points/type"
+	"FGG-Service/src/points/type"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -200,7 +199,7 @@ func (c *Controller) GetUserFreePointHistory(ctx echo.Context, login genpoints.L
 	return ctx.JSON(http.StatusOK, historyDto)
 }
 
-func convertFreePointChangeHistoriesToDto(history typepoints.FreePointChangeHistories) genpoints.FreePointChangeHistories {
+func convertFreePointChangeHistoriesToDto(history typepoints.PointChangeHistories) genpoints.FreePointChangeHistories {
 	historyDto := make(genpoints.FreePointChangeHistories, len(history))
 
 	for i, entry := range history {
@@ -326,8 +325,49 @@ func (c *Controller) GetUserTerritoryPoints(ctx echo.Context, login genpoints.Lo
 }
 
 // GetUserTerritoryPointHistory (GET /points/{login}/territory-points/history)
-func (c *Controller) GetUserTerritoryPointHistory(ctx echo.Context, _ gengames.Login) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+func (c *Controller) GetUserTerritoryPointHistory(ctx echo.Context, login genpoints.Login) error {
+	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	if !doesExist {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserIdByLogin(login)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	history, err := c.Service.GetUserTerritoryPointHistory(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	historyDto := convertTerritoryPointChangeHistoriesToDto(history)
+
+	return ctx.JSON(http.StatusOK, historyDto)
+}
+
+func convertTerritoryPointChangeHistoriesToDto(history typepoints.PointChangeHistories) genpoints.TerritoryPointChangeHistories {
+	historyDto := make(genpoints.TerritoryPointChangeHistories, len(history))
+
+	for i, entry := range history {
+		historyDto[i] = genpoints.TerritoryPointChangeHistory{
+			ActualChangeValue:  entry.ActualChangeValue,
+			ChangeDate:         entry.ChangeDate,
+			ChangeSource:       entry.ChangeSource,
+			DesiredChangeValue: entry.DesiredChangeValue,
+			FinalValue:         entry.FinalValue,
+		}
+	}
+
+	return historyDto
 }
 
 // ChangeTerritoryHours (POST /points/territory-hours)
