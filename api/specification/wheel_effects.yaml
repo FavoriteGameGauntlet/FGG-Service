@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.12.6
+  version: 0.13.0
 paths:
   /wheel-effects/{login}/history:
     get:
@@ -81,7 +81,7 @@ paths:
       tags:
         - WheelEffects
       requestBody:
-        $ref: '#/components/requestBodies/PointChangeByLoginsRequest'
+        $ref: '#/components/requestBodies/WheelEffectRollApplyRequest'
       responses:
         '200':
           $ref: '#/components/responses/FreePointChangeResultByLoginsResponse'
@@ -128,7 +128,9 @@ components:
             isApplied:
               type: boolean
           required:
+            - position
             - rollDate
+            - isApplied
     RolledWheelEffects:
       type: array
       items:
@@ -174,6 +176,16 @@ components:
         required:
           - login
           - pointChange
+    WheelEffectRollApply:
+      type: object
+      properties:
+        wheelEffectName:
+          $ref: '#/components/schemas/Name'
+        pointChanges:
+          $ref: '#/components/schemas/PointChangeByLogins'
+      required:
+        - wheelEffectName
+        - pointChanges
     PointChangeResult:
       allOf:
         - $ref: '#/components/schemas/PointChange'
@@ -251,8 +263,8 @@ components:
           schema:
             $ref: '#/components/schemas/FreePointChangeResultByLogins'
   requestBodies:
-    PointChangeByLoginsRequest:
+    WheelEffectRollApplyRequest:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/PointChangeByLogins'
+            $ref: '#/components/schemas/WheelEffectRollApply'

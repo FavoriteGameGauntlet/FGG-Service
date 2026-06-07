@@ -4,9 +4,7 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/service"
 	"FGG-Service/src/points/type"
-	"FGG-Service/src/wheeleffects/types"
 	"FGG-Service/tests/points/mock"
-	"FGG-Service/tests/points/mock/srvwheeleffects"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -16,8 +14,8 @@ type ChangeFreePointsTestCase struct {
 	Name                 string
 	UserId               int
 	Change               typepoints.FreePointChange
+	EffectId             *int
 	SetupMock            func() *dbpointsmock.DatabaseMock
-	SetupWheelEffectMock func() *srvwheeleffectsmock.ServiceMock
 	SetupMinimum         func() (restore func())
 	ExpectedActualChange *int
 	ExpectedFinalValue   *int
@@ -84,9 +82,10 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 	},
 	{
 		// Gain with 'own-wheel-effect'. Success.
-		Name:   "Gain_OwnWheelEffect_Success",
-		UserId: 1,
-		Change: typepoints.FreePointChange{ChangeSource: typepoints.FreePointsChangeSourceOwnWheelEffect, DesiredChangeValue: 3, WheelEffectName: ptrStr("test-effect")},
+		Name:     "Gain_OwnWheelEffect_Success",
+		UserId:   1,
+		Change:   typepoints.FreePointChange{ChangeSource: typepoints.FreePointsChangeSourceOwnWheelEffect, DesiredChangeValue: 3},
+		EffectId: ptr(42),
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(10, nil)
@@ -94,17 +93,12 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 1, 0, typepoints.FreePointsChangeSourceOwnWheelEffect, 3, 3, 13, ptr(42)).Return(nil)
 			return databaseMock
 		},
-		SetupWheelEffectMock: func() *srvwheeleffectsmock.ServiceMock {
-			weMock := new(srvwheeleffectsmock.ServiceMock)
-			weMock.On("GetEffectHistoryByEffectName", 1, "test-effect").Return(&typewheeleffects.RolledWheelEffect{Id: 42}, nil)
-			return weMock
-		},
 		ExpectedActualChange: ptr(3),
 		ExpectedFinalValue:   ptr(13),
 	},
 	{
-		// WheelEffectName is nil for 'own-wheel-effect' — required field missing. Unprocessable error returns.
-		Name:   "Gain_OwnWheelEffect_NoName_UnprocessableError",
+		// EffectId is nil for 'own-wheel-effect' — the wheel effect wasn't resolved. Unprocessable error returns.
+		Name:   "Gain_OwnWheelEffect_NoEffectId_UnprocessableError",
 		UserId: 1,
 		Change: typepoints.FreePointChange{ChangeSource: typepoints.FreePointsChangeSourceOwnWheelEffect, DesiredChangeValue: 3},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
@@ -113,39 +107,11 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 		ExpectedErrorCode: "WHEEL_EFFECT_NAME_REQUIRED",
 	},
 	{
-		// GetEffectHistoryByEffectName returns a database error for 'own-wheel-effect'.
-		Name:   "Gain_OwnWheelEffect_ServiceError",
-		UserId: 1,
-		Change: typepoints.FreePointChange{ChangeSource: typepoints.FreePointsChangeSourceOwnWheelEffect, DesiredChangeValue: 3, WheelEffectName: ptrStr("test-effect")},
-		SetupMock: func() *dbpointsmock.DatabaseMock {
-			return new(dbpointsmock.DatabaseMock)
-		},
-		SetupWheelEffectMock: func() *srvwheeleffectsmock.ServiceMock {
-			weMock := new(srvwheeleffectsmock.ServiceMock)
-			weMock.On("GetEffectHistoryByEffectName", 1, "test-effect").Return(nil, dbError)
-			return weMock
-		},
-	},
-	{
-		// GetEffectHistoryByEffectName returns nil — effect not found. Not found error returns.
-		Name:   "Gain_OwnWheelEffect_NotFound_Error",
-		UserId: 1,
-		Change: typepoints.FreePointChange{ChangeSource: typepoints.FreePointsChangeSourceOwnWheelEffect, DesiredChangeValue: 3, WheelEffectName: ptrStr("unknown-effect")},
-		SetupMock: func() *dbpointsmock.DatabaseMock {
-			return new(dbpointsmock.DatabaseMock)
-		},
-		SetupWheelEffectMock: func() *srvwheeleffectsmock.ServiceMock {
-			weMock := new(srvwheeleffectsmock.ServiceMock)
-			weMock.On("GetEffectHistoryByEffectName", 1, "unknown-effect").Return(nil, nil)
-			return weMock
-		},
-		ExpectedErrorCode: "WHEEL_EFFECT_NAME_NOT_FOUND",
-	},
-	{
 		// Gain with 'other-wheel-effect', non-zero SourceUserId. Success.
-		Name:   "Gain_OtherWheelEffect_Success",
-		UserId: 1,
-		Change: typepoints.FreePointChange{SourceUserId: 2, ChangeSource: typepoints.FreePointsChangeSourceOtherWheelEffect, DesiredChangeValue: 5, WheelEffectName: ptrStr("test-effect")},
+		Name:     "Gain_OtherWheelEffect_Success",
+		UserId:   1,
+		Change:   typepoints.FreePointChange{SourceUserId: 2, ChangeSource: typepoints.FreePointsChangeSourceOtherWheelEffect, DesiredChangeValue: 5},
+		EffectId: ptr(42),
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(10, nil)
@@ -153,17 +119,12 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 1, 2, typepoints.FreePointsChangeSourceOtherWheelEffect, 5, 5, 15, ptr(42)).Return(nil)
 			return databaseMock
 		},
-		SetupWheelEffectMock: func() *srvwheeleffectsmock.ServiceMock {
-			weMock := new(srvwheeleffectsmock.ServiceMock)
-			weMock.On("GetEffectHistoryByEffectName", 1, "test-effect").Return(&typewheeleffects.RolledWheelEffect{Id: 42}, nil)
-			return weMock
-		},
 		ExpectedActualChange: ptr(5),
 		ExpectedFinalValue:   ptr(15),
 	},
 	{
-		// WheelEffectName is nil for 'other-wheel-effect'. Unprocessable error returns.
-		Name:   "Gain_OtherWheelEffect_NoName_UnprocessableError",
+		// EffectId is nil for 'other-wheel-effect'. Unprocessable error returns.
+		Name:   "Gain_OtherWheelEffect_NoEffectId_UnprocessableError",
 		UserId: 1,
 		Change: typepoints.FreePointChange{SourceUserId: 2, ChangeSource: typepoints.FreePointsChangeSourceOtherWheelEffect, DesiredChangeValue: 5},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
@@ -264,14 +225,9 @@ func TestSrvPoints_ChangeFreePoints(test *testing.T) {
 
 			databaseMock := testCase.SetupMock()
 			sut := srvpoints.Service{Database: databaseMock}
-			var weMock *srvwheeleffectsmock.ServiceMock
-			if testCase.SetupWheelEffectMock != nil {
-				weMock = testCase.SetupWheelEffectMock()
-				sut.WheelEffectService = weMock
-			}
 
 			// Act
-			result, err := sut.ChangeFreePoints(testCase.UserId, testCase.Change)
+			result, err := sut.ChangeFreePoints(testCase.UserId, testCase.Change, testCase.EffectId)
 
 			// Assert
 			if testCase.ExpectedErrorCode != "" {
@@ -288,9 +244,6 @@ func TestSrvPoints_ChangeFreePoints(test *testing.T) {
 			}
 
 			databaseMock.AssertExpectations(test)
-			if weMock != nil {
-				weMock.AssertExpectations(test)
-			}
 		})
 	}
 }

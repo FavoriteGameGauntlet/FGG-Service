@@ -28,12 +28,17 @@ func NewGettingService() IGettingService {
 func (s *GettingService) GetCurrentGame(userId int) (game typegames.CurrentGame, err error) {
 	games, err := s.Database.GetCurrentGameCommand(userId)
 
-	if errors.Is(err, sql.ErrNoRows) || len(games) == 0 {
+	if errors.Is(err, sql.ErrNoRows) {
 		err = common.NewCurrentGameNotFoundError()
 		return
 	}
 
 	if err != nil {
+		return
+	}
+
+	if len(games) == 0 {
+		err = common.NewCurrentGameNotFoundError()
 		return
 	}
 

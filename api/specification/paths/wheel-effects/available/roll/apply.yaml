@@ -2,7 +2,7 @@ post:
   operationId: applyAvailableWheelEffectRoll
   tags: [ WheelEffects ]
   requestBody:
-    $ref: "../../../../components/requests/PointChangeByLoginsRequest.yaml"
+    $ref: "../../../../components/requests/WheelEffectRollApplyRequest.yaml"
   responses:
     "200":
       $ref: "../../../../components/responses/FreePointChangeResultByLoginsResponse.yaml"

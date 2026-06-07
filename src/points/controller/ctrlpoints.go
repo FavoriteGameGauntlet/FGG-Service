@@ -6,23 +6,28 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/service"
 	"FGG-Service/src/points/type"
+	srvwheeleffects "FGG-Service/src/wheeleffects/service"
+	typewheeleffects "FGG-Service/src/wheeleffects/types"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type Controller struct {
-	Service     srvpoints.Service
-	AuthService srvauth.Service
+	Service            srvpoints.Service
+	AuthService        srvauth.IService
+	WheelEffectService srvwheeleffects.IService
 }
 
 func NewController() *Controller {
 	s := srvpoints.NewService()
 	as := srvauth.NewService()
+	wes := srvwheeleffects.NewService()
 
 	return &Controller{
 		*s,
-		*as,
+		as,
+		wes,
 	}
 }
 
@@ -110,9 +115,21 @@ func (c *Controller) ChangeFreePoints(ctx echo.Context, login genpoints.Login) e
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
+	var effectId *int
+	if pointChangeDto.WheelEffectName != nil {
+		var effect typewheeleffects.RolledWheelEffect
+		effect, err = c.WheelEffectService.GetLastWheelEffectByName(userId, *pointChangeDto.WheelEffectName)
+
+		if err != nil {
+			return common.SendJSONErrorResponse(ctx, err)
+		}
+
+		effectId = &effect.Id
+	}
+
 	pointChange := convertDtoToFreePointChange(sourceUserId, pointChangeDto)
 
-	changeResult, err := c.Service.ChangeFreePoints(userId, pointChange)
+	changeResult, err := c.Service.ChangeFreePoints(userId, pointChange, effectId)
 
 	if err != nil {
 		return common.SendJSONErrorResponse(ctx, err)
@@ -128,7 +145,6 @@ func convertDtoToFreePointChange(sourceUserId int, pointChangeDto genpoints.Free
 		SourceUserId:       sourceUserId,
 		ChangeSource:       pointChangeDto.ChangeSource,
 		DesiredChangeValue: pointChangeDto.DesiredChangeValue,
-		WheelEffectName:    pointChangeDto.WheelEffectName,
 	}
 }
 

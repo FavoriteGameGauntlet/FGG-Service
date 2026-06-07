@@ -1,8 +1,8 @@
 package ctrltimers
 
 import (
-	gentimers "FGG-Service/api/generated/timers"
-	srvauth "FGG-Service/src/auth/service"
+	"FGG-Service/api/generated/timers"
+	"FGG-Service/src/auth/service"
 	"FGG-Service/src/common"
 	"FGG-Service/src/timers/service"
 	"FGG-Service/src/timers/types"

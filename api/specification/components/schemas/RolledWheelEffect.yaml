@@ -10,4 +10,4 @@ allOf:
         format: date-time
       isApplied:
         type: boolean
-    required: [ rollDate ]
+    required: [ position, rollDate, isApplied ]

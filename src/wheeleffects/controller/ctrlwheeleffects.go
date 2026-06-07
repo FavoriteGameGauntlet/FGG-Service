@@ -1,10 +1,11 @@
 package ctrlwheeleffects
 
 import (
-	gengames "FGG-Service/api/generated/games"
-	genwheeleffects "FGG-Service/api/generated/wheel_effects"
-	srvauth "FGG-Service/src/auth/service"
+	"FGG-Service/api/generated/games"
+	"FGG-Service/api/generated/wheel_effects"
+	"FGG-Service/src/auth/service"
 	"FGG-Service/src/common"
+	"FGG-Service/src/points/type"
 	"FGG-Service/src/wheeleffects/service"
 	"FGG-Service/src/wheeleffects/types"
 	"net/http"
@@ -61,7 +62,83 @@ func convertWheelEffectsToDto(effects typewheeleffects.WheelEffects) genwheeleff
 
 // ApplyAvailableWheelEffectRoll (POST /wheel-effects/available/roll/apply)
 func (c *Controller) ApplyAvailableWheelEffectRoll(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	var rollApplyDto genwheeleffects.WheelEffectRollApply
+	err := ctx.Bind(&rollApplyDto)
+
+	if err != nil {
+		err = common.NewBadRequestError(err.Error())
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	sourceUserId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	rollApply, err := c.convertDtoToWheelEffectRollApply(sourceUserId, rollApplyDto)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	changeResults, err := c.Service.ApplyWheelEffectRoll(sourceUserId, rollApply)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	changeResultsDto := convertPointChangeResultsToDto(changeResults)
+
+	return ctx.JSON(http.StatusOK, changeResultsDto)
+}
+
+func (c *Controller) convertDtoToWheelEffectRollApply(sourceUserId int, rollApplyDto genwheeleffects.WheelEffectRollApply) (
+	rollApply typewheeleffects.WheelEffectRollApply, err error) {
+
+	pointChanges := make(typepoints.FreePointChangeByUserIds, len(rollApplyDto.PointChanges))
+
+	for i, pointChangeByLogin := range rollApplyDto.PointChanges {
+		var userId int
+		userId, err = c.AuthService.GetUserIdByLogin(pointChangeByLogin.Login)
+
+		if err != nil {
+			return
+		}
+
+		pointChanges[i] = typepoints.FreePointChangeByUserId{
+			Login:  pointChangeByLogin.Login,
+			UserId: userId,
+			PointChange: typepoints.FreePointChange{
+				SourceUserId:       sourceUserId,
+				ChangeSource:       pointChangeByLogin.PointChange.ChangeSource,
+				DesiredChangeValue: pointChangeByLogin.PointChange.DesiredChangeValue,
+			},
+		}
+	}
+
+	rollApply = typewheeleffects.WheelEffectRollApply{
+		PointChangeByUserIds: pointChanges,
+		WheelEffectName:      rollApplyDto.WheelEffectName,
+	}
+
+	return
+}
+
+func convertPointChangeResultsToDto(changeResults typepoints.PointChangeResultByUserIds) genwheeleffects.FreePointChangeResultByLogins {
+	changeResultsDto := make(genwheeleffects.FreePointChangeResultByLogins, len(changeResults))
+
+	for i, changeResult := range changeResults {
+		changeResultsDto[i].Login = changeResult.Login
+		changeResultsDto[i].ChangeResult = genwheeleffects.FreePointChangeResult{
+			ActualChangeValue:  changeResult.ChangeResult.ActualChangeValue,
+			ChangeSource:       changeResult.ChangeResult.ChangeSource,
+			DesiredChangeValue: changeResult.ChangeResult.DesiredChangeValue,
+			FinalValue:         changeResult.ChangeResult.FinalValue,
+		}
+	}
+
+	return changeResultsDto
 }
 
 // GetLastRolledWheelEffects (POST /wheel-effects/available/roll/last)

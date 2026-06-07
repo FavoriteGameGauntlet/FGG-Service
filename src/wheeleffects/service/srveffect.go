@@ -2,21 +2,32 @@ package srvwheeleffects
 
 import (
 	"FGG-Service/src/common"
+	"FGG-Service/src/points/service"
+	"FGG-Service/src/points/type"
 	"FGG-Service/src/wheeleffects/database"
 	"FGG-Service/src/wheeleffects/types"
 	"database/sql"
 	"errors"
 )
 
+type IService interface {
+	ApplyWheelEffectRoll(userId int, rollApply typewheeleffects.WheelEffectRollApply) (
+		results typepoints.PointChangeResultByUserIds, err error)
+	GetLastWheelEffectByName(userId int, effectName string) (effect typewheeleffects.RolledWheelEffect, err error)
+}
+
 type Service struct {
-	Database dbwheeleffects.Database
+	Database     dbwheeleffects.IDatabase
+	PointService srvpoints.Service
 }
 
 func NewService() *Service {
 	db := new(dbwheeleffects.Database)
+	ps := new(srvpoints.Service)
 
 	return &Service{
-		Database: *db,
+		db,
+		*ps,
 	}
 }
 
@@ -74,6 +85,12 @@ func (s *Service) MakeEffectRoll(userId int) (effects typewheeleffects.WheelEffe
 
 	err = s.Database.DecreaseAvailableRollsValueCommand(userId)
 
+	if err != nil {
+		return
+	}
+
+	err = s.Database.AddLastRolledWheelEffectsCommand(userId, effects)
+
 	return
 }
 
@@ -84,6 +101,85 @@ func (s *Service) GetLastRolledWheelEffects(userId int) (effects typewheeleffect
 		err = common.NewLastWheelEffectsNotFoundError()
 		return
 	}
+
+	return
+}
+
+func (s *Service) ApplyWheelEffectRoll(userId int, rollApply typewheeleffects.WheelEffectRollApply) (
+	results typepoints.PointChangeResultByUserIds, err error) {
+
+	effect, err := s.GetLastWheelEffectByName(userId, rollApply.WheelEffectName)
+
+	if err != nil {
+		return
+	}
+
+	results = make(typepoints.PointChangeResultByUserIds, len(rollApply.PointChangeByUserIds))
+
+	for i, pointChange := range rollApply.PointChangeByUserIds {
+		var changeResult typepoints.PointChangeResult
+		changeResult, err = s.PointService.ChangeFreePoints(pointChange.UserId, pointChange.PointChange, &effect.Id)
+
+		if err != nil {
+			return
+		}
+
+		results[i] = typepoints.PointChangeResultByUserId{
+			UserId:       pointChange.UserId,
+			Login:        pointChange.Login,
+			ChangeResult: changeResult,
+		}
+	}
+
+	err = s.Database.MarkLastWheelEffectAppliedCommand(userId, effect.Id)
+
+	if err != nil {
+		return
+	}
+
+	err = s.Database.AddWheelEffectHistoryCommand(userId, effect.Id)
+
+	return
+}
+
+func (s *Service) GetLastWheelEffectByName(userId int, effectName string) (
+	effect typewheeleffects.RolledWheelEffect, err error) {
+
+	lastEffects, err := s.Database.GetLastRolledWheelEffectsCommand(userId)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = common.NewLastWheelEffectsNotFoundError()
+		return
+	}
+
+	if err != nil {
+		return
+	}
+
+	if len(lastEffects) == 0 {
+		err = common.NewLastWheelEffectsNotFoundError()
+		return
+	}
+
+	var foundLastEffect *typewheeleffects.RolledWheelEffect
+	for _, lastEffect := range lastEffects {
+		if lastEffect.Name == effectName {
+			foundLastEffect = &lastEffect
+			break
+		}
+	}
+
+	if foundLastEffect == nil {
+		err = common.NewWheelEffectNameNotFoundError()
+		return
+	}
+
+	if foundLastEffect.IsApplied {
+		err = common.NewWheelEffectRollAlreadyAppliedConflictError()
+		return
+	}
+
+	effect = *foundLastEffect
 
 	return
 }

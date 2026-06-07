@@ -9,6 +9,14 @@ type PointChangeResult struct {
 	FinalValue         int
 }
 
+type PointChangeResultByUserId struct {
+	Login        string
+	UserId       int
+	ChangeResult PointChangeResult
+}
+
+type PointChangeResultByUserIds = []PointChangeResultByUserId
+
 type PointChange struct {
 	ChangeSource       string
 	DesiredChangeValue int
@@ -24,8 +32,15 @@ type FreePointChange struct {
 	SourceUserId       int
 	ChangeSource       string
 	DesiredChangeValue int
-	WheelEffectName    *string
 }
+
+type FreePointChangeByUserId struct {
+	Login       string
+	UserId      int
+	PointChange FreePointChange
+}
+
+type FreePointChangeByUserIds = []FreePointChangeByUserId
 
 type TerritoryPointChange struct {
 	SourceUserId       int

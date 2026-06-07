@@ -12,9 +12,13 @@ type IDatabase interface {
 	GetAvailableRollsCountCommand(userId int) (count int, err error)
 	GetAvailableEffectsCommand(userId int) (effects typewheeleffects.WheelEffects, err error)
 	GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error)
+	GetEffectHistoryByEffectNameCommand(userId int, effectName string) (effect typewheeleffects.RolledWheelEffect, err error)
 	MakeEffectRollCommand(userId int) (effects typewheeleffects.WheelEffects, err error)
 	DecreaseAvailableRollsValueCommand(userId int) error
+	AddLastRolledWheelEffectsCommand(userId int, effects typewheeleffects.WheelEffects) (err error)
 	GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error)
+	MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId int) error
+	AddWheelEffectHistoryCommand(userId int, wheelEffectId int) error
 }
 
 type Database struct {
@@ -233,6 +237,29 @@ func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
 	return err
 }
 
+const AddLastRolledWheelEffectsQuery = `
+	INSERT INTO LastWheelEffects (UserId, WheelEffectId, Position)
+	VALUES (?, ?, ?)
+`
+
+func (db *Database) AddLastRolledWheelEffectsCommand(userId int, effects typewheeleffects.WheelEffects) (err error) {
+	queryName := "AddLastRolledWheelEffectsQuery"
+
+	for i, effect := range effects {
+		_, err = dbaccess.Exec(queryName, AddLastRolledWheelEffectsQuery, userId, effect.Id, i-2)
+
+		if err != nil {
+			dbaccess.LogDbResult(queryName, nil, err)
+
+			return
+		}
+	}
+
+	dbaccess.LogDbResult(queryName, effects, err)
+
+	return
+}
+
 const GetLastRolledWheelEffectsQuery = `
 	SELECT we.Id, we.Name, we.Description, lwe.RollDate, lwe.Position, lwe.IsApplied
 	FROM LastWheelEffects lwe
@@ -286,4 +313,34 @@ func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewh
 
 	_ = rows.Close()
 	return
+}
+
+const MarkLastWheelEffectAppliedQuery = `
+	UPDATE LastWheelEffects
+	SET IsApplied = 1
+	WHERE UserId = ?
+		AND WheelEffectId = ?
+`
+
+func (db *Database) MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId int) error {
+	queryName := "MarkLastWheelEffectAppliedQuery"
+	_, err := dbaccess.Exec(queryName, MarkLastWheelEffectAppliedQuery, userId, wheelEffectId)
+
+	dbaccess.LogDbResult(queryName, nil, err)
+
+	return err
+}
+
+const AddWheelEffectHistoryQuery = `
+	INSERT INTO WheelEffectHistory (UserId, WheelEffectId)
+	VALUES (?, ?)
+`
+
+func (db *Database) AddWheelEffectHistoryCommand(userId int, wheelEffectId int) error {
+	queryName := "AddWheelEffectHistoryQuery"
+	_, err := dbaccess.Exec(queryName, AddWheelEffectHistoryQuery, userId, wheelEffectId)
+
+	dbaccess.LogDbResult(queryName, nil, err)
+
+	return err
 }

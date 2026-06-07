@@ -240,6 +240,15 @@ func NewNotEnoughAvailableWheelEffectsConflictError() error {
 	}
 }
 
+func NewWheelEffectRollAlreadyAppliedConflictError() error {
+	return &ConflictError{
+		&BaseError{
+			Code:    "WHEEL_EFFECT_ROLL_ALREADY_APPLIED",
+			Message: "This wheel effect roll has already been applied.",
+		},
+	}
+}
+
 func NewWrongDesiredChangeValueConflictError(changeSource string, changeSourceRule string) error {
 	message := fmt.Sprintf(
 		"The desired change value is invalid. The value for '%s' should be %s.",

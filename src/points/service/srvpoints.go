@@ -4,28 +4,19 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/database"
 	"FGG-Service/src/points/type"
-	"FGG-Service/src/wheeleffects/service"
-	typewheeleffects "FGG-Service/src/wheeleffects/types"
 	"slices"
 	"strconv"
 )
 
-type IWheelEffectService interface {
-	GetEffectHistoryByEffectName(userId int, effectName string) (effect *typewheeleffects.RolledWheelEffect, err error)
-}
-
 type Service struct {
-	Database           dbpoints.IDatabase
-	WheelEffectService IWheelEffectService
+	Database dbpoints.IDatabase
 }
 
 func NewService() *Service {
 	pdb := new(dbpoints.Database)
-	wes := srvwheeleffects.NewService()
 
 	return &Service{
 		pdb,
-		wes,
 	}
 }
 
@@ -61,7 +52,7 @@ func (s *Service) GetAllPointInfo() (typepoints.PointInfoByLogins, error) {
 	return s.Database.GetAllPointInfoCommand()
 }
 
-func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.FreePointChange) (
+func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.FreePointChange, effectId *int) (
 	result typepoints.PointChangeResult, err error) {
 
 	if !slices.Contains(typepoints.FreePointsChangeSourceSlice, pointChange.ChangeSource) {
@@ -69,28 +60,13 @@ func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.FreePointC
 		return
 	}
 
-	var effectId *int
 	if pointChange.ChangeSource == typepoints.FreePointsChangeSourceOwnWheelEffect ||
 		pointChange.ChangeSource == typepoints.FreePointsChangeSourceOtherWheelEffect {
-		err = validateWheelEffectChange(pointChange)
+		err = validateWheelEffectChange(pointChange, effectId)
 
 		if err != nil {
 			return
 		}
-
-		var effect *typewheeleffects.RolledWheelEffect
-		effect, err = s.WheelEffectService.GetEffectHistoryByEffectName(userId, *pointChange.WheelEffectName)
-
-		if err != nil {
-			return
-		}
-
-		if effect == nil {
-			err = common.NewWheelEffectNameNotFoundError()
-			return
-		}
-
-		effectId = &effect.Id
 	}
 
 	if pointChange.ChangeSource == typepoints.FreePointsChangeSourceBaseTeleport ||
@@ -150,8 +126,8 @@ func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.FreePointC
 	return
 }
 
-func validateWheelEffectChange(pointChange typepoints.FreePointChange) error {
-	if pointChange.WheelEffectName == nil {
+func validateWheelEffectChange(pointChange typepoints.FreePointChange, effectId *int) error {
+	if effectId == nil {
 		return common.NewWheelEffectNameRequiredUnprocessableError(pointChange.ChangeSource)
 	}
 

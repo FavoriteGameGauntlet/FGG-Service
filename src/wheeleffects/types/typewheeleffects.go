@@ -1,6 +1,9 @@
 package typewheeleffects
 
-import "time"
+import (
+	typepoints "FGG-Service/src/points/type"
+	"time"
+)
 
 type WheelEffect struct {
 	Id          int
@@ -15,8 +18,13 @@ type RolledWheelEffect struct {
 	Name        string
 	Description *string
 	RollDate    time.Time
-	Position    *int
-	IsApplied   *bool
+	Position    int
+	IsApplied   bool
 }
 
 type RolledWheelEffects = []RolledWheelEffect
+
+type WheelEffectRollApply struct {
+	PointChangeByUserIds typepoints.FreePointChangeByUserIds
+	WheelEffectName      string
+}
