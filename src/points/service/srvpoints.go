@@ -49,6 +49,10 @@ func (s *Service) GetUserPointInfo(userId int) (typepoints.PointInfo, error) {
 	return s.Database.GetPointInfoCommand(userId)
 }
 
+func (s *Service) GetAllPointInfo() (typepoints.PointInfoByLogins, error) {
+	return s.Database.GetAllPointInfoCommand()
+}
+
 func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.FreePointChange) (
 	result typepoints.PointChangeResult, err error) {
 

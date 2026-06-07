@@ -64,3 +64,10 @@ func (m *DatabaseMock) GetPointInfoCommand(userId int) (info typepoints.PointInf
 	err = args.Error(1)
 	return
 }
+
+func (m *DatabaseMock) GetAllPointInfoCommand() (infos typepoints.PointInfoByLogins, err error) {
+	args := m.Called()
+	infos = args.Get(0).(typepoints.PointInfoByLogins)
+	err = args.Error(1)
+	return
+}

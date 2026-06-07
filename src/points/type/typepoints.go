@@ -33,6 +33,13 @@ type PointInfo struct {
 	ExperiencePoints int
 }
 
+type PointInfoByLogin struct {
+	Login     string
+	PointInfo PointInfo
+}
+
+type PointInfoByLogins = []PointInfoByLogin
+
 const (
 	ExperienceChangeSourceLevelUp = "level-up"
 	ExperienceChangeSourceOther   = "other"

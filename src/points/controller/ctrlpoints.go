@@ -306,5 +306,37 @@ func (c *Controller) GetTerritoryHours(ctx echo.Context) error {
 
 // GetAllPointInfo (GET /points/all/info)
 func (c *Controller) GetAllPointInfo(ctx echo.Context) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	if !doesExist {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	infos, err := c.Service.GetAllPointInfo()
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	infosDto := convertPointInfoByLoginsToDto(infos)
+
+	return ctx.JSON(http.StatusOK, infosDto)
+}
+
+func convertPointInfoByLoginsToDto(infos typepoints.PointInfoByLogins) genpoints.PointInfoByLogins {
+	infosDto := make(genpoints.PointInfoByLogins, len(infos))
+
+	for i, info := range infos {
+		login := info.Login
+		pointInfo := convertPointInfoToDto(info.PointInfo)
+		infosDto[i].Login = &login
+		infosDto[i].PointInfo = &pointInfo
+	}
+
+	return infosDto
 }
