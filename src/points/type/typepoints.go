@@ -1,5 +1,7 @@
 package typepoints
 
+import "time"
+
 type PointChangeResult struct {
 	ActualChangeValue  int
 	ChangeSource       string
@@ -24,6 +26,16 @@ type FreePointChange struct {
 	DesiredChangeValue int
 	WheelEffectName    *string
 }
+
+type FreePointChangeHistory struct {
+	ActualChangeValue  int
+	ChangeDate         time.Time
+	ChangeSource       string
+	DesiredChangeValue int
+	FinalValue         int
+}
+
+type FreePointChangeHistories = []FreePointChangeHistory
 
 type PointInfo struct {
 	TerritoryPoints  int

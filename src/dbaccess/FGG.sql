@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.17 on Sun Feb 15 22:50:27 2026
+-- File generated with SQLiteStudio v3.4.21 on Sun Jun 7 13:01:23 2026
 --
 -- Text encoding used: System
 --
@@ -13,11 +13,14 @@ CREATE TABLE IF NOT EXISTS FreePointHistory (
                               NOT NULL,
     UserId            NUMERIC REFERENCES Users (Id) 
                               NOT NULL,
+    SourceUserId      INTEGER REFERENCES Users (Id) 
+                              NOT NULL,
     ChangeSource      TEXT    NOT NULL,
     ChangeValue       INTEGER NOT NULL,
     ActualChangeValue INTEGER NOT NULL,
     FinalValue        INTEGER CHECK (FinalValue >= 0) 
                               NOT NULL,
+    WheelEffectId     INTEGER REFERENCES WheelEffectHistory (Id),
     ChangeDate        TEXT    NOT NULL
                               DEFAULT (datetime('now', 'subsec') ) 
 );
@@ -76,6 +79,8 @@ CREATE TABLE IF NOT EXISTS TerritoryPointHistory (
                               UNIQUE
                               NOT NULL,
     UserId            INTEGER REFERENCES Users (Id) 
+                              NOT NULL,
+    SourceUserId      INTEGER REFERENCES Users (Id) 
                               NOT NULL,
     ChangeSource      TEXT    NOT NULL,
     ChangeValue       INTEGER NOT NULL,

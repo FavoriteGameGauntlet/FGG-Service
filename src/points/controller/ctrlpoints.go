@@ -171,8 +171,49 @@ func (c *Controller) GetFreePoints(ctx echo.Context, login genpoints.Login) erro
 }
 
 // GetUserFreePointHistory (GET /points/{login}/free-points/history)
-func (c *Controller) GetUserFreePointHistory(ctx echo.Context, _ gengames.Login) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+func (c *Controller) GetUserFreePointHistory(ctx echo.Context, login genpoints.Login) error {
+	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	if !doesExist {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserIdByLogin(login)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	history, err := c.Service.GetUserFreePointHistory(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	historyDto := convertFreePointChangeHistoriesToDto(history)
+
+	return ctx.JSON(http.StatusOK, historyDto)
+}
+
+func convertFreePointChangeHistoriesToDto(history typepoints.FreePointChangeHistories) genpoints.FreePointChangeHistories {
+	historyDto := make(genpoints.FreePointChangeHistories, len(history))
+
+	for i, entry := range history {
+		historyDto[i] = genpoints.FreePointChangeHistory{
+			ActualChangeValue:  entry.ActualChangeValue,
+			ChangeDate:         entry.ChangeDate,
+			ChangeSource:       entry.ChangeSource,
+			DesiredChangeValue: entry.DesiredChangeValue,
+			FinalValue:         entry.FinalValue,
+		}
+	}
+
+	return historyDto
 }
 
 // GetUserPointInfo (GET /points/{login}/info)
