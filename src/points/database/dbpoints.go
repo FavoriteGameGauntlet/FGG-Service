@@ -22,6 +22,7 @@ type IDatabase interface {
 	ChangeTerritoryHoursCommand(userId int, changeValue int) error
 	GetTerritoryPointsCommand(userId int) (points int, err error)
 	GetPointInfoCommand(userId int) (info typepoints.PointInfo, err error)
+	GetAllPointInfoCommand() (infos typepoints.PointInfoByLogins, err error)
 }
 
 type Database struct {
@@ -157,6 +158,44 @@ func (db *Database) GetPointInfoCommand(userId int) (info typepoints.PointInfo, 
 
 	dbaccess.LogDbResult(queryName, info, err)
 
+	return
+}
+
+const GetAllPointInfoQuery = `
+	SELECT u.Login, us.TerritoryPoints, us.FreePoints, us.AvailableRolls, us.TerritoryHours, us.ExperiencePoints
+	FROM Users u
+	INNER JOIN UserStats us ON us.UserId = u.Id
+`
+
+func (db *Database) GetAllPointInfoCommand() (infos typepoints.PointInfoByLogins, err error) {
+	queryName := "GetAllPointInfoQuery"
+	rows, err := dbaccess.Query(queryName, GetAllPointInfoQuery)
+
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		info := typepoints.PointInfoByLogin{}
+		err = rows.Scan(
+			&info.Login,
+			&info.PointInfo.TerritoryPoints,
+			&info.PointInfo.FreePoints,
+			&info.PointInfo.AvailableRolls,
+			&info.PointInfo.TerritoryHours,
+			&info.PointInfo.ExperiencePoints)
+
+		if err != nil {
+			_ = rows.Close()
+			return
+		}
+
+		infos = append(infos, info)
+	}
+
+	dbaccess.LogDbResult(queryName, infos, err)
+
+	_ = rows.Close()
 	return
 }
 
