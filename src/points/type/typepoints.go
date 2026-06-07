@@ -27,6 +27,12 @@ type FreePointChange struct {
 	WheelEffectName    *string
 }
 
+type TerritoryPointChange struct {
+	SourceUserId       int
+	ChangeSource       string
+	DesiredChangeValue int
+}
+
 type FreePointChangeHistory struct {
 	ActualChangeValue  int
 	ChangeDate         time.Time
@@ -65,6 +71,10 @@ const (
 	FreePointsChangeSourceBaseTeleport     = "base-teleport"
 	FreePointsChangeSourceSandStorm        = "sandstorm"
 	FreePointsChangeSourceOther            = "other"
+
+	TerritoryPointChangeSourceObtaining = "territory-obtaining"
+	TerritoryPointChangeSourceLoss      = "territory-loss"
+	TerritoryPointChangeSourceOther     = "other"
 )
 
 var ExperienceChangeSourceSlice = []string{ExperienceChangeSourceLevelUp, ExperienceChangeSourceOther}
@@ -78,4 +88,10 @@ var FreePointsChangeSourceSlice = []string{
 	FreePointsChangeSourceBaseTeleport,
 	FreePointsChangeSourceSandStorm,
 	FreePointsChangeSourceOther,
+}
+
+var TerritoryPointChangeSourceSlice = []string{
+	TerritoryPointChangeSourceObtaining,
+	TerritoryPointChangeSourceLoss,
+	TerritoryPointChangeSourceOther,
 }

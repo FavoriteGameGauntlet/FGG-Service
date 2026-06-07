@@ -22,6 +22,14 @@ type IDatabase interface {
 	GetTerritoryHoursCommand(userId int) (points int, err error)
 	ChangeTerritoryHoursCommand(userId int, changeValue int) error
 	GetTerritoryPointsCommand(userId int) (points int, err error)
+	ChangeTerritoryPointsCommand(userId int, changeValue int) error
+	AddTerritoryPointHistoryCommand(
+		userId int,
+		sourceUserId int,
+		changeSource string,
+		changeValue int,
+		actualChangeValue int,
+		finalValue int) error
 	GetPointInfoCommand(userId int) (info typepoints.PointInfo, err error)
 	GetAllPointInfoCommand() (infos typepoints.PointInfoByLogins, err error)
 }
@@ -138,6 +146,57 @@ func (db *Database) GetTerritoryPointsCommand(userId int) (points int, err error
 	dbaccess.LogDbResult(queryName, points, err)
 
 	return
+}
+
+const ChangeTerritoryPointsQuery = `
+	UPDATE UserStats
+	SET TerritoryPoints = TerritoryPoints + ?
+	WHERE UserId = ?
+`
+
+func (db *Database) ChangeTerritoryPointsCommand(userId int, changeValue int) error {
+	queryName := "ChangeTerritoryPointsQuery"
+	_, err := dbaccess.Exec(queryName, ChangeTerritoryPointsQuery, changeValue, userId)
+
+	dbaccess.LogDbResult(queryName, nil, err)
+
+	return err
+}
+
+const AddTerritoryPointHistoryQuery = `
+	INSERT INTO TerritoryPointHistory (
+		UserId,
+		SourceUserId,
+		ChangeSource,
+		ChangeValue,
+		ActualChangeValue,
+		FinalValue
+	)
+	VALUES (?, ?, ?, ?, ?, ?)
+`
+
+func (db *Database) AddTerritoryPointHistoryCommand(
+	userId int,
+	sourceUserId int,
+	changeSource string,
+	changeValue int,
+	actualChangeValue int,
+	finalValue int) error {
+
+	queryName := "AddTerritoryPointHistoryQuery"
+	_, err := dbaccess.Exec(
+		queryName,
+		AddTerritoryPointHistoryQuery,
+		userId,
+		sourceUserId,
+		changeSource,
+		changeValue,
+		actualChangeValue,
+		finalValue)
+
+	dbaccess.LogDbResult(queryName, nil, err)
+
+	return err
 }
 
 const GetPointInfoQuery = `
