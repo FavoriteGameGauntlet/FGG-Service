@@ -18,6 +18,7 @@ type IDatabase interface {
 		actualChangeValue int,
 		finalValue int,
 		wheelEffectId *int) error
+	GetFreePointHistoryCommand(userId int) (history typepoints.FreePointChangeHistories, err error)
 	GetTerritoryHoursCommand(userId int) (points int, err error)
 	ChangeTerritoryHoursCommand(userId int, changeValue int) error
 	GetTerritoryPointsCommand(userId int) (points int, err error)
@@ -268,4 +269,55 @@ func (db *Database) AddFreePointHistoryCommand(
 	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
+}
+
+const GetFreePointHistoryQuery = `
+	SELECT
+		ActualChangeValue,
+		ChangeDate,
+		ChangeSource,
+		ChangeValue,
+		FinalValue
+	FROM FreePointHistory
+	WHERE UserId = ?
+	ORDER BY ChangeDate DESC
+`
+
+func (db *Database) GetFreePointHistoryCommand(userId int) (history typepoints.FreePointChangeHistories, err error) {
+	queryName := "GetFreePointHistoryQuery"
+	rows, err := dbaccess.Query(queryName, GetFreePointHistoryQuery, userId)
+
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		entry := typepoints.FreePointChangeHistory{}
+		var changeDateString string
+		err = rows.Scan(
+			&entry.ActualChangeValue,
+			&changeDateString,
+			&entry.ChangeSource,
+			&entry.DesiredChangeValue,
+			&entry.FinalValue)
+
+		if err != nil {
+			_ = rows.Close()
+			return
+		}
+
+		entry.ChangeDate, err = dbaccess.ConvertToDate(changeDateString)
+
+		if err != nil {
+			_ = rows.Close()
+			return
+		}
+
+		history = append(history, entry)
+	}
+
+	dbaccess.LogDbResult(queryName, history, err)
+
+	_ = rows.Close()
+	return
 }
