@@ -1,6 +1,9 @@
 package dbpoints
 
-import "FGG-Service/src/dbaccess"
+import (
+	"FGG-Service/src/dbaccess"
+	typepoints "FGG-Service/src/points/type"
+)
 
 type IDatabase interface {
 	GetExperiencePointsCommand(userId int) (points int, err error)
@@ -18,6 +21,7 @@ type IDatabase interface {
 	GetTerritoryHoursCommand(userId int) (points int, err error)
 	ChangeTerritoryHoursCommand(userId int, changeValue int) error
 	GetTerritoryPointsCommand(userId int) (points int, err error)
+	GetPointInfoCommand(userId int) (info typepoints.PointInfo, err error)
 }
 
 type Database struct {
@@ -130,6 +134,28 @@ func (db *Database) GetTerritoryPointsCommand(userId int) (points int, err error
 	err = row.Scan(&points)
 
 	dbaccess.LogDbResult(queryName, points, err)
+
+	return
+}
+
+const GetPointInfoQuery = `
+	SELECT TerritoryPoints, FreePoints, AvailableRolls, TerritoryHours, ExperiencePoints
+	FROM UserStats
+	WHERE UserId = ?
+`
+
+func (db *Database) GetPointInfoCommand(userId int) (info typepoints.PointInfo, err error) {
+	queryName := "GetPointInfoQuery"
+	row := dbaccess.QueryRow(queryName, GetPointInfoQuery, userId)
+
+	err = row.Scan(
+		&info.TerritoryPoints,
+		&info.FreePoints,
+		&info.AvailableRolls,
+		&info.TerritoryHours,
+		&info.ExperiencePoints)
+
+	dbaccess.LogDbResult(queryName, info, err)
 
 	return
 }

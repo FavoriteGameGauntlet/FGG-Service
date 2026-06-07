@@ -176,8 +176,41 @@ func (c *Controller) GetUserFreePointHistory(ctx echo.Context, _ gengames.Login)
 }
 
 // GetUserPointInfo (GET /points/{login}/info)
-func (c *Controller) GetUserPointInfo(ctx echo.Context, _ gengames.Login) error {
-	return ctx.NoContent(http.StatusNotImplemented)
+func (c *Controller) GetUserPointInfo(ctx echo.Context, login genpoints.Login) error {
+	doesExist, err := c.AuthService.DoesUserSessionExist(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	if !doesExist {
+		err = common.NewActiveSessionNotFoundUnauthorizedError()
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	userId, err := c.AuthService.GetUserIdByLogin(login)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	info, err := c.Service.GetUserPointInfo(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, convertPointInfoToDto(info))
+}
+
+func convertPointInfoToDto(info typepoints.PointInfo) genpoints.PointInfo {
+	return genpoints.PointInfo{
+		TerritoryPoints:  info.TerritoryPoints,
+		FreePoints:       info.FreePoints,
+		AvailableRolls:   info.AvailableRolls,
+		TerritoryHours:   info.TerritoryHours,
+		ExperiencePoints: info.ExperiencePoints,
+	}
 }
 
 // ChangeUserTerritoryPoints (POST /points/{login}/territory-points)

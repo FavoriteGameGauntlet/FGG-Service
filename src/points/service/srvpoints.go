@@ -45,6 +45,10 @@ func (s *Service) GetTerritoryPoints(userId int) (int, error) {
 	return s.Database.GetTerritoryPointsCommand(userId)
 }
 
+func (s *Service) GetUserPointInfo(userId int) (typepoints.PointInfo, error) {
+	return s.Database.GetPointInfoCommand(userId)
+}
+
 func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.FreePointChange) (
 	result typepoints.PointChangeResult, err error) {
 
