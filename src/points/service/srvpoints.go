@@ -60,8 +60,7 @@ func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.FreePointC
 		return
 	}
 
-	if pointChange.ChangeSource == typepoints.FreePointsChangeSourceOwnWheelEffect ||
-		pointChange.ChangeSource == typepoints.FreePointsChangeSourceOtherWheelEffect {
+	if pointChange.ChangeSource == typepoints.FreePointsChangeSourceWheelEffect {
 		err = validateWheelEffectChange(pointChange, effectId)
 
 		if err != nil {

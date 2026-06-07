@@ -81,52 +81,42 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 		ExpectedFinalValue:   ptr(15),
 	},
 	{
-		// Gain with 'own-wheel-effect'. Success.
-		Name:     "Gain_OwnWheelEffect_Success",
+		// Gain with 'wheel-effect', zero SourceUserId (effect rolled by the user themselves). Success.
+		Name:     "Gain_WheelEffect_BySelf_Success",
 		UserId:   1,
-		Change:   typepoints.FreePointChange{ChangeSource: typepoints.FreePointsChangeSourceOwnWheelEffect, DesiredChangeValue: 3},
+		Change:   typepoints.FreePointChange{ChangeSource: typepoints.FreePointsChangeSourceWheelEffect, DesiredChangeValue: 3},
 		EffectId: ptr(42),
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(10, nil)
 			databaseMock.On("ChangeFreePointsCommand", 1, 3).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 1, 0, typepoints.FreePointsChangeSourceOwnWheelEffect, 3, 3, 13, ptr(42)).Return(nil)
+			databaseMock.On("AddFreePointHistoryCommand", 1, 0, typepoints.FreePointsChangeSourceWheelEffect, 3, 3, 13, ptr(42)).Return(nil)
 			return databaseMock
 		},
 		ExpectedActualChange: ptr(3),
 		ExpectedFinalValue:   ptr(13),
 	},
 	{
-		// EffectId is nil for 'own-wheel-effect' — the wheel effect wasn't resolved. Unprocessable error returns.
-		Name:   "Gain_OwnWheelEffect_NoEffectId_UnprocessableError",
-		UserId: 1,
-		Change: typepoints.FreePointChange{ChangeSource: typepoints.FreePointsChangeSourceOwnWheelEffect, DesiredChangeValue: 3},
-		SetupMock: func() *dbpointsmock.DatabaseMock {
-			return new(dbpointsmock.DatabaseMock)
-		},
-		ExpectedErrorCode: "WHEEL_EFFECT_NAME_REQUIRED",
-	},
-	{
-		// Gain with 'other-wheel-effect', non-zero SourceUserId. Success.
-		Name:     "Gain_OtherWheelEffect_Success",
+		// Gain with 'wheel-effect', non-zero SourceUserId (effect rolled by another user). Success.
+		Name:     "Gain_WheelEffect_BySourceUser_Success",
 		UserId:   1,
-		Change:   typepoints.FreePointChange{SourceUserId: 2, ChangeSource: typepoints.FreePointsChangeSourceOtherWheelEffect, DesiredChangeValue: 5},
+		Change:   typepoints.FreePointChange{SourceUserId: 2, ChangeSource: typepoints.FreePointsChangeSourceWheelEffect, DesiredChangeValue: 5},
 		EffectId: ptr(42),
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 1).Return(10, nil)
 			databaseMock.On("ChangeFreePointsCommand", 1, 5).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 1, 2, typepoints.FreePointsChangeSourceOtherWheelEffect, 5, 5, 15, ptr(42)).Return(nil)
+			databaseMock.On("AddFreePointHistoryCommand", 1, 2, typepoints.FreePointsChangeSourceWheelEffect, 5, 5, 15, ptr(42)).Return(nil)
 			return databaseMock
 		},
 		ExpectedActualChange: ptr(5),
 		ExpectedFinalValue:   ptr(15),
 	},
 	{
-		// EffectId is nil for 'other-wheel-effect'. Unprocessable error returns.
-		Name:   "Gain_OtherWheelEffect_NoEffectId_UnprocessableError",
+		// EffectId is nil for 'wheel-effect' — the wheel effect wasn't resolved. Unprocessable error returns.
+		Name:   "Gain_WheelEffect_NoEffectId_UnprocessableError",
 		UserId: 1,
-		Change: typepoints.FreePointChange{SourceUserId: 2, ChangeSource: typepoints.FreePointsChangeSourceOtherWheelEffect, DesiredChangeValue: 5},
+		Change: typepoints.FreePointChange{ChangeSource: typepoints.FreePointsChangeSourceWheelEffect, DesiredChangeValue: 3},
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			return new(dbpointsmock.DatabaseMock)
 		},

@@ -80,12 +80,11 @@ const (
 	TerritoryHourChangeSourceSeize = "seize"
 	TerritoryHourChangeSourceOther = "other"
 
-	FreePointsChangeSourceQuestCompletion  = "quest"
-	FreePointsChangeSourceOwnWheelEffect   = "own-wheel-effect"
-	FreePointsChangeSourceOtherWheelEffect = "other-wheel-effect"
-	FreePointsChangeSourceBaseTeleport     = "base-teleport"
-	FreePointsChangeSourceSandStorm        = "sandstorm"
-	FreePointsChangeSourceOther            = "other"
+	FreePointsChangeSourceQuestCompletion = "quest"
+	FreePointsChangeSourceWheelEffect     = "wheel-effect"
+	FreePointsChangeSourceBaseTeleport    = "base-teleport"
+	FreePointsChangeSourceSandStorm       = "sandstorm"
+	FreePointsChangeSourceOther           = "other"
 
 	TerritoryPointChangeSourceObtaining = "territory-obtaining"
 	TerritoryPointChangeSourceLoss      = "territory-loss"
@@ -98,8 +97,7 @@ var TerritoryHourChangeSourceSlice = []string{TerritoryHourChangeSourceSeize, Te
 
 var FreePointsChangeSourceSlice = []string{
 	FreePointsChangeSourceQuestCompletion,
-	FreePointsChangeSourceOwnWheelEffect,
-	FreePointsChangeSourceOtherWheelEffect,
+	FreePointsChangeSourceWheelEffect,
 	FreePointsChangeSourceBaseTeleport,
 	FreePointsChangeSourceSandStorm,
 	FreePointsChangeSourceOther,

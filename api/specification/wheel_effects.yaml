@@ -206,8 +206,7 @@ components:
           properties:
             changeSource:
               enum:
-                - own-wheel-effect
-                - other-wheel-effect
+                - wheel-effect
                 - quest
                 - base-teleport
                 - sandstorm
