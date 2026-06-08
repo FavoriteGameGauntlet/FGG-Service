@@ -26,6 +26,11 @@ type SystemParameter struct {
 	Value string `json:"value"`
 }
 
+// SystemParameterChange defines model for SystemParameterChange.
+type SystemParameterChange struct {
+	Value string `json:"value"`
+}
+
 // SystemParameters defines model for SystemParameters.
 type SystemParameters = []SystemParameter
 
@@ -39,10 +44,10 @@ type SystemParameterResponse = SystemParameter
 type SystemParametersResponse = SystemParameters
 
 // SystemParameterRequest defines model for SystemParameterRequest.
-type SystemParameterRequest = SystemParameter
+type SystemParameterRequest = SystemParameterChange
 
 // ChangeSystemParameterJSONRequestBody defines body for ChangeSystemParameter for application/json ContentType.
-type ChangeSystemParameterJSONRequestBody = SystemParameter
+type ChangeSystemParameterJSONRequestBody = SystemParameterChange
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {

@@ -72,7 +72,7 @@ func (c *Controller) ChangeSystemParameter(ctx echo.Context, name gensysparams.N
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	var parameterDto gensysparams.SystemParameter
+	var parameterDto gensysparams.SystemParameterChange
 	err = ctx.Bind(&parameterDto)
 
 	if err != nil {

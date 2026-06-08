@@ -83,6 +83,13 @@ components:
       required:
         - code
         - message
+    SystemParameterChange:
+      type: object
+      properties:
+        value:
+          type: string
+      required:
+        - value
   responses:
     SystemParametersResponse:
       description: Success.
@@ -114,4 +121,4 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SystemParameter'
+            $ref: '#/components/schemas/SystemParameterChange'
