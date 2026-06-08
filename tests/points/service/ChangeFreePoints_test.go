@@ -4,7 +4,9 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/service"
 	"FGG-Service/src/points/type"
+	"FGG-Service/src/sysparams/types"
 	"FGG-Service/tests/points/mock"
+	"FGG-Service/tests/sysparams/srvmock"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -16,10 +18,17 @@ type ChangeFreePointsTestCase struct {
 	Change               typepoints.FreePointChange
 	EffectId             *int
 	SetupMock            func() *dbpointsmock.DatabaseMock
-	SetupMinimum         func() (restore func())
+	SetupSysParams       func() *srvsysparamsmock.ServiceMock
 	ExpectedActualChange *int
 	ExpectedFinalValue   *int
 	ExpectedErrorCode    string
+}
+
+func defaultFreePointMinimumSysParams() *srvsysparamsmock.ServiceMock {
+	spSvc := new(srvsysparamsmock.ServiceMock)
+	spSvc.On("GetInt", typesysparams.ParamFreePointMinimum).Return(0, nil)
+	spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(true, nil)
+	return spSvc
 }
 
 var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
@@ -77,6 +86,7 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 1, 0, typepoints.FreePointsChangeSourceQuestCompletion, 10, 10, 15, (*int)(nil)).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams:       defaultFreePointMinimumSysParams,
 		ExpectedActualChange: ptr(10),
 		ExpectedFinalValue:   ptr(15),
 	},
@@ -93,6 +103,7 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 1, 0, typepoints.FreePointsChangeSourceWheelEffect, 3, 3, 13, ptr(42)).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams:       defaultFreePointMinimumSysParams,
 		ExpectedActualChange: ptr(3),
 		ExpectedFinalValue:   ptr(13),
 	},
@@ -109,6 +120,7 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 1, 2, typepoints.FreePointsChangeSourceWheelEffect, 5, 5, 15, ptr(42)).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams:       defaultFreePointMinimumSysParams,
 		ExpectedActualChange: ptr(5),
 		ExpectedFinalValue:   ptr(15),
 	},
@@ -134,6 +146,7 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 1, 0, typepoints.FreePointsChangeSourceOther, 7, 7, 7, (*int)(nil)).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams:       defaultFreePointMinimumSysParams,
 		ExpectedActualChange: ptr(7),
 		ExpectedFinalValue:   ptr(7),
 	},
@@ -149,6 +162,7 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 1, 0, typepoints.FreePointsChangeSourceBaseTeleport, -5, -5, 5, (*int)(nil)).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams:       defaultFreePointMinimumSysParams,
 		ExpectedActualChange: ptr(-5),
 		ExpectedFinalValue:   ptr(5),
 	},
@@ -164,6 +178,7 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 1, 0, typepoints.FreePointsChangeSourceQuestCompletion, -20, -5, 0, (*int)(nil)).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams:       defaultFreePointMinimumSysParams,
 		ExpectedActualChange: ptr(-5),
 		ExpectedFinalValue:   ptr(0),
 	},
@@ -179,10 +194,11 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 1, 0, typepoints.FreePointsChangeSourceSandStorm, -20, -20, -15, (*int)(nil)).Return(nil)
 			return databaseMock
 		},
-		SetupMinimum: func() (restore func()) {
-			original := common.FreePointMinimum
-			common.FreePointMinimum = nil
-			return func() { common.FreePointMinimum = original }
+		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
+			spSvc := new(srvsysparamsmock.ServiceMock)
+			spSvc.On("GetInt", typesysparams.ParamFreePointMinimum).Return(0, nil)
+			spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(false, nil)
+			return spSvc
 		},
 		ExpectedActualChange: ptr(-20),
 		ExpectedFinalValue:   ptr(-15),
@@ -199,6 +215,7 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 1, 0, typepoints.FreePointsChangeSourceQuestCompletion, 0, 0, 10, (*int)(nil)).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams:       defaultFreePointMinimumSysParams,
 		ExpectedActualChange: ptr(0),
 		ExpectedFinalValue:   ptr(10),
 	},
@@ -208,13 +225,16 @@ func TestSrvPoints_ChangeFreePoints(test *testing.T) {
 	for _, testCase := range ChangeFreePointsTestCases {
 		test.Run(testCase.Name, func(test *testing.T) {
 			// Arrange
-			if testCase.SetupMinimum != nil {
-				restore := testCase.SetupMinimum()
-				defer restore()
+			databaseMock := testCase.SetupMock()
+
+			var spSvc *srvsysparamsmock.ServiceMock
+			if testCase.SetupSysParams != nil {
+				spSvc = testCase.SetupSysParams()
+			} else {
+				spSvc = new(srvsysparamsmock.ServiceMock)
 			}
 
-			databaseMock := testCase.SetupMock()
-			sut := srvpoints.Service{Database: databaseMock}
+			sut := srvpoints.Service{Database: databaseMock, SysParamsService: spSvc}
 
 			// Act
 			result, err := sut.ChangeFreePoints(testCase.UserId, testCase.Change, testCase.EffectId)
@@ -234,6 +254,7 @@ func TestSrvPoints_ChangeFreePoints(test *testing.T) {
 			}
 
 			databaseMock.AssertExpectations(test)
+			spSvc.AssertExpectations(test)
 		})
 	}
 }

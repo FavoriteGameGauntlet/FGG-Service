@@ -4,6 +4,8 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/games/database"
 	"FGG-Service/src/games/types"
+	"FGG-Service/src/sysparams/service"
+	"FGG-Service/src/sysparams/types"
 	"FGG-Service/src/timers/service"
 	"database/sql"
 	"errors"
@@ -23,20 +25,23 @@ type IService interface {
 }
 
 type Service struct {
-	Database       dbgames.IDatabase
-	TimerService   srvtimers.IService
-	GettingService IGettingService
+	Database         dbgames.IDatabase
+	TimerService     srvtimers.IService
+	GettingService   IGettingService
+	SysParamsService srvsysparams.IService
 }
 
 func NewService() *Service {
 	db := new(dbgames.Database)
 	ts := srvtimers.NewService()
 	gs := NewGettingService()
+	sps := srvsysparams.NewService()
 
 	return &Service{
-		Database:       db,
-		TimerService:   ts,
-		GettingService: gs,
+		Database:         db,
+		TimerService:     ts,
+		GettingService:   gs,
+		SysParamsService: sps,
 	}
 }
 
@@ -178,8 +183,14 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 		return
 	}
 
-	if unplayedGames == nil || len(unplayedGames) < common.MinimumNumberOfUnplayedGames {
-		err = common.NewUnplayedGamesNotFoundError()
+	minimumNumberOfUnplayedGames, err := s.SysParamsService.GetInt(typesysparams.ParamMinimumNumberOfUnplayedGames)
+
+	if err != nil {
+		return
+	}
+
+	if unplayedGames == nil || len(unplayedGames) < minimumNumberOfUnplayedGames {
+		err = common.NewUnplayedGamesNotFoundError(minimumNumberOfUnplayedGames)
 		return
 	}
 

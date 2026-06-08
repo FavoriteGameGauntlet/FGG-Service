@@ -4,9 +4,11 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/service"
 	"FGG-Service/src/points/type"
+	"FGG-Service/src/sysparams/types"
 	"FGG-Service/src/wheeleffects/service"
 	"FGG-Service/src/wheeleffects/types"
 	"FGG-Service/tests/points/mock"
+	"FGG-Service/tests/sysparams/srvmock"
 	"FGG-Service/tests/timers/mock/dbwheeleffects"
 	"testing"
 
@@ -19,6 +21,7 @@ type ApplyWheelEffectRollTestCase struct {
 	RollApply            typewheeleffects.WheelEffectRollApply
 	SetupWheelEffectMock func() *dbwheeleffectsmock.DatabaseMock
 	SetupPointsMock      func() *dbpointsmock.DatabaseMock
+	SetupSysParams       func() *srvsysparamsmock.ServiceMock
 	ExpectedResults      typepoints.PointChangeResultByUserIds
 	ExpectedError        error
 	ExpectedErrorCode    string
@@ -108,6 +111,12 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 2, 1, typepoints.FreePointsChangeSourceQuestCompletion, 5, 5, 15, ptr(42)).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
+			spSvc := new(srvsysparamsmock.ServiceMock)
+			spSvc.On("GetInt", typesysparams.ParamFreePointMinimum).Return(0, nil)
+			spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(true, nil)
+			return spSvc
+		},
 		ExpectedError: dbError,
 	},
 	{
@@ -139,6 +148,12 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 			databaseMock.On("ChangeFreePointsCommand", 2, 5).Return(nil)
 			databaseMock.On("AddFreePointHistoryCommand", 2, 1, typepoints.FreePointsChangeSourceQuestCompletion, 5, 5, 15, ptr(42)).Return(nil)
 			return databaseMock
+		},
+		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
+			spSvc := new(srvsysparamsmock.ServiceMock)
+			spSvc.On("GetInt", typesysparams.ParamFreePointMinimum).Return(0, nil)
+			spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(true, nil)
+			return spSvc
 		},
 		ExpectedError: dbError,
 	},
@@ -176,6 +191,12 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 3, 1, typepoints.FreePointsChangeSourceOther, -2, -2, 2, ptr(42)).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
+			spSvc := new(srvsysparamsmock.ServiceMock)
+			spSvc.On("GetInt", typesysparams.ParamFreePointMinimum).Return(0, nil)
+			spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(true, nil)
+			return spSvc
+		},
 		ExpectedResults: typepoints.PointChangeResultByUserIds{
 			{Login: "alice", UserId: 2, ChangeResult: typepoints.PointChangeResult{ActualChangeValue: 5, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5, FinalValue: 15}},
 			{Login: "bob", UserId: 3, ChangeResult: typepoints.PointChangeResult{ActualChangeValue: -2, ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: -2, FinalValue: 2}},
@@ -189,9 +210,17 @@ func TestSrvWheelEffects_ApplyWheelEffectRoll(test *testing.T) {
 			// Arrange
 			weDatabaseMock := testCase.SetupWheelEffectMock()
 			pointsDatabaseMock := testCase.SetupPointsMock()
+
+			var spSvc *srvsysparamsmock.ServiceMock
+			if testCase.SetupSysParams != nil {
+				spSvc = testCase.SetupSysParams()
+			} else {
+				spSvc = new(srvsysparamsmock.ServiceMock)
+			}
+
 			sut := srvwheeleffects.Service{
 				Database:     weDatabaseMock,
-				PointService: srvpoints.Service{Database: pointsDatabaseMock},
+				PointService: srvpoints.Service{Database: pointsDatabaseMock, SysParamsService: spSvc},
 			}
 
 			// Act
@@ -212,6 +241,7 @@ func TestSrvWheelEffects_ApplyWheelEffectRoll(test *testing.T) {
 
 			weDatabaseMock.AssertExpectations(test)
 			pointsDatabaseMock.AssertExpectations(test)
+			spSvc.AssertExpectations(test)
 		})
 	}
 }

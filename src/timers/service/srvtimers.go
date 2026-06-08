@@ -4,6 +4,8 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/games/database"
 	"FGG-Service/src/points/database"
+	"FGG-Service/src/sysparams/service"
+	"FGG-Service/src/sysparams/types"
 	"FGG-Service/src/timers/database"
 	"FGG-Service/src/timers/types"
 	"FGG-Service/src/wheeleffects/database"
@@ -23,6 +25,7 @@ type Service struct {
 	GamesDatabase          dbgames.IDatabase
 	PointsDatabase         dbpoints.Database
 	WheelEffectsDatabase   dbwheeleffects.IDatabase
+	SysParamsService       srvsysparams.IService
 	TimerFinisherScheduler gocron.Scheduler
 }
 
@@ -30,11 +33,13 @@ func NewService() *Service {
 	db := new(dbtimers.Database)
 	gdb := new(dbgames.Database)
 	wedb := new(dbwheeleffects.Database)
+	sp := srvsysparams.NewService()
 
 	s := &Service{
 		Database:             db,
 		GamesDatabase:        gdb,
 		WheelEffectsDatabase: wedb,
+		SysParamsService:     sp,
 	}
 
 	s.StartTimerFinisherScheduler()
@@ -104,7 +109,13 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, e
 		return
 	}
 
-	err = s.Database.CreateCurrentTimerCommand(userId, game.Id)
+	durationInS, err := s.SysParamsService.GetInt(typesysparams.ParamDefaultTimerDurationInS)
+
+	if err != nil {
+		return
+	}
+
+	err = s.Database.CreateCurrentTimerCommand(userId, game.Id, durationInS)
 
 	if err != nil {
 		return
@@ -212,11 +223,23 @@ func (s *Service) StopAllCompletedTimers() error {
 		return err
 	}
 
+	territoryHoursIncreasing, err := s.SysParamsService.GetInt(typesysparams.ParamDefaultTerritoryHoursIncreasing)
+
+	if err != nil {
+		return err
+	}
+
+	experiencePointsIncreasing, err := s.SysParamsService.GetInt(typesysparams.ParamDefaultExperiencePointsIncreasing)
+
+	if err != nil {
+		return err
+	}
+
 	for _, userId := range userIds {
 		_, _ = s.StopCurrentTimer(userId)
 		_ = s.PointsDatabase.IncreaseAvailableRollsCommand(userId)
-		_ = s.PointsDatabase.IncreaseTerritoryHoursCommand(userId, common.DefaultTerritoryHoursIncreasing)
-		_ = s.PointsDatabase.ChangeExperiencePointsCommand(userId, common.DefaultExperiencePointsIncreasing)
+		_ = s.PointsDatabase.IncreaseTerritoryHoursCommand(userId, territoryHoursIncreasing)
+		_ = s.PointsDatabase.ChangeExperiencePointsCommand(userId, experiencePointsIncreasing)
 	}
 
 	return nil

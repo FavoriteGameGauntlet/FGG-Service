@@ -94,10 +94,10 @@ func NewCompletedTimersNotFoundError() error {
 	}
 }
 
-func NewUnplayedGamesNotFoundError() error {
+func NewUnplayedGamesNotFoundError(minimum int) error {
 	message := fmt.Sprintf(
 		"The user doesn't have unplayed games. Add at least %d to roll the game.",
-		MinimumNumberOfUnplayedGames)
+		minimum)
 
 	return &NotFoundError{
 		&BaseError{

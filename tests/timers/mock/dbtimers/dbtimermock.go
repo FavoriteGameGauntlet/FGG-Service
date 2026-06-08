@@ -18,8 +18,8 @@ func (m *DatabaseMock) GetCurrentTimerCommand(userId int) (timer typetimers.Time
 	return
 }
 
-func (m *DatabaseMock) CreateCurrentTimerCommand(userId int, gameId int) error {
-	args := m.Called(userId, gameId)
+func (m *DatabaseMock) CreateCurrentTimerCommand(userId int, gameId int, durationInS int) error {
+	args := m.Called(userId, gameId, durationInS)
 	return args.Error(0)
 }
 
