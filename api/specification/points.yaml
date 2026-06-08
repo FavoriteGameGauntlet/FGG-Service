@@ -272,6 +272,11 @@ components:
             changeDate:
               type: string
               format: date-time
+            sourceLogin:
+              nullable: true
+              example: null
+              allOf:
+                - $ref: '#/components/schemas/Login'
           required:
             - changeDate
       example:
@@ -306,8 +311,7 @@ components:
           properties:
             changeSource:
               enum:
-                - own-wheel-effect
-                - other-wheel-effect
+                - wheel-effect
                 - quest
                 - base-teleport
                 - sandstorm
@@ -320,6 +324,16 @@ components:
             changeDate:
               type: string
               format: date-time
+            sourceLogin:
+              nullable: true
+              example: null
+              allOf:
+                - $ref: '#/components/schemas/Login'
+            wheelEffectName:
+              nullable: true
+              example: null
+              allOf:
+                - $ref: '#/components/schemas/Name'
           required:
             - changeDate
       example:

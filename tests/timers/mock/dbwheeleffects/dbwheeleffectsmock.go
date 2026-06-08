@@ -24,9 +24,9 @@ func (m *DatabaseMock) GetAvailableEffectsCommand(userId int) (effects typewheel
 	return
 }
 
-func (m *DatabaseMock) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
+func (m *DatabaseMock) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffectHistories, err error) {
 	args := m.Called(userId)
-	effects = args.Get(0).(typewheeleffects.RolledWheelEffects)
+	effects = args.Get(0).(typewheeleffects.RolledWheelEffectHistories)
 	err = args.Error(1)
 	return
 }
@@ -43,9 +43,31 @@ func (m *DatabaseMock) DecreaseAvailableRollsValueCommand(userId int) error {
 	return args.Error(0)
 }
 
+func (m *DatabaseMock) AddLastRolledWheelEffectsCommand(userId int, effects typewheeleffects.WheelEffects) error {
+	args := m.Called(userId, effects)
+	return args.Error(0)
+}
+
 func (m *DatabaseMock) GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
 	args := m.Called(userId)
 	effects = args.Get(0).(typewheeleffects.RolledWheelEffects)
 	err = args.Error(1)
 	return
+}
+
+func (m *DatabaseMock) GetEffectHistoryByEffectNameCommand(userId int, effectName string) (effect typewheeleffects.RolledWheelEffect, err error) {
+	args := m.Called(userId, effectName)
+	effect = args.Get(0).(typewheeleffects.RolledWheelEffect)
+	err = args.Error(1)
+	return
+}
+
+func (m *DatabaseMock) MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId int) error {
+	args := m.Called(userId, wheelEffectId)
+	return args.Error(0)
+}
+
+func (m *DatabaseMock) AddWheelEffectHistoryCommand(userId int, wheelEffectId int) error {
+	args := m.Called(userId, wheelEffectId)
+	return args.Error(0)
 }

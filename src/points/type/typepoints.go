@@ -9,6 +9,14 @@ type PointChangeResult struct {
 	FinalValue         int
 }
 
+type PointChangeResultByUserId struct {
+	Login        string
+	UserId       int
+	ChangeResult PointChangeResult
+}
+
+type PointChangeResultByUserIds = []PointChangeResultByUserId
+
 type PointChange struct {
 	ChangeSource       string
 	DesiredChangeValue int
@@ -24,8 +32,15 @@ type FreePointChange struct {
 	SourceUserId       int
 	ChangeSource       string
 	DesiredChangeValue int
-	WheelEffectName    *string
 }
+
+type FreePointChangeByUserId struct {
+	Login       string
+	UserId      int
+	PointChange FreePointChange
+}
+
+type FreePointChangeByUserIds = []FreePointChangeByUserId
 
 type TerritoryPointChange struct {
 	SourceUserId       int
@@ -33,15 +48,28 @@ type TerritoryPointChange struct {
 	DesiredChangeValue int
 }
 
-type PointChangeHistory struct {
+type FreePointChangeHistory struct {
 	ActualChangeValue  int
 	ChangeDate         time.Time
 	ChangeSource       string
 	DesiredChangeValue int
 	FinalValue         int
+	SourceLogin        *string
+	WheelEffectName    *string
 }
 
-type PointChangeHistories = []PointChangeHistory
+type FreePointChangeHistories = []FreePointChangeHistory
+
+type TerritoryPointChangeHistory struct {
+	ActualChangeValue  int
+	ChangeDate         time.Time
+	ChangeSource       string
+	DesiredChangeValue int
+	FinalValue         int
+	SourceLogin        *string
+}
+
+type TerritoryPointChangeHistories = []TerritoryPointChangeHistory
 
 type PointInfo struct {
 	TerritoryPoints  int
@@ -65,12 +93,11 @@ const (
 	TerritoryHourChangeSourceSeize = "seize"
 	TerritoryHourChangeSourceOther = "other"
 
-	FreePointsChangeSourceQuestCompletion  = "quest"
-	FreePointsChangeSourceOwnWheelEffect   = "own-wheel-effect"
-	FreePointsChangeSourceOtherWheelEffect = "other-wheel-effect"
-	FreePointsChangeSourceBaseTeleport     = "base-teleport"
-	FreePointsChangeSourceSandStorm        = "sandstorm"
-	FreePointsChangeSourceOther            = "other"
+	FreePointsChangeSourceQuestCompletion = "quest"
+	FreePointsChangeSourceWheelEffect     = "wheel-effect"
+	FreePointsChangeSourceBaseTeleport    = "base-teleport"
+	FreePointsChangeSourceSandStorm       = "sandstorm"
+	FreePointsChangeSourceOther           = "other"
 
 	TerritoryPointChangeSourceObtaining = "territory-obtaining"
 	TerritoryPointChangeSourceLoss      = "territory-loss"
@@ -83,8 +110,7 @@ var TerritoryHourChangeSourceSlice = []string{TerritoryHourChangeSourceSeize, Te
 
 var FreePointsChangeSourceSlice = []string{
 	FreePointsChangeSourceQuestCompletion,
-	FreePointsChangeSourceOwnWheelEffect,
-	FreePointsChangeSourceOtherWheelEffect,
+	FreePointsChangeSourceWheelEffect,
 	FreePointsChangeSourceBaseTeleport,
 	FreePointsChangeSourceSandStorm,
 	FreePointsChangeSourceOther,

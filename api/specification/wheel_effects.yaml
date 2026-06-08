@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.12.6
+  version: 0.13.0
 paths:
   /wheel-effects/{login}/history:
     get:
@@ -12,7 +12,7 @@ paths:
         - $ref: '#/components/parameters/Login'
       responses:
         '200':
-          $ref: '#/components/responses/RolledWheelEffectsResponse'
+          $ref: '#/components/responses/RolledWheelEffectHistoriesResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '404':
@@ -81,7 +81,7 @@ paths:
       tags:
         - WheelEffects
       requestBody:
-        $ref: '#/components/requestBodies/PointChangeByLoginsRequest'
+        $ref: '#/components/requestBodies/WheelEffectRollApplyRequest'
       responses:
         '200':
           $ref: '#/components/responses/FreePointChangeResultByLoginsResponse'
@@ -114,25 +114,20 @@ components:
           type: string
       required:
         - name
-    RolledWheelEffect:
+    RolledWheelEffectHistory:
       allOf:
         - $ref: '#/components/schemas/WheelEffect'
         - type: object
           properties:
-            position:
-              type: integer
-              format: int
             rollDate:
               type: string
               format: date-time
-            isApplied:
-              type: boolean
           required:
             - rollDate
-    RolledWheelEffects:
+    RolledWheelEffectHistories:
       type: array
       items:
-        $ref: '#/components/schemas/RolledWheelEffect'
+        $ref: '#/components/schemas/RolledWheelEffectHistory'
     Error:
       type: object
       properties:
@@ -147,6 +142,27 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/WheelEffect'
+    RolledWheelEffect:
+      allOf:
+        - $ref: '#/components/schemas/WheelEffect'
+        - type: object
+          properties:
+            position:
+              type: integer
+              format: int
+            rollDate:
+              type: string
+              format: date-time
+            isApplied:
+              type: boolean
+          required:
+            - position
+            - rollDate
+            - isApplied
+    RolledWheelEffects:
+      type: array
+      items:
+        $ref: '#/components/schemas/RolledWheelEffect'
     Points:
       type: integer
       format: int
@@ -174,6 +190,16 @@ components:
         required:
           - login
           - pointChange
+    WheelEffectRollApply:
+      type: object
+      properties:
+        wheelEffectName:
+          $ref: '#/components/schemas/Name'
+        pointChanges:
+          $ref: '#/components/schemas/PointChangeByLogins'
+      required:
+        - wheelEffectName
+        - pointChanges
     PointChangeResult:
       allOf:
         - $ref: '#/components/schemas/PointChange'
@@ -194,8 +220,7 @@ components:
           properties:
             changeSource:
               enum:
-                - own-wheel-effect
-                - other-wheel-effect
+                - wheel-effect
                 - quest
                 - base-teleport
                 - sandstorm
@@ -220,12 +245,12 @@ components:
       schema:
         $ref: '#/components/schemas/Login'
   responses:
-    RolledWheelEffectsResponse:
+    RolledWheelEffectHistoriesResponse:
       description: Success.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/RolledWheelEffects'
+            $ref: '#/components/schemas/RolledWheelEffectHistories'
     ErrorResponse:
       description: Error
       content:
@@ -238,6 +263,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WheelEffects'
+    RolledWheelEffectsResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RolledWheelEffects'
     PointsResponse:
       description: Success.
       content:
@@ -251,8 +282,8 @@ components:
           schema:
             $ref: '#/components/schemas/FreePointChangeResultByLogins'
   requestBodies:
-    PointChangeByLoginsRequest:
+    WheelEffectRollApplyRequest:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/PointChangeByLogins'
+            $ref: '#/components/schemas/WheelEffectRollApply'

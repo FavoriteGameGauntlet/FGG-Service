@@ -6,23 +6,28 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/service"
 	"FGG-Service/src/points/type"
+	srvwheeleffects "FGG-Service/src/wheeleffects/service"
+	typewheeleffects "FGG-Service/src/wheeleffects/types"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type Controller struct {
-	Service     srvpoints.Service
-	AuthService srvauth.Service
+	Service            srvpoints.Service
+	AuthService        srvauth.IService
+	WheelEffectService srvwheeleffects.IService
 }
 
 func NewController() *Controller {
 	s := srvpoints.NewService()
 	as := srvauth.NewService()
+	wes := srvwheeleffects.NewService()
 
 	return &Controller{
 		*s,
-		*as,
+		as,
+		wes,
 	}
 }
 
@@ -110,9 +115,21 @@ func (c *Controller) ChangeFreePoints(ctx echo.Context, login genpoints.Login) e
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
+	var effectId *int
+	if pointChangeDto.WheelEffectName != nil {
+		var effect typewheeleffects.RolledWheelEffect
+		effect, err = c.WheelEffectService.GetLastWheelEffectByName(userId, *pointChangeDto.WheelEffectName)
+
+		if err != nil {
+			return common.SendJSONErrorResponse(ctx, err)
+		}
+
+		effectId = &effect.Id
+	}
+
 	pointChange := convertDtoToFreePointChange(sourceUserId, pointChangeDto)
 
-	changeResult, err := c.Service.ChangeFreePoints(userId, pointChange)
+	changeResult, err := c.Service.ChangeFreePoints(userId, pointChange, effectId)
 
 	if err != nil {
 		return common.SendJSONErrorResponse(ctx, err)
@@ -128,7 +145,6 @@ func convertDtoToFreePointChange(sourceUserId int, pointChangeDto genpoints.Free
 		SourceUserId:       sourceUserId,
 		ChangeSource:       pointChangeDto.ChangeSource,
 		DesiredChangeValue: pointChangeDto.DesiredChangeValue,
-		WheelEffectName:    pointChangeDto.WheelEffectName,
 	}
 }
 
@@ -199,7 +215,7 @@ func (c *Controller) GetUserFreePointHistory(ctx echo.Context, login genpoints.L
 	return ctx.JSON(http.StatusOK, historyDto)
 }
 
-func convertFreePointChangeHistoriesToDto(history typepoints.PointChangeHistories) genpoints.FreePointChangeHistories {
+func convertFreePointChangeHistoriesToDto(history typepoints.FreePointChangeHistories) genpoints.FreePointChangeHistories {
 	historyDto := make(genpoints.FreePointChangeHistories, len(history))
 
 	for i, entry := range history {
@@ -209,6 +225,8 @@ func convertFreePointChangeHistoriesToDto(history typepoints.PointChangeHistorie
 			ChangeSource:       entry.ChangeSource,
 			DesiredChangeValue: entry.DesiredChangeValue,
 			FinalValue:         entry.FinalValue,
+			SourceLogin:        entry.SourceLogin,
+			WheelEffectName:    entry.WheelEffectName,
 		}
 	}
 
@@ -354,7 +372,7 @@ func (c *Controller) GetUserTerritoryPointHistory(ctx echo.Context, login genpoi
 	return ctx.JSON(http.StatusOK, historyDto)
 }
 
-func convertTerritoryPointChangeHistoriesToDto(history typepoints.PointChangeHistories) genpoints.TerritoryPointChangeHistories {
+func convertTerritoryPointChangeHistoriesToDto(history typepoints.TerritoryPointChangeHistories) genpoints.TerritoryPointChangeHistories {
 	historyDto := make(genpoints.TerritoryPointChangeHistories, len(history))
 
 	for i, entry := range history {
@@ -364,6 +382,7 @@ func convertTerritoryPointChangeHistoriesToDto(history typepoints.PointChangeHis
 			ChangeSource:       entry.ChangeSource,
 			DesiredChangeValue: entry.DesiredChangeValue,
 			FinalValue:         entry.FinalValue,
+			SourceLogin:        entry.SourceLogin,
 		}
 	}
 

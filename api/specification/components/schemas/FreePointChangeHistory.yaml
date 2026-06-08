@@ -5,6 +5,16 @@ allOf:
       changeDate:
         type: string
         format: date-time
+      sourceLogin:
+        nullable: true
+        example: null
+        allOf:
+          - $ref: "./Login.yaml"
+      wheelEffectName:
+        nullable: true
+        example: null
+        allOf:
+          - $ref: "./Name.yaml"
     required: [ changeDate ]
 example:
   changeSource: quest

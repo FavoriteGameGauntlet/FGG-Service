@@ -39,9 +39,9 @@ func (m *DatabaseMock) AddFreePointHistoryCommand(userId int, sourceUserId int, 
 	return args.Error(0)
 }
 
-func (m *DatabaseMock) GetFreePointHistoryCommand(userId int) (history typepoints.PointChangeHistories, err error) {
+func (m *DatabaseMock) GetFreePointHistoryCommand(userId int) (history typepoints.FreePointChangeHistories, err error) {
 	args := m.Called(userId)
-	history = args.Get(0).(typepoints.PointChangeHistories)
+	history = args.Get(0).(typepoints.FreePointChangeHistories)
 	err = args.Error(1)
 	return
 }
@@ -75,9 +75,9 @@ func (m *DatabaseMock) AddTerritoryPointHistoryCommand(userId int, sourceUserId 
 	return args.Error(0)
 }
 
-func (m *DatabaseMock) GetTerritoryPointHistoryCommand(userId int) (history typepoints.PointChangeHistories, err error) {
+func (m *DatabaseMock) GetTerritoryPointHistoryCommand(userId int) (history typepoints.TerritoryPointChangeHistories, err error) {
 	args := m.Called(userId)
-	history = args.Get(0).(typepoints.PointChangeHistories)
+	history = args.Get(0).(typepoints.TerritoryPointChangeHistories)
 	err = args.Error(1)
 	return
 }

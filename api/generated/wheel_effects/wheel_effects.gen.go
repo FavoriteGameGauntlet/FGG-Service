@@ -64,9 +64,19 @@ type Points = int
 // RolledWheelEffect defines model for RolledWheelEffect.
 type RolledWheelEffect struct {
 	Description *string   `json:"description,omitempty"`
-	IsApplied   *bool     `json:"isApplied,omitempty"`
+	IsApplied   bool      `json:"isApplied"`
 	Name        Name      `json:"name"`
-	Position    *int      `json:"position,omitempty"`
+	Position    int       `json:"position"`
+	RollDate    time.Time `json:"rollDate"`
+}
+
+// RolledWheelEffectHistories defines model for RolledWheelEffectHistories.
+type RolledWheelEffectHistories = []RolledWheelEffectHistory
+
+// RolledWheelEffectHistory defines model for RolledWheelEffectHistory.
+type RolledWheelEffectHistory struct {
+	Description *string   `json:"description,omitempty"`
+	Name        Name      `json:"name"`
 	RollDate    time.Time `json:"rollDate"`
 }
 
@@ -77,6 +87,12 @@ type RolledWheelEffects = []RolledWheelEffect
 type WheelEffect struct {
 	Description *string `json:"description,omitempty"`
 	Name        Name    `json:"name"`
+}
+
+// WheelEffectRollApply defines model for WheelEffectRollApply.
+type WheelEffectRollApply struct {
+	PointChanges    PointChangeByLogins `json:"pointChanges"`
+	WheelEffectName Name                `json:"wheelEffectName"`
 }
 
 // WheelEffects defines model for WheelEffects.
@@ -91,17 +107,20 @@ type FreePointChangeResultByLoginsResponse = FreePointChangeResultByLogins
 // PointsResponse defines model for PointsResponse.
 type PointsResponse = Points
 
+// RolledWheelEffectHistoriesResponse defines model for RolledWheelEffectHistoriesResponse.
+type RolledWheelEffectHistoriesResponse = RolledWheelEffectHistories
+
 // RolledWheelEffectsResponse defines model for RolledWheelEffectsResponse.
 type RolledWheelEffectsResponse = RolledWheelEffects
 
 // WheelEffectsResponse defines model for WheelEffectsResponse.
 type WheelEffectsResponse = WheelEffects
 
-// PointChangeByLoginsRequest defines model for PointChangeByLoginsRequest.
-type PointChangeByLoginsRequest = PointChangeByLogins
+// WheelEffectRollApplyRequest defines model for WheelEffectRollApplyRequest.
+type WheelEffectRollApplyRequest = WheelEffectRollApply
 
 // ApplyAvailableWheelEffectRollJSONRequestBody defines body for ApplyAvailableWheelEffectRoll for application/json ContentType.
-type ApplyAvailableWheelEffectRollJSONRequestBody = PointChangeByLogins
+type ApplyAvailableWheelEffectRollJSONRequestBody = WheelEffectRollApply
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {

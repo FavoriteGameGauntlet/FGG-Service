@@ -3,4 +3,4 @@ allOf:
   - type: object
     properties:
       changeSource:
-        enum: [ "own-wheel-effect", "other-wheel-effect", "quest", "base-teleport", "sandstorm", "other" ]
+        enum: [ "wheel-effect", "quest", "base-teleport", "sandstorm", "other" ]

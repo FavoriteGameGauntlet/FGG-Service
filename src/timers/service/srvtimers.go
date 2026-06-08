@@ -67,12 +67,17 @@ func (s *Service) StartTimerFinisherScheduler() {
 func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, err error) {
 	games, err := s.GamesDatabase.GetCurrentGameCommand(userId)
 
-	if errors.Is(err, sql.ErrNoRows) || len(games) == 0 {
+	if errors.Is(err, sql.ErrNoRows) {
 		err = common.NewCurrentGameNotFoundError()
 		return
 	}
 
 	if err != nil {
+		return
+	}
+
+	if len(games) == 0 {
+		err = common.NewCurrentGameNotFoundError()
 		return
 	}
 
@@ -88,16 +93,16 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, e
 		return
 	}
 
-	_, err = s.WheelEffectsDatabase.GetAvailableRollsCountCommand(userId)
+	count, err := s.WheelEffectsDatabase.GetAvailableRollsCountCommand(userId)
 
 	if err != nil {
 		return
 	}
 
-	//if count > 0 {
-	//	err = common.NewAvailableRollsExistConflictError()
-	//	return
-	//}
+	if count > 0 {
+		err = common.NewAvailableRollsExistConflictError()
+		return
+	}
 
 	err = s.Database.CreateCurrentTimerCommand(userId, game.Id)
 
