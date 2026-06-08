@@ -23,7 +23,7 @@ type Service struct {
 
 func NewService() *Service {
 	db := new(dbwheeleffects.Database)
-	ps := new(srvpoints.Service)
+	ps := srvpoints.NewService()
 
 	return &Service{
 		db,
@@ -39,7 +39,7 @@ func (s *Service) GetAvailableEffects(userId int) (typewheeleffects.WheelEffects
 	return s.Database.GetAvailableEffectsCommand(userId)
 }
 
-func (s *Service) GetEffectHistory(userId int) (typewheeleffects.RolledWheelEffects, error) {
+func (s *Service) GetEffectHistory(userId int) (typewheeleffects.RolledWheelEffectHistories, error) {
 	return s.Database.GetEffectHistoryCommand(userId)
 }
 

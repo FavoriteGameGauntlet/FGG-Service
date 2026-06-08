@@ -70,6 +70,16 @@ type RolledWheelEffect struct {
 	RollDate    time.Time `json:"rollDate"`
 }
 
+// RolledWheelEffectHistories defines model for RolledWheelEffectHistories.
+type RolledWheelEffectHistories = []RolledWheelEffectHistory
+
+// RolledWheelEffectHistory defines model for RolledWheelEffectHistory.
+type RolledWheelEffectHistory struct {
+	Description *string   `json:"description,omitempty"`
+	Name        Name      `json:"name"`
+	RollDate    time.Time `json:"rollDate"`
+}
+
 // RolledWheelEffects defines model for RolledWheelEffects.
 type RolledWheelEffects = []RolledWheelEffect
 
@@ -96,6 +106,9 @@ type FreePointChangeResultByLoginsResponse = FreePointChangeResultByLogins
 
 // PointsResponse defines model for PointsResponse.
 type PointsResponse = Points
+
+// RolledWheelEffectHistoriesResponse defines model for RolledWheelEffectHistoriesResponse.
+type RolledWheelEffectHistoriesResponse = RolledWheelEffectHistories
 
 // RolledWheelEffectsResponse defines model for RolledWheelEffectsResponse.
 type RolledWheelEffectsResponse = RolledWheelEffects

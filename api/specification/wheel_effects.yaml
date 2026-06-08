@@ -12,7 +12,7 @@ paths:
         - $ref: '#/components/parameters/Login'
       responses:
         '200':
-          $ref: '#/components/responses/RolledWheelEffectsResponse'
+          $ref: '#/components/responses/RolledWheelEffectHistoriesResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '404':
@@ -114,6 +114,34 @@ components:
           type: string
       required:
         - name
+    RolledWheelEffectHistory:
+      allOf:
+        - $ref: '#/components/schemas/WheelEffect'
+        - type: object
+          properties:
+            rollDate:
+              type: string
+              format: date-time
+          required:
+            - rollDate
+    RolledWheelEffectHistories:
+      type: array
+      items:
+        $ref: '#/components/schemas/RolledWheelEffectHistory'
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    WheelEffects:
+      type: array
+      items:
+        $ref: '#/components/schemas/WheelEffect'
     RolledWheelEffect:
       allOf:
         - $ref: '#/components/schemas/WheelEffect'
@@ -135,20 +163,6 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/RolledWheelEffect'
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-      required:
-        - code
-        - message
-    WheelEffects:
-      type: array
-      items:
-        $ref: '#/components/schemas/WheelEffect'
     Points:
       type: integer
       format: int
@@ -231,12 +245,12 @@ components:
       schema:
         $ref: '#/components/schemas/Login'
   responses:
-    RolledWheelEffectsResponse:
+    RolledWheelEffectHistoriesResponse:
       description: Success.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/RolledWheelEffects'
+            $ref: '#/components/schemas/RolledWheelEffectHistories'
     ErrorResponse:
       description: Error
       content:
@@ -249,6 +263,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/WheelEffects'
+    RolledWheelEffectsResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RolledWheelEffects'
     PointsResponse:
       description: Success.
       content:

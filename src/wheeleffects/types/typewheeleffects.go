@@ -24,6 +24,15 @@ type RolledWheelEffect struct {
 
 type RolledWheelEffects = []RolledWheelEffect
 
+type RolledWheelEffectHistory struct {
+	Id          int
+	Name        string
+	Description *string
+	RollDate    time.Time
+}
+
+type RolledWheelEffectHistories = []RolledWheelEffectHistory
+
 type WheelEffectRollApply struct {
 	PointChangeByUserIds typepoints.FreePointChangeByUserIds
 	WheelEffectName      string

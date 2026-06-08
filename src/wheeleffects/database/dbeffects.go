@@ -11,7 +11,7 @@ import (
 type IDatabase interface {
 	GetAvailableRollsCountCommand(userId int) (count int, err error)
 	GetAvailableEffectsCommand(userId int) (effects typewheeleffects.WheelEffects, err error)
-	GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error)
+	GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffectHistories, err error)
 	GetEffectHistoryByEffectNameCommand(userId int, effectName string) (effect typewheeleffects.RolledWheelEffect, err error)
 	MakeEffectRollCommand(userId int) (effects typewheeleffects.WheelEffects, err error)
 	DecreaseAvailableRollsValueCommand(userId int) error
@@ -97,7 +97,7 @@ const GetEffectHistoryQuery = `
 	WHERE weh.UserId = ?
 `
 
-func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
+func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffectHistories, err error) {
 	queryName := "GetEffectHistoryQuery"
 	rows, err := dbaccess.Query(queryName, GetEffectHistoryQuery, userId)
 
@@ -106,7 +106,7 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffect
 	}
 
 	for rows.Next() {
-		effect := typewheeleffects.RolledWheelEffect{}
+		effect := typewheeleffects.RolledWheelEffectHistory{}
 		var rollDateString string
 		err = rows.Scan(&effect.Name, &effect.Description, &rollDateString)
 

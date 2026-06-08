@@ -24,9 +24,9 @@ func (m *DatabaseMock) GetAvailableEffectsCommand(userId int) (effects typewheel
 	return
 }
 
-func (m *DatabaseMock) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
+func (m *DatabaseMock) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffectHistories, err error) {
 	args := m.Called(userId)
-	effects = args.Get(0).(typewheeleffects.RolledWheelEffects)
+	effects = args.Get(0).(typewheeleffects.RolledWheelEffectHistories)
 	err = args.Error(1)
 	return
 }

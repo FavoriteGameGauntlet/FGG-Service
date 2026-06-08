@@ -160,6 +160,22 @@ func (c *Controller) GetLastRolledWheelEffects(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, effectsDto)
 }
 
+func convertRolledWheelEffectsToDto(effects typewheeleffects.RolledWheelEffects) genwheeleffects.RolledWheelEffects {
+	effectsDto := make(genwheeleffects.RolledWheelEffects, len(effects))
+
+	for i, effect := range effects {
+		effectsDto[i] = genwheeleffects.RolledWheelEffect{
+			Name:        effect.Name,
+			Description: effect.Description,
+			RollDate:    effect.RollDate,
+			Position:    effect.Position,
+			IsApplied:   effect.IsApplied,
+		}
+	}
+
+	return effectsDto
+}
+
 // GetAvailableWheelEffectRollsCount (GET /wheel-effects/available/roll/count)
 func (c *Controller) GetAvailableWheelEffectRollsCount(ctx echo.Context) error {
 	userId, err := c.AuthService.GetUserId(ctx)
@@ -221,21 +237,19 @@ func (c *Controller) GetUserWheelEffectHistory(ctx echo.Context, login gengames.
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	effectsDto := convertRolledWheelEffectsToDto(effects)
+	effectsDto := convertRolledWheelEffectsToHistoryDto(effects)
 
 	return ctx.JSON(http.StatusOK, effectsDto)
 }
 
-func convertRolledWheelEffectsToDto(effects typewheeleffects.RolledWheelEffects) genwheeleffects.RolledWheelEffects {
-	effectsDto := make(genwheeleffects.RolledWheelEffects, len(effects))
+func convertRolledWheelEffectsToHistoryDto(effects typewheeleffects.RolledWheelEffectHistories) genwheeleffects.RolledWheelEffectHistories {
+	effectsDto := make(genwheeleffects.RolledWheelEffectHistories, len(effects))
 
 	for i, effect := range effects {
-		effectsDto[i] = genwheeleffects.RolledWheelEffect{
+		effectsDto[i] = genwheeleffects.RolledWheelEffectHistory{
 			Name:        effect.Name,
 			Description: effect.Description,
 			RollDate:    effect.RollDate,
-			Position:    effect.Position,
-			IsApplied:   effect.IsApplied,
 		}
 	}
 
