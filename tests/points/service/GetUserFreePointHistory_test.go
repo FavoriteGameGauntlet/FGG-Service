@@ -1,4 +1,4 @@
-﻿package srvpoints_test
+package srvpoints_test
 
 import (
 	"FGG-Service/src/points/service"
@@ -14,11 +14,11 @@ type GetUserFreePointHistoryTestCase struct {
 	Name            string
 	UserId          int
 	SetupMock       func() *dbpointsmock.DatabaseMock
-	ExpectedHistory typepoints.PointChangeHistories
+	ExpectedHistory typepoints.FreePointChangeHistories
 	ExpectedErrorIs error
 }
 
-var freePointChangeHistoryEntry = typepoints.PointChangeHistory{
+var freePointChangeHistoryEntry = typepoints.FreePointChangeHistory{
 	ActualChangeValue:  10,
 	ChangeDate:         time.Date(2026, 6, 1, 12, 0, 0, 0, time.UTC),
 	ChangeSource:       typepoints.FreePointsChangeSourceQuestCompletion,
@@ -36,7 +36,7 @@ var GetUserFreePointHistoryTestCases = []GetUserFreePointHistoryTestCase{
 
 			databaseMock.
 				On("GetFreePointHistoryCommand", 1).
-				Return(typepoints.PointChangeHistories{}, dbError)
+				Return(typepoints.FreePointChangeHistories{}, dbError)
 
 			return databaseMock
 		},
@@ -51,11 +51,11 @@ var GetUserFreePointHistoryTestCases = []GetUserFreePointHistoryTestCase{
 
 			databaseMock.
 				On("GetFreePointHistoryCommand", 1).
-				Return(typepoints.PointChangeHistories{}, nil)
+				Return(typepoints.FreePointChangeHistories{}, nil)
 
 			return databaseMock
 		},
-		ExpectedHistory: typepoints.PointChangeHistories{},
+		ExpectedHistory: typepoints.FreePointChangeHistories{},
 	},
 	{
 		// GetFreePointHistoryCommand succeeds. The list of free point change history entries will return.
@@ -66,11 +66,11 @@ var GetUserFreePointHistoryTestCases = []GetUserFreePointHistoryTestCase{
 
 			databaseMock.
 				On("GetFreePointHistoryCommand", 1).
-				Return(typepoints.PointChangeHistories{freePointChangeHistoryEntry}, nil)
+				Return(typepoints.FreePointChangeHistories{freePointChangeHistoryEntry}, nil)
 
 			return databaseMock
 		},
-		ExpectedHistory: typepoints.PointChangeHistories{freePointChangeHistoryEntry},
+		ExpectedHistory: typepoints.FreePointChangeHistories{freePointChangeHistoryEntry},
 	},
 }
 

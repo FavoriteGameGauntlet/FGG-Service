@@ -1,4 +1,4 @@
-﻿package srvpoints_test
+package srvpoints_test
 
 import (
 	"FGG-Service/src/points/service"
@@ -14,11 +14,11 @@ type GetUserTerritoryPointHistoryTestCase struct {
 	Name            string
 	UserId          int
 	SetupMock       func() *dbpointsmock.DatabaseMock
-	ExpectedHistory typepoints.PointChangeHistories
+	ExpectedHistory typepoints.TerritoryPointChangeHistories
 	ExpectedErrorIs error
 }
 
-var territoryPointChangeHistoryEntry = typepoints.PointChangeHistory{
+var territoryPointChangeHistoryEntry = typepoints.TerritoryPointChangeHistory{
 	ActualChangeValue:  10,
 	ChangeDate:         time.Date(2026, 6, 1, 12, 0, 0, 0, time.UTC),
 	ChangeSource:       typepoints.TerritoryPointChangeSourceObtaining,
@@ -36,7 +36,7 @@ var GetUserTerritoryPointHistoryTestCases = []GetUserTerritoryPointHistoryTestCa
 
 			databaseMock.
 				On("GetTerritoryPointHistoryCommand", 1).
-				Return(typepoints.PointChangeHistories{}, dbError)
+				Return(typepoints.TerritoryPointChangeHistories{}, dbError)
 
 			return databaseMock
 		},
@@ -51,11 +51,11 @@ var GetUserTerritoryPointHistoryTestCases = []GetUserTerritoryPointHistoryTestCa
 
 			databaseMock.
 				On("GetTerritoryPointHistoryCommand", 1).
-				Return(typepoints.PointChangeHistories{}, nil)
+				Return(typepoints.TerritoryPointChangeHistories{}, nil)
 
 			return databaseMock
 		},
-		ExpectedHistory: typepoints.PointChangeHistories{},
+		ExpectedHistory: typepoints.TerritoryPointChangeHistories{},
 	},
 	{
 		// GetTerritoryPointHistoryCommand succeeds. The list of territory point change history entries will return.
@@ -66,11 +66,11 @@ var GetUserTerritoryPointHistoryTestCases = []GetUserTerritoryPointHistoryTestCa
 
 			databaseMock.
 				On("GetTerritoryPointHistoryCommand", 1).
-				Return(typepoints.PointChangeHistories{territoryPointChangeHistoryEntry}, nil)
+				Return(typepoints.TerritoryPointChangeHistories{territoryPointChangeHistoryEntry}, nil)
 
 			return databaseMock
 		},
-		ExpectedHistory: typepoints.PointChangeHistories{territoryPointChangeHistoryEntry},
+		ExpectedHistory: typepoints.TerritoryPointChangeHistories{territoryPointChangeHistoryEntry},
 	},
 }
 

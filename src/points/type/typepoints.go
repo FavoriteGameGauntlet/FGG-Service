@@ -48,15 +48,28 @@ type TerritoryPointChange struct {
 	DesiredChangeValue int
 }
 
-type PointChangeHistory struct {
+type FreePointChangeHistory struct {
 	ActualChangeValue  int
 	ChangeDate         time.Time
 	ChangeSource       string
 	DesiredChangeValue int
 	FinalValue         int
+	SourceLogin        *string
+	WheelEffectName    *string
 }
 
-type PointChangeHistories = []PointChangeHistory
+type FreePointChangeHistories = []FreePointChangeHistory
+
+type TerritoryPointChangeHistory struct {
+	ActualChangeValue  int
+	ChangeDate         time.Time
+	ChangeSource       string
+	DesiredChangeValue int
+	FinalValue         int
+	SourceLogin        *string
+}
+
+type TerritoryPointChangeHistories = []TerritoryPointChangeHistory
 
 type PointInfo struct {
 	TerritoryPoints  int

@@ -35,6 +35,8 @@ type FreePointChangeHistory struct {
 	ChangeSource       interface{} `json:"changeSource"`
 	DesiredChangeValue int         `json:"desiredChangeValue"`
 	FinalValue         Points      `json:"finalValue"`
+	SourceLogin        *Login      `json:"sourceLogin"`
+	WheelEffectName    *Name       `json:"wheelEffectName"`
 }
 
 // FreePointChangeResult defines model for FreePointChangeResult.
@@ -100,6 +102,7 @@ type TerritoryPointChangeHistory struct {
 	ChangeSource       interface{} `json:"changeSource"`
 	DesiredChangeValue int         `json:"desiredChangeValue"`
 	FinalValue         Points      `json:"finalValue"`
+	SourceLogin        *Login      `json:"sourceLogin"`
 }
 
 // TerritoryPointChangeResult defines model for TerritoryPointChangeResult.

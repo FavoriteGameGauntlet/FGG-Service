@@ -5,6 +5,11 @@ allOf:
       changeDate:
         type: string
         format: date-time
+      sourceLogin:
+        nullable: true
+        example: null
+        allOf:
+          - $ref: "./Login.yaml"
     required: [ changeDate ]
 example:
   changeSource: territory-obtaining

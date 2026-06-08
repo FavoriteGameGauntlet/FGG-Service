@@ -215,7 +215,7 @@ func (c *Controller) GetUserFreePointHistory(ctx echo.Context, login genpoints.L
 	return ctx.JSON(http.StatusOK, historyDto)
 }
 
-func convertFreePointChangeHistoriesToDto(history typepoints.PointChangeHistories) genpoints.FreePointChangeHistories {
+func convertFreePointChangeHistoriesToDto(history typepoints.FreePointChangeHistories) genpoints.FreePointChangeHistories {
 	historyDto := make(genpoints.FreePointChangeHistories, len(history))
 
 	for i, entry := range history {
@@ -225,6 +225,8 @@ func convertFreePointChangeHistoriesToDto(history typepoints.PointChangeHistorie
 			ChangeSource:       entry.ChangeSource,
 			DesiredChangeValue: entry.DesiredChangeValue,
 			FinalValue:         entry.FinalValue,
+			SourceLogin:        entry.SourceLogin,
+			WheelEffectName:    entry.WheelEffectName,
 		}
 	}
 
@@ -370,7 +372,7 @@ func (c *Controller) GetUserTerritoryPointHistory(ctx echo.Context, login genpoi
 	return ctx.JSON(http.StatusOK, historyDto)
 }
 
-func convertTerritoryPointChangeHistoriesToDto(history typepoints.PointChangeHistories) genpoints.TerritoryPointChangeHistories {
+func convertTerritoryPointChangeHistoriesToDto(history typepoints.TerritoryPointChangeHistories) genpoints.TerritoryPointChangeHistories {
 	historyDto := make(genpoints.TerritoryPointChangeHistories, len(history))
 
 	for i, entry := range history {
@@ -380,6 +382,7 @@ func convertTerritoryPointChangeHistoriesToDto(history typepoints.PointChangeHis
 			ChangeSource:       entry.ChangeSource,
 			DesiredChangeValue: entry.DesiredChangeValue,
 			FinalValue:         entry.FinalValue,
+			SourceLogin:        entry.SourceLogin,
 		}
 	}
 

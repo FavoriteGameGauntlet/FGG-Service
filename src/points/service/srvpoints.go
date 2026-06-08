@@ -28,7 +28,7 @@ func (s *Service) GetFreePoints(userId int) (int, error) {
 	return s.Database.GetFreePointsCommand(userId)
 }
 
-func (s *Service) GetUserFreePointHistory(userId int) (typepoints.PointChangeHistories, error) {
+func (s *Service) GetUserFreePointHistory(userId int) (typepoints.FreePointChangeHistories, error) {
 	return s.Database.GetFreePointHistoryCommand(userId)
 }
 
@@ -40,7 +40,7 @@ func (s *Service) GetTerritoryPoints(userId int) (int, error) {
 	return s.Database.GetTerritoryPointsCommand(userId)
 }
 
-func (s *Service) GetUserTerritoryPointHistory(userId int) (typepoints.PointChangeHistories, error) {
+func (s *Service) GetUserTerritoryPointHistory(userId int) (typepoints.TerritoryPointChangeHistories, error) {
 	return s.Database.GetTerritoryPointHistoryCommand(userId)
 }
 
