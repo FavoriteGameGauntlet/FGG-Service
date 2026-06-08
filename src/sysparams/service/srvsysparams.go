@@ -1,0 +1,83 @@
+package srvsysparams
+
+import (
+	"FGG-Service/src/common"
+	"FGG-Service/src/sysparams/database"
+	"FGG-Service/src/sysparams/types"
+	"database/sql"
+	"errors"
+	"strconv"
+)
+
+type IService interface {
+	GetAll() ([]typesysparams.SystemParameter, error)
+	GetParameter(name string) (typesysparams.SystemParameter, error)
+	GetString(name string) (string, error)
+	GetInt(name string) (int, error)
+	ChangeValue(name string, value string) error
+}
+
+type Service struct {
+	Database dbsysparams.IDatabase
+}
+
+func NewService() *Service {
+	db := new(dbsysparams.Database)
+
+	return &Service{
+		Database: db,
+	}
+}
+
+func (s *Service) GetAll() (parameters []typesysparams.SystemParameter, err error) {
+	parameters, err = s.Database.GetAllSystemParametersCommand()
+
+	return
+}
+
+func (s *Service) GetParameter(name string) (parameter typesysparams.SystemParameter, err error) {
+	parameter, err = s.Database.GetSystemParameterCommand(name)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = common.NewSystemParameterNotFoundError(name)
+		return
+	}
+
+	return
+}
+
+func (s *Service) GetString(name string) (value string, err error) {
+	parameter, err := s.GetParameter(name)
+
+	if err != nil {
+		return
+	}
+
+	value = parameter.Value
+
+	return
+}
+
+func (s *Service) GetInt(name string) (value int, err error) {
+	stringValue, err := s.GetString(name)
+
+	if err != nil {
+		return
+	}
+
+	value, err = strconv.Atoi(stringValue)
+
+	return
+}
+
+func (s *Service) ChangeValue(name string, value string) (err error) {
+	_, err = s.GetParameter(name)
+
+	if err != nil {
+		return
+	}
+
+	err = s.Database.ChangeSystemParameterValueCommand(name, value)
+
+	return
+}

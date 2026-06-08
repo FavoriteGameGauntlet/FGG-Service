@@ -1,0 +1,117 @@
+openapi: 3.0.4
+info:
+  title: Favorite Game Gauntlet
+  version: 0.1.0
+paths:
+  /system-parameters/all:
+    get:
+      operationId: getAllSystemParameters
+      tags:
+        - SystemParameters
+      responses:
+        '200':
+          $ref: '#/components/responses/SystemParametersResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+  /system-parameters/{name}:
+    post:
+      operationId: changeSystemParameter
+      tags:
+        - SystemParameters
+      parameters:
+        - $ref: '#/components/parameters/Name'
+      requestBody:
+        $ref: '#/components/requestBodies/SystemParameterRequest'
+      responses:
+        '204':
+          description: Success.
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      operationId: getSystemParameter
+      tags:
+        - SystemParameters
+      parameters:
+        - $ref: '#/components/parameters/Name'
+      responses:
+        '200':
+          $ref: '#/components/responses/SystemParameterResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  schemas:
+    Name:
+      type: string
+      pattern: ^.+$
+      minLength: 1
+      maxLength: 70
+    SystemParameter:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+        value:
+          type: string
+      required:
+        - name
+        - value
+    SystemParameters:
+      type: array
+      items:
+        $ref: '#/components/schemas/SystemParameter'
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+  responses:
+    SystemParametersResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SystemParameters'
+    ErrorResponse:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    SystemParameterResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SystemParameter'
+  parameters:
+    Name:
+      name: name
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Name'
+  requestBodies:
+    SystemParameterRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SystemParameter'

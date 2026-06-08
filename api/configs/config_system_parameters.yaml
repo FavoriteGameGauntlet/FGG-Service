@@ -1,0 +1,5 @@
+package: gensysparams
+output: generated/system_parameters/system_parameters.gen.go
+generate:
+  echo-server: true
+  models: true

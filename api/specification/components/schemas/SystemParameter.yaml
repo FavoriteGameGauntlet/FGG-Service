@@ -1,0 +1,7 @@
+type: object
+properties:
+  name:
+    $ref: "../schemas/Name.yaml"
+  value:
+    type: string
+required: [ name, value ]
