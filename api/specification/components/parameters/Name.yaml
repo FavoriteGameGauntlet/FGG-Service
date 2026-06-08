@@ -1,0 +1,5 @@
+name: name
+in: path
+required: true
+schema:
+  $ref: '../schemas/Name.yaml'

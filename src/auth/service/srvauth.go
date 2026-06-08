@@ -7,6 +7,8 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,6 +17,7 @@ type IService interface {
 	DoesUserSessionExist(ctx echo.Context) (bool, error)
 	GetUserId(ctx echo.Context) (int, error)
 	GetUserIdByLogin(login string) (int, error)
+	IsAdmin(userId int) (bool, error)
 }
 
 type Service struct {
@@ -149,6 +152,23 @@ func (s *Service) DeleteUserSession(userSessionId string) error {
 	err := s.Database.DeleteUserSessionCommand(userSessionId)
 
 	return err
+}
+
+func (s *Service) IsAdmin(userId int) (isAdmin bool, err error) {
+	user, err := s.Database.GetUserByIdCommand(userId)
+
+	if err != nil {
+		return
+	}
+
+	for _, adminLogin := range strings.Split(os.Getenv("ADMIN_LOGINS"), ",") {
+		if strings.TrimSpace(adminLogin) == user.Login {
+			isAdmin = true
+			return
+		}
+	}
+
+	return
 }
 
 func (s *Service) GetUserIdByLogin(userLogin string) (userId int, err error) {

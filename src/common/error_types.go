@@ -63,6 +63,15 @@ func NewActiveSessionNotFoundUnauthorizedError() error {
 	}
 }
 
+func NewNotAdminUnauthorizedError() error {
+	return &UnauthorizedError{
+		&BaseError{
+			Code:    "NOT_ADMIN",
+			Message: "This action is only available to administrators.",
+		},
+	}
+}
+
 type NotFoundError struct {
 	*BaseError
 }
@@ -143,6 +152,19 @@ func NewDisplayNameNotFoundError() error {
 		&BaseError{
 			Code:    "DISPLAY_NAME_NOT_FOUND",
 			Message: "The user have not added a display name.",
+		},
+	}
+}
+
+func NewSystemParameterNotFoundError(name string) error {
+	message := fmt.Sprintf(
+		"The system parameter \"%s\" wasn't found.",
+		name)
+
+	return &NotFoundError{
+		&BaseError{
+			Code:    "SYSTEM_PARAMETER_NOT_FOUND",
+			Message: message,
 		},
 	}
 }

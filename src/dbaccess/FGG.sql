@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.21 on Sun Jun 7 13:01:23 2026
+-- File generated with SQLiteStudio v3.4.21 on Mon Jun 8 10:13:18 2026
 --
 -- Text encoding used: System
 --
@@ -70,6 +70,17 @@ CREATE TABLE IF NOT EXISTS LastWheelEffects (
                           DEFAULT (0),
     RollDate      TEXT    NOT NULL
                           DEFAULT (datetime('now', 'subsec') ) 
+);
+
+
+-- Table: SystemParameters
+CREATE TABLE IF NOT EXISTS SystemParameters (
+    Id    INTEGER PRIMARY KEY AUTOINCREMENT
+                  UNIQUE
+                  NOT NULL,
+    Name  TEXT    NOT NULL
+                  UNIQUE,
+    Value TEXT    NOT NULL
 );
 
 

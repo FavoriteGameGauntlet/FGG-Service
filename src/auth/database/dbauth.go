@@ -27,6 +27,23 @@ func (db *Database) GetUserByLoginCommand(userLogin string) (user typeauth.User,
 	return
 }
 
+const GetUserByIdQuery = `
+	SELECT Id, Login, DisplayName, Email
+	FROM Users
+	WHERE Id = ?
+`
+
+func (db *Database) GetUserByIdCommand(userId int) (user typeauth.User, err error) {
+	queryName := "GetUserByIdQuery"
+	row := dbaccess.QueryRow(queryName, GetUserByIdQuery, userId)
+
+	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
+
+	dbaccess.LogDbResult(queryName, user, err)
+
+	return
+}
+
 const GetUserByEmailQuery = `
 	SELECT Id, Login, DisplayName, Email
 	FROM Users
