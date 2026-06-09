@@ -363,7 +363,7 @@ const GetAllCurrentGamesQuery = `
 		g.Id,
 		g.Name,
 		gh.State,
-		gh.UserID
+		gh.FinishDate
 	FROM GameHistory gh
 		INNER JOIN Games g ON gh.GameId = g.Id
 	WHERE gh.State NOT IN (?, ?)

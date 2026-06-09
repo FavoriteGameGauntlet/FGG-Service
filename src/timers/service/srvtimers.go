@@ -109,7 +109,7 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, e
 		return
 	}
 
-	durationInS, err := s.SysParamsService.GetInt(typesysparams.ParamDefaultTimerDurationInS)
+	durationInS, err := s.SysParamsService.GetInt(typesysparams.ParamTimerDurationInS)
 
 	if err != nil {
 		return
@@ -223,13 +223,13 @@ func (s *Service) StopAllCompletedTimers() error {
 		return err
 	}
 
-	territoryHoursIncreasing, err := s.SysParamsService.GetInt(typesysparams.ParamDefaultTerritoryHoursIncreasing)
+	territoryHoursIncreasing, err := s.SysParamsService.GetInt(typesysparams.ParamTerritoryHoursIncreaseByTimer)
 
 	if err != nil {
 		return err
 	}
 
-	experiencePointsIncreasing, err := s.SysParamsService.GetInt(typesysparams.ParamDefaultExperiencePointsIncreasing)
+	experiencePointsIncreasing, err := s.SysParamsService.GetInt(typesysparams.ParamExperiencePointsIncreaseByTimer)
 
 	if err != nil {
 		return err

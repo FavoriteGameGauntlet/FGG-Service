@@ -26,7 +26,7 @@ type ChangeFreePointsTestCase struct {
 
 func defaultFreePointMinimumSysParams() *srvsysparamsmock.ServiceMock {
 	spSvc := new(srvsysparamsmock.ServiceMock)
-	spSvc.On("GetInt", typesysparams.ParamFreePointMinimum).Return(0, nil)
+	spSvc.On("GetInt", typesysparams.ParamFreePointsMinimum).Return(0, nil)
 	spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(true, nil)
 	return spSvc
 }
@@ -196,7 +196,7 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 		},
 		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
 			spSvc := new(srvsysparamsmock.ServiceMock)
-			spSvc.On("GetInt", typesysparams.ParamFreePointMinimum).Return(0, nil)
+			spSvc.On("GetInt", typesysparams.ParamFreePointsMinimum).Return(0, nil)
 			spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(false, nil)
 			return spSvc
 		},

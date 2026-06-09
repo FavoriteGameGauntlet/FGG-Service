@@ -88,7 +88,7 @@ func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.FreePointC
 		return
 	}
 
-	freePointMinimum, err := s.SysParamsService.GetInt(typesysparams.ParamFreePointMinimum)
+	freePointMinimum, err := s.SysParamsService.GetInt(typesysparams.ParamFreePointsMinimum)
 
 	if err != nil {
 		return
@@ -330,7 +330,7 @@ func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.Poin
 
 	var experiencePointsLevelUp int
 	if pointChange.ChangeSource == typepoints.ExperienceChangeSourceLevelUp {
-		experiencePointsLevelUp, err = s.SysParamsService.GetInt(typesysparams.ParamDefaultExperiencePointsLevelUp)
+		experiencePointsLevelUp, err = s.SysParamsService.GetInt(typesysparams.ParamExperiencePointsLevelUp)
 
 		if err != nil {
 			return

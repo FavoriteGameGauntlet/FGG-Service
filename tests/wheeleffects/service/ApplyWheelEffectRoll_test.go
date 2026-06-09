@@ -113,7 +113,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		},
 		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
 			spSvc := new(srvsysparamsmock.ServiceMock)
-			spSvc.On("GetInt", typesysparams.ParamFreePointMinimum).Return(0, nil)
+			spSvc.On("GetInt", typesysparams.ParamFreePointsMinimum).Return(0, nil)
 			spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(true, nil)
 			return spSvc
 		},
@@ -151,7 +151,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		},
 		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
 			spSvc := new(srvsysparamsmock.ServiceMock)
-			spSvc.On("GetInt", typesysparams.ParamFreePointMinimum).Return(0, nil)
+			spSvc.On("GetInt", typesysparams.ParamFreePointsMinimum).Return(0, nil)
 			spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(true, nil)
 			return spSvc
 		},
@@ -193,7 +193,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		},
 		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
 			spSvc := new(srvsysparamsmock.ServiceMock)
-			spSvc.On("GetInt", typesysparams.ParamFreePointMinimum).Return(0, nil)
+			spSvc.On("GetInt", typesysparams.ParamFreePointsMinimum).Return(0, nil)
 			spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(true, nil)
 			return spSvc
 		},

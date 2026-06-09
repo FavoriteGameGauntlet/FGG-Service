@@ -7,12 +7,12 @@ type SystemParameter struct {
 }
 
 const (
-	ParamMinimumNumberOfUnplayedGames      = "MinimumNumberOfUnplayedGames"
-	ParamDefaultTimerDurationInS           = "DefaultTimerDurationInS"
-	ParamDefaultTerritoryHoursIncreasing   = "DefaultTerritoryHoursIncreasing"
-	ParamDefaultExperiencePointsIncreasing = "DefaultExperiencePointsIncreasing"
-	ParamDefaultExperiencePointsLevelUp    = "DefaultExperiencePointsLevelUp"
-	ParamTerritoryHoursSeizeDecreaseSlice  = "TerritoryHoursSeizeDecreaseSlice"
-	ParamFreePointMinimum                  = "FreePointMinimum"
-	ParamShouldLimitFreePoints             = "ShouldLimitFreePoints"
+	ParamMinimumNumberOfUnplayedGames     = "MinimumNumberOfUnplayedGames"
+	ParamTimerDurationInS                 = "TimerDurationInS"
+	ParamTerritoryHoursIncreaseByTimer    = "TerritoryHoursIncreaseByTimer"
+	ParamExperiencePointsIncreaseByTimer  = "ExperiencePointsIncreaseByTimer"
+	ParamExperiencePointsLevelUp          = "ExperiencePointsLevelUp"
+	ParamTerritoryHoursSeizeDecreaseSlice = "TerritoryHoursSeizeDecreaseSlice"
+	ParamFreePointsMinimum                = "FreePointsMinimum"
+	ParamShouldLimitFreePoints            = "ShouldLimitFreePoints"
 )
