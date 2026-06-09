@@ -259,5 +259,19 @@ func (c *Controller) GetAllCurrentGame(ctx echo.Context) error {
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	return ctx.JSON(http.StatusOK, games)
+	gamesDto := convertAllCurrentGamesToDto(games)
+
+	return ctx.JSON(http.StatusOK, gamesDto)
+}
+
+func convertAllCurrentGamesToDto(games []typegames.CurrentGameWithLogin) gengames.CurrentGameByLogins {
+	dtos := make(gengames.CurrentGameByLogins, len(games))
+
+	for i, g := range games {
+		gameDto := convertGameToDto(g.Game)
+		dtos[i].CurrentGame = &gameDto
+		dtos[i].Login = g.Login
+	}
+
+	return dtos
 }

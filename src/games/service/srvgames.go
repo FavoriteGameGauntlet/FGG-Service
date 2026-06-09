@@ -21,7 +21,7 @@ type IService interface {
 	GetGameHistory(userId int) (typegames.CurrentGames, error)
 	GetUnplayedGames(userId int) (typegames.WishlistGames, error)
 	AddWishlistGame(userId int, wishlistGame typegames.WishlistGame) error
-	GetAllCurrentGames() (typegames.CurrentGames, error)
+	GetAllCurrentGames() ([]typegames.CurrentGameWithLogin, error)
 }
 
 type Service struct {
@@ -216,7 +216,7 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 	return
 }
 
-func (s *Service) GetAllCurrentGames() (games typegames.CurrentGames, err error) {
+func (s *Service) GetAllCurrentGames() (games []typegames.CurrentGameWithLogin, err error) {
 	games, err = s.Database.GetAllCurrentGamesCommand()
 
 	if errors.Is(err, sql.ErrNoRows) {
