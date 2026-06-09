@@ -1,7 +1,6 @@
 package dbtimers
 
 import (
-	"FGG-Service/src/common"
 	"FGG-Service/src/dbaccess"
 	"FGG-Service/src/timers/types"
 	"time"
@@ -9,7 +8,7 @@ import (
 
 type IDatabase interface {
 	GetCurrentTimerCommand(userId int) (timer typetimers.Timer, err error)
-	CreateCurrentTimerCommand(userId int, gameId int) error
+	CreateCurrentTimerCommand(userId int, gameId int, durationInS int) error
 	ActTimerCommand(timerId int, timerState typetimers.TimerStateType, remainingTime time.Duration) error
 	GetCompletedTimerUsersCommand() (userIds []int, err error)
 }
@@ -82,15 +81,15 @@ const CreateCurrentTimerQuery = `
 	VALUES (?, ?, ?, ?)
 `
 
-func (db *Database) CreateCurrentTimerCommand(userId int, gameId int) error {
+func (db *Database) CreateCurrentTimerCommand(userId int, gameId int, durationInS int) error {
 	queryName := "CreateCurrentTimerQuery"
 	_, err := dbaccess.Exec(
 		queryName,
 		CreateCurrentTimerQuery,
 		userId,
 		gameId,
-		common.DefaultTimerDurationInS,
-		common.DefaultTimerDurationInS,
+		durationInS,
+		durationInS,
 	)
 
 	dbaccess.LogDbResult(queryName, nil, err)

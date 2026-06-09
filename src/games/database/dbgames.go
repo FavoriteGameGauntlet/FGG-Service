@@ -23,7 +23,7 @@ type IDatabase interface {
 	CancelCurrentGameCommand(userId int, gameId int) error
 	FinishCurrentGameCommand(userId int, gameId int) error
 	GetGameHistoryCommand(userId int) (games typegames.CurrentGames, err error)
-	GetAllCurrentGamesCommand() (games typegames.CurrentGames, err error)
+	GetAllCurrentGamesCommand() (games []typegames.CurrentGameWithLogin, err error)
 }
 
 type Database struct {
@@ -363,15 +363,48 @@ const GetAllCurrentGamesQuery = `
 		g.Id,
 		g.Name,
 		gh.State,
-		gh.UserID
+		gh.FinishDate,
+		u.Login
 	FROM GameHistory gh
 		INNER JOIN Games g ON gh.GameId = g.Id
+		INNER JOIN Users u ON gh.UserId = u.Id
 	WHERE gh.State NOT IN (?, ?)
 `
 
-func (db *Database) GetAllCurrentGamesCommand() (games typegames.CurrentGames, err error) {
+func (db *Database) GetAllCurrentGamesCommand() (games []typegames.CurrentGameWithLogin, err error) {
 	queryName := "GetAllCurrentGamesQuery"
-	games, err = db.getHistoryGames(queryName, GetAllCurrentGamesQuery, nil)
+	rows, err := dbaccess.Query(queryName, GetAllCurrentGamesQuery, typegames.GameStateFinished, typegames.GameStateCancelled)
 
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		game := typegames.CurrentGame{}
+		var finishDateString *string
+		var login string
+		err = rows.Scan(&game.Id, &game.Name, &game.State, &finishDateString, &login)
+
+		if err != nil {
+			dbaccess.LogDbResult(queryName, games, err)
+			_ = rows.Close()
+			return
+		}
+
+		var finishDate *time.Time
+		finishDate, err = dbaccess.ConvertToNullableDate(finishDateString)
+
+		if err != nil {
+			dbaccess.LogDbResult(queryName, games, err)
+			_ = rows.Close()
+			return
+		}
+
+		game.FinishDate = finishDate
+		games = append(games, typegames.CurrentGameWithLogin{Login: login, Game: game})
+	}
+
+	dbaccess.LogDbResult(queryName, games, err)
+	_ = rows.Close()
 	return
 }

@@ -59,7 +59,7 @@ func (m *ServiceMock) AddWishlistGame(userId int, wishlistGame typegames.Wishlis
 	return args.Error(0)
 }
 
-func (m *ServiceMock) GetAllCurrentGames() (typegames.CurrentGames, error) {
+func (m *ServiceMock) GetAllCurrentGames() ([]typegames.CurrentGameWithLogin, error) {
 	args := m.Called()
-	return args.Get(0).(typegames.CurrentGames), args.Error(1)
+	return args.Get(0).([]typegames.CurrentGameWithLogin), args.Error(1)
 }

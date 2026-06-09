@@ -83,9 +83,9 @@ func (m *DatabaseMock) FinishCurrentGameCommand(userId int, gameId int) error {
 	panic("implement me")
 }
 
-func (m *DatabaseMock) GetAllCurrentGamesCommand() (games typegames.CurrentGames, err error) {
+func (m *DatabaseMock) GetAllCurrentGamesCommand() (games []typegames.CurrentGameWithLogin, err error) {
 	args := m.Called()
-	games = args.Get(0).(typegames.CurrentGames)
+	games = args.Get(0).([]typegames.CurrentGameWithLogin)
 	err = args.Error(1)
 	return
 }

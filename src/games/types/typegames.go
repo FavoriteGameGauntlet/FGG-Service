@@ -12,6 +12,11 @@ type CurrentGame struct {
 
 type CurrentGames = []CurrentGame
 
+type CurrentGameWithLogin struct {
+	Login string
+	Game  CurrentGame
+}
+
 type CurrentGameState string
 
 const (

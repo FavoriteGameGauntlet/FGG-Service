@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"errors"
 	"strconv"
+	"strings"
 )
 
 type IService interface {
@@ -14,6 +15,8 @@ type IService interface {
 	GetParameter(name string) (typesysparams.SystemParameter, error)
 	GetString(name string) (string, error)
 	GetInt(name string) (int, error)
+	GetBool(name string) (bool, error)
+	GetIntSlice(name string) ([]int, error)
 	ChangeValue(name string, value string) error
 }
 
@@ -66,6 +69,43 @@ func (s *Service) GetInt(name string) (value int, err error) {
 	}
 
 	value, err = strconv.Atoi(stringValue)
+
+	return
+}
+
+func (s *Service) GetBool(name string) (value bool, err error) {
+	str, err := s.GetString(name)
+
+	if err != nil {
+		return
+	}
+
+	if str == "" {
+		return
+	}
+
+	value, err = strconv.ParseBool(str)
+
+	return
+}
+
+func (s *Service) GetIntSlice(name string) (values []int, err error) {
+	str, err := s.GetString(name)
+
+	if err != nil {
+		return
+	}
+
+	for _, part := range strings.Split(str, ",") {
+		var v int
+		v, err = strconv.Atoi(strings.TrimSpace(part))
+
+		if err != nil {
+			return
+		}
+
+		values = append(values, v)
+	}
 
 	return
 }

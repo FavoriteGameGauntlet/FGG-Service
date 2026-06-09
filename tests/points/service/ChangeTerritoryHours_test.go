@@ -3,8 +3,10 @@ package srvpoints_test
 import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/service"
-	typepoints "FGG-Service/src/points/type"
+	"FGG-Service/src/points/type"
+	"FGG-Service/src/sysparams/types"
 	"FGG-Service/tests/points/mock"
+	"FGG-Service/tests/sysparams/srvmock"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -15,9 +17,16 @@ type ChangeTerritoryHoursTestCase struct {
 	UserId               int
 	Change               typepoints.TerritoryHourChange
 	SetupMock            func() *dbpointsmock.DatabaseMock
+	SetupSysParams       func() *srvsysparamsmock.ServiceMock
 	ExpectedActualChange *int
 	ExpectedFinalValue   *int
 	ExpectedErrorCode    string
+}
+
+func defaultSeizeDecreaseSliceSysParams() *srvsysparamsmock.ServiceMock {
+	spSvc := new(srvsysparamsmock.ServiceMock)
+	spSvc.On("GetIntSlice", typesysparams.ParamTerritoryHoursSeizeDecreaseSlice).Return([]int{-2, -4}, nil)
+	return spSvc
 }
 
 var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
@@ -39,6 +48,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			return new(dbpointsmock.DatabaseMock)
 		},
+		SetupSysParams:    defaultSeizeDecreaseSliceSysParams,
 		ExpectedErrorCode: "WRONG_DESIRED_CHANGE_VALUE",
 	},
 	{
@@ -49,6 +59,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			return new(dbpointsmock.DatabaseMock)
 		},
+		SetupSysParams:    defaultSeizeDecreaseSliceSysParams,
 		ExpectedErrorCode: "WRONG_DESIRED_CHANGE_VALUE",
 	},
 	{
@@ -59,6 +70,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			return new(dbpointsmock.DatabaseMock)
 		},
+		SetupSysParams:    defaultSeizeDecreaseSliceSysParams,
 		ExpectedErrorCode: "WRONG_DESIRED_CHANGE_VALUE",
 	},
 	{
@@ -69,6 +81,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			return new(dbpointsmock.DatabaseMock)
 		},
+		SetupSysParams:    defaultSeizeDecreaseSliceSysParams,
 		ExpectedErrorCode: "WRONG_DESIRED_CHANGE_VALUE",
 	},
 	{
@@ -81,6 +94,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 			databaseMock.On("GetTerritoryHoursCommand", 1).Return(2, nil)
 			return databaseMock
 		},
+		SetupSysParams:    defaultSeizeDecreaseSliceSysParams,
 		ExpectedErrorCode: "NOT_ENOUGH_CURRENT_POINTS",
 	},
 	{
@@ -93,6 +107,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 			databaseMock.On("GetTerritoryHoursCommand", 1).Return(0, dbError)
 			return databaseMock
 		},
+		SetupSysParams:    defaultSeizeDecreaseSliceSysParams,
 		ExpectedErrorCode: "",
 	},
 	{
@@ -106,6 +121,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 			databaseMock.On("ChangeTerritoryHoursCommand", 1, -2).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams:       defaultSeizeDecreaseSliceSysParams,
 		ExpectedActualChange: ptr(-2),
 		ExpectedFinalValue:   ptr(8),
 	},
@@ -120,6 +136,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 			databaseMock.On("ChangeTerritoryHoursCommand", 1, -4).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams:       defaultSeizeDecreaseSliceSysParams,
 		ExpectedActualChange: ptr(-4),
 		ExpectedFinalValue:   ptr(6),
 	},
@@ -134,6 +151,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 			databaseMock.On("ChangeTerritoryHoursCommand", 1, -3).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams:       defaultSeizeDecreaseSliceSysParams,
 		ExpectedActualChange: ptr(-3),
 		ExpectedFinalValue:   ptr(7),
 	},
@@ -148,6 +166,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 			databaseMock.On("ChangeTerritoryHoursCommand", 1, -5).Return(nil)
 			return databaseMock
 		},
+		SetupSysParams:       defaultSeizeDecreaseSliceSysParams,
 		ExpectedActualChange: ptr(-5),
 		ExpectedFinalValue:   ptr(5),
 	},
@@ -200,7 +219,15 @@ func TestSrvPoints_ChangeTerritoryHours(test *testing.T) {
 		test.Run(testCase.Name, func(test *testing.T) {
 			// Arrange
 			databaseMock := testCase.SetupMock()
-			sut := srvpoints.Service{Database: databaseMock}
+
+			var spSvc *srvsysparamsmock.ServiceMock
+			if testCase.SetupSysParams != nil {
+				spSvc = testCase.SetupSysParams()
+			} else {
+				spSvc = new(srvsysparamsmock.ServiceMock)
+			}
+
+			sut := srvpoints.Service{Database: databaseMock, SysParamsService: spSvc}
 
 			// Act
 			result, err := sut.ChangeTerritoryHours(testCase.UserId, testCase.Change)
@@ -220,6 +247,7 @@ func TestSrvPoints_ChangeTerritoryHours(test *testing.T) {
 			}
 
 			databaseMock.AssertExpectations(test)
+			spSvc.AssertExpectations(test)
 		})
 	}
 }

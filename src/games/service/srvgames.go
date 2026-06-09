@@ -4,6 +4,8 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/games/database"
 	"FGG-Service/src/games/types"
+	"FGG-Service/src/sysparams/service"
+	"FGG-Service/src/sysparams/types"
 	"FGG-Service/src/timers/service"
 	"database/sql"
 	"errors"
@@ -19,24 +21,27 @@ type IService interface {
 	GetGameHistory(userId int) (typegames.CurrentGames, error)
 	GetUnplayedGames(userId int) (typegames.WishlistGames, error)
 	AddWishlistGame(userId int, wishlistGame typegames.WishlistGame) error
-	GetAllCurrentGames() (typegames.CurrentGames, error)
+	GetAllCurrentGames() ([]typegames.CurrentGameWithLogin, error)
 }
 
 type Service struct {
-	Database       dbgames.IDatabase
-	TimerService   srvtimers.IService
-	GettingService IGettingService
+	Database         dbgames.IDatabase
+	TimerService     srvtimers.IService
+	GettingService   IGettingService
+	SysParamsService srvsysparams.IService
 }
 
 func NewService() *Service {
 	db := new(dbgames.Database)
 	ts := srvtimers.NewService()
 	gs := NewGettingService()
+	sps := srvsysparams.NewService()
 
 	return &Service{
-		Database:       db,
-		TimerService:   ts,
-		GettingService: gs,
+		Database:         db,
+		TimerService:     ts,
+		GettingService:   gs,
+		SysParamsService: sps,
 	}
 }
 
@@ -178,8 +183,14 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 		return
 	}
 
-	if unplayedGames == nil || len(unplayedGames) < common.MinimumNumberOfUnplayedGames {
-		err = common.NewUnplayedGamesNotFoundError()
+	minimumNumberOfUnplayedGames, err := s.SysParamsService.GetInt(typesysparams.ParamMinimumNumberOfUnplayedGames)
+
+	if err != nil {
+		return
+	}
+
+	if unplayedGames == nil || len(unplayedGames) < minimumNumberOfUnplayedGames {
+		err = common.NewUnplayedGamesNotFoundError(minimumNumberOfUnplayedGames)
 		return
 	}
 
@@ -205,7 +216,7 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 	return
 }
 
-func (s *Service) GetAllCurrentGames() (games typegames.CurrentGames, err error) {
+func (s *Service) GetAllCurrentGames() (games []typegames.CurrentGameWithLogin, err error) {
 	games, err = s.Database.GetAllCurrentGamesCommand()
 
 	if errors.Is(err, sql.ErrNoRows) {

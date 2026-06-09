@@ -4,19 +4,24 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/database"
 	"FGG-Service/src/points/type"
+	"FGG-Service/src/sysparams/service"
+	typesysparams "FGG-Service/src/sysparams/types"
 	"slices"
 	"strconv"
 )
 
 type Service struct {
-	Database dbpoints.IDatabase
+	Database         dbpoints.IDatabase
+	SysParamsService srvsysparams.IService
 }
 
 func NewService() *Service {
 	pdb := new(dbpoints.Database)
+	sps := srvsysparams.NewService()
 
 	return &Service{
-		pdb,
+		Database:         pdb,
+		SysParamsService: sps,
 	}
 }
 
@@ -83,16 +88,26 @@ func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.FreePointC
 		return
 	}
 
+	freePointMinimum, err := s.SysParamsService.GetInt(typesysparams.ParamFreePointsMinimum)
+
+	if err != nil {
+		return
+	}
+
+	shouldLimitFreePoints, err := s.SysParamsService.GetBool(typesysparams.ParamShouldLimitFreePoints)
+
+	if err != nil {
+		return
+	}
+
 	// We assume that the current points are greater and subtract the smaller from the larger
 	finalValue := currentPoints + pointChange.DesiredChangeValue
 	changeValue := pointChange.DesiredChangeValue
-	if common.FreePointMinimum != nil {
-		pointMinimum := *common.FreePointMinimum
-
-		if finalValue < pointMinimum {
-			finalValue = pointMinimum
+	if shouldLimitFreePoints {
+		if finalValue < freePointMinimum {
+			finalValue = freePointMinimum
 			// The current points are not enough, we calculate how many points are between the current and the minimum
-			changeValue = pointMinimum - currentPoints
+			changeValue = freePointMinimum - currentPoints
 		}
 	}
 
@@ -152,7 +167,14 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 	}
 
 	if pointChange.ChangeSource == typepoints.TerritoryHourChangeSourceSeize {
-		err = validateSeizeChange(pointChange)
+		var seizeDecreaseSlice []int
+		seizeDecreaseSlice, err = s.SysParamsService.GetIntSlice(typesysparams.ParamTerritoryHoursSeizeDecreaseSlice)
+
+		if err != nil {
+			return
+		}
+
+		err = validateSeizeChange(pointChange, seizeDecreaseSlice)
 
 		if err != nil {
 			return
@@ -272,7 +294,7 @@ func validateTerritoryLossChange(pointChange typepoints.TerritoryPointChange) er
 	return nil
 }
 
-func validateSeizeChange(pointChange typepoints.TerritoryHourChange) error {
+func validateSeizeChange(pointChange typepoints.TerritoryHourChange, seizeDecreaseSlice []int) error {
 	if pointChange.DesiredChangeValue > 0 {
 		return common.NewWrongDesiredChangeValueConflictError(
 			pointChange.ChangeSource,
@@ -284,9 +306,9 @@ func validateSeizeChange(pointChange typepoints.TerritoryHourChange) error {
 		penaltyPoints = 1
 	}
 
-	if !slices.Contains(common.DefaultTerritoryHoursSeizeDecreaseSlice, pointChange.DesiredChangeValue+penaltyPoints) {
-		decreaseSlice := make([]int, len(common.DefaultTerritoryHoursSeizeDecreaseSlice))
-		for i, v := range common.DefaultTerritoryHoursSeizeDecreaseSlice {
+	if !slices.Contains(seizeDecreaseSlice, pointChange.DesiredChangeValue+penaltyPoints) {
+		decreaseSlice := make([]int, len(seizeDecreaseSlice))
+		for i, v := range seizeDecreaseSlice {
 			decreaseSlice[i] = v - penaltyPoints
 		}
 
@@ -306,8 +328,15 @@ func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.Poin
 		return
 	}
 
+	var experiencePointsLevelUp int
 	if pointChange.ChangeSource == typepoints.ExperienceChangeSourceLevelUp {
-		err = validateLevelUpChange(pointChange)
+		experiencePointsLevelUp, err = s.SysParamsService.GetInt(typesysparams.ParamExperiencePointsLevelUp)
+
+		if err != nil {
+			return
+		}
+
+		err = validateLevelUpChange(pointChange, experiencePointsLevelUp)
 
 		if err != nil {
 			return
@@ -327,7 +356,7 @@ func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.Poin
 
 		err = common.NewNotEnoughCurrentPointsConflictError(
 			pointChange.ChangeSource,
-			-common.DefaultExperiencePointsLevelUp)
+			-experiencePointsLevelUp)
 		return
 	}
 
@@ -348,11 +377,11 @@ func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.Poin
 	return
 }
 
-func validateLevelUpChange(pointChange typepoints.PointChange) error {
-	if pointChange.DesiredChangeValue != common.DefaultExperiencePointsLevelUp {
+func validateLevelUpChange(pointChange typepoints.PointChange, experiencePointsLevelUp int) error {
+	if pointChange.DesiredChangeValue != experiencePointsLevelUp {
 		return common.NewWrongDesiredChangeValueConflictError(
 			pointChange.ChangeSource,
-			strconv.Itoa(common.DefaultExperiencePointsLevelUp))
+			strconv.Itoa(experiencePointsLevelUp))
 	}
 
 	return nil
