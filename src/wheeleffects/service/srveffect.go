@@ -5,7 +5,7 @@ import (
 	"FGG-Service/src/points/service"
 	"FGG-Service/src/points/type"
 	"FGG-Service/src/sysparams/service"
-	typesysparams "FGG-Service/src/sysparams/types"
+	"FGG-Service/src/sysparams/types"
 	"FGG-Service/src/wheeleffects/database"
 	"FGG-Service/src/wheeleffects/types"
 	"database/sql"
