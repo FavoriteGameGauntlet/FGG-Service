@@ -1,233 +1,117 @@
---
--- File generated with SQLiteStudio v3.4.21 on Mon Jun 8 10:13:18 2026
---
--- Text encoding used: System
---
-PRAGMA foreign_keys = off;
-BEGIN TRANSACTION;
+-- PostgreSQL schema for FGG-Service
 
--- Table: FreePointHistory
-CREATE TABLE IF NOT EXISTS FreePointHistory (
-    Id                INTEGER PRIMARY KEY AUTOINCREMENT
-                              UNIQUE
-                              NOT NULL,
-    UserId            NUMERIC REFERENCES Users (Id) 
-                              NOT NULL,
-    SourceUserId      INTEGER REFERENCES Users (Id) 
-                              NOT NULL,
-    ChangeSource      TEXT    NOT NULL,
-    ChangeValue       INTEGER NOT NULL,
-    ActualChangeValue INTEGER NOT NULL,
-    FinalValue        INTEGER CHECK (FinalValue >= 0) 
-                              NOT NULL,
-    WheelEffectId     INTEGER REFERENCES WheelEffectHistory (Id),
-    ChangeDate        TEXT    NOT NULL
-                              DEFAULT (datetime('now', 'subsec') ) 
+CREATE TABLE IF NOT EXISTS Users (
+    Id          SERIAL PRIMARY KEY,
+    Login       TEXT NOT NULL UNIQUE,
+    DisplayName TEXT UNIQUE,
+    Email       TEXT NOT NULL UNIQUE,
+    Password    TEXT NOT NULL,
+    JoinDate    TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-
--- Table: GameHistory
-CREATE TABLE IF NOT EXISTS GameHistory (
-    Id         INTEGER PRIMARY KEY AUTOINCREMENT
-                       NOT NULL
-                       UNIQUE,
-    UserId     INTEGER REFERENCES Users (Id) 
-                       NOT NULL,
-    GameId     INTEGER NOT NULL
-                       REFERENCES Games (Id),
-    State      TEXT    NOT NULL
-                       DEFAULT ('started'),
-    ChangeDate TEXT    NOT NULL
-                       DEFAULT (datetime('now', 'subsec') ),
-    FinishDate TEXT
+CREATE TABLE IF NOT EXISTS UserSessions (
+    Id         TEXT PRIMARY KEY,
+    UserId     INTEGER NOT NULL REFERENCES Users (Id),
+    CreateDate TIMESTAMP NOT NULL DEFAULT NOW(),
+    ExpiryDate TIMESTAMP NOT NULL DEFAULT NOW() + INTERVAL '1 day'
 );
 
+CREATE TABLE IF NOT EXISTS UserStats (
+    Id               SERIAL PRIMARY KEY,
+    UserId           INTEGER NOT NULL UNIQUE REFERENCES Users (Id),
+    AvailableRolls   INTEGER NOT NULL DEFAULT 0 CHECK (AvailableRolls >= 0),
+    TerritoryHours   INTEGER NOT NULL DEFAULT 0 CHECK (TerritoryHours >= 0),
+    ExperiencePoints INTEGER NOT NULL DEFAULT 0 CHECK (ExperiencePoints >= 0),
+    TerritoryPoints  INTEGER NOT NULL DEFAULT 0 CHECK (TerritoryPoints >= 0),
+    FreePoints       INTEGER NOT NULL DEFAULT 0 CHECK (FreePoints >= 0)
+);
 
--- Table: Games
 CREATE TABLE IF NOT EXISTS Games (
-    Id         INTEGER PRIMARY KEY AUTOINCREMENT
-                       UNIQUE
-                       NOT NULL,
-    Name       TEXT    NOT NULL
-                       UNIQUE,
-    CreateDate TEXT    DEFAULT (datetime('now', 'subsec') ) 
-                       NOT NULL
+    Id         SERIAL PRIMARY KEY,
+    Name       TEXT NOT NULL UNIQUE,
+    CreateDate TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-
--- Table: LastWheelEffects
-CREATE TABLE IF NOT EXISTS LastWheelEffects (
-    Id            INTEGER PRIMARY KEY AUTOINCREMENT
-                          UNIQUE
-                          NOT NULL,
-    UserId        INTEGER REFERENCES Users (Id) 
-                          NOT NULL,
-    WheelEffectId INTEGER REFERENCES WheelEffects (Id) 
-                          NOT NULL,
-    Position      INTEGER NOT NULL,
-    IsApplied     INTEGER CHECK (IsApplied IN (0, 1) ) 
-                          NOT NULL
-                          DEFAULT (0),
-    RollDate      TEXT    NOT NULL
-                          DEFAULT (datetime('now', 'subsec') ) 
+CREATE TABLE IF NOT EXISTS GameHistory (
+    Id         SERIAL PRIMARY KEY,
+    UserId     INTEGER NOT NULL REFERENCES Users (Id),
+    GameId     INTEGER NOT NULL REFERENCES Games (Id),
+    State      TEXT NOT NULL DEFAULT 'started',
+    ChangeDate TIMESTAMP NOT NULL DEFAULT NOW(),
+    FinishDate TIMESTAMP
 );
 
-
--- Table: SystemParameters
-CREATE TABLE IF NOT EXISTS SystemParameters (
-    Id    INTEGER PRIMARY KEY AUTOINCREMENT
-                  UNIQUE
-                  NOT NULL,
-    Name  TEXT    NOT NULL
-                  UNIQUE,
-    Value TEXT    NOT NULL
+CREATE TABLE IF NOT EXISTS UnplayedGames (
+    Id         SERIAL PRIMARY KEY,
+    UserId     INTEGER NOT NULL REFERENCES Users (Id),
+    GameId     INTEGER NOT NULL REFERENCES Games (Id),
+    CreateDate TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-
--- Table: TerritoryPointHistory
-CREATE TABLE IF NOT EXISTS TerritoryPointHistory (
-    Id                INTEGER PRIMARY KEY AUTOINCREMENT
-                              UNIQUE
-                              NOT NULL,
-    UserId            INTEGER REFERENCES Users (Id) 
-                              NOT NULL,
-    SourceUserId      INTEGER REFERENCES Users (Id) 
-                              NOT NULL,
-    ChangeSource      TEXT    NOT NULL,
-    ChangeValue       INTEGER NOT NULL,
-    ActualChangeValue INTEGER NOT NULL,
-    FinalValue        INTEGER NOT NULL
-                              CHECK (FinalValue >= 0),
-    ChangeDate        TEXT    NOT NULL
-                              DEFAULT (datetime('now', 'subsec') ) 
-);
-
-
--- Table: Timers
 CREATE TABLE IF NOT EXISTS Timers (
-    Id               INTEGER PRIMARY KEY AUTOINCREMENT
-                             UNIQUE
-                             NOT NULL,
-    UserId           INTEGER REFERENCES Users (Id) 
-                             NOT NULL,
-    GameId           INTEGER NOT NULL
-                             REFERENCES Games (Id),
-    State            TEXT    NOT NULL
-                             DEFAULT ('created'),
+    Id               SERIAL PRIMARY KEY,
+    UserId           INTEGER NOT NULL REFERENCES Users (Id),
+    GameId           INTEGER NOT NULL REFERENCES Games (Id),
+    State            TEXT NOT NULL DEFAULT 'created',
     DurationInS      INTEGER NOT NULL,
     RemainingTimeInS INTEGER NOT NULL,
-    CreateDate       TEXT    NOT NULL
-                             DEFAULT (datetime('now', 'subsec') ),
-    LastActionDate   TEXT    NOT NULL
-                             DEFAULT (datetime('now', 'subsec') ) 
+    CreateDate       TIMESTAMP NOT NULL DEFAULT NOW(),
+    LastActionDate   TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-
--- Table: UnplayedGames
-CREATE TABLE IF NOT EXISTS UnplayedGames (
-    Id         INTEGER PRIMARY KEY AUTOINCREMENT
-                       UNIQUE
-                       NOT NULL,
-    UserId     INTEGER REFERENCES Users (Id) 
-                       NOT NULL,
-    GameId     INTEGER NOT NULL
-                       REFERENCES Games (Id),
-    CreateDate TEXT    NOT NULL
-                       DEFAULT (datetime('now', 'subsec') ) 
-);
-
-
--- Table: Users
-CREATE TABLE IF NOT EXISTS Users (
-    Id          INTEGER PRIMARY KEY AUTOINCREMENT
-                        UNIQUE
-                        NOT NULL,
-    Login       TEXT    NOT NULL
-                        UNIQUE,
-    DisplayName TEXT    UNIQUE,
-    Email       TEXT    UNIQUE
-                        NOT NULL,
-    Password    TEXT    NOT NULL,
-    JoinDate    TEXT    DEFAULT (datetime('now', 'subsec') ) 
-                        NOT NULL
-);
-
-
--- Table: UserSessions
-CREATE TABLE IF NOT EXISTS UserSessions (
-    Id         TEXT    PRIMARY KEY
-                       UNIQUE
-                       NOT NULL,
-    UserId     INTEGER REFERENCES Users (Id) 
-                       NOT NULL,
-    CreateDate TEXT    NOT NULL
-                       DEFAULT (datetime('now', 'subsec') ),
-    ExpiryDate TEXT    NOT NULL
-                       DEFAULT (datetime('now', 'subsec', '+1 day') ) 
-);
-
-
--- Table: UserStats
-CREATE TABLE IF NOT EXISTS UserStats (
-    Id               INTEGER PRIMARY KEY AUTOINCREMENT
-                             UNIQUE
-                             NOT NULL,
-    UserId           INTEGER REFERENCES Users (Id) 
-                             NOT NULL
-                             UNIQUE,
-    AvailableRolls   INTEGER NOT NULL
-                             DEFAULT (0) 
-                             CHECK (AvailableRolls >= 0),
-    TerritoryHours   INTEGER NOT NULL
-                             DEFAULT (0) 
-                             CHECK (TerritoryHours >= 0),
-    ExperiencePoints INTEGER CHECK (ExperiencePoints >= 0) 
-                             NOT NULL
-                             DEFAULT (0),
-    TerritoryPoints  INTEGER CHECK (TerritoryPoints >= 0) 
-                             NOT NULL
-                             DEFAULT (0),
-    FreePoints       INTEGER CHECK (FreePoints >= 0) 
-                             NOT NULL
-                             DEFAULT (0) 
-);
-
-
--- Table: WheelEffectHistory
-CREATE TABLE IF NOT EXISTS WheelEffectHistory (
-    Id            INTEGER PRIMARY KEY AUTOINCREMENT
-                          NOT NULL
-                          UNIQUE,
-    UserId        INTEGER REFERENCES Users (Id) 
-                          NOT NULL,
-    WheelEffectId INTEGER NOT NULL
-                          REFERENCES WheelEffects (Id),
-    RollDate      TEXT    NOT NULL
-                          DEFAULT (datetime('now', 'subsec') ) 
-);
-
-
--- Table: WheelEffects
 CREATE TABLE IF NOT EXISTS WheelEffects (
-    Id                      INTEGER PRIMARY KEY AUTOINCREMENT
-                                    UNIQUE
-                                    NOT NULL,
-    Name                    TEXT    NOT NULL,
-    Description             TEXT    NOT NULL,
-    IsCompleted             INTEGER DEFAULT (0) 
-                                    NOT NULL,
-    OwnerPointChangeFormula TEXT    NOT NULL
-                                    DEFAULT ('output 0'),
-    EffectRerollFormula     TEXT    NOT NULL
-                                    DEFAULT ('output 0'),
-    IsItem                  INTEGER DEFAULT (0) 
-                                    NOT NULL,
-    IsEffectChoice          INTEGER NOT NULL
-                                    DEFAULT (0),
-    RepeatCount             INTEGER NOT NULL
-                                    DEFAULT (1) 
+    Id                      SERIAL PRIMARY KEY,
+    Name                    TEXT NOT NULL,
+    Description             TEXT NOT NULL,
+    IsCompleted             INTEGER NOT NULL DEFAULT 0,
+    OwnerPointChangeFormula TEXT NOT NULL DEFAULT 'output 0',
+    EffectRerollFormula     TEXT NOT NULL DEFAULT 'output 0',
+    IsItem                  INTEGER NOT NULL DEFAULT 0,
+    IsEffectChoice          INTEGER NOT NULL DEFAULT 0,
+    RepeatCount             INTEGER NOT NULL DEFAULT 1
 );
 
+CREATE TABLE IF NOT EXISTS LastWheelEffects (
+    Id            SERIAL PRIMARY KEY,
+    UserId        INTEGER NOT NULL REFERENCES Users (Id),
+    WheelEffectId INTEGER NOT NULL REFERENCES WheelEffects (Id),
+    Position      INTEGER NOT NULL,
+    IsApplied     INTEGER NOT NULL DEFAULT 0 CHECK (IsApplied IN (0, 1)),
+    RollDate      TIMESTAMP NOT NULL DEFAULT NOW()
+);
 
-COMMIT TRANSACTION;
-PRAGMA foreign_keys = on;
+CREATE TABLE IF NOT EXISTS SystemParameters (
+    Id    SERIAL PRIMARY KEY,
+    Name  TEXT NOT NULL UNIQUE,
+    Value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS TerritoryPointHistory (
+    Id                SERIAL PRIMARY KEY,
+    UserId            INTEGER NOT NULL REFERENCES Users (Id),
+    SourceUserId      INTEGER NOT NULL REFERENCES Users (Id),
+    ChangeSource      TEXT NOT NULL,
+    ChangeValue       INTEGER NOT NULL,
+    ActualChangeValue INTEGER NOT NULL,
+    FinalValue        INTEGER NOT NULL CHECK (FinalValue >= 0),
+    ChangeDate        TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS WheelEffectHistory (
+    Id            SERIAL PRIMARY KEY,
+    UserId        INTEGER NOT NULL REFERENCES Users (Id),
+    WheelEffectId INTEGER NOT NULL REFERENCES WheelEffects (Id),
+    RollDate      TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS FreePointHistory (
+    Id                SERIAL PRIMARY KEY,
+    UserId            INTEGER NOT NULL REFERENCES Users (Id),
+    SourceUserId      INTEGER NOT NULL REFERENCES Users (Id),
+    ChangeSource      TEXT NOT NULL,
+    ChangeValue       INTEGER NOT NULL,
+    ActualChangeValue INTEGER NOT NULL,
+    FinalValue        INTEGER NOT NULL CHECK (FinalValue >= 0),
+    WheelEffectId     INTEGER REFERENCES WheelEffectHistory (Id),
+    ChangeDate        TIMESTAMP NOT NULL DEFAULT NOW()
+);

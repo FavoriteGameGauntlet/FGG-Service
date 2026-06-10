@@ -13,7 +13,7 @@ type Database struct {
 const GetUserByLoginQuery = `
 	SELECT Id, Login, DisplayName, Email
 	FROM Users
-	WHERE Login = ?
+	WHERE Login = $1
 `
 
 func (db *Database) GetUserByLoginCommand(userLogin string) (user typeauth.User, err error) {
@@ -30,7 +30,7 @@ func (db *Database) GetUserByLoginCommand(userLogin string) (user typeauth.User,
 const GetUserByIdQuery = `
 	SELECT Id, Login, DisplayName, Email
 	FROM Users
-	WHERE Id = ?
+	WHERE Id = $1
 `
 
 func (db *Database) GetUserByIdCommand(userId int) (user typeauth.User, err error) {
@@ -47,7 +47,7 @@ func (db *Database) GetUserByIdCommand(userId int) (user typeauth.User, err erro
 const GetUserByEmailQuery = `
 	SELECT Id, Login, DisplayName, Email
 	FROM Users
-	WHERE Email = ?
+	WHERE Email = $1
 `
 
 func (db *Database) GetUserByEmailCommand(userEmail string) (user typeauth.User, err error) {
@@ -64,8 +64,8 @@ func (db *Database) GetUserByEmailCommand(userEmail string) (user typeauth.User,
 const GetUserByLoginAndPasswordQuery = `
 	SELECT Id, Login, DisplayName, Email
 	FROM Users
-	WHERE Login = ?
-		AND Password = ?
+	WHERE Login = $1
+		AND Password = $2
 `
 
 func (db *Database) GetUserByLoginAndPasswordCommand(loginUser typeauth.LoginUser) (user typeauth.User, err error) {
@@ -81,7 +81,7 @@ func (db *Database) GetUserByLoginAndPasswordCommand(loginUser typeauth.LoginUse
 
 const CreateUserQuery = `
 	INSERT INTO Users (Login, Email, Password)
-	VALUES (?, ?, ?)
+	VALUES ($1, $2, $3)
 `
 
 func (db *Database) CreateUserCommand(signupUser typeauth.SignupUser) error {
@@ -95,7 +95,7 @@ func (db *Database) CreateUserCommand(signupUser typeauth.SignupUser) error {
 
 const CreateUserStatsQuery = `
 	INSERT INTO UserStats (UserId)
-	SELECT Id FROM Users WHERE Login = ?
+	SELECT Id FROM Users WHERE Login = $1
 `
 
 func (db *Database) CreateUserStatsCommand(login string) error {
@@ -110,7 +110,7 @@ func (db *Database) CreateUserStatsCommand(login string) error {
 const GetUserSessionByIdQuery = `
 	SELECT Id, UserId
 	FROM UserSessions
-	WHERE Id = ?
+	WHERE Id = $1
 `
 
 func (db *Database) GetUserSessionByIdCommand(sessionId string) (userSession typeauth.UserSession, err error) {
@@ -126,7 +126,7 @@ func (db *Database) GetUserSessionByIdCommand(sessionId string) (userSession typ
 
 const CreateUserSessionQuery = `
 	INSERT INTO UserSessions (Id, UserId)
-	VALUES (?, ?)
+	VALUES ($1, $2)
 `
 
 func (db *Database) CreateUserSessionCommand(userId int) (userSession typeauth.UserSession, err error) {
@@ -150,7 +150,7 @@ func (db *Database) CreateUserSessionCommand(userId int) (userSession typeauth.U
 
 const DeleteUserSessionQuery = `
 	DELETE FROM UserSessions
-	WHERE Id = ?
+	WHERE Id = $1
 `
 
 func (db *Database) DeleteUserSessionCommand(sessionId string) error {

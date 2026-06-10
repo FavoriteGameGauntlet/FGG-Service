@@ -16,8 +16,8 @@ type Database struct {
 
 const ChangeDisplayNameQuery = `
 	UPDATE Users
-	SET DisplayName = ?
-	WHERE Id = ?
+	SET DisplayName = $1
+	WHERE Id = $2
 `
 
 func (db *Database) ChangeDisplayNameCommand(userId int, displayName string) error {
@@ -32,7 +32,7 @@ func (db *Database) ChangeDisplayNameCommand(userId int, displayName string) err
 const GetDisplayNameQuery = `
 	SELECT DisplayName
     FROM Users
-	WHERE Id = ?
+	WHERE Id = $1
 `
 
 func (db *Database) GetDisplayNameCommand(userId int) (displayName *string, err error) {

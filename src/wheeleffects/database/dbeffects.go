@@ -5,7 +5,6 @@ import (
 	"FGG-Service/src/wheeleffects/types"
 	"database/sql"
 	"errors"
-	"time"
 )
 
 type IDatabase interface {
@@ -27,7 +26,7 @@ type Database struct {
 const GetAvailableRollsCountQuery = `
 	SELECT AvailableRolls
 	FROM UserStats
-	WHERE UserId = ?
+	WHERE UserId = $1
 `
 
 func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err error) {
@@ -53,12 +52,12 @@ const GetAvailableEffectsQuery = `
 		SELECT 1
 		FROM WheelEffectHistory weh
 		WHERE weh.WheelEffectId = we.Id
-			AND weh.UserId = ?)
+			AND weh.UserId = $1)
 	  	AND NOT EXISTS (
 			SELECT 1
 			FROM LastWheelEffects lwe
 			WHERE lwe.WheelEffectId = we.Id
-				AND lwe.UserId = ?
+				AND lwe.UserId = $2
 				AND Position = 0)
 `
 
@@ -94,7 +93,7 @@ const GetEffectHistoryQuery = `
 	SELECT we.Name, we.Description, weh.RollDate
 	FROM WheelEffectHistory weh
 		INNER JOIN WheelEffects we ON weh.WheelEffectId = we.Id
-	WHERE weh.UserId = ?
+	WHERE weh.UserId = $1
 `
 
 func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffectHistories, err error) {
@@ -107,8 +106,7 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffect
 
 	for rows.Next() {
 		effect := typewheeleffects.RolledWheelEffectHistory{}
-		var rollDateString string
-		err = rows.Scan(&effect.Name, &effect.Description, &rollDateString)
+		err = rows.Scan(&effect.Name, &effect.Description, &effect.RollDate)
 
 		if err != nil {
 			dbaccess.LogDbResult(queryName, effects, err)
@@ -116,18 +114,6 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffect
 			_ = rows.Close()
 			return
 		}
-
-		var rollDate time.Time
-		rollDate, err = dbaccess.ConvertToDate(rollDateString)
-
-		if err != nil {
-			dbaccess.LogDbResult(queryName, effects, err)
-
-			_ = rows.Close()
-			return
-		}
-
-		effect.RollDate = rollDate
 
 		effects = append(effects, effect)
 	}
@@ -142,8 +128,8 @@ const GetEffectHistoryByEffectNameQuery = `
 	SELECT we.Name, we.Description, weh.RollDate
 	FROM WheelEffectHistory weh
 		INNER JOIN WheelEffects we ON weh.WheelEffectId = we.Id
-	WHERE weh.UserId = ?
-		AND we.Name = ?
+	WHERE weh.UserId = $1
+		AND we.Name = $2
 	ORDER BY weh.RollDate DESC
 `
 
@@ -151,25 +137,13 @@ func (db *Database) GetEffectHistoryByEffectNameCommand(userId int, effectName s
 	queryName := "GetEffectHistoryByEffectNameQuery"
 	row := dbaccess.QueryRow(queryName, GetEffectHistoryByEffectNameQuery, userId, effectName)
 
-	var rollDateString string
-	err = row.Scan(&effect.Name, &effect.Description, &rollDateString)
+	err = row.Scan(&effect.Name, &effect.Description, &effect.RollDate)
 
 	if err != nil {
 		dbaccess.LogDbResult(queryName, effect, err)
 
 		return
 	}
-
-	var rollDate time.Time
-	rollDate, err = dbaccess.ConvertToDate(rollDateString)
-
-	if err != nil {
-		dbaccess.LogDbResult(queryName, effect, err)
-
-		return
-	}
-
-	effect.RollDate = rollDate
 
 	dbaccess.LogDbResult(queryName, effect, err)
 
@@ -183,12 +157,12 @@ const MakeEffectRollQuery = `
 		SELECT 1
 		FROM WheelEffectHistory weh
 		WHERE weh.WheelEffectId = we.Id
-			AND weh.UserId = ?)
+			AND weh.UserId = $1)
 		AND NOT EXISTS (
 			SELECT 1
 			FROM LastWheelEffects lwe
 			WHERE lwe.WheelEffectId = we.Id
-				AND lwe.UserId = ?
+				AND lwe.UserId = $2
 				AND Position = 0)
 	ORDER BY RANDOM()
 	LIMIT 5
@@ -225,7 +199,7 @@ func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.
 const DecreaseAvailableRollsValueQuery = `
 	UPDATE UserStats
 	SET AvailableRolls = AvailableRolls - 1
-	WHERE UserId = ?
+	WHERE UserId = $1
 `
 
 func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
@@ -239,7 +213,7 @@ func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
 
 const AddLastRolledWheelEffectsQuery = `
 	INSERT INTO LastWheelEffects (UserId, WheelEffectId, Position)
-	VALUES (?, ?, ?)
+	VALUES ($1, $2, $3)
 `
 
 func (db *Database) AddLastRolledWheelEffectsCommand(userId int, effects typewheeleffects.WheelEffects) (err error) {
@@ -264,7 +238,7 @@ const GetLastRolledWheelEffectsQuery = `
 	SELECT we.Id, we.Name, we.Description, lwe.RollDate, lwe.Position, lwe.IsApplied
 	FROM LastWheelEffects lwe
 		INNER JOIN WheelEffects we ON we.Id = lwe.WheelEffectId
-	WHERE lwe.UserId = ?
+	WHERE lwe.UserId = $1
 `
 
 func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
@@ -278,12 +252,11 @@ func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewh
 	for rows.Next() {
 		effect := typewheeleffects.RolledWheelEffect{}
 
-		var rollDateString string
 		err = rows.Scan(
 			&effect.Id,
 			&effect.Name,
 			&effect.Description,
-			&rollDateString,
+			&effect.RollDate,
 			&effect.Position,
 			&effect.IsApplied)
 
@@ -293,18 +266,6 @@ func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewh
 			_ = rows.Close()
 			return
 		}
-
-		var rollDate time.Time
-		rollDate, err = dbaccess.ConvertToDate(rollDateString)
-
-		if err != nil {
-			dbaccess.LogDbResult(queryName, effects, err)
-
-			_ = rows.Close()
-			return
-		}
-
-		effect.RollDate = rollDate
 
 		effects = append(effects, effect)
 	}
@@ -318,8 +279,8 @@ func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewh
 const MarkLastWheelEffectAppliedQuery = `
 	UPDATE LastWheelEffects
 	SET IsApplied = 1
-	WHERE UserId = ?
-		AND WheelEffectId = ?
+	WHERE UserId = $1
+		AND WheelEffectId = $2
 `
 
 func (db *Database) MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId int) error {
@@ -333,7 +294,7 @@ func (db *Database) MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId 
 
 const AddWheelEffectHistoryQuery = `
 	INSERT INTO WheelEffectHistory (UserId, WheelEffectId)
-	VALUES (?, ?)
+	VALUES ($1, $2)
 `
 
 func (db *Database) AddWheelEffectHistoryCommand(userId int, wheelEffectId int) error {

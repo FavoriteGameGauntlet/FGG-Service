@@ -48,7 +48,7 @@ func (db *Database) GetAllSystemParametersCommand() (parameters []typesysparams.
 const GetSystemParameterQuery = `
 	SELECT Id, Name, Value
 	FROM SystemParameters
-	WHERE Name = ?
+	WHERE Name = $1
 `
 
 func (db *Database) GetSystemParameterCommand(name string) (parameter typesysparams.SystemParameter, err error) {
@@ -64,8 +64,8 @@ func (db *Database) GetSystemParameterCommand(name string) (parameter typesyspar
 
 const ChangeSystemParameterValueQuery = `
 	UPDATE SystemParameters
-	SET Value = ?
-	WHERE Name = ?
+	SET Value = $1
+	WHERE Name = $2
 `
 
 func (db *Database) ChangeSystemParameterValueCommand(name string, value string) error {

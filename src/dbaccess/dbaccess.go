@@ -3,24 +3,25 @@ package dbaccess
 import (
 	typeauth "FGG-Service/src/auth/types"
 	"database/sql"
+	_ "embed"
 	"log/slog"
+	"os"
 
-	_ "modernc.org/sqlite"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
+
+//go:embed FGG.sql
+var schema string
 
 var db *sql.DB
 
-const Path = "file:data/FGG.db"
-
 func Init() func() {
 	var err error
-	db, err = sql.Open("sqlite", Path)
+	db, err = sql.Open("pgx", os.Getenv(DatabaseURLEnvVar))
 
 	if err != nil {
 		panic(err)
 	}
-
-	db.SetMaxOpenConns(1)
 
 	err = db.Ping()
 
@@ -28,13 +29,7 @@ func Init() func() {
 		panic(err)
 	}
 
-	_, err = db.Exec("PRAGMA journal_mode=WAL;")
-
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = db.Exec("PRAGMA busy_timeout=5000;")
+	_, err = db.Exec(schema)
 
 	if err != nil {
 		panic(err)

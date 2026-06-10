@@ -34,7 +34,7 @@ const DoesGameExistQuery = `
 		CASE WHEN EXISTS (
 			SELECT 1
 			FROM Games
-			WHERE Name = ?
+			WHERE Name = $1
 		)
 		THEN true
 		ELSE false
@@ -53,7 +53,7 @@ func (db *Database) DoesGameExistCommand(gameName string) (doesExist bool, err e
 
 const CreateGameQuery = `
 	INSERT INTO Games (Name)
-	VALUES (?)
+	VALUES ($1)
 `
 
 func (db *Database) CreateGameCommand(name string) error {
@@ -68,7 +68,7 @@ func (db *Database) CreateGameCommand(name string) error {
 const GetWishlistGameQuery = `
 	SELECT Id, Name
 	FROM Games
-	WHERE Name = ?
+	WHERE Name = $1
 `
 
 func (db *Database) GetWishlistGameCommand(name string) (game typegames.WishlistGame, err error) {
@@ -83,13 +83,13 @@ func (db *Database) GetWishlistGameCommand(name string) (game typegames.Wishlist
 }
 
 const DoesUnplayedGameExistQuery = `
-	SELECT 
+	SELECT
 	    CASE WHEN EXISTS (
 			SELECT 1
 			FROM UnplayedGames ug
 				INNER JOIN Games g ON ug.GameId = g.Id
-			WHERE ug.UserId = ?
-				AND g.Name = ?
+			WHERE ug.UserId = $1
+				AND g.Name = $2
 		)
 		THEN true
 		ELSE false
@@ -108,7 +108,7 @@ func (db *Database) DoesWishlistGameExistCommand(userId int, gameName string) (d
 
 const CreateUnplayedGameQuery = `
 	INSERT INTO UnplayedGames (UserId, GameId)
-	VALUES (?, ?)
+	VALUES ($1, $2)
 `
 
 func (db *Database) CreateWishlistGameCommand(userId int, gameId int) error {
@@ -122,8 +122,8 @@ func (db *Database) CreateWishlistGameCommand(userId int, gameId int) error {
 
 const DeleteUnplayedGameQuery = `
 	DELETE FROM UnplayedGames
-	WHERE UserId = ?
-		AND GameId = ?
+	WHERE UserId = $1
+		AND GameId = $2
 `
 
 func (db *Database) DeleteUnplayedGameCommand(userId int, gameId int) error {
@@ -139,7 +139,7 @@ const GetWishlistGamesQuery = `
 	SELECT ug.Id, g.Id, g.Name
 	FROM UnplayedGames ug
 		INNER JOIN Games g ON ug.GameId = g.Id
-	WHERE ug.UserId = ?
+	WHERE ug.UserId = $1
 `
 
 func (db *Database) GetWishlistGamesCommand(userId int) (games typegames.WishlistGames, err error) {
@@ -170,7 +170,7 @@ func (db *Database) GetWishlistGamesCommand(userId int) (games typegames.Wishlis
 
 const CreateCurrentGameQuery = `
 	INSERT INTO GameHistory (UserId, GameId)
-	VALUES (?, ?)
+	VALUES ($1, $2)
 `
 
 func (db *Database) CreateCurrentGameCommand(userId int, gameId int) error {
@@ -190,8 +190,8 @@ const GetCurrentGameQuery = `
 		gh.FinishDate
 	FROM GameHistory gh
 		INNER JOIN Games g ON gh.GameId = g.Id
-	WHERE gh.UserId = ?
-		AND gh.State NOT IN (?, ?)
+	WHERE gh.UserId = $1
+		AND gh.State NOT IN ($2, $3)
 `
 
 func (db *Database) GetCurrentGameCommand(userId int) (games typegames.CurrentGames, err error) {
@@ -216,8 +216,7 @@ func (db *Database) getHistoryGames(queryName string, query string, userId *int)
 
 	for rows.Next() {
 		game := typegames.CurrentGame{}
-		var finishDateString *string
-		err = rows.Scan(&game.Id, &game.Name, &game.State, &finishDateString)
+		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.FinishDate)
 
 		if err != nil {
 			dbaccess.LogDbResult(queryName, games, err)
@@ -225,18 +224,6 @@ func (db *Database) getHistoryGames(queryName string, query string, userId *int)
 			_ = rows.Close()
 			return
 		}
-
-		var finishDate *time.Time
-		finishDate, err = dbaccess.ConvertToNullableDate(finishDateString)
-
-		if err != nil {
-			dbaccess.LogDbResult(queryName, games, err)
-
-			_ = rows.Close()
-			return
-		}
-
-		game.FinishDate = finishDate
 
 		games = append(games, game)
 	}
@@ -248,22 +235,22 @@ func (db *Database) getHistoryGames(queryName string, query string, userId *int)
 }
 
 const GetGameSecondsSpentQuery = `
-	SELECT 
+	SELECT
 		COALESCE(
 			SUM(
 				t.DurationInS -
 				CASE t.State
-					WHEN ? THEN t.RemainingTimeInS - (strftime('%s','now') - strftime('%s', t.LastActionDate))
-					WHEN ? THEN t.RemainingTimeInS
-					WHEN ? THEN t.RemainingTimeInS
+					WHEN $1 THEN t.RemainingTimeInS - CAST(EXTRACT(EPOCH FROM (NOW() - t.LastActionDate)) AS INTEGER)
+					WHEN $2 THEN t.RemainingTimeInS
+					WHEN $3 THEN t.RemainingTimeInS
 					ELSE t.DurationInS
 				END
 			),
 			0
 	    ) AS SecondsSpent
 	FROM Timers t
-	WHERE t.UserId = ?
-		AND t.GameId = ?
+	WHERE t.UserId = $4
+		AND t.GameId = $5
 `
 
 func (db *Database) GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
@@ -302,10 +289,10 @@ func (db *Database) GetGameTimeSpentCommand(userId int, gameId int) (timeSpent t
 
 const CancelCurrentGameQuery = `
 	UPDATE GameHistory
-	SET State = ?,
-		FinishDate = datetime('now', 'subsec')
-	WHERE UserId = ?
-		AND GameId = ?;
+	SET State = $1,
+		FinishDate = NOW()
+	WHERE UserId = $2
+		AND GameId = $3
 `
 
 func (db *Database) CancelCurrentGameCommand(userId int, gameId int) error {
@@ -319,10 +306,10 @@ func (db *Database) CancelCurrentGameCommand(userId int, gameId int) error {
 
 const FinishCurrentGameQuery = `
 	UPDATE GameHistory
-	SET State = ?,
-		FinishDate = datetime('now', 'subsec')
-	WHERE UserId = ?
-		AND GameId = ?;
+	SET State = $1,
+		FinishDate = NOW()
+	WHERE UserId = $2
+		AND GameId = $3
 `
 
 func (db *Database) FinishCurrentGameCommand(userId int, gameId int) error {
@@ -335,15 +322,15 @@ func (db *Database) FinishCurrentGameCommand(userId int, gameId int) error {
 }
 
 const GetGameHistoryQuery = `
-	SELECT 
+	SELECT
 		g.Id,
 		g.Name,
 		gh.State,
 		gh.FinishDate
 	FROM GameHistory gh
 		INNER JOIN Games g ON gh.GameId = g.Id
-	WHERE gh.UserId = ?
-		AND gh.State IN (?, ?)
+	WHERE gh.UserId = $1
+		AND gh.State IN ($2, $3)
 	ORDER BY gh.FinishDate NULLS FIRST
 `
 
@@ -368,7 +355,7 @@ const GetAllCurrentGamesQuery = `
 	FROM GameHistory gh
 		INNER JOIN Games g ON gh.GameId = g.Id
 		INNER JOIN Users u ON gh.UserId = u.Id
-	WHERE gh.State NOT IN (?, ?)
+	WHERE gh.State NOT IN ($1, $2)
 `
 
 func (db *Database) GetAllCurrentGamesCommand() (games []typegames.CurrentGameWithLogin, err error) {
@@ -381,9 +368,8 @@ func (db *Database) GetAllCurrentGamesCommand() (games []typegames.CurrentGameWi
 
 	for rows.Next() {
 		game := typegames.CurrentGame{}
-		var finishDateString *string
 		var login string
-		err = rows.Scan(&game.Id, &game.Name, &game.State, &finishDateString, &login)
+		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.FinishDate, &login)
 
 		if err != nil {
 			dbaccess.LogDbResult(queryName, games, err)
@@ -391,16 +377,6 @@ func (db *Database) GetAllCurrentGamesCommand() (games []typegames.CurrentGameWi
 			return
 		}
 
-		var finishDate *time.Time
-		finishDate, err = dbaccess.ConvertToNullableDate(finishDateString)
-
-		if err != nil {
-			dbaccess.LogDbResult(queryName, games, err)
-			_ = rows.Close()
-			return
-		}
-
-		game.FinishDate = finishDate
 		games = append(games, typegames.CurrentGameWithLogin{Login: login, Game: game})
 	}
 
