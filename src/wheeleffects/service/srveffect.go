@@ -4,6 +4,8 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/service"
 	"FGG-Service/src/points/type"
+	"FGG-Service/src/sysparams/service"
+	"FGG-Service/src/sysparams/types"
 	"FGG-Service/src/wheeleffects/database"
 	"FGG-Service/src/wheeleffects/types"
 	"database/sql"
@@ -17,17 +19,20 @@ type IService interface {
 }
 
 type Service struct {
-	Database     dbwheeleffects.IDatabase
-	PointService srvpoints.Service
+	Database         dbwheeleffects.IDatabase
+	PointService     srvpoints.Service
+	SysParamsService srvsysparams.IService
 }
 
 func NewService() *Service {
 	db := new(dbwheeleffects.Database)
 	ps := srvpoints.NewService()
+	sp := srvsysparams.NewService()
 
 	return &Service{
 		db,
 		*ps,
+		sp,
 	}
 }
 
@@ -78,7 +83,13 @@ func (s *Service) MakeEffectRoll(userId int) (effects typewheeleffects.WheelEffe
 		return
 	}
 
-	if len(effects) < 5 {
+	minimumWheelEffectsForRoll, err := s.SysParamsService.GetInt(typesysparams.ParamMinimumWheelEffectsForRoll)
+
+	if err != nil {
+		return
+	}
+
+	if len(effects) < minimumWheelEffectsForRoll {
 		err = common.NewNotEnoughAvailableWheelEffectsConflictError()
 		return
 	}

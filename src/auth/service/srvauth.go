@@ -161,7 +161,7 @@ func (s *Service) IsAdmin(userId int) (isAdmin bool, err error) {
 		return
 	}
 
-	for _, adminLogin := range strings.Split(os.Getenv("ADMIN_LOGINS"), ",") {
+	for _, adminLogin := range strings.Split(os.Getenv(common.AdminLoginsEnvVar), common.AdminLoginsSeparator) {
 		if strings.TrimSpace(adminLogin) == user.Login {
 			isAdmin = true
 			return
