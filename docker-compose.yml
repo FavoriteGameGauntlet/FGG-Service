@@ -1,17 +1,19 @@
 services:
-  postgres:
+  fgg-db:
     image: postgres:17-alpine
-    container_name: fgg-postgres
+    container_name: fgg-db
     environment:
-      POSTGRES_DB: fgg
-      POSTGRES_USER: fgg
-      POSTGRES_PASSWORD: fgg
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     restart: unless-stopped
 
   fgg:
-    container_name: fgg-service
+    container_name: fgg-server
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,8 +21,8 @@ services:
       - "8080:8080"
     restart: unless-stopped
     depends_on:
-      - postgres
+      - fgg-db
     environment:
-      DATABASE_URL: "postgres://fgg:fgg@postgres:5432/fgg"
+      DATABASE_URL: ${DATABASE_URL}
     volumes:
       - ./logs:/app/logs
