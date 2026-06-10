@@ -36,12 +36,12 @@ func main() {
 	e := echo.New()
 	e.HideBanner = true
 
+	dbCloseFunc := dbaccess.Init()
+	defer dbCloseFunc()
+
 	registerHandlers(e)
 	addScalarRoutes(e)
 	fixCORS(e)
-
-	dbCloseFunc := dbaccess.Init()
-	defer dbCloseFunc()
 
 	f := createFileAndStartLogger()
 	defer func(f *os.File) {
