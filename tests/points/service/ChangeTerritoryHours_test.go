@@ -26,6 +26,7 @@ type ChangeTerritoryHoursTestCase struct {
 func defaultSeizeDecreaseSliceSysParams() *srvsysparamsmock.ServiceMock {
 	spSvc := new(srvsysparamsmock.ServiceMock)
 	spSvc.On("GetIntSlice", typesysparams.ParamTerritoryHoursSeizeDecreaseSlice).Return([]int{-2, -4}, nil)
+	spSvc.On("GetInt", typesysparams.ParamSeizePenaltyPoints).Return(1, nil)
 	return spSvc
 }
 

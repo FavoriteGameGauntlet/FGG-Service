@@ -152,7 +152,7 @@ func validateTeleportBaseOrSandstormChange(pointChange typepoints.FreePointChang
 	if pointChange.DesiredChangeValue > 0 {
 		return common.NewWrongDesiredChangeValueConflictError(
 			pointChange.ChangeSource,
-			"zero or less")
+			common.ConstraintZeroOrLess)
 	}
 
 	return nil
@@ -174,7 +174,14 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 			return
 		}
 
-		err = validateSeizeChange(pointChange, seizeDecreaseSlice)
+		var seizePenaltyPoints int
+		seizePenaltyPoints, err = s.SysParamsService.GetInt(typesysparams.ParamSeizePenaltyPoints)
+
+		if err != nil {
+			return
+		}
+
+		err = validateSeizeChange(pointChange, seizeDecreaseSlice, seizePenaltyPoints)
 
 		if err != nil {
 			return
@@ -278,7 +285,7 @@ func validateTerritoryObtainingChange(pointChange typepoints.TerritoryPointChang
 	if pointChange.DesiredChangeValue < 0 {
 		return common.NewWrongDesiredChangeValueConflictError(
 			pointChange.ChangeSource,
-			"zero or more")
+			common.ConstraintZeroOrMore)
 	}
 
 	return nil
@@ -288,22 +295,21 @@ func validateTerritoryLossChange(pointChange typepoints.TerritoryPointChange) er
 	if pointChange.DesiredChangeValue > 0 {
 		return common.NewWrongDesiredChangeValueConflictError(
 			pointChange.ChangeSource,
-			"zero or less")
+			common.ConstraintZeroOrLess)
 	}
 
 	return nil
 }
 
-func validateSeizeChange(pointChange typepoints.TerritoryHourChange, seizeDecreaseSlice []int) error {
+func validateSeizeChange(pointChange typepoints.TerritoryHourChange, seizeDecreaseSlice []int, penaltyPoints int) error {
 	if pointChange.DesiredChangeValue > 0 {
 		return common.NewWrongDesiredChangeValueConflictError(
 			pointChange.ChangeSource,
-			"zero or less")
+			common.ConstraintZeroOrLess)
 	}
 
-	penaltyPoints := 0
-	if pointChange.IsSomeones {
-		penaltyPoints = 1
+	if !pointChange.IsSomeones {
+		penaltyPoints = 0
 	}
 
 	if !slices.Contains(seizeDecreaseSlice, pointChange.DesiredChangeValue+penaltyPoints) {

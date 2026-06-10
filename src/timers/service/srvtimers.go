@@ -54,8 +54,14 @@ func (s *Service) StartTimerFinisherScheduler() {
 		panic(err)
 	}
 
+	intervalInS, err := s.SysParamsService.GetInt(typesysparams.ParamTimerFinisherSchedulerIntervalInS)
+
+	if err != nil {
+		panic(err)
+	}
+
 	_, err = scheduler.NewJob(
-		gocron.DurationJob(1*time.Second),
+		gocron.DurationJob(time.Duration(intervalInS)*time.Second),
 		gocron.NewTask(s.StopAllCompletedTimers),
 		gocron.WithSingletonMode(gocron.LimitModeReschedule),
 	)
