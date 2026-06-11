@@ -41,7 +41,7 @@ type Database struct {
 const IncreaseAvailableRollsQuery = `
 	UPDATE UserStats
 	SET AvailableRolls = AvailableRolls + 1
-	WHERE UserId = ?
+	WHERE UserId = $1
 `
 
 func (db *Database) IncreaseAvailableRollsCommand(userId int) error {
@@ -55,8 +55,8 @@ func (db *Database) IncreaseAvailableRollsCommand(userId int) error {
 
 const IncreaseTerritoryHoursQuery = `
 	UPDATE UserStats
-	SET TerritoryHours = TerritoryHours + ?
-	WHERE UserId = ?
+	SET TerritoryHours = TerritoryHours + $1
+	WHERE UserId = $2
 `
 
 func (db *Database) IncreaseTerritoryHoursCommand(userId int, changeValue int) error {
@@ -70,8 +70,8 @@ func (db *Database) IncreaseTerritoryHoursCommand(userId int, changeValue int) e
 
 const ChangeExperiencePointsQuery = `
 	UPDATE UserStats
-	SET ExperiencePoints = ExperiencePoints + ?
-	WHERE UserId = ?
+	SET ExperiencePoints = ExperiencePoints + $1
+	WHERE UserId = $2
 `
 
 func (db *Database) ChangeExperiencePointsCommand(userId int, changeValue int) error {
@@ -86,7 +86,7 @@ func (db *Database) ChangeExperiencePointsCommand(userId int, changeValue int) e
 const GetExperiencePointsQuery = `
 	SELECT ExperiencePoints
 	FROM UserStats
-	WHERE UserId = ?
+	WHERE UserId = $1
 `
 
 func (db *Database) GetExperiencePointsCommand(userId int) (points int, err error) {
@@ -103,7 +103,7 @@ func (db *Database) GetExperiencePointsCommand(userId int) (points int, err erro
 const GetTerritoryHoursQuery = `
 	SELECT TerritoryHours
 	FROM UserStats
-	WHERE UserId = ?
+	WHERE UserId = $1
 `
 
 func (db *Database) GetTerritoryHoursCommand(userId int) (points int, err error) {
@@ -119,8 +119,8 @@ func (db *Database) GetTerritoryHoursCommand(userId int) (points int, err error)
 
 const ChangeTerritoryHoursQuery = `
 	UPDATE UserStats
-	SET TerritoryHours = TerritoryHours + ?
-	WHERE UserId = ?
+	SET TerritoryHours = TerritoryHours + $1
+	WHERE UserId = $2
 `
 
 func (db *Database) ChangeTerritoryHoursCommand(userId int, changeValue int) error {
@@ -135,7 +135,7 @@ func (db *Database) ChangeTerritoryHoursCommand(userId int, changeValue int) err
 const GetTerritoryPointsQuery = `
 	SELECT TerritoryPoints
 	FROM UserStats
-	WHERE UserId = ?
+	WHERE UserId = $1
 `
 
 func (db *Database) GetTerritoryPointsCommand(userId int) (points int, err error) {
@@ -151,8 +151,8 @@ func (db *Database) GetTerritoryPointsCommand(userId int) (points int, err error
 
 const ChangeTerritoryPointsQuery = `
 	UPDATE UserStats
-	SET TerritoryPoints = TerritoryPoints + ?
-	WHERE UserId = ?
+	SET TerritoryPoints = TerritoryPoints + $1
+	WHERE UserId = $2
 `
 
 func (db *Database) ChangeTerritoryPointsCommand(userId int, changeValue int) error {
@@ -173,7 +173,7 @@ const AddTerritoryPointHistoryQuery = `
 		ActualChangeValue,
 		FinalValue
 	)
-	VALUES (?, ?, ?, ?, ?, ?)
+	VALUES ($1, $2, $3, $4, $5, $6)
 `
 
 func (db *Database) AddTerritoryPointHistoryCommand(
@@ -210,7 +210,7 @@ const GetTerritoryPointHistoryQuery = `
 		u.Login
 	FROM TerritoryPointHistory tph
 		LEFT JOIN Users u ON u.Id = tph.SourceUserId
-	WHERE tph.UserId = ?
+	WHERE tph.UserId = $1
 	ORDER BY tph.ChangeDate DESC
 `
 
@@ -226,21 +226,13 @@ func (db *Database) GetTerritoryPointHistoryCommand(userId int) (
 
 	for rows.Next() {
 		entry := typepoints.TerritoryPointChangeHistory{}
-		var changeDateString string
 		err = rows.Scan(
 			&entry.ActualChangeValue,
-			&changeDateString,
+			&entry.ChangeDate,
 			&entry.ChangeSource,
 			&entry.DesiredChangeValue,
 			&entry.FinalValue,
 			&entry.SourceLogin)
-
-		if err != nil {
-			_ = rows.Close()
-			return
-		}
-
-		entry.ChangeDate, err = dbaccess.ConvertToDate(changeDateString)
 
 		if err != nil {
 			_ = rows.Close()
@@ -259,7 +251,7 @@ func (db *Database) GetTerritoryPointHistoryCommand(userId int) (
 const GetPointInfoQuery = `
 	SELECT TerritoryPoints, FreePoints, AvailableRolls, TerritoryHours, ExperiencePoints
 	FROM UserStats
-	WHERE UserId = ?
+	WHERE UserId = $1
 `
 
 func (db *Database) GetPointInfoCommand(userId int) (info typepoints.PointInfo, err error) {
@@ -319,7 +311,7 @@ func (db *Database) GetAllPointInfoCommand() (infos typepoints.PointInfoByLogins
 const GetFreePointsQuery = `
 	SELECT FreePoints
 	FROM UserStats
-	WHERE UserId = ?
+	WHERE UserId = $1
 `
 
 func (db *Database) GetFreePointsCommand(userId int) (points int, err error) {
@@ -335,8 +327,8 @@ func (db *Database) GetFreePointsCommand(userId int) (points int, err error) {
 
 const ChangeFreePointsQuery = `
 	UPDATE UserStats
-	SET FreePoints = FreePoints + ?
-	WHERE UserId = ?
+	SET FreePoints = FreePoints + $1
+	WHERE UserId = $2
 `
 
 func (db *Database) ChangeFreePointsCommand(userId int, changeValue int) error {
@@ -358,7 +350,7 @@ const AddFreePointHistoryQuery = `
 		FinalValue,
 	  	WheelEffectId
 	)
-	VALUES (?, ?, ?, ?, ?, ?, ?)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
 func (db *Database) AddFreePointHistoryCommand(
@@ -399,7 +391,7 @@ const GetFreePointHistoryQuery = `
 	FROM FreePointHistory fph
 		LEFT JOIN Users u ON u.Id = fph.SourceUserId
 		LEFT JOIN WheelEffects we ON we.Id = fph.WheelEffectId
-	WHERE fph.UserId = ?
+	WHERE fph.UserId = $1
 	ORDER BY fph.ChangeDate DESC
 `
 
@@ -413,22 +405,14 @@ func (db *Database) GetFreePointHistoryCommand(userId int) (history typepoints.F
 
 	for rows.Next() {
 		entry := typepoints.FreePointChangeHistory{}
-		var changeDateString string
 		err = rows.Scan(
 			&entry.ActualChangeValue,
-			&changeDateString,
+			&entry.ChangeDate,
 			&entry.ChangeSource,
 			&entry.DesiredChangeValue,
 			&entry.FinalValue,
 			&entry.SourceLogin,
 			&entry.WheelEffectName)
-
-		if err != nil {
-			_ = rows.Close()
-			return
-		}
-
-		entry.ChangeDate, err = dbaccess.ConvertToDate(changeDateString)
 
 		if err != nil {
 			_ = rows.Close()

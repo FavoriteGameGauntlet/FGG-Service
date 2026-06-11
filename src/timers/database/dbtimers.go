@@ -22,13 +22,13 @@ const GetCurrentTimerQuery = `
 		t.State,
 		t.DurationInS,
 		t.LastActionDate,
-		CASE WHEN t.State IN (?, ?)
+		CASE WHEN t.State IN ($1, $2)
 	    	THEN t.RemainingTimeInS
 	    	ELSE t.DurationInS
 		END AS RemainingTime
 	FROM Timers t
-	WHERE UserId = ?
-		AND t.State != ?
+	WHERE UserId = $3
+		AND t.State != $4
 `
 
 func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, err error) {
@@ -43,13 +43,12 @@ func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, 
 	)
 
 	var durationInS int
-	var lastActionDateString string
 	var remainingTimeInS int
 	err = row.Scan(
 		&timer.Id,
 		&timer.State,
 		&durationInS,
-		&lastActionDateString,
+		&timer.LastActionDate,
 		&remainingTimeInS,
 	)
 
@@ -59,16 +58,7 @@ func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, 
 		return
 	}
 
-	lastActionDate, err := dbaccess.ConvertToDate(lastActionDateString)
-
-	if err != nil {
-		dbaccess.LogDbResult(queryName, timer, err)
-
-		return
-	}
-
 	timer.Duration = time.Duration(durationInS) * time.Second
-	timer.LastActionDate = lastActionDate
 	timer.RemainingTime = time.Duration(remainingTimeInS) * time.Second
 
 	dbaccess.LogDbResult(queryName, timer, err)
@@ -78,7 +68,7 @@ func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, 
 
 const CreateCurrentTimerQuery = `
 	INSERT INTO Timers (UserId, GameId, DurationInS, RemainingTimeInS)
-	VALUES (?, ?, ?, ?)
+	VALUES ($1, $2, $3, $4)
 `
 
 func (db *Database) CreateCurrentTimerCommand(userId int, gameId int, durationInS int) error {
@@ -100,10 +90,10 @@ func (db *Database) CreateCurrentTimerCommand(userId int, gameId int, durationIn
 const ActTimerQuery = `
 	UPDATE Timers
 	SET
-		State = ?,
-		RemainingTimeInS = ?,
-		LastActionDate = datetime('now', 'subsec')
-	WHERE Id = ?
+		State = $1,
+		RemainingTimeInS = $2,
+		LastActionDate = NOW()
+	WHERE Id = $3
 `
 
 func (db *Database) ActTimerCommand(
@@ -128,10 +118,10 @@ func (db *Database) ActTimerCommand(
 const GetCompletedTimerUsersQuery = `
 	SELECT DISTINCT t.UserId
 	FROM Timers t
-	WHERE t.State NOT IN (?, ?)
+	WHERE t.State NOT IN ($1, $2)
 	    AND CASE t.State
-			WHEN ? THEN t.RemainingTimeInS - (strftime('%s', 'now') - strftime('%s', t.LastActionDate))
-			WHEN ? THEN t.RemainingTimeInS
+			WHEN $3 THEN t.RemainingTimeInS - CAST(EXTRACT(EPOCH FROM (NOW() - t.LastActionDate)) AS INTEGER)
+			WHEN $4 THEN t.RemainingTimeInS
 			ELSE t.DurationInS
 		END <= 0
 `
