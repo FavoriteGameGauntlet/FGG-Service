@@ -1,17 +1,13 @@
 package dbaccess
 
 import (
-	typeauth "FGG-Service/src/auth/types"
+	"FGG-Service/src/auth/types"
 	"database/sql"
-	_ "embed"
 	"log/slog"
 	"os"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
-
-//go:embed FGG.sql
-var schema string
 
 var db *sql.DB
 
@@ -24,12 +20,6 @@ func Init() func() {
 	}
 
 	err = db.Ping()
-
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = db.Exec(schema)
 
 	if err != nil {
 		panic(err)
