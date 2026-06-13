@@ -42,7 +42,7 @@ func (db *Database) GetAllSystemParametersCommand() (parameters []typesysparams.
 	return
 }
 
-const GetSystemParameterQuery = `SELECT * FROM get_system_parameter($1)`
+const GetSystemParameterQuery = `SELECT * FROM get_system_parameter($1::text)`
 
 func (db *Database) GetSystemParameterCommand(name string) (parameter typesysparams.SystemParameter, err error) {
 	queryName := "GetSystemParameterQuery"
@@ -55,7 +55,7 @@ func (db *Database) GetSystemParameterCommand(name string) (parameter typesyspar
 	return
 }
 
-const ChangeSystemParameterValueQuery = `SELECT change_system_parameter_value($1, $2)`
+const ChangeSystemParameterValueQuery = `SELECT change_system_parameter_value($1::text, $2::text)`
 
 func (db *Database) ChangeSystemParameterValueCommand(name string, value string) error {
 	queryName := "ChangeSystemParameterValueQuery"

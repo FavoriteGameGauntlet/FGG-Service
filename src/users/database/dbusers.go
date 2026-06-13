@@ -14,7 +14,7 @@ type IDatabase interface {
 type Database struct {
 }
 
-const ChangeDisplayNameQuery = `SELECT change_display_name($1, $2)`
+const ChangeDisplayNameQuery = `SELECT change_display_name($1::integer, $2::text)`
 
 func (db *Database) ChangeDisplayNameCommand(userId int, displayName string) error {
 	queryName := "ChangeDisplayNameQuery"
@@ -25,7 +25,7 @@ func (db *Database) ChangeDisplayNameCommand(userId int, displayName string) err
 	return err
 }
 
-const GetDisplayNameQuery = `SELECT * FROM get_display_name($1)`
+const GetDisplayNameQuery = `SELECT * FROM get_display_name($1::integer)`
 
 func (db *Database) GetDisplayNameCommand(userId int) (displayName *string, err error) {
 	queryName := "GetDisplayNameQuery"

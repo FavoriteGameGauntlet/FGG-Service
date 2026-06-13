@@ -38,7 +38,7 @@ type IDatabase interface {
 type Database struct {
 }
 
-const IncreaseAvailableRollsQuery = `SELECT increase_available_rolls($1)`
+const IncreaseAvailableRollsQuery = `SELECT increase_available_rolls($1::integer)`
 
 func (db *Database) IncreaseAvailableRollsCommand(userId int) error {
 	queryName := "IncreaseAvailableRollsQuery"
@@ -49,7 +49,7 @@ func (db *Database) IncreaseAvailableRollsCommand(userId int) error {
 	return err
 }
 
-const IncreaseTerritoryHoursQuery = `SELECT increase_territory_hours($1, $2)`
+const IncreaseTerritoryHoursQuery = `SELECT increase_territory_hours($1::integer, $2::integer)`
 
 func (db *Database) IncreaseTerritoryHoursCommand(userId int, changeValue int) error {
 	queryName := "IncreaseTerritoryHoursQuery"
@@ -60,7 +60,7 @@ func (db *Database) IncreaseTerritoryHoursCommand(userId int, changeValue int) e
 	return err
 }
 
-const ChangeExperiencePointsQuery = `SELECT change_experience_points($1, $2)`
+const ChangeExperiencePointsQuery = `SELECT change_experience_points($1::integer, $2::integer)`
 
 func (db *Database) ChangeExperiencePointsCommand(userId int, changeValue int) error {
 	queryName := "ChangeExperiencePointsQuery"
@@ -71,7 +71,7 @@ func (db *Database) ChangeExperiencePointsCommand(userId int, changeValue int) e
 	return err
 }
 
-const GetExperiencePointsQuery = `SELECT * FROM get_experience_points($1)`
+const GetExperiencePointsQuery = `SELECT * FROM get_experience_points($1::integer)`
 
 func (db *Database) GetExperiencePointsCommand(userId int) (points int, err error) {
 	queryName := "ExperiencePointsQuery"
@@ -84,7 +84,7 @@ func (db *Database) GetExperiencePointsCommand(userId int) (points int, err erro
 	return
 }
 
-const GetTerritoryHoursQuery = `SELECT * FROM get_territory_hours($1)`
+const GetTerritoryHoursQuery = `SELECT * FROM get_territory_hours($1::integer)`
 
 func (db *Database) GetTerritoryHoursCommand(userId int) (points int, err error) {
 	queryName := "GetTerritoryHoursQuery"
@@ -97,7 +97,7 @@ func (db *Database) GetTerritoryHoursCommand(userId int) (points int, err error)
 	return
 }
 
-const ChangeTerritoryHoursQuery = `SELECT change_territory_hours($1, $2)`
+const ChangeTerritoryHoursQuery = `SELECT change_territory_hours($1::integer, $2::integer)`
 
 func (db *Database) ChangeTerritoryHoursCommand(userId int, changeValue int) error {
 	queryName := "ChangeTerritoryHoursQuery"
@@ -108,7 +108,7 @@ func (db *Database) ChangeTerritoryHoursCommand(userId int, changeValue int) err
 	return err
 }
 
-const GetTerritoryPointsQuery = `SELECT * FROM get_territory_points($1)`
+const GetTerritoryPointsQuery = `SELECT * FROM get_territory_points($1::integer)`
 
 func (db *Database) GetTerritoryPointsCommand(userId int) (points int, err error) {
 	queryName := "GetTerritoryPointsQuery"
@@ -121,7 +121,7 @@ func (db *Database) GetTerritoryPointsCommand(userId int) (points int, err error
 	return
 }
 
-const ChangeTerritoryPointsQuery = `SELECT change_territory_points($1, $2)`
+const ChangeTerritoryPointsQuery = `SELECT change_territory_points($1::integer, $2::integer)`
 
 func (db *Database) ChangeTerritoryPointsCommand(userId int, changeValue int) error {
 	queryName := "ChangeTerritoryPointsQuery"
@@ -132,7 +132,7 @@ func (db *Database) ChangeTerritoryPointsCommand(userId int, changeValue int) er
 	return err
 }
 
-const AddTerritoryPointHistoryQuery = `SELECT add_territory_point_history($1, $2, $3, $4, $5, $6)`
+const AddTerritoryPointHistoryQuery = `SELECT add_territory_point_history($1::integer, $2::integer, $3::text, $4::integer, $5::integer, $6::integer)`
 
 func (db *Database) AddTerritoryPointHistoryCommand(
 	userId int,
@@ -158,7 +158,7 @@ func (db *Database) AddTerritoryPointHistoryCommand(
 	return err
 }
 
-const GetTerritoryPointHistoryQuery = `SELECT * FROM get_territory_point_history($1)`
+const GetTerritoryPointHistoryQuery = `SELECT * FROM get_territory_point_history($1::integer)`
 
 func (db *Database) GetTerritoryPointHistoryCommand(userId int) (
 	history typepoints.TerritoryPointChangeHistories, err error) {
@@ -194,7 +194,7 @@ func (db *Database) GetTerritoryPointHistoryCommand(userId int) (
 	return
 }
 
-const GetPointInfoQuery = `SELECT * FROM get_point_info($1)`
+const GetPointInfoQuery = `SELECT * FROM get_point_info($1::integer)`
 
 func (db *Database) GetPointInfoCommand(userId int) (info typepoints.PointInfo, err error) {
 	queryName := "GetPointInfoQuery"
@@ -246,7 +246,7 @@ func (db *Database) GetAllPointInfoCommand() (infos typepoints.PointInfoByLogins
 	return
 }
 
-const GetFreePointsQuery = `SELECT * FROM get_free_points($1)`
+const GetFreePointsQuery = `SELECT * FROM get_free_points($1::integer)`
 
 func (db *Database) GetFreePointsCommand(userId int) (points int, err error) {
 	queryName := "GetFreePointsQuery"
@@ -259,7 +259,7 @@ func (db *Database) GetFreePointsCommand(userId int) (points int, err error) {
 	return
 }
 
-const ChangeFreePointsQuery = `SELECT change_free_points($1, $2)`
+const ChangeFreePointsQuery = `SELECT change_free_points($1::integer, $2::integer)`
 
 func (db *Database) ChangeFreePointsCommand(userId int, changeValue int) error {
 	queryName := "ChangeFreePointsQuery"
@@ -270,7 +270,7 @@ func (db *Database) ChangeFreePointsCommand(userId int, changeValue int) error {
 	return err
 }
 
-const AddFreePointHistoryQuery = `SELECT add_free_point_history($1, $2, $3, $4, $5, $6, $7)`
+const AddFreePointHistoryQuery = `SELECT add_free_point_history($1::integer, $2::integer, $3::text, $4::integer, $5::integer, $6::integer, $7::integer)`
 
 func (db *Database) AddFreePointHistoryCommand(
 	userId int,
@@ -298,7 +298,7 @@ func (db *Database) AddFreePointHistoryCommand(
 	return err
 }
 
-const GetFreePointHistoryQuery = `SELECT * FROM get_free_point_history($1)`
+const GetFreePointHistoryQuery = `SELECT * FROM get_free_point_history($1::integer)`
 
 func (db *Database) GetFreePointHistoryCommand(userId int) (history typepoints.FreePointChangeHistories, err error) {
 	queryName := "GetFreePointHistoryQuery"

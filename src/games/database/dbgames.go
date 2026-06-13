@@ -28,7 +28,7 @@ type IDatabase interface {
 type Database struct {
 }
 
-const DoesGameExistQuery = `SELECT does_game_exist($1)`
+const DoesGameExistQuery = `SELECT does_game_exist($1::text)`
 
 func (db *Database) DoesGameExistCommand(gameName string) (doesExist bool, err error) {
 	queryName := "DoesGameExistQuery"
@@ -41,7 +41,7 @@ func (db *Database) DoesGameExistCommand(gameName string) (doesExist bool, err e
 	return
 }
 
-const CreateGameQuery = `SELECT create_game($1)`
+const CreateGameQuery = `SELECT create_game($1::text)`
 
 func (db *Database) CreateGameCommand(name string) error {
 	queryName := "CreateGameQuery"
@@ -52,7 +52,7 @@ func (db *Database) CreateGameCommand(name string) error {
 	return err
 }
 
-const GetWishlistGameQuery = `SELECT * FROM get_wishlist_game($1)`
+const GetWishlistGameQuery = `SELECT * FROM get_wishlist_game($1::text)`
 
 func (db *Database) GetWishlistGameCommand(name string) (game typegames.WishlistGame, err error) {
 	queryName := "GetWishlistGameQuery"
@@ -65,7 +65,7 @@ func (db *Database) GetWishlistGameCommand(name string) (game typegames.Wishlist
 	return
 }
 
-const DoesUnplayedGameExistQuery = `SELECT does_wishlist_game_exist($1, $2)`
+const DoesUnplayedGameExistQuery = `SELECT does_wishlist_game_exist($1::integer, $2::text)`
 
 func (db *Database) DoesWishlistGameExistCommand(userId int, gameName string) (doesExist bool, err error) {
 	queryName := "DoesUnplayedGameExistQuery"
@@ -78,7 +78,7 @@ func (db *Database) DoesWishlistGameExistCommand(userId int, gameName string) (d
 	return
 }
 
-const CreateUnplayedGameQuery = `SELECT create_wishlist_game($1, $2)`
+const CreateUnplayedGameQuery = `SELECT create_wishlist_game($1::integer, $2::integer)`
 
 func (db *Database) CreateWishlistGameCommand(userId int, gameId int) error {
 	queryName := "CreateUnplayedGameQuery"
@@ -89,7 +89,7 @@ func (db *Database) CreateWishlistGameCommand(userId int, gameId int) error {
 	return err
 }
 
-const DeleteUnplayedGameQuery = `SELECT delete_wishlist_game($1, $2)`
+const DeleteUnplayedGameQuery = `SELECT delete_wishlist_game($1::integer, $2::integer)`
 
 func (db *Database) DeleteUnplayedGameCommand(userId int, gameId int) error {
 	queryName := "DeleteUnplayedGameQuery"
@@ -100,7 +100,7 @@ func (db *Database) DeleteUnplayedGameCommand(userId int, gameId int) error {
 	return err
 }
 
-const GetWishlistGamesQuery = `SELECT * FROM get_wishlist_games($1)`
+const GetWishlistGamesQuery = `SELECT * FROM get_wishlist_games($1::integer)`
 
 func (db *Database) GetWishlistGamesCommand(userId int) (games typegames.WishlistGames, err error) {
 	queryName := "GetWishlistGamesQuery"
@@ -128,7 +128,7 @@ func (db *Database) GetWishlistGamesCommand(userId int) (games typegames.Wishlis
 	return
 }
 
-const CreateCurrentGameQuery = `SELECT create_current_game($1, $2)`
+const CreateCurrentGameQuery = `SELECT create_current_game($1::integer, $2::integer)`
 
 func (db *Database) CreateCurrentGameCommand(userId int, gameId int) error {
 	queryName := "CreateCurrentGameQuery"
@@ -139,7 +139,7 @@ func (db *Database) CreateCurrentGameCommand(userId int, gameId int) error {
 	return err
 }
 
-const GetCurrentGameQuery = `SELECT * FROM get_current_game($1)`
+const GetCurrentGameQuery = `SELECT * FROM get_current_game($1::integer)`
 
 func (db *Database) GetCurrentGameCommand(userId int) (games typegames.CurrentGames, err error) {
 	queryName := "GetCurrentGameQuery"
@@ -175,7 +175,7 @@ func (db *Database) getHistoryGames(queryName string, query string, userId int) 
 	return
 }
 
-const GetGameSecondsSpentQuery = `SELECT get_game_seconds_spent($1, $2)`
+const GetGameSecondsSpentQuery = `SELECT get_game_seconds_spent($1::integer, $2::integer)`
 
 func (db *Database) GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
 	queryName := "GetGameSecondsSpentQuery"
@@ -204,7 +204,7 @@ func (db *Database) GetGameTimeSpentCommand(userId int, gameId int) (timeSpent t
 	return
 }
 
-const CancelCurrentGameQuery = `SELECT cancel_current_game($1, $2)`
+const CancelCurrentGameQuery = `SELECT cancel_current_game($1::integer, $2::integer)`
 
 func (db *Database) CancelCurrentGameCommand(userId int, gameId int) error {
 	queryName := "CancelCurrentGameQuery"
@@ -215,7 +215,7 @@ func (db *Database) CancelCurrentGameCommand(userId int, gameId int) error {
 	return err
 }
 
-const FinishCurrentGameQuery = `SELECT finish_current_game($1, $2)`
+const FinishCurrentGameQuery = `SELECT finish_current_game($1::integer, $2::integer)`
 
 func (db *Database) FinishCurrentGameCommand(userId int, gameId int) error {
 	queryName := "FinishCurrentGameQuery"
@@ -226,7 +226,7 @@ func (db *Database) FinishCurrentGameCommand(userId int, gameId int) error {
 	return err
 }
 
-const GetGameHistoryQuery = `SELECT * FROM get_game_history($1)`
+const GetGameHistoryQuery = `SELECT * FROM get_game_history($1::integer)`
 
 func (db *Database) GetGameHistoryCommand(userId int) (games typegames.CurrentGames, err error) {
 	queryName := "GetGameHistoryQuery"

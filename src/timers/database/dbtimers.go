@@ -16,7 +16,7 @@ type IDatabase interface {
 type Database struct {
 }
 
-const GetCurrentTimerQuery = `SELECT * FROM get_current_timer($1)`
+const GetCurrentTimerQuery = `SELECT * FROM get_current_timer($1::integer)`
 
 func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, err error) {
 	queryName := "GetCurrentTimerQuery"
@@ -46,7 +46,7 @@ func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, 
 	return
 }
 
-const CreateCurrentTimerQuery = `SELECT create_current_timer($1, $2, $3)`
+const CreateCurrentTimerQuery = `SELECT create_current_timer($1::integer, $2::integer, $3::integer)`
 
 func (db *Database) CreateCurrentTimerCommand(userId int, gameId int, durationInS int) error {
 	queryName := "CreateCurrentTimerQuery"
@@ -63,7 +63,7 @@ func (db *Database) CreateCurrentTimerCommand(userId int, gameId int, durationIn
 	return err
 }
 
-const ActTimerQuery = `SELECT act_timer($1, $2, $3)`
+const ActTimerQuery = `SELECT act_timer($1::integer, $2::text, $3::integer)`
 
 func (db *Database) ActTimerCommand(
 	timerId int,

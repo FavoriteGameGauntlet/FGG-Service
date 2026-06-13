@@ -23,7 +23,7 @@ type IDatabase interface {
 type Database struct {
 }
 
-const GetAvailableRollsCountQuery = `SELECT * FROM get_available_rolls_count($1)`
+const GetAvailableRollsCountQuery = `SELECT * FROM get_available_rolls_count($1::integer)`
 
 func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err error) {
 	queryName := "GetAvailableRollsCountQuery"
@@ -41,7 +41,7 @@ func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err er
 	return
 }
 
-const GetAvailableEffectsQuery = `SELECT * FROM get_available_effects($1)`
+const GetAvailableEffectsQuery = `SELECT * FROM get_available_effects($1::integer)`
 
 func (db *Database) GetAvailableEffectsCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
 	queryName := "GetAvailableEffectsQuery"
@@ -71,7 +71,7 @@ func (db *Database) GetAvailableEffectsCommand(userId int) (effects typewheeleff
 	return
 }
 
-const GetEffectHistoryQuery = `SELECT * FROM get_effect_history($1)`
+const GetEffectHistoryQuery = `SELECT * FROM get_effect_history($1::integer)`
 
 func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffectHistories, err error) {
 	queryName := "GetEffectHistoryQuery"
@@ -101,7 +101,7 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffect
 	return
 }
 
-const GetEffectHistoryByEffectNameQuery = `SELECT * FROM get_effect_history_by_name($1, $2)`
+const GetEffectHistoryByEffectNameQuery = `SELECT * FROM get_effect_history_by_name($1::integer, $2::text)`
 
 func (db *Database) GetEffectHistoryByEffectNameCommand(userId int, effectName string) (effect typewheeleffects.RolledWheelEffect, err error) {
 	queryName := "GetEffectHistoryByEffectNameQuery"
@@ -120,7 +120,7 @@ func (db *Database) GetEffectHistoryByEffectNameCommand(userId int, effectName s
 	return
 }
 
-const MakeEffectRollQuery = `SELECT * FROM make_effect_roll($1)`
+const MakeEffectRollQuery = `SELECT * FROM make_effect_roll($1::integer)`
 
 func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
 	queryName := "MakeEffectRollQuery"
@@ -150,7 +150,7 @@ func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.
 	return
 }
 
-const DecreaseAvailableRollsValueQuery = `SELECT decrease_available_rolls($1)`
+const DecreaseAvailableRollsValueQuery = `SELECT decrease_available_rolls($1::integer)`
 
 func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
 	queryName := "DecreaseAvailableRollsValueQuery"
@@ -161,7 +161,7 @@ func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
 	return err
 }
 
-const AddLastRolledWheelEffectsQuery = `SELECT add_last_rolled_wheel_effect($1, $2, $3)`
+const AddLastRolledWheelEffectsQuery = `SELECT add_last_rolled_wheel_effect($1::integer, $2::integer, $3::integer)`
 
 func (db *Database) AddLastRolledWheelEffectsCommand(userId int, effects typewheeleffects.WheelEffects) (err error) {
 	queryName := "AddLastRolledWheelEffectsQuery"
@@ -181,7 +181,7 @@ func (db *Database) AddLastRolledWheelEffectsCommand(userId int, effects typewhe
 	return
 }
 
-const GetLastRolledWheelEffectsQuery = `SELECT * FROM get_last_rolled_wheel_effects($1)`
+const GetLastRolledWheelEffectsQuery = `SELECT * FROM get_last_rolled_wheel_effects($1::integer)`
 
 func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
 	queryName := "GetLastRolledWheelEffectsQuery"
@@ -218,7 +218,7 @@ func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewh
 	return
 }
 
-const MarkLastWheelEffectAppliedQuery = `SELECT mark_last_wheel_effect_applied($1, $2)`
+const MarkLastWheelEffectAppliedQuery = `SELECT mark_last_wheel_effect_applied($1::integer, $2::integer)`
 
 func (db *Database) MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId int) error {
 	queryName := "MarkLastWheelEffectAppliedQuery"
@@ -229,7 +229,7 @@ func (db *Database) MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId 
 	return err
 }
 
-const AddWheelEffectHistoryQuery = `SELECT add_wheel_effect_history($1, $2)`
+const AddWheelEffectHistoryQuery = `SELECT add_wheel_effect_history($1::integer, $2::integer)`
 
 func (db *Database) AddWheelEffectHistoryCommand(userId int, wheelEffectId int) error {
 	queryName := "AddWheelEffectHistoryQuery"
