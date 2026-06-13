@@ -23,11 +23,7 @@ type IDatabase interface {
 type Database struct {
 }
 
-const GetAvailableRollsCountQuery = `
-	SELECT AvailableRolls
-	FROM UserStats
-	WHERE UserId = $1
-`
+const GetAvailableRollsCountQuery = `SELECT * FROM get_available_rolls_count($1)`
 
 func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err error) {
 	queryName := "GetAvailableRollsCountQuery"
@@ -45,25 +41,11 @@ func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err er
 	return
 }
 
-const GetAvailableEffectsQuery = `
-	SELECT we.Id, we.Name, we.Description
-	FROM WheelEffects we
-	WHERE NOT EXISTS (
-		SELECT 1
-		FROM WheelEffectHistory weh
-		WHERE weh.WheelEffectId = we.Id
-			AND weh.UserId = $1)
-	  	AND NOT EXISTS (
-			SELECT 1
-			FROM LastWheelEffects lwe
-			WHERE lwe.WheelEffectId = we.Id
-				AND lwe.UserId = $2
-				AND Position = 0)
-`
+const GetAvailableEffectsQuery = `SELECT * FROM get_available_effects($1)`
 
 func (db *Database) GetAvailableEffectsCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
 	queryName := "GetAvailableEffectsQuery"
-	rows, err := dbaccess.Query(queryName, GetAvailableEffectsQuery, userId, userId)
+	rows, err := dbaccess.Query(queryName, GetAvailableEffectsQuery, userId)
 
 	if err != nil {
 		return
@@ -89,12 +71,7 @@ func (db *Database) GetAvailableEffectsCommand(userId int) (effects typewheeleff
 	return
 }
 
-const GetEffectHistoryQuery = `
-	SELECT we.Name, we.Description, weh.RollDate
-	FROM WheelEffectHistory weh
-		INNER JOIN WheelEffects we ON weh.WheelEffectId = we.Id
-	WHERE weh.UserId = $1
-`
+const GetEffectHistoryQuery = `SELECT * FROM get_effect_history($1)`
 
 func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffectHistories, err error) {
 	queryName := "GetEffectHistoryQuery"
@@ -124,14 +101,7 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffect
 	return
 }
 
-const GetEffectHistoryByEffectNameQuery = `
-	SELECT we.Name, we.Description, weh.RollDate
-	FROM WheelEffectHistory weh
-		INNER JOIN WheelEffects we ON weh.WheelEffectId = we.Id
-	WHERE weh.UserId = $1
-		AND we.Name = $2
-	ORDER BY weh.RollDate DESC
-`
+const GetEffectHistoryByEffectNameQuery = `SELECT * FROM get_effect_history_by_name($1, $2)`
 
 func (db *Database) GetEffectHistoryByEffectNameCommand(userId int, effectName string) (effect typewheeleffects.RolledWheelEffect, err error) {
 	queryName := "GetEffectHistoryByEffectNameQuery"
@@ -150,27 +120,11 @@ func (db *Database) GetEffectHistoryByEffectNameCommand(userId int, effectName s
 	return
 }
 
-const MakeEffectRollQuery = `
-	SELECT we.Id, we.Name, we.Description
-	FROM WheelEffects we
-	WHERE NOT EXISTS (
-		SELECT 1
-		FROM WheelEffectHistory weh
-		WHERE weh.WheelEffectId = we.Id
-			AND weh.UserId = $1)
-		AND NOT EXISTS (
-			SELECT 1
-			FROM LastWheelEffects lwe
-			WHERE lwe.WheelEffectId = we.Id
-				AND lwe.UserId = $2
-				AND Position = 0)
-	ORDER BY RANDOM()
-	LIMIT 5
-`
+const MakeEffectRollQuery = `SELECT * FROM make_effect_roll($1)`
 
 func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
 	queryName := "MakeEffectRollQuery"
-	rows, err := dbaccess.Query(queryName, MakeEffectRollQuery, userId, userId)
+	rows, err := dbaccess.Query(queryName, MakeEffectRollQuery, userId)
 
 	if err != nil {
 		return
@@ -196,11 +150,7 @@ func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.
 	return
 }
 
-const DecreaseAvailableRollsValueQuery = `
-	UPDATE UserStats
-	SET AvailableRolls = AvailableRolls - 1
-	WHERE UserId = $1
-`
+const DecreaseAvailableRollsValueQuery = `SELECT decrease_available_rolls($1)`
 
 func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
 	queryName := "DecreaseAvailableRollsValueQuery"
@@ -211,10 +161,7 @@ func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
 	return err
 }
 
-const AddLastRolledWheelEffectsQuery = `
-	INSERT INTO LastWheelEffects (UserId, WheelEffectId, Position)
-	VALUES ($1, $2, $3)
-`
+const AddLastRolledWheelEffectsQuery = `SELECT add_last_rolled_wheel_effect($1, $2, $3)`
 
 func (db *Database) AddLastRolledWheelEffectsCommand(userId int, effects typewheeleffects.WheelEffects) (err error) {
 	queryName := "AddLastRolledWheelEffectsQuery"
@@ -234,12 +181,7 @@ func (db *Database) AddLastRolledWheelEffectsCommand(userId int, effects typewhe
 	return
 }
 
-const GetLastRolledWheelEffectsQuery = `
-	SELECT we.Id, we.Name, we.Description, lwe.RollDate, lwe.Position, lwe.IsApplied
-	FROM LastWheelEffects lwe
-		INNER JOIN WheelEffects we ON we.Id = lwe.WheelEffectId
-	WHERE lwe.UserId = $1
-`
+const GetLastRolledWheelEffectsQuery = `SELECT * FROM get_last_rolled_wheel_effects($1)`
 
 func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
 	queryName := "GetLastRolledWheelEffectsQuery"
@@ -276,12 +218,7 @@ func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewh
 	return
 }
 
-const MarkLastWheelEffectAppliedQuery = `
-	UPDATE LastWheelEffects
-	SET IsApplied = 1
-	WHERE UserId = $1
-		AND WheelEffectId = $2
-`
+const MarkLastWheelEffectAppliedQuery = `SELECT mark_last_wheel_effect_applied($1, $2)`
 
 func (db *Database) MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId int) error {
 	queryName := "MarkLastWheelEffectAppliedQuery"
@@ -292,10 +229,7 @@ func (db *Database) MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId 
 	return err
 }
 
-const AddWheelEffectHistoryQuery = `
-	INSERT INTO WheelEffectHistory (UserId, WheelEffectId)
-	VALUES ($1, $2)
-`
+const AddWheelEffectHistoryQuery = `SELECT add_wheel_effect_history($1, $2)`
 
 func (db *Database) AddWheelEffectHistoryCommand(userId int, wheelEffectId int) error {
 	queryName := "AddWheelEffectHistoryQuery"
