@@ -1,6 +1,7 @@
 services:
   fgg-db:
-    image: postgres:17-alpine
+    build:
+      context: ../fgg-database
     container_name: fgg-db
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
