@@ -16,31 +16,11 @@ type IDatabase interface {
 type Database struct {
 }
 
-const GetCurrentTimerQuery = `
-	SELECT
-		t.Id,
-		t.State,
-		t.DurationInS,
-		t.LastActionDate,
-		CASE WHEN t.State IN ($1, $2)
-	    	THEN t.RemainingTimeInS
-	    	ELSE t.DurationInS
-		END AS RemainingTime
-	FROM Timers t
-	WHERE UserId = $3
-		AND t.State != $4
-`
+const GetCurrentTimerQuery = `SELECT * FROM get_current_timer($1::integer)`
 
 func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, err error) {
 	queryName := "GetCurrentTimerQuery"
-	row := dbaccess.QueryRow(
-		queryName,
-		GetCurrentTimerQuery,
-		typetimers.TimerStateRunning,
-		typetimers.TimerStatePaused,
-		userId,
-		typetimers.TimerStateFinished,
-	)
+	row := dbaccess.QueryRow(queryName, GetCurrentTimerQuery, userId)
 
 	var durationInS int
 	var remainingTimeInS int
@@ -66,10 +46,7 @@ func (db *Database) GetCurrentTimerCommand(userId int) (timer typetimers.Timer, 
 	return
 }
 
-const CreateCurrentTimerQuery = `
-	INSERT INTO Timers (UserId, GameId, DurationInS, RemainingTimeInS)
-	VALUES ($1, $2, $3, $4)
-`
+const CreateCurrentTimerQuery = `SELECT create_current_timer($1::integer, $2::integer, $3::integer)`
 
 func (db *Database) CreateCurrentTimerCommand(userId int, gameId int, durationInS int) error {
 	queryName := "CreateCurrentTimerQuery"
@@ -79,7 +56,6 @@ func (db *Database) CreateCurrentTimerCommand(userId int, gameId int, durationIn
 		userId,
 		gameId,
 		durationInS,
-		durationInS,
 	)
 
 	dbaccess.LogDbResult(queryName, nil, err)
@@ -87,14 +63,7 @@ func (db *Database) CreateCurrentTimerCommand(userId int, gameId int, durationIn
 	return err
 }
 
-const ActTimerQuery = `
-	UPDATE Timers
-	SET
-		State = $1,
-		RemainingTimeInS = $2,
-		LastActionDate = NOW()
-	WHERE Id = $3
-`
+const ActTimerQuery = `SELECT act_timer($1::integer, $2::text, $3::integer)`
 
 func (db *Database) ActTimerCommand(
 	timerId int,
@@ -105,9 +74,9 @@ func (db *Database) ActTimerCommand(
 	_, err := dbaccess.Exec(
 		queryName,
 		ActTimerQuery,
+		timerId,
 		timerState,
 		int(remainingTime.Seconds()),
-		timerId,
 	)
 
 	dbaccess.LogDbResult(queryName, nil, err)
@@ -115,27 +84,11 @@ func (db *Database) ActTimerCommand(
 	return err
 }
 
-const GetCompletedTimerUsersQuery = `
-	SELECT DISTINCT t.UserId
-	FROM Timers t
-	WHERE t.State NOT IN ($1, $2)
-	    AND CASE t.State
-			WHEN $3 THEN t.RemainingTimeInS - CAST(EXTRACT(EPOCH FROM (NOW() - t.LastActionDate)) AS INTEGER)
-			WHEN $4 THEN t.RemainingTimeInS
-			ELSE t.DurationInS
-		END <= 0
-`
+const GetCompletedTimerUsersQuery = `SELECT * FROM get_completed_timer_users()`
 
 func (db *Database) GetCompletedTimerUsersCommand() (userIds []int, err error) {
 	queryName := "GetCompletedTimerUsersQuery"
-	rows, err := dbaccess.Query(
-		queryName,
-		GetCompletedTimerUsersQuery,
-		typetimers.TimerStateCreated,
-		typetimers.TimerStateFinished,
-		typetimers.TimerStateRunning,
-		typetimers.TimerStatePaused,
-	)
+	rows, err := dbaccess.Query(queryName, GetCompletedTimerUsersQuery)
 
 	if err != nil {
 		return

@@ -38,11 +38,7 @@ type IDatabase interface {
 type Database struct {
 }
 
-const IncreaseAvailableRollsQuery = `
-	UPDATE UserStats
-	SET AvailableRolls = AvailableRolls + 1
-	WHERE UserId = $1
-`
+const IncreaseAvailableRollsQuery = `SELECT increase_available_rolls($1::integer)`
 
 func (db *Database) IncreaseAvailableRollsCommand(userId int) error {
 	queryName := "IncreaseAvailableRollsQuery"
@@ -53,41 +49,29 @@ func (db *Database) IncreaseAvailableRollsCommand(userId int) error {
 	return err
 }
 
-const IncreaseTerritoryHoursQuery = `
-	UPDATE UserStats
-	SET TerritoryHours = TerritoryHours + $1
-	WHERE UserId = $2
-`
+const IncreaseTerritoryHoursQuery = `SELECT increase_territory_hours($1::integer, $2::integer)`
 
 func (db *Database) IncreaseTerritoryHoursCommand(userId int, changeValue int) error {
 	queryName := "IncreaseTerritoryHoursQuery"
-	_, err := dbaccess.Exec(queryName, IncreaseTerritoryHoursQuery, changeValue, userId)
+	_, err := dbaccess.Exec(queryName, IncreaseTerritoryHoursQuery, userId, changeValue)
 
 	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
 
-const ChangeExperiencePointsQuery = `
-	UPDATE UserStats
-	SET ExperiencePoints = ExperiencePoints + $1
-	WHERE UserId = $2
-`
+const ChangeExperiencePointsQuery = `SELECT change_experience_points($1::integer, $2::integer)`
 
 func (db *Database) ChangeExperiencePointsCommand(userId int, changeValue int) error {
 	queryName := "ChangeExperiencePointsQuery"
-	_, err := dbaccess.Exec(queryName, ChangeExperiencePointsQuery, changeValue, userId)
+	_, err := dbaccess.Exec(queryName, ChangeExperiencePointsQuery, userId, changeValue)
 
 	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
 
-const GetExperiencePointsQuery = `
-	SELECT ExperiencePoints
-	FROM UserStats
-	WHERE UserId = $1
-`
+const GetExperiencePointsQuery = `SELECT * FROM get_experience_points($1::integer)`
 
 func (db *Database) GetExperiencePointsCommand(userId int) (points int, err error) {
 	queryName := "ExperiencePointsQuery"
@@ -100,11 +84,7 @@ func (db *Database) GetExperiencePointsCommand(userId int) (points int, err erro
 	return
 }
 
-const GetTerritoryHoursQuery = `
-	SELECT TerritoryHours
-	FROM UserStats
-	WHERE UserId = $1
-`
+const GetTerritoryHoursQuery = `SELECT * FROM get_territory_hours($1::integer)`
 
 func (db *Database) GetTerritoryHoursCommand(userId int) (points int, err error) {
 	queryName := "GetTerritoryHoursQuery"
@@ -117,26 +97,18 @@ func (db *Database) GetTerritoryHoursCommand(userId int) (points int, err error)
 	return
 }
 
-const ChangeTerritoryHoursQuery = `
-	UPDATE UserStats
-	SET TerritoryHours = TerritoryHours + $1
-	WHERE UserId = $2
-`
+const ChangeTerritoryHoursQuery = `SELECT change_territory_hours($1::integer, $2::integer)`
 
 func (db *Database) ChangeTerritoryHoursCommand(userId int, changeValue int) error {
 	queryName := "ChangeTerritoryHoursQuery"
-	_, err := dbaccess.Exec(queryName, ChangeTerritoryHoursQuery, changeValue, userId)
+	_, err := dbaccess.Exec(queryName, ChangeTerritoryHoursQuery, userId, changeValue)
 
 	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
 
-const GetTerritoryPointsQuery = `
-	SELECT TerritoryPoints
-	FROM UserStats
-	WHERE UserId = $1
-`
+const GetTerritoryPointsQuery = `SELECT * FROM get_territory_points($1::integer)`
 
 func (db *Database) GetTerritoryPointsCommand(userId int) (points int, err error) {
 	queryName := "GetTerritoryPointsQuery"
@@ -149,32 +121,18 @@ func (db *Database) GetTerritoryPointsCommand(userId int) (points int, err error
 	return
 }
 
-const ChangeTerritoryPointsQuery = `
-	UPDATE UserStats
-	SET TerritoryPoints = TerritoryPoints + $1
-	WHERE UserId = $2
-`
+const ChangeTerritoryPointsQuery = `SELECT change_territory_points($1::integer, $2::integer)`
 
 func (db *Database) ChangeTerritoryPointsCommand(userId int, changeValue int) error {
 	queryName := "ChangeTerritoryPointsQuery"
-	_, err := dbaccess.Exec(queryName, ChangeTerritoryPointsQuery, changeValue, userId)
+	_, err := dbaccess.Exec(queryName, ChangeTerritoryPointsQuery, userId, changeValue)
 
 	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
 
-const AddTerritoryPointHistoryQuery = `
-	INSERT INTO TerritoryPointHistory (
-		UserId,
-		SourceUserId,
-		ChangeSource,
-		ChangeValue,
-		ActualChangeValue,
-		FinalValue
-	)
-	VALUES ($1, $2, $3, $4, $5, $6)
-`
+const AddTerritoryPointHistoryQuery = `SELECT add_territory_point_history($1::integer, $2::integer, $3::text, $4::integer, $5::integer, $6::integer)`
 
 func (db *Database) AddTerritoryPointHistoryCommand(
 	userId int,
@@ -200,19 +158,7 @@ func (db *Database) AddTerritoryPointHistoryCommand(
 	return err
 }
 
-const GetTerritoryPointHistoryQuery = `
-	SELECT
-		tph.ActualChangeValue,
-		tph.ChangeDate,
-		tph.ChangeSource,
-		tph.ChangeValue,
-		tph.FinalValue,
-		u.Login
-	FROM TerritoryPointHistory tph
-		LEFT JOIN Users u ON u.Id = tph.SourceUserId
-	WHERE tph.UserId = $1
-	ORDER BY tph.ChangeDate DESC
-`
+const GetTerritoryPointHistoryQuery = `SELECT * FROM get_territory_point_history($1::integer)`
 
 func (db *Database) GetTerritoryPointHistoryCommand(userId int) (
 	history typepoints.TerritoryPointChangeHistories, err error) {
@@ -248,11 +194,7 @@ func (db *Database) GetTerritoryPointHistoryCommand(userId int) (
 	return
 }
 
-const GetPointInfoQuery = `
-	SELECT TerritoryPoints, FreePoints, AvailableRolls, TerritoryHours, ExperiencePoints
-	FROM UserStats
-	WHERE UserId = $1
-`
+const GetPointInfoQuery = `SELECT * FROM get_point_info($1::integer)`
 
 func (db *Database) GetPointInfoCommand(userId int) (info typepoints.PointInfo, err error) {
 	queryName := "GetPointInfoQuery"
@@ -270,11 +212,7 @@ func (db *Database) GetPointInfoCommand(userId int) (info typepoints.PointInfo, 
 	return
 }
 
-const GetAllPointInfoQuery = `
-	SELECT u.Login, us.TerritoryPoints, us.FreePoints, us.AvailableRolls, us.TerritoryHours, us.ExperiencePoints
-	FROM Users u
-	INNER JOIN UserStats us ON us.UserId = u.Id
-`
+const GetAllPointInfoQuery = `SELECT * FROM get_all_point_info()`
 
 func (db *Database) GetAllPointInfoCommand() (infos typepoints.PointInfoByLogins, err error) {
 	queryName := "GetAllPointInfoQuery"
@@ -308,11 +246,7 @@ func (db *Database) GetAllPointInfoCommand() (infos typepoints.PointInfoByLogins
 	return
 }
 
-const GetFreePointsQuery = `
-	SELECT FreePoints
-	FROM UserStats
-	WHERE UserId = $1
-`
+const GetFreePointsQuery = `SELECT * FROM get_free_points($1::integer)`
 
 func (db *Database) GetFreePointsCommand(userId int) (points int, err error) {
 	queryName := "GetFreePointsQuery"
@@ -325,33 +259,18 @@ func (db *Database) GetFreePointsCommand(userId int) (points int, err error) {
 	return
 }
 
-const ChangeFreePointsQuery = `
-	UPDATE UserStats
-	SET FreePoints = FreePoints + $1
-	WHERE UserId = $2
-`
+const ChangeFreePointsQuery = `SELECT change_free_points($1::integer, $2::integer)`
 
 func (db *Database) ChangeFreePointsCommand(userId int, changeValue int) error {
 	queryName := "ChangeFreePointsQuery"
-	_, err := dbaccess.Exec(queryName, ChangeFreePointsQuery, changeValue, userId)
+	_, err := dbaccess.Exec(queryName, ChangeFreePointsQuery, userId, changeValue)
 
 	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
 
-const AddFreePointHistoryQuery = `
-	INSERT INTO FreePointHistory (
-		UserId,
-	    SourceUserId,
-		ChangeSource,
-		ChangeValue,
-		ActualChangeValue,
-		FinalValue,
-	  	WheelEffectId
-	)
-	VALUES ($1, $2, $3, $4, $5, $6, $7)
-`
+const AddFreePointHistoryQuery = `SELECT add_free_point_history($1::integer, $2::integer, $3::text, $4::integer, $5::integer, $6::integer, $7::integer)`
 
 func (db *Database) AddFreePointHistoryCommand(
 	userId int,
@@ -379,21 +298,7 @@ func (db *Database) AddFreePointHistoryCommand(
 	return err
 }
 
-const GetFreePointHistoryQuery = `
-	SELECT
-		fph.ActualChangeValue,
-		fph.ChangeDate,
-		fph.ChangeSource,
-		fph.ChangeValue,
-		fph.FinalValue,
-		u.Login,
-		we.Name
-	FROM FreePointHistory fph
-		LEFT JOIN Users u ON u.Id = fph.SourceUserId
-		LEFT JOIN WheelEffects we ON we.Id = fph.WheelEffectId
-	WHERE fph.UserId = $1
-	ORDER BY fph.ChangeDate DESC
-`
+const GetFreePointHistoryQuery = `SELECT * FROM get_free_point_history($1::integer)`
 
 func (db *Database) GetFreePointHistoryCommand(userId int) (history typepoints.FreePointChangeHistories, err error) {
 	queryName := "GetFreePointHistoryQuery"

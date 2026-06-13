@@ -14,26 +14,18 @@ type IDatabase interface {
 type Database struct {
 }
 
-const ChangeDisplayNameQuery = `
-	UPDATE Users
-	SET DisplayName = $1
-	WHERE Id = $2
-`
+const ChangeDisplayNameQuery = `SELECT change_display_name($1::integer, $2::text)`
 
 func (db *Database) ChangeDisplayNameCommand(userId int, displayName string) error {
 	queryName := "ChangeDisplayNameQuery"
-	_, err := dbaccess.Exec(queryName, ChangeDisplayNameQuery, displayName, userId)
+	_, err := dbaccess.Exec(queryName, ChangeDisplayNameQuery, userId, displayName)
 
 	dbaccess.LogDbResult(queryName, nil, err)
 
 	return err
 }
 
-const GetDisplayNameQuery = `
-	SELECT DisplayName
-    FROM Users
-	WHERE Id = $1
-`
+const GetDisplayNameQuery = `SELECT * FROM get_display_name($1::integer)`
 
 func (db *Database) GetDisplayNameCommand(userId int) (displayName *string, err error) {
 	queryName := "GetDisplayNameQuery"
@@ -46,10 +38,7 @@ func (db *Database) GetDisplayNameCommand(userId int) (displayName *string, err 
 	return
 }
 
-const GetAllUserNamesQuery = `
-	SELECT Login, DisplayName
-	FROM Users
-`
+const GetAllUserNamesQuery = `SELECT * FROM get_all_user_names()`
 
 func (db *Database) GetAllUserNamesCommand() (users typeusers.Users, err error) {
 	queryName := "GetAllUserNamesQuery"

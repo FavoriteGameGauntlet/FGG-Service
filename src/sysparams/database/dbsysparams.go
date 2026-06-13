@@ -14,10 +14,7 @@ type IDatabase interface {
 type Database struct {
 }
 
-const GetAllSystemParametersQuery = `
-	SELECT Id, Name, Value
-	FROM SystemParameters
-`
+const GetAllSystemParametersQuery = `SELECT * FROM get_all_system_parameters()`
 
 func (db *Database) GetAllSystemParametersCommand() (parameters []typesysparams.SystemParameter, err error) {
 	queryName := "GetAllSystemParametersQuery"
@@ -45,11 +42,7 @@ func (db *Database) GetAllSystemParametersCommand() (parameters []typesysparams.
 	return
 }
 
-const GetSystemParameterQuery = `
-	SELECT Id, Name, Value
-	FROM SystemParameters
-	WHERE Name = $1
-`
+const GetSystemParameterQuery = `SELECT * FROM get_system_parameter($1::text)`
 
 func (db *Database) GetSystemParameterCommand(name string) (parameter typesysparams.SystemParameter, err error) {
 	queryName := "GetSystemParameterQuery"
@@ -62,15 +55,11 @@ func (db *Database) GetSystemParameterCommand(name string) (parameter typesyspar
 	return
 }
 
-const ChangeSystemParameterValueQuery = `
-	UPDATE SystemParameters
-	SET Value = $1
-	WHERE Name = $2
-`
+const ChangeSystemParameterValueQuery = `SELECT change_system_parameter_value($1::text, $2::text)`
 
 func (db *Database) ChangeSystemParameterValueCommand(name string, value string) error {
 	queryName := "ChangeSystemParameterValueQuery"
-	_, err := dbaccess.Exec(queryName, ChangeSystemParameterValueQuery, value, name)
+	_, err := dbaccess.Exec(queryName, ChangeSystemParameterValueQuery, name, value)
 
 	dbaccess.LogDbResult(queryName, nil, err)
 
