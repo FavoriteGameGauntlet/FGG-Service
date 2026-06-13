@@ -1,30 +1,21 @@
 services:
-  fgg-db:
-    build:
-      context: ../fgg-database
-    container_name: fgg-db
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-    restart: unless-stopped
-
-  fgg:
+  fgg-server:
     container_name: fgg-server
+    image: fgg-service
     build:
       context: .
-      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     restart: unless-stopped
-    depends_on:
-      - fgg-db
     environment:
       DATABASE_URL: ${DATABASE_URL}
       ADMIN_LOGINS: ${ADMIN_LOGINS}
     volumes:
       - ./logs:/app/logs
+    networks:
+      - fgg-network
+
+networks:
+  fgg-network:
+    name: fgg-network
+    external: true
