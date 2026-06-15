@@ -1,11 +1,11 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.1.0
+  version: 0.2.0
 paths:
-  /system-parameters/all:
+  /system-parameters/admin/all:
     get:
-      operationId: getAllSystemParameters
+      operationId: getAllAdminSystemParameters
       tags:
         - SystemParameters
       responses:
@@ -15,9 +15,21 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
-  /system-parameters/{name}:
+  /system-parameters/app/all:
+    get:
+      operationId: getAllAppSystemParameters
+      tags:
+        - SystemParameters
+      responses:
+        '200':
+          $ref: '#/components/responses/SystemParametersResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+  /system-parameters/admin/{name}:
     post:
-      operationId: changeSystemParameter
+      operationId: changeAdminSystemParameter
       tags:
         - SystemParameters
       parameters:
@@ -36,7 +48,25 @@ paths:
         '500':
           $ref: '#/components/responses/ErrorResponse'
     get:
-      operationId: getSystemParameter
+      operationId: getAdminSystemParameter
+      tags:
+        - SystemParameters
+      parameters:
+        - $ref: '#/components/parameters/Name'
+      responses:
+        '200':
+          $ref: '#/components/responses/SystemParameterResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+  /system-parameters/app/{name}:
+    get:
+      operationId: getAppSystemParameter
       tags:
         - SystemParameters
       parameters:

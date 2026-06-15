@@ -12,7 +12,9 @@ import (
 
 type IService interface {
 	GetAll() ([]typesysparams.SystemParameter, error)
+	GetAllApp() ([]typesysparams.SystemParameter, error)
 	GetParameter(name string) (typesysparams.SystemParameter, error)
+	GetAppParameter(name string) (typesysparams.SystemParameter, error)
 	GetString(name string) (string, error)
 	GetInt(name string) (int, error)
 	GetBool(name string) (bool, error)
@@ -38,10 +40,42 @@ func (s *Service) GetAll() (parameters []typesysparams.SystemParameter, err erro
 	return
 }
 
+func (s *Service) GetAllApp() (parameters []typesysparams.SystemParameter, err error) {
+	all, err := s.Database.GetAllSystemParametersCommand()
+
+	if err != nil {
+		return
+	}
+
+	for _, p := range all {
+		if p.ShouldShowToApp {
+			parameters = append(parameters, p)
+		}
+	}
+
+	return
+}
+
 func (s *Service) GetParameter(name string) (parameter typesysparams.SystemParameter, err error) {
 	parameter, err = s.Database.GetSystemParameterCommand(name)
 
 	if errors.Is(err, sql.ErrNoRows) {
+		err = common.NewSystemParameterNotFoundError(name)
+		return
+	}
+
+	return
+}
+
+func (s *Service) GetAppParameter(name string) (parameter typesysparams.SystemParameter, err error) {
+	parameter, err = s.Database.GetSystemParameterCommand(name)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = common.NewSystemParameterNotFoundError(name)
+		return
+	}
+
+	if !parameter.ShouldShowToApp {
 		err = common.NewSystemParameterNotFoundError(name)
 		return
 	}

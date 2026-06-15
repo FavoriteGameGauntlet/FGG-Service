@@ -46,20 +46,26 @@ type SystemParametersResponse = SystemParameters
 // SystemParameterRequest defines model for SystemParameterRequest.
 type SystemParameterRequest = SystemParameterChange
 
-// ChangeSystemParameterJSONRequestBody defines body for ChangeSystemParameter for application/json ContentType.
-type ChangeSystemParameterJSONRequestBody = SystemParameterChange
+// ChangeAdminSystemParameterJSONRequestBody defines body for ChangeAdminSystemParameter for application/json ContentType.
+type ChangeAdminSystemParameterJSONRequestBody = SystemParameterChange
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
-	// (GET /system-parameters/all)
-	GetAllSystemParameters(ctx echo.Context) error
+	// (GET /system-parameters/admin/all)
+	GetAllAdminSystemParameters(ctx echo.Context) error
 
-	// (GET /system-parameters/{name})
-	GetSystemParameter(ctx echo.Context, name Name) error
+	// (GET /system-parameters/admin/{name})
+	GetAdminSystemParameter(ctx echo.Context, name Name) error
 
-	// (POST /system-parameters/{name})
-	ChangeSystemParameter(ctx echo.Context, name Name) error
+	// (POST /system-parameters/admin/{name})
+	ChangeAdminSystemParameter(ctx echo.Context, name Name) error
+
+	// (GET /system-parameters/app/all)
+	GetAllAppSystemParameters(ctx echo.Context) error
+
+	// (GET /system-parameters/app/{name})
+	GetAppSystemParameter(ctx echo.Context, name Name) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -67,17 +73,17 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// GetAllSystemParameters converts echo context to params.
-func (w *ServerInterfaceWrapper) GetAllSystemParameters(ctx echo.Context) error {
+// GetAllAdminSystemParameters converts echo context to params.
+func (w *ServerInterfaceWrapper) GetAllAdminSystemParameters(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetAllSystemParameters(ctx)
+	err = w.Handler.GetAllAdminSystemParameters(ctx)
 	return err
 }
 
-// GetSystemParameter converts echo context to params.
-func (w *ServerInterfaceWrapper) GetSystemParameter(ctx echo.Context) error {
+// GetAdminSystemParameter converts echo context to params.
+func (w *ServerInterfaceWrapper) GetAdminSystemParameter(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "name" -------------
 	var name Name
@@ -88,12 +94,12 @@ func (w *ServerInterfaceWrapper) GetSystemParameter(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetSystemParameter(ctx, name)
+	err = w.Handler.GetAdminSystemParameter(ctx, name)
 	return err
 }
 
-// ChangeSystemParameter converts echo context to params.
-func (w *ServerInterfaceWrapper) ChangeSystemParameter(ctx echo.Context) error {
+// ChangeAdminSystemParameter converts echo context to params.
+func (w *ServerInterfaceWrapper) ChangeAdminSystemParameter(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "name" -------------
 	var name Name
@@ -104,7 +110,32 @@ func (w *ServerInterfaceWrapper) ChangeSystemParameter(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ChangeSystemParameter(ctx, name)
+	err = w.Handler.ChangeAdminSystemParameter(ctx, name)
+	return err
+}
+
+// GetAllAppSystemParameters converts echo context to params.
+func (w *ServerInterfaceWrapper) GetAllAppSystemParameters(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetAllAppSystemParameters(ctx)
+	return err
+}
+
+// GetAppSystemParameter converts echo context to params.
+func (w *ServerInterfaceWrapper) GetAppSystemParameter(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "name" -------------
+	var name Name
+
+	err = runtime.BindStyledParameterWithOptions("simple", "name", ctx.Param("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter name: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetAppSystemParameter(ctx, name)
 	return err
 }
 
@@ -136,8 +167,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.GET(baseURL+"/system-parameters/all", wrapper.GetAllSystemParameters)
-	router.GET(baseURL+"/system-parameters/:name", wrapper.GetSystemParameter)
-	router.POST(baseURL+"/system-parameters/:name", wrapper.ChangeSystemParameter)
+	router.GET(baseURL+"/system-parameters/admin/all", wrapper.GetAllAdminSystemParameters)
+	router.GET(baseURL+"/system-parameters/admin/:name", wrapper.GetAdminSystemParameter)
+	router.POST(baseURL+"/system-parameters/admin/:name", wrapper.ChangeAdminSystemParameter)
+	router.GET(baseURL+"/system-parameters/app/all", wrapper.GetAllAppSystemParameters)
+	router.GET(baseURL+"/system-parameters/app/:name", wrapper.GetAppSystemParameter)
 
 }

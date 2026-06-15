@@ -26,8 +26,8 @@ func NewController() *Controller {
 	}
 }
 
-// GetAllSystemParameters (GET /system-parameters/all)
-func (c *Controller) GetAllSystemParameters(ctx echo.Context) error {
+// GetAllAdminSystemParameters (GET /system-parameters/admin/all)
+func (c *Controller) GetAllAdminSystemParameters(ctx echo.Context) error {
 	err := c.requireAdmin(ctx)
 
 	if err != nil {
@@ -45,8 +45,8 @@ func (c *Controller) GetAllSystemParameters(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, parametersDto)
 }
 
-// GetSystemParameter (GET /system-parameters/{name})
-func (c *Controller) GetSystemParameter(ctx echo.Context, name gensysparams.Name) error {
+// GetAdminSystemParameter (GET /system-parameters/admin/{name})
+func (c *Controller) GetAdminSystemParameter(ctx echo.Context, name gensysparams.Name) error {
 	err := c.requireAdmin(ctx)
 
 	if err != nil {
@@ -64,8 +64,8 @@ func (c *Controller) GetSystemParameter(ctx echo.Context, name gensysparams.Name
 	return ctx.JSON(http.StatusOK, parameterDto)
 }
 
-// ChangeSystemParameter (POST /system-parameters/{name})
-func (c *Controller) ChangeSystemParameter(ctx echo.Context, name gensysparams.Name) error {
+// ChangeAdminSystemParameter (POST /system-parameters/admin/{name})
+func (c *Controller) ChangeAdminSystemParameter(ctx echo.Context, name gensysparams.Name) error {
 	err := c.requireAdmin(ctx)
 
 	if err != nil {
@@ -87,6 +87,40 @@ func (c *Controller) ChangeSystemParameter(ctx echo.Context, name gensysparams.N
 	}
 
 	return ctx.NoContent(http.StatusNoContent)
+}
+
+// GetAllAppSystemParameters (GET /system-parameters/app/all)
+func (c *Controller) GetAllAppSystemParameters(ctx echo.Context) error {
+	_, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	parameters, err := c.Service.GetAllApp()
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, convertParametersToDto(parameters))
+}
+
+// GetAppSystemParameter (GET /system-parameters/app/{name})
+func (c *Controller) GetAppSystemParameter(ctx echo.Context, name gensysparams.Name) error {
+	_, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	parameter, err := c.Service.GetAppParameter(name)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.JSON(http.StatusOK, convertParameterToDto(parameter))
 }
 
 func (c *Controller) requireAdmin(ctx echo.Context) error {
