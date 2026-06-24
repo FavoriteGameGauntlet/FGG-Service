@@ -14,6 +14,7 @@ import (
 	ctrlpoints "FGG-Service/src/points/controller"
 	ctrlsysparams "FGG-Service/src/sysparams/controller"
 	ctrltimers "FGG-Service/src/timers/controller"
+	srvtimers "FGG-Service/src/timers/service"
 	ctrlusers "FGG-Service/src/users/controller"
 	ctrleffects "FGG-Service/src/wheeleffects/controller"
 	"embed"
@@ -60,11 +61,13 @@ func main() {
 }
 
 func registerHandlers(e *echo.Echo) {
+	ts := srvtimers.NewService()
+
 	genauth.RegisterHandlers(e, ctrlauth.NewController())
-	gengames.RegisterHandlers(e, ctrlgames.NewController())
+	gengames.RegisterHandlers(e, ctrlgames.NewController(ts))
 	genpoints.RegisterHandlers(e, ctrlpoints.NewController())
 	gensysparams.RegisterHandlers(e, ctrlsysparams.NewController())
-	gentimers.RegisterHandlers(e, ctrltimers.NewController())
+	gentimers.RegisterHandlers(e, ctrltimers.NewController(ts))
 	genusers.RegisterHandlers(e, ctrlusers.NewController())
 	geneffects.RegisterHandlers(e, ctrleffects.NewController())
 }

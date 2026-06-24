@@ -38,22 +38,12 @@ type IDatabase interface {
 type Database struct {
 }
 
-var increaseAvailableRollsQuery = dbaccess.Query{Name: "IncreaseAvailableRollsQuery", SQL: `SELECT increase_available_rolls($1::integer)`}
+var changeAvailableRollsQuery = dbaccess.Query{Name: "ChangeAvailableRollsQuery", SQL: `SELECT change_available_rolls($1::integer, $2::integer)`}
 
-func (db *Database) IncreaseAvailableRollsCommand(userId int) error {
-	_, err := dbaccess.Exec(increaseAvailableRollsQuery, userId)
+func (db *Database) ChangeAvailableRollsCommand(userId int, changeValue int) error {
+	_, err := dbaccess.Exec(changeAvailableRollsQuery, userId, changeValue)
 
-	dbaccess.LogDbResult(increaseAvailableRollsQuery, nil, err)
-
-	return err
-}
-
-var increaseTerritoryHoursQuery = dbaccess.Query{Name: "IncreaseTerritoryHoursQuery", SQL: `SELECT increase_territory_hours($1::integer, $2::integer)`}
-
-func (db *Database) IncreaseTerritoryHoursCommand(userId int, changeValue int) error {
-	_, err := dbaccess.Exec(increaseTerritoryHoursQuery, userId, changeValue)
-
-	dbaccess.LogDbResult(increaseTerritoryHoursQuery, nil, err)
+	dbaccess.LogDbResult(changeAvailableRollsQuery, nil, err)
 
 	return err
 }
