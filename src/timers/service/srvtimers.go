@@ -104,13 +104,19 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, e
 		return
 	}
 
-	count, err := s.WheelEffectsDatabase.GetAvailableRollsCountCommand(userId)
+	rollCount, err := s.WheelEffectsDatabase.GetAvailableRollsCountCommand(userId)
 
 	if err != nil {
 		return
 	}
 
-	if count > 0 {
+	maximumRollsCountForTimer, err := s.SysParamsService.GetInt(typesysparams.ParamMaximumRollsCountForTimer)
+
+	if err != nil {
+		return
+	}
+
+	if rollCount > maximumRollsCountForTimer {
 		err = common.NewAvailableRollsExistConflictError()
 		return
 	}

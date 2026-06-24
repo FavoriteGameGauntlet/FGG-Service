@@ -72,7 +72,13 @@ func (s *Service) MakeEffectRoll(userId int) (effects typewheeleffects.WheelEffe
 		return
 	}
 
-	if rollCount == 0 {
+	minimumRollsCountForEffectRoll, err := s.SysParamsService.GetInt(typesysparams.ParamMinimumRollsCountForEffectRoll)
+
+	if err != nil {
+		return
+	}
+
+	if rollCount < minimumRollsCountForEffectRoll {
 		err = common.NewAvailableRollsNotFoundError()
 		return
 	}
