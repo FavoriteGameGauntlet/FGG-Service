@@ -23,11 +23,10 @@ type IDatabase interface {
 type Database struct {
 }
 
-const GetAvailableRollsCountQuery = `SELECT * FROM get_available_rolls_count($1::integer)`
+var getAvailableRollsCountQuery = dbaccess.Query{Name: "GetAvailableRollsCountQuery", SQL: `SELECT * FROM get_available_rolls_count($1::integer)`}
 
 func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err error) {
-	queryName := "GetAvailableRollsCountQuery"
-	row := dbaccess.QueryRow(queryName, GetAvailableRollsCountQuery, userId)
+	row := dbaccess.QueryRow(getAvailableRollsCountQuery, userId)
 
 	err = row.Scan(&count)
 
@@ -36,16 +35,15 @@ func (db *Database) GetAvailableRollsCountCommand(userId int) (count int, err er
 		err = nil
 	}
 
-	dbaccess.LogDbResult(queryName, count, err)
+	dbaccess.LogDbResult(getAvailableRollsCountQuery, count, err)
 
 	return
 }
 
-const GetAvailableEffectsQuery = `SELECT * FROM get_available_effects($1::integer)`
+var getAvailableEffectsQuery = dbaccess.Query{Name: "GetAvailableEffectsQuery", SQL: `SELECT * FROM get_available_effects($1::integer)`}
 
 func (db *Database) GetAvailableEffectsCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
-	queryName := "GetAvailableEffectsQuery"
-	rows, err := dbaccess.Query(queryName, GetAvailableEffectsQuery, userId)
+	rows, err := dbaccess.QueryRows(getAvailableEffectsQuery, userId)
 
 	if err != nil {
 		return
@@ -56,7 +54,7 @@ func (db *Database) GetAvailableEffectsCommand(userId int) (effects typewheeleff
 		err = rows.Scan(&effect.Id, &effect.Name, &effect.Description)
 
 		if err != nil {
-			dbaccess.LogDbResult(queryName, effects, err)
+			dbaccess.LogDbResult(getAvailableEffectsQuery, effects, err)
 
 			_ = rows.Close()
 			return
@@ -65,17 +63,16 @@ func (db *Database) GetAvailableEffectsCommand(userId int) (effects typewheeleff
 		effects = append(effects, effect)
 	}
 
-	dbaccess.LogDbResult(queryName, effects, err)
+	dbaccess.LogDbResult(getAvailableEffectsQuery, effects, err)
 
 	_ = rows.Close()
 	return
 }
 
-const GetEffectHistoryQuery = `SELECT * FROM get_effect_history($1::integer)`
+var getEffectHistoryQuery = dbaccess.Query{Name: "GetEffectHistoryQuery", SQL: `SELECT * FROM get_effect_history($1::integer)`}
 
 func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffectHistories, err error) {
-	queryName := "GetEffectHistoryQuery"
-	rows, err := dbaccess.Query(queryName, GetEffectHistoryQuery, userId)
+	rows, err := dbaccess.QueryRows(getEffectHistoryQuery, userId)
 
 	if err != nil {
 		return
@@ -86,7 +83,7 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffect
 		err = rows.Scan(&effect.Name, &effect.Description, &effect.RollDate)
 
 		if err != nil {
-			dbaccess.LogDbResult(queryName, effects, err)
+			dbaccess.LogDbResult(getEffectHistoryQuery, effects, err)
 
 			_ = rows.Close()
 			return
@@ -95,36 +92,28 @@ func (db *Database) GetEffectHistoryCommand(userId int) (effects typewheeleffect
 		effects = append(effects, effect)
 	}
 
-	dbaccess.LogDbResult(queryName, effects, err)
+	dbaccess.LogDbResult(getEffectHistoryQuery, effects, err)
 
 	_ = rows.Close()
 	return
 }
 
-const GetEffectHistoryByEffectNameQuery = `SELECT * FROM get_effect_history_by_name($1::integer, $2::text)`
+var getEffectHistoryByEffectNameQuery = dbaccess.Query{Name: "GetEffectHistoryByEffectNameQuery", SQL: `SELECT * FROM get_effect_history_by_name($1::integer, $2::text)`}
 
 func (db *Database) GetEffectHistoryByEffectNameCommand(userId int, effectName string) (effect typewheeleffects.RolledWheelEffect, err error) {
-	queryName := "GetEffectHistoryByEffectNameQuery"
-	row := dbaccess.QueryRow(queryName, GetEffectHistoryByEffectNameQuery, userId, effectName)
+	row := dbaccess.QueryRow(getEffectHistoryByEffectNameQuery, userId, effectName)
 
 	err = row.Scan(&effect.Name, &effect.Description, &effect.RollDate)
 
-	if err != nil {
-		dbaccess.LogDbResult(queryName, effect, err)
-
-		return
-	}
-
-	dbaccess.LogDbResult(queryName, effect, err)
+	dbaccess.LogDbResult(getEffectHistoryByEffectNameQuery, effect, err)
 
 	return
 }
 
-const MakeEffectRollQuery = `SELECT * FROM make_effect_roll($1::integer)`
+var makeEffectRollQuery = dbaccess.Query{Name: "MakeEffectRollQuery", SQL: `SELECT * FROM make_effect_roll($1::integer)`}
 
 func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.WheelEffects, err error) {
-	queryName := "MakeEffectRollQuery"
-	rows, err := dbaccess.Query(queryName, MakeEffectRollQuery, userId)
+	rows, err := dbaccess.QueryRows(makeEffectRollQuery, userId)
 
 	if err != nil {
 		return
@@ -135,7 +124,7 @@ func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.
 		err = rows.Scan(&effect.Id, &effect.Name, &effect.Description)
 
 		if err != nil {
-			dbaccess.LogDbResult(queryName, effects, err)
+			dbaccess.LogDbResult(makeEffectRollQuery, effects, err)
 
 			_ = rows.Close()
 			return
@@ -144,48 +133,44 @@ func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.
 		effects = append(effects, effect)
 	}
 
-	dbaccess.LogDbResult(queryName, effects, err)
+	dbaccess.LogDbResult(makeEffectRollQuery, effects, err)
 
 	_ = rows.Close()
 	return
 }
 
-const DecreaseAvailableRollsValueQuery = `SELECT decrease_available_rolls($1::integer)`
+var decreaseAvailableRollsValueQuery = dbaccess.Query{Name: "DecreaseAvailableRollsValueQuery", SQL: `SELECT decrease_available_rolls($1::integer)`}
 
 func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
-	queryName := "DecreaseAvailableRollsValueQuery"
-	_, err := dbaccess.Exec(queryName, DecreaseAvailableRollsValueQuery, userId)
+	_, err := dbaccess.Exec(decreaseAvailableRollsValueQuery, userId)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(decreaseAvailableRollsValueQuery, nil, err)
 
 	return err
 }
 
-const AddLastRolledWheelEffectsQuery = `SELECT add_last_rolled_wheel_effect($1::integer, $2::integer, $3::integer)`
+var addLastRolledWheelEffectsQuery = dbaccess.Query{Name: "AddLastRolledWheelEffectsQuery", SQL: `SELECT add_last_rolled_wheel_effect($1::integer, $2::integer, $3::integer)`}
 
 func (db *Database) AddLastRolledWheelEffectsCommand(userId int, effects typewheeleffects.WheelEffects) (err error) {
-	queryName := "AddLastRolledWheelEffectsQuery"
-
 	for i, effect := range effects {
-		_, err = dbaccess.Exec(queryName, AddLastRolledWheelEffectsQuery, userId, effect.Id, i-2)
+		_, err = dbaccess.Exec(addLastRolledWheelEffectsQuery, userId, effect.Id, i-2)
 
 		if err != nil {
-			dbaccess.LogDbResult(queryName, nil, err)
+			dbaccess.LogDbResult(addLastRolledWheelEffectsQuery, nil, err)
 
 			return
 		}
 	}
 
-	dbaccess.LogDbResult(queryName, effects, err)
+	dbaccess.LogDbResult(addLastRolledWheelEffectsQuery, effects, err)
 
 	return
 }
 
-const GetLastRolledWheelEffectsQuery = `SELECT * FROM get_last_rolled_wheel_effects($1::integer)`
+var getLastRolledWheelEffectsQuery = dbaccess.Query{Name: "GetLastRolledWheelEffectsQuery", SQL: `SELECT * FROM get_last_rolled_wheel_effects($1::integer)`}
 
 func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
-	queryName := "GetLastRolledWheelEffectsQuery"
-	rows, err := dbaccess.Query(queryName, GetLastRolledWheelEffectsQuery, userId)
+	rows, err := dbaccess.QueryRows(getLastRolledWheelEffectsQuery, userId)
 
 	if err != nil {
 		return
@@ -203,7 +188,7 @@ func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewh
 			&effect.IsApplied)
 
 		if err != nil {
-			dbaccess.LogDbResult(queryName, effects, err)
+			dbaccess.LogDbResult(getLastRolledWheelEffectsQuery, effects, err)
 
 			_ = rows.Close()
 			return
@@ -212,30 +197,28 @@ func (db *Database) GetLastRolledWheelEffectsCommand(userId int) (effects typewh
 		effects = append(effects, effect)
 	}
 
-	dbaccess.LogDbResult(queryName, effects, err)
+	dbaccess.LogDbResult(getLastRolledWheelEffectsQuery, effects, err)
 
 	_ = rows.Close()
 	return
 }
 
-const MarkLastWheelEffectAppliedQuery = `SELECT mark_last_wheel_effect_applied($1::integer, $2::integer)`
+var markLastWheelEffectAppliedQuery = dbaccess.Query{Name: "MarkLastWheelEffectAppliedQuery", SQL: `SELECT mark_last_wheel_effect_applied($1::integer, $2::integer)`}
 
 func (db *Database) MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId int) error {
-	queryName := "MarkLastWheelEffectAppliedQuery"
-	_, err := dbaccess.Exec(queryName, MarkLastWheelEffectAppliedQuery, userId, wheelEffectId)
+	_, err := dbaccess.Exec(markLastWheelEffectAppliedQuery, userId, wheelEffectId)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(markLastWheelEffectAppliedQuery, nil, err)
 
 	return err
 }
 
-const AddWheelEffectHistoryQuery = `SELECT add_wheel_effect_history($1::integer, $2::integer)`
+var addWheelEffectHistoryQuery = dbaccess.Query{Name: "AddWheelEffectHistoryQuery", SQL: `SELECT add_wheel_effect_history($1::integer, $2::integer)`}
 
 func (db *Database) AddWheelEffectHistoryCommand(userId int, wheelEffectId int) error {
-	queryName := "AddWheelEffectHistoryQuery"
-	_, err := dbaccess.Exec(queryName, AddWheelEffectHistoryQuery, userId, wheelEffectId)
+	_, err := dbaccess.Exec(addWheelEffectHistoryQuery, userId, wheelEffectId)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(addWheelEffectHistoryQuery, nil, err)
 
 	return err
 }

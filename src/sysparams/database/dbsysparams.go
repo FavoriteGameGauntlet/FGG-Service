@@ -14,11 +14,10 @@ type IDatabase interface {
 type Database struct {
 }
 
-const GetAllSystemParametersQuery = `SELECT * FROM get_all_system_parameters()`
+var getAllSystemParametersQuery = dbaccess.Query{Name: "GetAllSystemParametersQuery", SQL: `SELECT * FROM get_all_system_parameters()`}
 
 func (db *Database) GetAllSystemParametersCommand() (parameters []typesysparams.SystemParameter, err error) {
-	queryName := "GetAllSystemParametersQuery"
-	rows, err := dbaccess.Query(queryName, GetAllSystemParametersQuery)
+	rows, err := dbaccess.QueryRows(getAllSystemParametersQuery)
 
 	if err != nil {
 		return
@@ -36,32 +35,30 @@ func (db *Database) GetAllSystemParametersCommand() (parameters []typesysparams.
 		parameters = append(parameters, parameter)
 	}
 
-	dbaccess.LogDbResult(queryName, parameters, err)
+	dbaccess.LogDbResult(getAllSystemParametersQuery, parameters, err)
 
 	_ = rows.Close()
 	return
 }
 
-const GetSystemParameterQuery = `SELECT * FROM get_system_parameter($1::text)`
+var getSystemParameterQuery = dbaccess.Query{Name: "GetSystemParameterQuery", SQL: `SELECT * FROM get_system_parameter($1::text)`, IsSilent: true}
 
 func (db *Database) GetSystemParameterCommand(name string) (parameter typesysparams.SystemParameter, err error) {
-	queryName := "GetSystemParameterQuery"
-	row := dbaccess.QueryRow(queryName, GetSystemParameterQuery, name)
+	row := dbaccess.QueryRow(getSystemParameterQuery, name)
 
 	err = row.Scan(&parameter.Id, &parameter.Name, &parameter.Value, &parameter.ShouldShowToApp)
 
-	dbaccess.LogDbResult(queryName, parameter, err)
+	dbaccess.LogDbResult(getSystemParameterQuery, parameter, err)
 
 	return
 }
 
-const ChangeSystemParameterValueQuery = `SELECT change_system_parameter_value($1::text, $2::text)`
+var changeSystemParameterValueQuery = dbaccess.Query{Name: "ChangeSystemParameterValueQuery", SQL: `SELECT change_system_parameter_value($1::text, $2::text)`}
 
 func (db *Database) ChangeSystemParameterValueCommand(name string, value string) error {
-	queryName := "ChangeSystemParameterValueQuery"
-	_, err := dbaccess.Exec(queryName, ChangeSystemParameterValueQuery, name, value)
+	_, err := dbaccess.Exec(changeSystemParameterValueQuery, name, value)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(changeSystemParameterValueQuery, nil, err)
 
 	return err
 }

@@ -30,46 +30,46 @@ func Init() func() {
 	}
 }
 
-func Exec(queryName string, query string, args ...any) (sql.Result, error) {
+func Exec(q Query, args ...any) (sql.Result, error) {
 	queryArgs, logArgs := getArgs(args...)
 
-	if queryName != "GetCompletedTimerUsersQuery" {
-		slog.Info(queryName, "args", logArgs)
+	if !q.IsSilent {
+		slog.Info(q.Name, "args", logArgs)
 	}
 
-	result, err := db.Exec(query, queryArgs...)
+	result, err := db.Exec(q.SQL, queryArgs...)
 
 	if err != nil {
-		slog.Error(queryName, "error", err)
+		slog.Error(q.Name, "error", err)
 	}
 
 	return result, err
 }
 
-func Query(queryName string, query string, args ...any) (*sql.Rows, error) {
+func QueryRows(q Query, args ...any) (*sql.Rows, error) {
 	queryArgs, logArgs := getArgs(args...)
 
-	if queryName != "GetCompletedTimerUsersQuery" {
-		slog.Info(queryName, "args", logArgs)
+	if !q.IsSilent {
+		slog.Info(q.Name, "args", logArgs)
 	}
 
-	rows, err := db.Query(query, queryArgs...)
+	rows, err := db.Query(q.SQL, queryArgs...)
 
 	if err != nil {
-		slog.Error(queryName, "error", err)
+		slog.Error(q.Name, "error", err)
 	}
 
 	return rows, err
 }
 
-func QueryRow(queryName string, query string, args ...any) *sql.Row {
+func QueryRow(q Query, args ...any) *sql.Row {
 	queryArgs, logArgs := getArgs(args...)
 
-	if queryName != "GetCompletedTimerUsersQuery" {
-		slog.Info(queryName, "args", logArgs)
+	if !q.IsSilent {
+		slog.Info(q.Name, "args", logArgs)
 	}
 
-	return db.QueryRow(query, queryArgs...)
+	return db.QueryRow(q.SQL, queryArgs...)
 }
 
 func getArgs(args ...any) ([]any, []any) {

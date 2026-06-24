@@ -5,116 +5,119 @@ import (
 	"FGG-Service/src/dbaccess"
 )
 
+type IDatabase interface {
+	GetUserByLoginCommand(userLogin string) (typeauth.User, error)
+	GetUserByIdCommand(userId int) (typeauth.User, error)
+	GetUserByEmailCommand(userEmail string) (typeauth.User, error)
+	GetUserByLoginAndPasswordCommand(loginUser typeauth.LoginUser) (typeauth.User, error)
+	CreateUserCommand(signupUser typeauth.SignupUser) error
+	CreateUserStatsCommand(login string) error
+	GetUserSessionByIdCommand(sessionId string) (typeauth.UserSession, error)
+	CreateUserSessionCommand(userId int) (typeauth.UserSession, error)
+	DeleteUserSessionCommand(sessionId string) error
+}
+
 type Database struct {
 }
 
-const GetUserByLoginQuery = `SELECT * FROM get_user_by_login($1::text)`
+var getUserByLoginQuery = dbaccess.Query{Name: "GetUserByLoginQuery", SQL: `SELECT * FROM get_user_by_login($1::text)`}
 
 func (db *Database) GetUserByLoginCommand(userLogin string) (user typeauth.User, err error) {
-	queryName := "GetUserByLoginQuery"
-	row := dbaccess.QueryRow(queryName, GetUserByLoginQuery, userLogin)
+	row := dbaccess.QueryRow(getUserByLoginQuery, userLogin)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
 
-	dbaccess.LogDbResult(queryName, user, err)
+	dbaccess.LogDbResult(getUserByLoginQuery, user, err)
 
 	return
 }
 
-const GetUserByIdQuery = `SELECT * FROM get_user_by_id($1::integer)`
+var getUserByIdQuery = dbaccess.Query{Name: "GetUserByIdQuery", SQL: `SELECT * FROM get_user_by_id($1::integer)`}
 
 func (db *Database) GetUserByIdCommand(userId int) (user typeauth.User, err error) {
-	queryName := "GetUserByIdQuery"
-	row := dbaccess.QueryRow(queryName, GetUserByIdQuery, userId)
+	row := dbaccess.QueryRow(getUserByIdQuery, userId)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
 
-	dbaccess.LogDbResult(queryName, user, err)
+	dbaccess.LogDbResult(getUserByIdQuery, user, err)
 
 	return
 }
 
-const GetUserByEmailQuery = `SELECT * FROM get_user_by_email($1::text)`
+var getUserByEmailQuery = dbaccess.Query{Name: "GetUserByEmailQuery", SQL: `SELECT * FROM get_user_by_email($1::text)`}
 
 func (db *Database) GetUserByEmailCommand(userEmail string) (user typeauth.User, err error) {
-	queryName := "GetUserByEmailQuery"
-	row := dbaccess.QueryRow(queryName, GetUserByEmailQuery, userEmail)
+	row := dbaccess.QueryRow(getUserByEmailQuery, userEmail)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
 
-	dbaccess.LogDbResult(queryName, user, err)
+	dbaccess.LogDbResult(getUserByEmailQuery, user, err)
 
 	return
 }
 
-const GetUserByLoginAndPasswordQuery = `SELECT * FROM get_user_by_login_and_password($1::text, $2::text)`
+var getUserByLoginAndPasswordQuery = dbaccess.Query{Name: "GetUserByLoginAndPasswordQuery", SQL: `SELECT * FROM get_user_by_login_and_password($1::text, $2::text)`}
 
 func (db *Database) GetUserByLoginAndPasswordCommand(loginUser typeauth.LoginUser) (user typeauth.User, err error) {
-	queryName := "GetUserByLoginAndPasswordQuery"
-	row := dbaccess.QueryRow(queryName, GetUserByLoginAndPasswordQuery, loginUser.Login, loginUser.Password)
+	row := dbaccess.QueryRow(getUserByLoginAndPasswordQuery, loginUser.Login, loginUser.Password)
 
 	err = row.Scan(&user.Id, &user.Login, &user.DisplayName, &user.Email)
 
-	dbaccess.LogDbResult(queryName, user, err)
+	dbaccess.LogDbResult(getUserByLoginAndPasswordQuery, user, err)
 
 	return
 }
 
-const CreateUserQuery = `SELECT create_user($1::text, $2::text, $3::text)`
+var createUserQuery = dbaccess.Query{Name: "CreateUserQuery", SQL: `SELECT create_user($1::text, $2::text, $3::text)`}
 
 func (db *Database) CreateUserCommand(signupUser typeauth.SignupUser) error {
-	queryName := "CreateUserQuery"
-	_, err := dbaccess.Exec(queryName, CreateUserQuery, signupUser.Login, signupUser.Email, signupUser.Password)
+	_, err := dbaccess.Exec(createUserQuery, signupUser.Login, signupUser.Email, signupUser.Password)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(createUserQuery, nil, err)
 
 	return err
 }
 
-const CreateUserStatsQuery = `SELECT create_user_stats($1::text)`
+var createUserStatsQuery = dbaccess.Query{Name: "CreateUserStatsQuery", SQL: `SELECT create_user_stats($1::text)`}
 
 func (db *Database) CreateUserStatsCommand(login string) error {
-	queryName := "CreateUserStatsQuery"
-	_, err := dbaccess.Exec(queryName, CreateUserStatsQuery, login)
+	_, err := dbaccess.Exec(createUserStatsQuery, login)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(createUserStatsQuery, nil, err)
 
 	return err
 }
 
-const GetUserSessionByIdQuery = `SELECT * FROM get_user_session_by_id($1::text)`
+var getUserSessionByIdQuery = dbaccess.Query{Name: "GetUserSessionByIdQuery", SQL: `SELECT * FROM get_user_session_by_id($1::text)`}
 
 func (db *Database) GetUserSessionByIdCommand(sessionId string) (userSession typeauth.UserSession, err error) {
-	queryName := "GetUserSessionByIdQuery"
-	row := dbaccess.QueryRow(queryName, GetUserSessionByIdQuery, sessionId)
+	row := dbaccess.QueryRow(getUserSessionByIdQuery, sessionId)
 
 	err = row.Scan(&userSession.Id, &userSession.UserId)
 
-	dbaccess.LogDbResult(queryName, userSession, err)
+	dbaccess.LogDbResult(getUserSessionByIdQuery, userSession, err)
 
 	return
 }
 
-const CreateUserSessionQuery = `SELECT * FROM create_user_session($1::integer)`
+var createUserSessionQuery = dbaccess.Query{Name: "CreateUserSessionQuery", SQL: `SELECT * FROM create_user_session($1::integer)`}
 
 func (db *Database) CreateUserSessionCommand(userId int) (userSession typeauth.UserSession, err error) {
-	queryName := "CreateUserSessionQuery"
-	row := dbaccess.QueryRow(queryName, CreateUserSessionQuery, userId)
+	row := dbaccess.QueryRow(createUserSessionQuery, userId)
 
 	err = row.Scan(&userSession.Id, &userSession.UserId)
 
-	dbaccess.LogDbResult(queryName, userSession, err)
+	dbaccess.LogDbResult(createUserSessionQuery, userSession, err)
 
 	return
 }
 
-const DeleteUserSessionQuery = `SELECT delete_user_session($1::text)`
+var deleteUserSessionQuery = dbaccess.Query{Name: "DeleteUserSessionQuery", SQL: `SELECT delete_user_session($1::text)`}
 
 func (db *Database) DeleteUserSessionCommand(sessionId string) error {
-	queryName := "DeleteUserSessionQuery"
-	_, err := dbaccess.Exec(queryName, DeleteUserSessionQuery, sessionId)
+	_, err := dbaccess.Exec(deleteUserSessionQuery, sessionId)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(deleteUserSessionQuery, nil, err)
 
 	return err
 }
