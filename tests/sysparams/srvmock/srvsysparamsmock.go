@@ -15,6 +15,16 @@ func (m *ServiceMock) GetAll() ([]typesysparams.SystemParameter, error) {
 	return args.Get(0).([]typesysparams.SystemParameter), args.Error(1)
 }
 
+func (m *ServiceMock) GetAllApp() ([]typesysparams.SystemParameter, error) {
+	args := m.Called()
+	return args.Get(0).([]typesysparams.SystemParameter), args.Error(1)
+}
+
+func (m *ServiceMock) GetAppParameter(name string) (typesysparams.SystemParameter, error) {
+	args := m.Called(name)
+	return args.Get(0).(typesysparams.SystemParameter), args.Error(1)
+}
+
 func (m *ServiceMock) GetParameter(name string) (typesysparams.SystemParameter, error) {
 	args := m.Called(name)
 	return args.Get(0).(typesysparams.SystemParameter), args.Error(1)

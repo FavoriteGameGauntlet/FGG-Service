@@ -19,4 +19,6 @@ const (
 	ParamMinimumWheelEffectsForRoll        = "MinimumWheelEffectsForRoll"
 	ParamSeizePenaltyPoints                = "SeizePenaltyPoints"
 	ParamTimerFinisherSchedulerIntervalInS = "TimerFinisherSchedulerIntervalInS"
+	ParamMinimumRollsCountForEffectRoll    = "MinimumRollsCountForEffectRoll"
+	ParamMaximumRollsCountForTimer         = "MaximumRollsCountForTimer"
 )
