@@ -116,7 +116,7 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, e
 		return
 	}
 
-	if rollCount > maximumRollsCountForTimer {
+	if rollCount >= maximumRollsCountForTimer {
 		err = common.NewAvailableRollsExistConflictError()
 		return
 	}
@@ -235,6 +235,12 @@ func (s *Service) StopAllCompletedTimers() error {
 		return err
 	}
 
+	availableRollsIncreasing, err := s.SysParamsService.GetInt(typesysparams.ParamAvailableRollsIncreaseByTimer)
+
+	if err != nil {
+		return err
+	}
+
 	territoryHoursIncreasing, err := s.SysParamsService.GetInt(typesysparams.ParamTerritoryHoursIncreaseByTimer)
 
 	if err != nil {
@@ -249,8 +255,8 @@ func (s *Service) StopAllCompletedTimers() error {
 
 	for _, userId := range userIds {
 		_, _ = s.StopCurrentTimer(userId)
-		_ = s.PointsDatabase.IncreaseAvailableRollsCommand(userId)
-		_ = s.PointsDatabase.IncreaseTerritoryHoursCommand(userId, territoryHoursIncreasing)
+		_ = s.PointsDatabase.ChangeAvailableRollsCommand(userId, availableRollsIncreasing)
+		_ = s.PointsDatabase.ChangeTerritoryHoursCommand(userId, territoryHoursIncreasing)
 		_ = s.PointsDatabase.ChangeExperiencePointsCommand(userId, experiencePointsIncreasing)
 	}
 

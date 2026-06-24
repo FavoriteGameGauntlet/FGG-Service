@@ -10,6 +10,7 @@ type SystemParameter struct {
 const (
 	ParamMinimumNumberOfUnplayedGames      = "MinimumNumberOfUnplayedGames"
 	ParamTimerDurationInS                  = "TimerDurationInS"
+	ParamAvailableRollsIncreaseByTimer     = "AvailableRollsIncreaseByTimer"
 	ParamTerritoryHoursIncreaseByTimer     = "TerritoryHoursIncreaseByTimer"
 	ParamExperiencePointsIncreaseByTimer   = "ExperiencePointsIncreaseByTimer"
 	ParamExperiencePointsLevelUp           = "ExperiencePointsLevelUp"
