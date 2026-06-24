@@ -28,83 +28,76 @@ type IDatabase interface {
 type Database struct {
 }
 
-const DoesGameExistQuery = `SELECT does_game_exist($1::text)`
+var doesGameExistQuery = dbaccess.Query{Name: "DoesGameExistQuery", SQL: `SELECT does_game_exist($1::text)`}
 
 func (db *Database) DoesGameExistCommand(gameName string) (doesExist bool, err error) {
-	queryName := "DoesGameExistQuery"
-	row := dbaccess.QueryRow(queryName, DoesGameExistQuery, gameName)
+	row := dbaccess.QueryRow(doesGameExistQuery, gameName)
 
 	err = row.Scan(&doesExist)
 
-	dbaccess.LogDbResult(queryName, doesExist, err)
+	dbaccess.LogDbResult(doesGameExistQuery, doesExist, err)
 
 	return
 }
 
-const CreateGameQuery = `SELECT create_game($1::text)`
+var createGameQuery = dbaccess.Query{Name: "CreateGameQuery", SQL: `SELECT create_game($1::text)`}
 
 func (db *Database) CreateGameCommand(name string) error {
-	queryName := "CreateGameQuery"
-	_, err := dbaccess.Exec(queryName, CreateGameQuery, name)
+	_, err := dbaccess.Exec(createGameQuery, name)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(createGameQuery, nil, err)
 
 	return err
 }
 
-const GetWishlistGameQuery = `SELECT * FROM get_wishlist_game($1::text)`
+var getWishlistGameQuery = dbaccess.Query{Name: "GetWishlistGameQuery", SQL: `SELECT * FROM get_wishlist_game($1::text)`}
 
 func (db *Database) GetWishlistGameCommand(name string) (game typegames.WishlistGame, err error) {
-	queryName := "GetWishlistGameQuery"
-	row := dbaccess.QueryRow(queryName, GetWishlistGameQuery, name)
+	row := dbaccess.QueryRow(getWishlistGameQuery, name)
 
 	err = row.Scan(&game.GameId, &game.Name)
 
-	dbaccess.LogDbResult(queryName, game, err)
+	dbaccess.LogDbResult(getWishlistGameQuery, game, err)
 
 	return
 }
 
-const DoesUnplayedGameExistQuery = `SELECT does_wishlist_game_exist($1::integer, $2::text)`
+var doesUnplayedGameExistQuery = dbaccess.Query{Name: "DoesUnplayedGameExistQuery", SQL: `SELECT does_wishlist_game_exist($1::integer, $2::text)`}
 
 func (db *Database) DoesWishlistGameExistCommand(userId int, gameName string) (doesExist bool, err error) {
-	queryName := "DoesUnplayedGameExistQuery"
-	row := dbaccess.QueryRow(queryName, DoesUnplayedGameExistQuery, userId, gameName)
+	row := dbaccess.QueryRow(doesUnplayedGameExistQuery, userId, gameName)
 
 	err = row.Scan(&doesExist)
 
-	dbaccess.LogDbResult(queryName, doesExist, err)
+	dbaccess.LogDbResult(doesUnplayedGameExistQuery, doesExist, err)
 
 	return
 }
 
-const CreateUnplayedGameQuery = `SELECT create_wishlist_game($1::integer, $2::integer)`
+var createUnplayedGameQuery = dbaccess.Query{Name: "CreateUnplayedGameQuery", SQL: `SELECT create_wishlist_game($1::integer, $2::integer)`}
 
 func (db *Database) CreateWishlistGameCommand(userId int, gameId int) error {
-	queryName := "CreateUnplayedGameQuery"
-	_, err := dbaccess.Exec(queryName, CreateUnplayedGameQuery, userId, gameId)
+	_, err := dbaccess.Exec(createUnplayedGameQuery, userId, gameId)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(createUnplayedGameQuery, nil, err)
 
 	return err
 }
 
-const DeleteUnplayedGameQuery = `SELECT delete_wishlist_game($1::integer, $2::integer)`
+var deleteUnplayedGameQuery = dbaccess.Query{Name: "DeleteUnplayedGameQuery", SQL: `SELECT delete_wishlist_game($1::integer, $2::integer)`}
 
 func (db *Database) DeleteUnplayedGameCommand(userId int, gameId int) error {
-	queryName := "DeleteUnplayedGameQuery"
-	_, err := dbaccess.Exec(queryName, DeleteUnplayedGameQuery, userId, gameId)
+	_, err := dbaccess.Exec(deleteUnplayedGameQuery, userId, gameId)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(deleteUnplayedGameQuery, nil, err)
 
 	return err
 }
 
-const GetWishlistGamesQuery = `SELECT * FROM get_wishlist_games($1::integer)`
+var getWishlistGamesQuery = dbaccess.Query{Name: "GetWishlistGamesQuery", SQL: `SELECT * FROM get_wishlist_games($1::integer)`}
 
 func (db *Database) GetWishlistGamesCommand(userId int) (games typegames.WishlistGames, err error) {
-	queryName := "GetWishlistGamesQuery"
-	rows, err := dbaccess.Query(queryName, GetWishlistGamesQuery, userId)
+	rows, err := dbaccess.QueryRows(getWishlistGamesQuery, userId)
 
 	if err != nil {
 		return
@@ -122,34 +115,32 @@ func (db *Database) GetWishlistGamesCommand(userId int) (games typegames.Wishlis
 		games = append(games, game)
 	}
 
-	dbaccess.LogDbResult(queryName, games, err)
+	dbaccess.LogDbResult(getWishlistGamesQuery, games, err)
 
 	_ = rows.Close()
 	return
 }
 
-const CreateCurrentGameQuery = `SELECT create_current_game($1::integer, $2::integer)`
+var createCurrentGameQuery = dbaccess.Query{Name: "CreateCurrentGameQuery", SQL: `SELECT create_current_game($1::integer, $2::integer)`}
 
 func (db *Database) CreateCurrentGameCommand(userId int, gameId int) error {
-	queryName := "CreateCurrentGameQuery"
-	_, err := dbaccess.Exec(queryName, CreateCurrentGameQuery, userId, gameId)
+	_, err := dbaccess.Exec(createCurrentGameQuery, userId, gameId)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(createCurrentGameQuery, nil, err)
 
 	return err
 }
 
-const GetCurrentGameQuery = `SELECT * FROM get_current_game($1::integer)`
+var getCurrentGameQuery = dbaccess.Query{Name: "GetCurrentGameQuery", SQL: `SELECT * FROM get_current_game($1::integer)`}
 
 func (db *Database) GetCurrentGameCommand(userId int) (games typegames.CurrentGames, err error) {
-	queryName := "GetCurrentGameQuery"
-	games, err = db.getHistoryGames(queryName, GetCurrentGameQuery, userId)
+	games, err = db.getHistoryGames(getCurrentGameQuery, userId)
 
 	return
 }
 
-func (db *Database) getHistoryGames(queryName string, query string, userId int) (games typegames.CurrentGames, err error) {
-	rows, err := dbaccess.Query(queryName, query, userId)
+func (db *Database) getHistoryGames(q dbaccess.Query, userId int) (games typegames.CurrentGames, err error) {
+	rows, err := dbaccess.QueryRows(q, userId)
 
 	if err != nil {
 		return
@@ -160,7 +151,7 @@ func (db *Database) getHistoryGames(queryName string, query string, userId int) 
 		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.FinishDate)
 
 		if err != nil {
-			dbaccess.LogDbResult(queryName, games, err)
+			dbaccess.LogDbResult(q, games, err)
 
 			_ = rows.Close()
 			return
@@ -169,68 +160,64 @@ func (db *Database) getHistoryGames(queryName string, query string, userId int) 
 		games = append(games, game)
 	}
 
-	dbaccess.LogDbResult(queryName, games, err)
+	dbaccess.LogDbResult(q, games, err)
 
 	_ = rows.Close()
 	return
 }
 
-const GetGameSecondsSpentQuery = `SELECT get_game_seconds_spent($1::integer, $2::integer)`
+var getGameSecondsSpentQuery = dbaccess.Query{Name: "GetGameSecondsSpentQuery", SQL: `SELECT get_game_seconds_spent($1::integer, $2::integer)`}
 
 func (db *Database) GetGameTimeSpentCommand(userId int, gameId int) (timeSpent time.Duration, err error) {
-	queryName := "GetGameSecondsSpentQuery"
-	row := dbaccess.QueryRow(queryName, GetGameSecondsSpentQuery, userId, gameId)
+	row := dbaccess.QueryRow(getGameSecondsSpentQuery, userId, gameId)
 
 	var secondsSpent int
 	err = row.Scan(&secondsSpent)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		dbaccess.LogDbResult(queryName, timeSpent, err)
+		dbaccess.LogDbResult(getGameSecondsSpentQuery, timeSpent, err)
 
 		err = nil
 		return
 	}
 
 	if err != nil {
-		dbaccess.LogDbResult(queryName, timeSpent, err)
+		dbaccess.LogDbResult(getGameSecondsSpentQuery, timeSpent, err)
 
 		return
 	}
 
 	timeSpent = time.Duration(secondsSpent) * time.Second
 
-	dbaccess.LogDbResult(queryName, timeSpent, err)
+	dbaccess.LogDbResult(getGameSecondsSpentQuery, timeSpent, err)
 
 	return
 }
 
-const CancelCurrentGameQuery = `SELECT cancel_current_game($1::integer, $2::integer)`
+var cancelCurrentGameQuery = dbaccess.Query{Name: "CancelCurrentGameQuery", SQL: `SELECT cancel_current_game($1::integer, $2::integer)`}
 
 func (db *Database) CancelCurrentGameCommand(userId int, gameId int) error {
-	queryName := "CancelCurrentGameQuery"
-	_, err := dbaccess.Exec(queryName, CancelCurrentGameQuery, userId, gameId)
+	_, err := dbaccess.Exec(cancelCurrentGameQuery, userId, gameId)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(cancelCurrentGameQuery, nil, err)
 
 	return err
 }
 
-const FinishCurrentGameQuery = `SELECT finish_current_game($1::integer, $2::integer)`
+var finishCurrentGameQuery = dbaccess.Query{Name: "FinishCurrentGameQuery", SQL: `SELECT finish_current_game($1::integer, $2::integer)`}
 
 func (db *Database) FinishCurrentGameCommand(userId int, gameId int) error {
-	queryName := "FinishCurrentGameQuery"
-	_, err := dbaccess.Exec(queryName, FinishCurrentGameQuery, userId, gameId)
+	_, err := dbaccess.Exec(finishCurrentGameQuery, userId, gameId)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(finishCurrentGameQuery, nil, err)
 
 	return err
 }
 
-const GetGameHistoryQuery = `SELECT * FROM get_game_history($1::integer)`
+var getGameHistoryQuery = dbaccess.Query{Name: "GetGameHistoryQuery", SQL: `SELECT * FROM get_game_history($1::integer)`}
 
 func (db *Database) GetGameHistoryCommand(userId int) (games typegames.CurrentGames, err error) {
-	queryName := "GetGameHistoryQuery"
-	games, err = db.getHistoryGames(queryName, GetGameHistoryQuery, userId)
+	games, err = db.getHistoryGames(getGameHistoryQuery, userId)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
@@ -239,11 +226,10 @@ func (db *Database) GetGameHistoryCommand(userId int) (games typegames.CurrentGa
 	return
 }
 
-const GetAllCurrentGamesQuery = `SELECT * FROM get_all_current_games()`
+var getAllCurrentGamesQuery = dbaccess.Query{Name: "GetAllCurrentGamesQuery", SQL: `SELECT * FROM get_all_current_games()`}
 
 func (db *Database) GetAllCurrentGamesCommand() (games []typegames.CurrentGameWithLogin, err error) {
-	queryName := "GetAllCurrentGamesQuery"
-	rows, err := dbaccess.Query(queryName, GetAllCurrentGamesQuery)
+	rows, err := dbaccess.QueryRows(getAllCurrentGamesQuery)
 
 	if err != nil {
 		return
@@ -255,7 +241,7 @@ func (db *Database) GetAllCurrentGamesCommand() (games []typegames.CurrentGameWi
 		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.FinishDate, &login)
 
 		if err != nil {
-			dbaccess.LogDbResult(queryName, games, err)
+			dbaccess.LogDbResult(getAllCurrentGamesQuery, games, err)
 			_ = rows.Close()
 			return
 		}
@@ -263,7 +249,7 @@ func (db *Database) GetAllCurrentGamesCommand() (games []typegames.CurrentGameWi
 		games = append(games, typegames.CurrentGameWithLogin{Login: login, Game: game})
 	}
 
-	dbaccess.LogDbResult(queryName, games, err)
+	dbaccess.LogDbResult(getAllCurrentGamesQuery, games, err)
 	_ = rows.Close()
 	return
 }

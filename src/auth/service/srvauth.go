@@ -21,14 +21,12 @@ type IService interface {
 }
 
 type Service struct {
-	Database dbauth.Database
+	Database dbauth.IDatabase
 }
 
 func NewService() *Service {
-	db := new(dbauth.Database)
-
 	return &Service{
-		Database: *db,
+		Database: new(dbauth.Database),
 	}
 }
 

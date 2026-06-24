@@ -14,35 +14,32 @@ type IDatabase interface {
 type Database struct {
 }
 
-const ChangeDisplayNameQuery = `SELECT change_display_name($1::integer, $2::text)`
+var changeDisplayNameQuery = dbaccess.Query{Name: "ChangeDisplayNameQuery", SQL: `SELECT change_display_name($1::integer, $2::text)`}
 
 func (db *Database) ChangeDisplayNameCommand(userId int, displayName string) error {
-	queryName := "ChangeDisplayNameQuery"
-	_, err := dbaccess.Exec(queryName, ChangeDisplayNameQuery, userId, displayName)
+	_, err := dbaccess.Exec(changeDisplayNameQuery, userId, displayName)
 
-	dbaccess.LogDbResult(queryName, nil, err)
+	dbaccess.LogDbResult(changeDisplayNameQuery, nil, err)
 
 	return err
 }
 
-const GetDisplayNameQuery = `SELECT * FROM get_display_name($1::integer)`
+var getDisplayNameQuery = dbaccess.Query{Name: "GetDisplayNameQuery", SQL: `SELECT * FROM get_display_name($1::integer)`}
 
 func (db *Database) GetDisplayNameCommand(userId int) (displayName *string, err error) {
-	queryName := "GetDisplayNameQuery"
-	row := dbaccess.QueryRow(queryName, GetDisplayNameQuery, userId)
+	row := dbaccess.QueryRow(getDisplayNameQuery, userId)
 
 	err = row.Scan(&displayName)
 
-	dbaccess.LogDbResult(queryName, displayName, err)
+	dbaccess.LogDbResult(getDisplayNameQuery, displayName, err)
 
 	return
 }
 
-const GetAllUserNamesQuery = `SELECT * FROM get_all_user_names()`
+var getAllUserNamesQuery = dbaccess.Query{Name: "GetAllUserNamesQuery", SQL: `SELECT * FROM get_all_user_names()`}
 
 func (db *Database) GetAllUserNamesCommand() (users typeusers.Users, err error) {
-	queryName := "GetAllUserNamesQuery"
-	rows, err := dbaccess.Query(queryName, GetAllUserNamesQuery)
+	rows, err := dbaccess.QueryRows(getAllUserNamesQuery)
 
 	if err != nil {
 		return
@@ -60,7 +57,7 @@ func (db *Database) GetAllUserNamesCommand() (users typeusers.Users, err error) 
 		users = append(users, user)
 	}
 
-	dbaccess.LogDbResult(queryName, users, err)
+	dbaccess.LogDbResult(getAllUserNamesQuery, users, err)
 
 	_ = rows.Close()
 	return
