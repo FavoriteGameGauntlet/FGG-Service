@@ -31,9 +31,8 @@ type Service struct {
 	SysParamsService srvsysparams.IService
 }
 
-func NewService() *Service {
+func NewService(ts srvtimers.IService) *Service {
 	db := new(dbgames.Database)
-	ts := srvtimers.NewService()
 	gs := NewGettingService()
 	sps := srvsysparams.NewService()
 

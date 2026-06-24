@@ -6,6 +6,7 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/games/service"
 	"FGG-Service/src/games/types"
+	"FGG-Service/src/timers/service"
 	"FGG-Service/src/validator"
 	"net/http"
 
@@ -17,8 +18,8 @@ type Controller struct {
 	AuthService srvauth.IService
 }
 
-func NewController() *Controller {
-	s := srvgames.NewService()
+func NewController(ts srvtimers.IService) *Controller {
+	s := srvgames.NewService(ts)
 	as := srvauth.NewService()
 
 	return &Controller{

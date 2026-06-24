@@ -16,8 +16,7 @@ type Controller struct {
 	AuthService srvauth.Service
 }
 
-func NewController() *Controller {
-	s := srvtimers.NewService()
+func NewController(s *srvtimers.Service) *Controller {
 	as := srvauth.NewService()
 
 	return &Controller{

@@ -150,7 +150,49 @@ var GetOrCreateCurrentTimerTestCases = []GetOrCreateCurrentTimerTestCase{
 	},
 	{
 		// GetCurrentGameCommand, GetCurrentTimerCommand (no rows), and GetAvailableRollsCountCommand succeed.
-		// GetInt("DefaultTimerDurationInS") returns a database error. The error will return.
+		// GetInt("MaximumRollsCountForTimer") returns a database error. The error will return.
+		Name:   "SysParams_MaximumRolls_DatabaseError",
+		UserId: 1,
+		SetupMocks: func() (*dbtimermock.DatabaseMock, *dbgamesmock.DatabaseMock, *dbwheeleffectsmock.DatabaseMock, *srvsysparamsmock.ServiceMock) {
+			timerDb := new(dbtimermock.DatabaseMock)
+			gamesDb := new(dbgamesmock.DatabaseMock)
+			wheelDb := new(dbwheeleffectsmock.DatabaseMock)
+			spSvc := new(srvsysparamsmock.ServiceMock)
+
+			gamesDb.On("GetCurrentGameCommand", 1).Return(currentGame, nil)
+			timerDb.On("GetCurrentTimerCommand", 1).Return(typetimers.Timer{}, sql.ErrNoRows)
+			wheelDb.On("GetAvailableRollsCountCommand", 1).Return(0, nil)
+			spSvc.On("GetInt", typesysparams.ParamMaximumRollsCountForTimer).Return(0, dbError)
+
+			return timerDb, gamesDb, wheelDb, spSvc
+		},
+		ExpectedErrorIs: dbError,
+	},
+	{
+		// GetCurrentGameCommand, GetCurrentTimerCommand (no rows), GetAvailableRollsCountCommand,
+		// and GetInt("MaximumRollsCountForTimer") succeed. rollCount >= maximumRollsCountForTimer.
+		// The AvailableRollsExistConflictError will return.
+		Name:   "AvailableRollsExistConflict",
+		UserId: 1,
+		SetupMocks: func() (*dbtimermock.DatabaseMock, *dbgamesmock.DatabaseMock, *dbwheeleffectsmock.DatabaseMock, *srvsysparamsmock.ServiceMock) {
+			timerDb := new(dbtimermock.DatabaseMock)
+			gamesDb := new(dbgamesmock.DatabaseMock)
+			wheelDb := new(dbwheeleffectsmock.DatabaseMock)
+			spSvc := new(srvsysparamsmock.ServiceMock)
+
+			gamesDb.On("GetCurrentGameCommand", 1).Return(currentGame, nil)
+			timerDb.On("GetCurrentTimerCommand", 1).Return(typetimers.Timer{}, sql.ErrNoRows)
+			wheelDb.On("GetAvailableRollsCountCommand", 1).Return(5, nil)
+			spSvc.On("GetInt", typesysparams.ParamMaximumRollsCountForTimer).Return(5, nil)
+
+			return timerDb, gamesDb, wheelDb, spSvc
+		},
+		ExpectedErrorAs: new(common.ConflictError),
+	},
+	{
+		// GetCurrentGameCommand, GetCurrentTimerCommand (no rows), GetAvailableRollsCountCommand,
+		// and GetInt("MaximumRollsCountForTimer") succeed.
+		// GetInt("TimerDurationInS") returns a database error. The error will return.
 		Name:   "SysParams_DatabaseError",
 		UserId: 1,
 		SetupMocks: func() (*dbtimermock.DatabaseMock, *dbgamesmock.DatabaseMock, *dbwheeleffectsmock.DatabaseMock, *srvsysparamsmock.ServiceMock) {
@@ -162,6 +204,7 @@ var GetOrCreateCurrentTimerTestCases = []GetOrCreateCurrentTimerTestCase{
 			gamesDb.On("GetCurrentGameCommand", 1).Return(currentGame, nil)
 			timerDb.On("GetCurrentTimerCommand", 1).Return(typetimers.Timer{}, sql.ErrNoRows)
 			wheelDb.On("GetAvailableRollsCountCommand", 1).Return(0, nil)
+			spSvc.On("GetInt", typesysparams.ParamMaximumRollsCountForTimer).Return(10, nil)
 			spSvc.On("GetInt", typesysparams.ParamTimerDurationInS).Return(0, dbError)
 
 			return timerDb, gamesDb, wheelDb, spSvc
@@ -169,7 +212,8 @@ var GetOrCreateCurrentTimerTestCases = []GetOrCreateCurrentTimerTestCase{
 		ExpectedErrorIs: dbError,
 	},
 	{
-		// GetCurrentGameCommand, GetCurrentTimerCommand (no rows), and GetAvailableRollsCountCommand succeed.
+		// GetCurrentGameCommand, GetCurrentTimerCommand (no rows), GetAvailableRollsCountCommand,
+		// and GetInt("MaximumRollsCountForTimer") and GetInt("TimerDurationInS") succeed.
 		// CreateCurrentTimerCommand returns a database error. The error will return.
 		Name:   "CreateTimerDatabaseError",
 		UserId: 1,
@@ -182,6 +226,7 @@ var GetOrCreateCurrentTimerTestCases = []GetOrCreateCurrentTimerTestCase{
 			gamesDb.On("GetCurrentGameCommand", 1).Return(currentGame, nil)
 			timerDb.On("GetCurrentTimerCommand", 1).Return(typetimers.Timer{}, sql.ErrNoRows)
 			wheelDb.On("GetAvailableRollsCountCommand", 1).Return(0, nil)
+			spSvc.On("GetInt", typesysparams.ParamMaximumRollsCountForTimer).Return(10, nil)
 			spSvc.On("GetInt", typesysparams.ParamTimerDurationInS).Return(30, nil)
 			timerDb.On("CreateCurrentTimerCommand", 1, 1, 30).Return(dbError)
 
@@ -202,6 +247,7 @@ var GetOrCreateCurrentTimerTestCases = []GetOrCreateCurrentTimerTestCase{
 			gamesDb.On("GetCurrentGameCommand", 1).Return(currentGame, nil)
 			timerDb.On("GetCurrentTimerCommand", 1).Once().Return(typetimers.Timer{}, sql.ErrNoRows)
 			wheelDb.On("GetAvailableRollsCountCommand", 1).Return(0, nil)
+			spSvc.On("GetInt", typesysparams.ParamMaximumRollsCountForTimer).Return(10, nil)
 			spSvc.On("GetInt", typesysparams.ParamTimerDurationInS).Return(30, nil)
 			timerDb.On("CreateCurrentTimerCommand", 1, 1, 30).Return(nil)
 			timerDb.On("GetCurrentTimerCommand", 1).Once().Return(newTimer, nil)
