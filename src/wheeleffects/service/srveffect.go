@@ -112,6 +112,12 @@ func (s *Service) MakeEffectRoll(userId int) (effects typewheeleffects.WheelEffe
 		return
 	}
 
+	err = s.Database.ClearLastWheelEffectsCommand(userId)
+
+	if err != nil {
+		return
+	}
+
 	err = s.Database.AddLastRolledWheelEffectsCommand(userId, effects)
 
 	return
