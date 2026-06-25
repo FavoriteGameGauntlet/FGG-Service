@@ -143,11 +143,24 @@ func (s *Service) ApplyWheelEffectRoll(userId int, rollApply typewheeleffects.Wh
 		return
 	}
 
+	err = s.Database.MarkLastWheelEffectAppliedCommand(userId, effect.Id)
+
+	if err != nil {
+		return
+	}
+
+	var historyId int
+	historyId, err = s.Database.AddWheelEffectHistoryCommand(userId, effect.Id)
+
+	if err != nil {
+		return
+	}
+
 	results = make(typepoints.PointChangeResultByUserIds, len(rollApply.PointChangeByUserIds))
 
 	for i, pointChange := range rollApply.PointChangeByUserIds {
 		var changeResult typepoints.PointChangeResult
-		changeResult, err = s.PointService.ChangeFreePoints(pointChange.UserId, pointChange.PointChange, &effect.Id)
+		changeResult, err = s.PointService.ChangeFreePoints(pointChange.UserId, pointChange.PointChange, &historyId)
 
 		if err != nil {
 			return
@@ -159,14 +172,6 @@ func (s *Service) ApplyWheelEffectRoll(userId int, rollApply typewheeleffects.Wh
 			ChangeResult: changeResult,
 		}
 	}
-
-	err = s.Database.MarkLastWheelEffectAppliedCommand(userId, effect.Id)
-
-	if err != nil {
-		return
-	}
-
-	err = s.Database.AddWheelEffectHistoryCommand(userId, effect.Id)
 
 	return
 }

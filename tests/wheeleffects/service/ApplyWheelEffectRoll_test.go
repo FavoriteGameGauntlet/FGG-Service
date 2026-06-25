@@ -55,7 +55,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		ExpectedErrorCode: "WHEEL_EFFECT_NAME_NOT_FOUND",
 	},
 	{
-		// ChangeFreePoints fails for a change. The error returns and the roll isn't marked as applied.
+		// The roll is marked as applied and history is recorded, but ChangeFreePoints fails. The error returns.
 		Name:   "ChangeFreePoints_Error",
 		UserId: 1,
 		RollApply: typewheeleffects.WheelEffectRollApply{
@@ -72,6 +72,8 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 				Return(typewheeleffects.RolledWheelEffects{
 					{Id: 42, Name: "test-effect", IsApplied: false},
 				}, nil)
+			databaseMock.On("MarkLastWheelEffectAppliedCommand", 1, 42).Return(nil)
+			databaseMock.On("AddWheelEffectHistoryCommand", 1, 42).Return(100, nil)
 
 			return databaseMock
 		},
@@ -83,7 +85,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		ExpectedError: dbError,
 	},
 	{
-		// All point changes succeed but marking the roll as applied fails. The error returns and the history isn't recorded.
+		// Marking the roll as applied fails. The error returns and neither the history nor ChangeFreePoints are called.
 		Name:   "MarkEffectRollAsApplied_Error",
 		UserId: 1,
 		RollApply: typewheeleffects.WheelEffectRollApply{
@@ -105,22 +107,12 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 			return databaseMock
 		},
 		SetupPointsMock: func() *dbpointsmock.DatabaseMock {
-			databaseMock := new(dbpointsmock.DatabaseMock)
-			databaseMock.On("GetFreePointsCommand", 2).Return(10, nil)
-			databaseMock.On("ChangeFreePointsCommand", 2, 5).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 2, 1, typepoints.FreePointsChangeSourceQuestCompletion, 5, 5, 15, ptr(42)).Return(nil)
-			return databaseMock
-		},
-		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
-			spSvc := new(srvsysparamsmock.ServiceMock)
-			spSvc.On("GetInt", typesysparams.ParamFreePointsMinimum).Return(0, nil)
-			spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(true, nil)
-			return spSvc
+			return new(dbpointsmock.DatabaseMock)
 		},
 		ExpectedError: dbError,
 	},
 	{
-		// Marking the roll as applied succeeds but recording the history fails. The error returns.
+		// Marking the roll as applied succeeds but recording the history fails. The error returns and ChangeFreePoints is never called.
 		Name:   "AddWheelEffectHistory_Error",
 		UserId: 1,
 		RollApply: typewheeleffects.WheelEffectRollApply{
@@ -138,22 +130,12 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 					{Id: 42, Name: "test-effect", IsApplied: false},
 				}, nil)
 			databaseMock.On("MarkLastWheelEffectAppliedCommand", 1, 42).Return(nil)
-			databaseMock.On("AddWheelEffectHistoryCommand", 1, 42).Return(dbError)
+			databaseMock.On("AddWheelEffectHistoryCommand", 1, 42).Return(0, dbError)
 
 			return databaseMock
 		},
 		SetupPointsMock: func() *dbpointsmock.DatabaseMock {
-			databaseMock := new(dbpointsmock.DatabaseMock)
-			databaseMock.On("GetFreePointsCommand", 2).Return(10, nil)
-			databaseMock.On("ChangeFreePointsCommand", 2, 5).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 2, 1, typepoints.FreePointsChangeSourceQuestCompletion, 5, 5, 15, ptr(42)).Return(nil)
-			return databaseMock
-		},
-		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
-			spSvc := new(srvsysparamsmock.ServiceMock)
-			spSvc.On("GetInt", typesysparams.ParamFreePointsMinimum).Return(0, nil)
-			spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(true, nil)
-			return spSvc
+			return new(dbpointsmock.DatabaseMock)
 		},
 		ExpectedError: dbError,
 	},
@@ -177,7 +159,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 					{Id: 42, Name: "test-effect", IsApplied: false},
 				}, nil)
 			databaseMock.On("MarkLastWheelEffectAppliedCommand", 1, 42).Return(nil)
-			databaseMock.On("AddWheelEffectHistoryCommand", 1, 42).Return(nil)
+			databaseMock.On("AddWheelEffectHistoryCommand", 1, 42).Return(100, nil)
 
 			return databaseMock
 		},
@@ -185,10 +167,10 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetFreePointsCommand", 2).Return(10, nil)
 			databaseMock.On("ChangeFreePointsCommand", 2, 5).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 2, 1, typepoints.FreePointsChangeSourceQuestCompletion, 5, 5, 15, ptr(42)).Return(nil)
+			databaseMock.On("AddFreePointHistoryCommand", 2, 1, typepoints.FreePointsChangeSourceQuestCompletion, 5, 5, 15, ptr(100)).Return(nil)
 			databaseMock.On("GetFreePointsCommand", 3).Return(4, nil)
 			databaseMock.On("ChangeFreePointsCommand", 3, -2).Return(nil)
-			databaseMock.On("AddFreePointHistoryCommand", 3, 1, typepoints.FreePointsChangeSourceOther, -2, -2, 2, ptr(42)).Return(nil)
+			databaseMock.On("AddFreePointHistoryCommand", 3, 1, typepoints.FreePointsChangeSourceOther, -2, -2, 2, ptr(100)).Return(nil)
 			return databaseMock
 		},
 		SetupSysParams: func() *srvsysparamsmock.ServiceMock {

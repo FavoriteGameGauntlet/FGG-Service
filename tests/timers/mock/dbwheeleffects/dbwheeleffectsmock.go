@@ -67,7 +67,9 @@ func (m *DatabaseMock) MarkLastWheelEffectAppliedCommand(userId int, wheelEffect
 	return args.Error(0)
 }
 
-func (m *DatabaseMock) AddWheelEffectHistoryCommand(userId int, wheelEffectId int) error {
+func (m *DatabaseMock) AddWheelEffectHistoryCommand(userId int, wheelEffectId int) (historyId int, err error) {
 	args := m.Called(userId, wheelEffectId)
-	return args.Error(0)
+	historyId = args.Int(0)
+	err = args.Error(1)
+	return
 }
