@@ -10,6 +10,11 @@ type DatabaseMock struct {
 	mock.Mock
 }
 
+func (m *DatabaseMock) ChangeAvailableRollsCommand(userId int, changeValue int) error {
+	args := m.Called(userId, changeValue)
+	return args.Error(0)
+}
+
 func (m *DatabaseMock) GetExperiencePointsCommand(userId int) (points int, err error) {
 	args := m.Called(userId)
 	points = args.Get(0).(int)

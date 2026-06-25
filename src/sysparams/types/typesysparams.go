@@ -8,18 +8,22 @@ type SystemParameter struct {
 }
 
 const (
-	ParamMinimumNumberOfUnplayedGames      = "MinimumNumberOfUnplayedGames"
+	ParamMinimumNumberOfWishlistGames = "MinimumNumberOfWishlistGames"
+
 	ParamTimerDurationInS                  = "TimerDurationInS"
-	ParamAvailableRollsIncreaseByTimer     = "AvailableRollsIncreaseByTimer"
-	ParamTerritoryHoursIncreaseByTimer     = "TerritoryHoursIncreaseByTimer"
-	ParamExperiencePointsIncreaseByTimer   = "ExperiencePointsIncreaseByTimer"
-	ParamExperiencePointsLevelUp           = "ExperiencePointsLevelUp"
-	ParamTerritoryHoursSeizeDecreaseSlice  = "TerritoryHoursSeizeDecreaseSlice"
-	ParamFreePointsMinimum                 = "FreePointsMinimum"
-	ParamShouldLimitFreePoints             = "ShouldLimitFreePoints"
-	ParamMinimumWheelEffectsForRoll        = "MinimumWheelEffectsForRoll"
-	ParamSeizePenaltyPoints                = "SeizePenaltyPoints"
 	ParamTimerFinisherSchedulerIntervalInS = "TimerFinisherSchedulerIntervalInS"
-	ParamMinimumRollsCountForEffectRoll    = "MinimumRollsCountForEffectRoll"
-	ParamMaximumRollsCountForTimer         = "MaximumRollsCountForTimer"
+	ParamMaximumAvailableRollCountForTimer = "MaximumAvailableRollCountForTimer"
+
+	ParamAvailableRollChangeByTimer      = "AvailableRollChangeByTimer"
+	ParamAvailableRollChangeByRoll       = "AvailableRollChangeByRoll"
+	ParamTerritoryHourChangeByTimer      = "TerritoryHourChangeByTimer"
+	ParamExperiencePointChangeByTimer    = "ExperiencePointChangeByTimer"
+	ParamExperiencePointByLevelUp        = "ExperiencePointChangeByLevelUp"
+	ParamTerritoryHourChangeBySeizeSlice = "TerritoryHourChangeBySeizeSlice"
+	ParamFreePointsMinimum               = "FreePointsMinimum"
+	ParamShouldLimitFreePoints           = "ShouldLimitFreePoints"
+	ParamSeizePenaltyPoints              = "SeizePenaltyPoints"
+
+	ParamMinimumAvailableRollCountForRoll    = "MinimumAvailableRollCountForRoll"
+	ParamMinimumAvailableWheelEffectsForRoll = "MinimumAvailableWheelEffectsForRoll"
 )

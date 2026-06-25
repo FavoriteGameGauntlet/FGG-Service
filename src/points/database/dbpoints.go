@@ -6,6 +6,7 @@ import (
 )
 
 type IDatabase interface {
+	ChangeAvailableRollsCommand(userId int, changeValue int) error
 	GetExperiencePointsCommand(userId int) (points int, err error)
 	ChangeExperiencePointsCommand(userId int, changeValue int) error
 	GetFreePointsCommand(userId int) (points int, err error)

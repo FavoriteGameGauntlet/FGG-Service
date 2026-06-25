@@ -13,7 +13,6 @@ type IDatabase interface {
 	GetEffectHistoryCommand(userId int) (effects typewheeleffects.RolledWheelEffectHistories, err error)
 	GetEffectHistoryByEffectNameCommand(userId int, effectName string) (effect typewheeleffects.RolledWheelEffect, err error)
 	MakeEffectRollCommand(userId int) (effects typewheeleffects.WheelEffects, err error)
-	DecreaseAvailableRollsValueCommand(userId int) error
 	AddLastRolledWheelEffectsCommand(userId int, effects typewheeleffects.WheelEffects) (err error)
 	GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error)
 	MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId int) error
@@ -137,16 +136,6 @@ func (db *Database) MakeEffectRollCommand(userId int) (effects typewheeleffects.
 
 	_ = rows.Close()
 	return
-}
-
-var decreaseAvailableRollsValueQuery = dbaccess.Query{Name: "DecreaseAvailableRollsValueQuery", SQL: `SELECT decrease_available_rolls($1::integer)`}
-
-func (db *Database) DecreaseAvailableRollsValueCommand(userId int) error {
-	_, err := dbaccess.Exec(decreaseAvailableRollsValueQuery, userId)
-
-	dbaccess.LogDbResult(decreaseAvailableRollsValueQuery, nil, err)
-
-	return err
 }
 
 var addLastRolledWheelEffectsQuery = dbaccess.Query{Name: "AddLastRolledWheelEffectsQuery", SQL: `SELECT add_last_rolled_wheel_effect($1::integer, $2::integer, $3::integer)`}
