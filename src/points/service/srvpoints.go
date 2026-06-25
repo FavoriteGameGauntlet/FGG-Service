@@ -25,6 +25,10 @@ func NewService() *Service {
 	}
 }
 
+func (s *Service) ChangeAvailableRolls(userId int, changeValue int) error {
+	return s.Database.ChangeAvailableRollsCommand(userId, changeValue)
+}
+
 func (s *Service) GetExperiencePoints(userId int) (int, error) {
 	return s.Database.GetExperiencePointsCommand(userId)
 }
@@ -167,8 +171,8 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 	}
 
 	if pointChange.ChangeSource == typepoints.TerritoryHourChangeSourceSeize {
-		var seizeDecreaseSlice []int
-		seizeDecreaseSlice, err = s.SysParamsService.GetIntSlice(typesysparams.ParamTerritoryHoursSeizeDecreaseSlice)
+		var territoryHourChangeBySeizeSlice []int
+		territoryHourChangeBySeizeSlice, err = s.SysParamsService.GetIntSlice(typesysparams.ParamTerritoryHourChangeBySeizeSlice)
 
 		if err != nil {
 			return
@@ -181,7 +185,7 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 			return
 		}
 
-		err = validateSeizeChange(pointChange, seizeDecreaseSlice, seizePenaltyPoints)
+		err = validateSeizeChange(pointChange, territoryHourChangeBySeizeSlice, seizePenaltyPoints)
 
 		if err != nil {
 			return
@@ -334,15 +338,15 @@ func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.Poin
 		return
 	}
 
-	var experiencePointsLevelUp int
+	var experiencePointByLevelUp int
 	if pointChange.ChangeSource == typepoints.ExperienceChangeSourceLevelUp {
-		experiencePointsLevelUp, err = s.SysParamsService.GetInt(typesysparams.ParamExperiencePointsLevelUp)
+		experiencePointByLevelUp, err = s.SysParamsService.GetInt(typesysparams.ParamExperiencePointByLevelUp)
 
 		if err != nil {
 			return
 		}
 
-		err = validateLevelUpChange(pointChange, experiencePointsLevelUp)
+		err = validateLevelUpChange(pointChange, experiencePointByLevelUp)
 
 		if err != nil {
 			return
@@ -362,7 +366,7 @@ func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.Poin
 
 		err = common.NewNotEnoughCurrentPointsConflictError(
 			pointChange.ChangeSource,
-			-experiencePointsLevelUp)
+			-experiencePointByLevelUp)
 		return
 	}
 

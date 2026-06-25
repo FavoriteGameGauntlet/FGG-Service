@@ -23,7 +23,7 @@ type IService interface {
 type Service struct {
 	Database               dbtimers.IDatabase
 	GamesDatabase          dbgames.IDatabase
-	PointsDatabase         dbpoints.Database
+	PointsDatabase         dbpoints.IDatabase
 	WheelEffectsDatabase   dbwheeleffects.IDatabase
 	SysParamsService       srvsysparams.IService
 	TimerFinisherScheduler gocron.Scheduler
@@ -32,12 +32,14 @@ type Service struct {
 func NewService() *Service {
 	db := new(dbtimers.Database)
 	gdb := new(dbgames.Database)
+	pdb := new(dbpoints.Database)
 	wedb := new(dbwheeleffects.Database)
 	sp := srvsysparams.NewService()
 
 	s := &Service{
 		Database:             db,
 		GamesDatabase:        gdb,
+		PointsDatabase:       pdb,
 		WheelEffectsDatabase: wedb,
 		SysParamsService:     sp,
 	}
@@ -110,13 +112,13 @@ func (s *Service) GetOrCreateCurrentTimer(userId int) (timer typetimers.Timer, e
 		return
 	}
 
-	maximumRollsCountForTimer, err := s.SysParamsService.GetInt(typesysparams.ParamMaximumRollsCountForTimer)
+	maximumAvailableRollCountForTimer, err := s.SysParamsService.GetInt(typesysparams.ParamMaximumAvailableRollCountForTimer)
 
 	if err != nil {
 		return
 	}
 
-	if rollCount >= maximumRollsCountForTimer {
+	if rollCount >= maximumAvailableRollCountForTimer {
 		err = common.NewAvailableRollsExistConflictError()
 		return
 	}
@@ -235,19 +237,19 @@ func (s *Service) StopAllCompletedTimers() error {
 		return err
 	}
 
-	availableRollsIncreasing, err := s.SysParamsService.GetInt(typesysparams.ParamAvailableRollsIncreaseByTimer)
+	availableRollChangeByTimer, err := s.SysParamsService.GetInt(typesysparams.ParamAvailableRollChangeByTimer)
 
 	if err != nil {
 		return err
 	}
 
-	territoryHoursIncreasing, err := s.SysParamsService.GetInt(typesysparams.ParamTerritoryHoursIncreaseByTimer)
+	territoryHourChangeByTimer, err := s.SysParamsService.GetInt(typesysparams.ParamTerritoryHourChangeByTimer)
 
 	if err != nil {
 		return err
 	}
 
-	experiencePointsIncreasing, err := s.SysParamsService.GetInt(typesysparams.ParamExperiencePointsIncreaseByTimer)
+	experiencePointChangeByTimer, err := s.SysParamsService.GetInt(typesysparams.ParamExperiencePointChangeByTimer)
 
 	if err != nil {
 		return err
@@ -255,9 +257,9 @@ func (s *Service) StopAllCompletedTimers() error {
 
 	for _, userId := range userIds {
 		_, _ = s.StopCurrentTimer(userId)
-		_ = s.PointsDatabase.ChangeAvailableRollsCommand(userId, availableRollsIncreasing)
-		_ = s.PointsDatabase.ChangeTerritoryHoursCommand(userId, territoryHoursIncreasing)
-		_ = s.PointsDatabase.ChangeExperiencePointsCommand(userId, experiencePointsIncreasing)
+		_ = s.PointsDatabase.ChangeAvailableRollsCommand(userId, availableRollChangeByTimer)
+		_ = s.PointsDatabase.ChangeTerritoryHoursCommand(userId, territoryHourChangeByTimer)
+		_ = s.PointsDatabase.ChangeExperiencePointsCommand(userId, experiencePointChangeByTimer)
 	}
 
 	return nil

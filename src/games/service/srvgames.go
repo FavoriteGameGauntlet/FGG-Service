@@ -182,14 +182,14 @@ func (s *Service) MakeGameRoll(userId int) (game typegames.CurrentGame, err erro
 		return
 	}
 
-	minimumNumberOfUnplayedGames, err := s.SysParamsService.GetInt(typesysparams.ParamMinimumNumberOfUnplayedGames)
+	minimumNumberOfWishlistGames, err := s.SysParamsService.GetInt(typesysparams.ParamMinimumNumberOfWishlistGames)
 
 	if err != nil {
 		return
 	}
 
-	if unplayedGames == nil || len(unplayedGames) < minimumNumberOfUnplayedGames {
-		err = common.NewUnplayedGamesNotFoundError(minimumNumberOfUnplayedGames)
+	if unplayedGames == nil || len(unplayedGames) < minimumNumberOfWishlistGames {
+		err = common.NewUnplayedGamesNotFoundError(minimumNumberOfWishlistGames)
 		return
 	}
 

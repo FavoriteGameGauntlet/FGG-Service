@@ -38,11 +38,6 @@ func (m *DatabaseMock) MakeEffectRollCommand(userId int) (effects typewheeleffec
 	return
 }
 
-func (m *DatabaseMock) DecreaseAvailableRollsValueCommand(userId int) error {
-	args := m.Called(userId)
-	return args.Error(0)
-}
-
 func (m *DatabaseMock) AddLastRolledWheelEffectsCommand(userId int, effects typewheeleffects.WheelEffects) error {
 	args := m.Called(userId, effects)
 	return args.Error(0)

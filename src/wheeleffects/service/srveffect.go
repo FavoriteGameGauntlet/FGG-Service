@@ -2,7 +2,7 @@ package srvwheeleffects
 
 import (
 	"FGG-Service/src/common"
-	"FGG-Service/src/points/service"
+	srvpoints "FGG-Service/src/points/service"
 	"FGG-Service/src/points/type"
 	"FGG-Service/src/sysparams/service"
 	"FGG-Service/src/sysparams/types"
@@ -72,13 +72,13 @@ func (s *Service) MakeEffectRoll(userId int) (effects typewheeleffects.WheelEffe
 		return
 	}
 
-	minimumRollsCountForEffectRoll, err := s.SysParamsService.GetInt(typesysparams.ParamMinimumRollsCountForEffectRoll)
+	minimumAvailableRollCountForRoll, err := s.SysParamsService.GetInt(typesysparams.ParamMinimumAvailableRollCountForRoll)
 
 	if err != nil {
 		return
 	}
 
-	if rollCount < minimumRollsCountForEffectRoll {
+	if rollCount < minimumAvailableRollCountForRoll {
 		err = common.NewAvailableRollsNotFoundError()
 		return
 	}
@@ -89,18 +89,24 @@ func (s *Service) MakeEffectRoll(userId int) (effects typewheeleffects.WheelEffe
 		return
 	}
 
-	minimumWheelEffectsForRoll, err := s.SysParamsService.GetInt(typesysparams.ParamMinimumWheelEffectsForRoll)
+	minimumAvailableWheelEffectsForRoll, err := s.SysParamsService.GetInt(typesysparams.ParamMinimumAvailableWheelEffectsForRoll)
 
 	if err != nil {
 		return
 	}
 
-	if len(effects) < minimumWheelEffectsForRoll {
+	if len(effects) < minimumAvailableWheelEffectsForRoll {
 		err = common.NewNotEnoughAvailableWheelEffectsConflictError()
 		return
 	}
 
-	err = s.Database.DecreaseAvailableRollsValueCommand(userId)
+	availableRollChangeByRoll, err := s.SysParamsService.GetInt(typesysparams.ParamAvailableRollChangeByRoll)
+
+	if err != nil {
+		return
+	}
+
+	err = s.PointService.ChangeAvailableRolls(userId, availableRollChangeByRoll)
 
 	if err != nil {
 		return
