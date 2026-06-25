@@ -17,7 +17,7 @@ type IDatabase interface {
 	AddLastRolledWheelEffectsCommand(userId int, effects typewheeleffects.WheelEffects) (err error)
 	GetLastRolledWheelEffectsCommand(userId int) (effects typewheeleffects.RolledWheelEffects, err error)
 	MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId int) error
-	AddWheelEffectHistoryCommand(userId int, wheelEffectId int) error
+	AddWheelEffectHistoryCommand(userId int, wheelEffectId int) (historyId int, err error)
 }
 
 type Database struct {
@@ -215,10 +215,11 @@ func (db *Database) MarkLastWheelEffectAppliedCommand(userId int, wheelEffectId 
 
 var addWheelEffectHistoryQuery = dbaccess.Query{Name: "AddWheelEffectHistoryQuery", SQL: `SELECT add_wheel_effect_history($1::integer, $2::integer)`}
 
-func (db *Database) AddWheelEffectHistoryCommand(userId int, wheelEffectId int) error {
-	_, err := dbaccess.Exec(addWheelEffectHistoryQuery, userId, wheelEffectId)
+func (db *Database) AddWheelEffectHistoryCommand(userId int, wheelEffectId int) (historyId int, err error) {
+	row := dbaccess.QueryRow(addWheelEffectHistoryQuery, userId, wheelEffectId)
+	err = row.Scan(&historyId)
 
-	dbaccess.LogDbResult(addWheelEffectHistoryQuery, nil, err)
+	dbaccess.LogDbResult(addWheelEffectHistoryQuery, historyId, err)
 
-	return err
+	return
 }
