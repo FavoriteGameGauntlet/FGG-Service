@@ -2,7 +2,7 @@ package dbpoints
 
 import (
 	"FGG-Service/src/dbaccess"
-	typepoints "FGG-Service/src/points/type"
+	"FGG-Service/src/points/type"
 )
 
 type IDatabase interface {
@@ -181,10 +181,7 @@ func (db *Database) GetPointInfoCommand(userId int) (info typepoints.PointInfo, 
 
 	err = row.Scan(
 		&info.TerritoryPoints,
-		&info.FreePoints,
-		&info.AvailableRolls,
-		&info.TerritoryHours,
-		&info.ExperiencePoints)
+		&info.FreePoints)
 
 	dbaccess.LogDbResult(getPointInfoQuery, info, err)
 
@@ -205,10 +202,7 @@ func (db *Database) GetAllPointInfoCommand() (infos typepoints.PointInfoByLogins
 		err = rows.Scan(
 			&info.Login,
 			&info.PointInfo.TerritoryPoints,
-			&info.PointInfo.FreePoints,
-			&info.PointInfo.AvailableRolls,
-			&info.PointInfo.TerritoryHours,
-			&info.PointInfo.ExperiencePoints)
+			&info.PointInfo.FreePoints)
 
 		if err != nil {
 			_ = rows.Close()

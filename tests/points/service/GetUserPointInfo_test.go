@@ -18,11 +18,8 @@ type GetUserPointInfoTestCase struct {
 }
 
 var pointInfo = typepoints.PointInfo{
-	TerritoryPoints:  1,
-	FreePoints:       2,
-	AvailableRolls:   3,
-	TerritoryHours:   4,
-	ExperiencePoints: 5,
+	TerritoryPoints: 1,
+	FreePoints:      2,
 }
 
 var GetUserPointInfoTestCases = []GetUserPointInfoTestCase{

@@ -72,11 +72,8 @@ type TerritoryPointChangeHistory struct {
 type TerritoryPointChangeHistories = []TerritoryPointChangeHistory
 
 type PointInfo struct {
-	TerritoryPoints  int
-	FreePoints       int
-	AvailableRolls   int
-	TerritoryHours   int
-	ExperiencePoints int
+	TerritoryPoints int
+	FreePoints      int
 }
 
 type PointInfoByLogin struct {
