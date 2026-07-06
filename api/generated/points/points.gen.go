@@ -69,11 +69,8 @@ type PointChangeResult struct {
 
 // PointInfo defines model for PointInfo.
 type PointInfo struct {
-	AvailableRolls   Points `json:"availableRolls"`
-	ExperiencePoints Points `json:"experiencePoints"`
-	FreePoints       Points `json:"freePoints"`
-	TerritoryHours   Points `json:"territoryHours"`
-	TerritoryPoints  Points `json:"territoryPoints"`
+	FreePoints      Points `json:"freePoints"`
+	TerritoryPoints Points `json:"territoryPoints"`
 }
 
 // PointInfoByLogins defines model for PointInfoByLogins.

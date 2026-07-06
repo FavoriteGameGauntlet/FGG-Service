@@ -199,18 +199,9 @@ components:
           $ref: '#/components/schemas/Points'
         freePoints:
           $ref: '#/components/schemas/Points'
-        availableRolls:
-          $ref: '#/components/schemas/Points'
-        territoryHours:
-          $ref: '#/components/schemas/Points'
-        experiencePoints:
-          $ref: '#/components/schemas/Points'
       required:
         - territoryPoints
         - freePoints
-        - availableRolls
-        - territoryHours
-        - experiencePoints
     Error:
       type: object
       properties:

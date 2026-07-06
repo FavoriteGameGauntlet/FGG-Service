@@ -6,8 +6,8 @@ import (
 	"FGG-Service/src/common"
 	"FGG-Service/src/points/service"
 	"FGG-Service/src/points/type"
-	srvwheeleffects "FGG-Service/src/wheeleffects/service"
-	typewheeleffects "FGG-Service/src/wheeleffects/types"
+	"FGG-Service/src/wheeleffects/service"
+	"FGG-Service/src/wheeleffects/types"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -263,11 +263,8 @@ func (c *Controller) GetUserPointInfo(ctx echo.Context, login genpoints.Login) e
 
 func convertPointInfoToDto(info typepoints.PointInfo) genpoints.PointInfo {
 	return genpoints.PointInfo{
-		TerritoryPoints:  info.TerritoryPoints,
-		FreePoints:       info.FreePoints,
-		AvailableRolls:   info.AvailableRolls,
-		TerritoryHours:   info.TerritoryHours,
-		ExperiencePoints: info.ExperiencePoints,
+		TerritoryPoints: info.TerritoryPoints,
+		FreePoints:      info.FreePoints,
 	}
 }
 
