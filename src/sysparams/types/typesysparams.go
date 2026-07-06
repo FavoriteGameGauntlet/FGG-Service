@@ -20,6 +20,8 @@ const (
 	ParamExperiencePointChangeByTimer    = "ExperiencePointChangeByTimer"
 	ParamExperiencePointByLevelUp        = "ExperiencePointChangeByLevelUp"
 	ParamTerritoryHourChangeBySeizeSlice = "TerritoryHourChangeBySeizeSlice"
+	ParamFreePointChangeBySandstorm      = "FreePointChangeBySandstorm"
+	ParamFreePointChangeByBaseTeleport   = "FreePointChangeByBaseTeleport"
 	ParamFreePointsMinimum               = "FreePointsMinimum"
 	ParamShouldLimitFreePoints           = "ShouldLimitFreePoints"
 	ParamSeizePenaltyPoints              = "SeizePenaltyPoints"

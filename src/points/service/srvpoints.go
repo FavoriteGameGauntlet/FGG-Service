@@ -77,9 +77,30 @@ func (s *Service) ChangeFreePoints(userId int, pointChange typepoints.FreePointC
 		}
 	}
 
-	if pointChange.ChangeSource == typepoints.FreePointsChangeSourceBaseTeleport ||
-		pointChange.ChangeSource == typepoints.FreePointsChangeSourceSandStorm {
-		err = validateTeleportBaseOrSandstormChange(pointChange)
+	if pointChange.ChangeSource == typepoints.FreePointsChangeSourceBaseTeleport {
+		var freePointChangeByBaseTeleport int
+		freePointChangeByBaseTeleport, err = s.SysParamsService.GetInt(typesysparams.ParamFreePointChangeByBaseTeleport)
+
+		if err != nil {
+			return
+		}
+
+		err = validateBaseTeleportChange(pointChange, freePointChangeByBaseTeleport)
+
+		if err != nil {
+			return
+		}
+	}
+
+	if pointChange.ChangeSource == typepoints.FreePointsChangeSourceSandStorm {
+		var freePointChangeBySandstorm int
+		freePointChangeBySandstorm, err = s.SysParamsService.GetInt(typesysparams.ParamFreePointChangeBySandstorm)
+
+		if err != nil {
+			return
+		}
+
+		err = validateSandstormChange(pointChange, freePointChangeBySandstorm)
 
 		if err != nil {
 			return
@@ -152,11 +173,21 @@ func validateWheelEffectChange(pointChange typepoints.FreePointChange, effectId 
 	return nil
 }
 
-func validateTeleportBaseOrSandstormChange(pointChange typepoints.FreePointChange) error {
-	if pointChange.DesiredChangeValue > 0 {
+func validateBaseTeleportChange(pointChange typepoints.FreePointChange, expectedChangeValue int) error {
+	if pointChange.DesiredChangeValue != expectedChangeValue {
 		return common.NewWrongDesiredChangeValueConflictError(
 			pointChange.ChangeSource,
-			common.ConstraintZeroOrLess)
+			strconv.Itoa(expectedChangeValue))
+	}
+
+	return nil
+}
+
+func validateSandstormChange(pointChange typepoints.FreePointChange, expectedChangeValue int) error {
+	if pointChange.DesiredChangeValue != expectedChangeValue {
+		return common.NewWrongDesiredChangeValueConflictError(
+			pointChange.ChangeSource,
+			strconv.Itoa(expectedChangeValue))
 	}
 
 	return nil
