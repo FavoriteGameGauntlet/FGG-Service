@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Favorite Game Gauntlet
-  version: 0.12.7
+  version: 0.13.0
 paths:
   /games/{login}/wishlist:
     post:
@@ -179,6 +179,9 @@ components:
             - cancelled
         timeSpent:
           $ref: '#/components/schemas/Duration'
+        startDate:
+          type: string
+          format: date-time
         finishDate:
           type: string
           format: date-time
@@ -186,6 +189,7 @@ components:
         - name
         - state
         - timeSpent
+        - startDate
     CurrentGameByLogins:
       type: array
       items:

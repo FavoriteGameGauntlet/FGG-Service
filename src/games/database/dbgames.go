@@ -148,7 +148,7 @@ func (db *Database) getHistoryGames(q dbaccess.Query, userId int) (games typegam
 
 	for rows.Next() {
 		game := typegames.CurrentGame{}
-		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.FinishDate)
+		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.StartDate, &game.FinishDate)
 
 		if err != nil {
 			dbaccess.LogDbResult(q, games, err)
@@ -238,7 +238,7 @@ func (db *Database) GetAllCurrentGamesCommand() (games []typegames.CurrentGameWi
 	for rows.Next() {
 		game := typegames.CurrentGame{}
 		var login string
-		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.FinishDate, &login)
+		err = rows.Scan(&game.Id, &game.Name, &game.State, &game.StartDate, &game.FinishDate, &login)
 
 		if err != nil {
 			dbaccess.LogDbResult(getAllCurrentGamesQuery, games, err)

@@ -23,6 +23,7 @@ const (
 type CurrentGame struct {
 	FinishDate *time.Time       `json:"finishDate,omitempty"`
 	Name       Name             `json:"name"`
+	StartDate  time.Time        `json:"startDate"`
 	State      CurrentGameState `json:"state"`
 
 	// TimeSpent The duration notation as defined by ISO 8601
