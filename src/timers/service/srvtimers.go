@@ -227,6 +227,11 @@ func (s *Service) actCurrentTimer(
 
 	timer, err = s.Database.GetCurrentTimerCommand(userId)
 
+	if errors.Is(err, sql.ErrNoRows) {
+		err = common.NewCurrentTimerNotFoundError()
+		return
+	}
+
 	return
 }
 
