@@ -7,7 +7,10 @@ properties:
     enum: [ "started", "finished", "cancelled" ]
   timeSpent:
     $ref: "./Duration.yaml"
+  startDate:
+    type: string
+    format: date-time
   finishDate:
     type: string
     format: date-time
-required: [ name, state, timeSpent ]
+required: [ name, state, timeSpent, startDate ]

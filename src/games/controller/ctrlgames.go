@@ -63,6 +63,7 @@ func convertGameToDto(game typegames.CurrentGame) gengames.CurrentGame {
 		Name:       game.Name,
 		State:      gengames.CurrentGameState(game.State),
 		TimeSpent:  common.DurationToISO8601(game.TimeSpent),
+		StartDate:  game.StartDate,
 		FinishDate: game.FinishDate,
 	}
 }

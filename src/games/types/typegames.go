@@ -7,6 +7,7 @@ type CurrentGame struct {
 	Name       string
 	State      CurrentGameState
 	TimeSpent  time.Duration
+	StartDate  time.Time
 	FinishDate *time.Time
 }
 
