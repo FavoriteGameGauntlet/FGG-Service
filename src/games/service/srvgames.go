@@ -149,15 +149,15 @@ func (s *Service) FinishCurrentGame(userId int) error {
 func (s *Service) GetGameHistory(userId int) (games typegames.CurrentGames, err error) {
 	games, err = s.Database.GetGameHistoryCommand(userId)
 
-	for _, game := range games {
+	for i := range games {
 		var timeSpent time.Duration
-		timeSpent, err = s.Database.GetGameTimeSpentCommand(userId, game.Id)
+		timeSpent, err = s.Database.GetGameTimeSpentCommand(userId, games[i].Id)
 
 		if err != nil {
 			return
 		}
 
-		game.TimeSpent = timeSpent
+		games[i].TimeSpent = timeSpent
 	}
 
 	return

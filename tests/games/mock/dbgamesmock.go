@@ -91,6 +91,8 @@ func (m *DatabaseMock) GetAllCurrentGamesCommand() (games []typegames.CurrentGam
 }
 
 func (m *DatabaseMock) GetGameHistoryCommand(userId int) (games typegames.CurrentGames, err error) {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(userId)
+	games = args.Get(0).(typegames.CurrentGames)
+	err = args.Error(1)
+	return
 }
