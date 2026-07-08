@@ -1,0 +1,5 @@
+type: object
+properties:
+  isReroll:
+    type: boolean
+    default: false

@@ -79,6 +79,11 @@ type WheelEffect struct {
 	Name        Name    `json:"name"`
 }
 
+// WheelEffectRoll defines model for WheelEffectRoll.
+type WheelEffectRoll struct {
+	IsReroll *bool `json:"isReroll,omitempty"`
+}
+
 // WheelEffectRollApply defines model for WheelEffectRollApply.
 type WheelEffectRollApply struct {
 	PointChanges    PointChangeByLogins `json:"pointChanges"`
@@ -108,6 +113,12 @@ type WheelEffectsResponse = WheelEffects
 
 // WheelEffectRollApplyRequest defines model for WheelEffectRollApplyRequest.
 type WheelEffectRollApplyRequest = WheelEffectRollApply
+
+// WheelEffectRollRequest defines model for WheelEffectRollRequest.
+type WheelEffectRollRequest = WheelEffectRoll
+
+// RollAvailableWheelEffectsJSONRequestBody defines body for RollAvailableWheelEffects for application/json ContentType.
+type RollAvailableWheelEffectsJSONRequestBody = WheelEffectRoll
 
 // ApplyAvailableWheelEffectRollJSONRequestBody defines body for ApplyAvailableWheelEffectRoll for application/json ContentType.
 type ApplyAvailableWheelEffectRollJSONRequestBody = WheelEffectRollApply

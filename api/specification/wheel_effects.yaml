@@ -36,6 +36,8 @@ paths:
       operationId: rollAvailableWheelEffects
       tags:
         - WheelEffects
+      requestBody:
+        $ref: '#/components/requestBodies/WheelEffectRollRequest'
       responses:
         '200':
           $ref: '#/components/responses/RolledWheelEffectsResponse'
@@ -142,6 +144,12 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/WheelEffect'
+    WheelEffectRoll:
+      type: object
+      properties:
+        isReroll:
+          type: boolean
+          default: false
     RolledWheelEffect:
       allOf:
         - $ref: '#/components/schemas/WheelEffect'
@@ -268,6 +276,11 @@ components:
           schema:
             $ref: '#/components/schemas/FreePointChangeResultByLogins'
   requestBodies:
+    WheelEffectRollRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WheelEffectRoll'
     WheelEffectRollApplyRequest:
       content:
         application/json:

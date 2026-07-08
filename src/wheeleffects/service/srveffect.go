@@ -65,22 +65,26 @@ func (s *Service) GetEffectHistoryByEffectName(userId int, effectName string) (e
 	return
 }
 
-func (s *Service) MakeEffectRoll(userId int) (effects typewheeleffects.WheelEffects, err error) {
-	rollCount, err := s.Database.GetAvailableRollsCountCommand(userId)
+func (s *Service) MakeEffectRoll(userId int, isReroll bool) (effects typewheeleffects.WheelEffects, err error) {
+	if !isReroll {
+		var rollCount int
+		rollCount, err = s.Database.GetAvailableRollsCountCommand(userId)
 
-	if err != nil {
-		return
-	}
+		if err != nil {
+			return
+		}
 
-	minimumAvailableRollCountForRoll, err := s.SysParamsService.GetInt(typesysparams.ParamMinimumAvailableRollCountForRoll)
+		var minimumAvailableRollCountForRoll int
+		minimumAvailableRollCountForRoll, err = s.SysParamsService.GetInt(typesysparams.ParamMinimumAvailableRollCountForRoll)
 
-	if err != nil {
-		return
-	}
+		if err != nil {
+			return
+		}
 
-	if rollCount < minimumAvailableRollCountForRoll {
-		err = common.NewAvailableRollsNotFoundError()
-		return
+		if rollCount < minimumAvailableRollCountForRoll {
+			err = common.NewAvailableRollsNotFoundError()
+			return
+		}
 	}
 
 	effects, err = s.Database.MakeEffectRollCommand(userId)
@@ -100,16 +104,19 @@ func (s *Service) MakeEffectRoll(userId int) (effects typewheeleffects.WheelEffe
 		return
 	}
 
-	availableRollChangeByRoll, err := s.SysParamsService.GetInt(typesysparams.ParamAvailableRollChangeByRoll)
+	if !isReroll {
+		var availableRollChangeByRoll int
+		availableRollChangeByRoll, err = s.SysParamsService.GetInt(typesysparams.ParamAvailableRollChangeByRoll)
 
-	if err != nil {
-		return
-	}
+		if err != nil {
+			return
+		}
 
-	err = s.PointService.ChangeAvailableRolls(userId, availableRollChangeByRoll)
+		err = s.PointService.ChangeAvailableRolls(userId, availableRollChangeByRoll)
 
-	if err != nil {
-		return
+		if err != nil {
+			return
+		}
 	}
 
 	err = s.Database.ClearLastWheelEffectsCommand(userId)

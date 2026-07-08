@@ -30,13 +30,23 @@ func NewController() *Controller {
 
 // RollAvailableWheelEffects (POST /wheel-effects/available/roll)
 func (c *Controller) RollAvailableWheelEffects(ctx echo.Context) error {
+	var rollDto genwheeleffects.WheelEffectRoll
+	err := ctx.Bind(&rollDto)
+
+	if err != nil {
+		err = common.NewBadRequestError(err.Error())
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
 	userId, err := c.AuthService.GetUserId(ctx)
 
 	if err != nil {
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	effects, err := c.Service.MakeEffectRoll(userId)
+	isReroll := rollDto.IsReroll != nil && *rollDto.IsReroll
+
+	effects, err := c.Service.MakeEffectRoll(userId, isReroll)
 
 	if err != nil {
 		return common.SendJSONErrorResponse(ctx, err)
