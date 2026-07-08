@@ -23,6 +23,7 @@ var rolledEffects = typewheeleffects.WheelEffects{
 type MakeEffectRollTestCase struct {
 	Name                 string
 	UserId               int
+	IsReroll             bool
 	SetupWheelEffectMock func() *dbwheeleffectsmock.DatabaseMock
 	SetupPointsMock      func() *dbpointsmock.DatabaseMock
 	SetupSysParams       func() *srvsysparamsmock.ServiceMock
@@ -256,6 +257,26 @@ var MakeEffectRollTestCases = []MakeEffectRollTestCase{
 		},
 		ExpectedEffects: rolledEffects,
 	},
+	{
+		// A reroll skips the available rolls check and does not decrement available rolls.
+		Name:     "Reroll_Success",
+		UserId:   1,
+		IsReroll: true,
+		SetupWheelEffectMock: func() *dbwheeleffectsmock.DatabaseMock {
+			databaseMock := new(dbwheeleffectsmock.DatabaseMock)
+			databaseMock.On("MakeEffectRollCommand", 1).Return(rolledEffects, nil)
+			databaseMock.On("ClearLastWheelEffectsCommand", 1).Return(nil)
+			databaseMock.On("AddLastRolledWheelEffectsCommand", 1, rolledEffects).Return(nil)
+			return databaseMock
+		},
+		SetupPointsMock: func() *dbpointsmock.DatabaseMock { return new(dbpointsmock.DatabaseMock) },
+		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
+			spSvc := new(srvsysparamsmock.ServiceMock)
+			spSvc.On("GetInt", typesysparams.ParamMinimumAvailableWheelEffectsForRoll).Return(3, nil)
+			return spSvc
+		},
+		ExpectedEffects: rolledEffects,
+	},
 }
 
 func TestSrvWheelEffects_MakeEffectRoll(test *testing.T) {
@@ -273,7 +294,7 @@ func TestSrvWheelEffects_MakeEffectRoll(test *testing.T) {
 			}
 
 			// Act
-			effects, err := sut.MakeEffectRoll(testCase.UserId)
+			effects, err := sut.MakeEffectRoll(testCase.UserId, testCase.IsReroll)
 
 			// Assert
 			if testCase.ExpectedErrorCode != "" {
