@@ -130,6 +130,10 @@ func (s *Service) MakeEffectRoll(userId int, isReroll bool) (effects typewheelef
 	return
 }
 
+func (s *Service) ClearLastWheelEffects(userId int) error {
+	return s.Database.ClearLastWheelEffectsCommand(userId)
+}
+
 func (s *Service) GetLastRolledWheelEffects(userId int) (effects typewheeleffects.RolledWheelEffects, err error) {
 	effects, err = s.Database.GetLastRolledWheelEffectsCommand(userId)
 
