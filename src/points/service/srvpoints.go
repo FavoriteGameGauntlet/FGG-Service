@@ -520,7 +520,7 @@ func validateSeizeChange(pointChange typepoints.TerritoryHourChange, seizeDecrea
 	if index == -1 {
 		decreaseSlice := make([]int, len(seizeDecreaseSlice))
 		for i, v := range seizeDecreaseSlice {
-			decreaseSlice[i] = v - penaltyPoints
+			decreaseSlice[i] = v + penaltyPoints
 		}
 
 		err = common.NewWrongDesiredChangeValueConflictError(
