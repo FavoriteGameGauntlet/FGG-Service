@@ -235,12 +235,17 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 		return
 	}
 
-	pointsResult := typepoints.PointChangeResult{
-		ChangeSource: typepoints.TerritoryPointChangeSourceOther,
-		FinalValue:   currentPoints,
+	result = typepoints.PointChangeResultByTypes{
+		typepoints.PointTypeTerritoryHours: typepoints.PointChangeResult{
+			ActualChangeValue:  actualHoursChange,
+			ChangeSource:       pointChange.ChangeSource,
+			DesiredChangeValue: pointChange.DesiredChangeValue,
+			FinalValue:         currentHours + actualHoursChange,
+		},
 	}
 
 	if isSeize {
+		var pointsResult typepoints.PointChangeResult
 		pointsResult, err = s.applyTerritorySeize(
 			userId,
 			targetUserId,
@@ -252,16 +257,8 @@ func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.Territ
 		if err != nil {
 			return
 		}
-	}
 
-	result = typepoints.PointChangeResultByTypes{
-		typepoints.PointTypeTerritoryHours: typepoints.PointChangeResult{
-			ActualChangeValue:  actualHoursChange,
-			ChangeSource:       pointChange.ChangeSource,
-			DesiredChangeValue: pointChange.DesiredChangeValue,
-			FinalValue:         currentHours + actualHoursChange,
-		},
-		typepoints.PointTypeTerritoryPoints: pointsResult,
+		result[typepoints.PointTypeTerritoryPoints] = pointsResult
 	}
 
 	return
@@ -330,19 +327,20 @@ func (s *Service) getTerritoryHoursBalance(userId int, pointChange typepoints.Te
 	return
 }
 
-// resolveTerritoryPointsGrant fetches the user's current points and, for seize, computes the granted
-// amount and validates the target has enough points to lose when seizing someone else's territory.
+// resolveTerritoryPointsGrant is a no-op unless seizing: it fetches the user's current points,
+// computes the granted amount, and validates the target has enough points to lose when seizing
+// someone else's territory.
 func (s *Service) resolveTerritoryPointsGrant(
 	userId int, targetUserId *int, pointChange typepoints.TerritoryHourChange,
 	isSeize bool, seizeIndex int, territoryPointChangeBySeizeSlice []int) (
 	currentPoints, territoryPointsGranted, targetCurrentPoints int, err error) {
 
-	currentPoints, err = s.Database.GetTerritoryPointsCommand(userId)
-	if err != nil {
+	if !isSeize {
 		return
 	}
 
-	if !isSeize {
+	currentPoints, err = s.Database.GetTerritoryPointsCommand(userId)
+	if err != nil {
 		return
 	}
 
@@ -379,14 +377,9 @@ func (s *Service) applyTerritorySeize(
 		return
 	}
 
-	gainSourceUserId := userId
-	if pointChange.IsSomeones {
-		gainSourceUserId = *targetUserId
-	}
-
 	err = s.Database.AddTerritoryPointHistoryCommand(
 		userId,
-		gainSourceUserId,
+		userId,
 		typepoints.TerritoryPointChangeSourceObtaining,
 		territoryPointsGranted,
 		territoryPointsGranted,

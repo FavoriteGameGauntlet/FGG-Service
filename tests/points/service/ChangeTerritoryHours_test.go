@@ -232,7 +232,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 			databaseMock.On("GetTerritoryPointsCommand", 1).Return(100, nil)
 			databaseMock.On("GetTerritoryPointsCommand", 2).Return(50, nil)
 			databaseMock.On("ChangeTerritoryPointsCommand", 1, 10).Return(nil)
-			databaseMock.On("AddTerritoryPointHistoryCommand", 1, 2, typepoints.TerritoryPointChangeSourceObtaining, 10, 10, 110).Return(nil)
+			databaseMock.On("AddTerritoryPointHistoryCommand", 1, 1, typepoints.TerritoryPointChangeSourceObtaining, 10, 10, 110).Return(nil)
 			databaseMock.On("ChangeTerritoryPointsCommand", 2, -10).Return(nil)
 			databaseMock.On("AddTerritoryPointHistoryCommand", 2, 1, typepoints.TerritoryPointChangeSourceLoss, -10, -10, 40).Return(nil)
 			return databaseMock
@@ -259,7 +259,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 			databaseMock.On("GetTerritoryPointsCommand", 1).Return(100, nil)
 			databaseMock.On("GetTerritoryPointsCommand", 2).Return(50, nil)
 			databaseMock.On("ChangeTerritoryPointsCommand", 1, 20).Return(nil)
-			databaseMock.On("AddTerritoryPointHistoryCommand", 1, 2, typepoints.TerritoryPointChangeSourceObtaining, 20, 20, 120).Return(nil)
+			databaseMock.On("AddTerritoryPointHistoryCommand", 1, 1, typepoints.TerritoryPointChangeSourceObtaining, 20, 20, 120).Return(nil)
 			databaseMock.On("ChangeTerritoryPointsCommand", 2, -20).Return(nil)
 			databaseMock.On("AddTerritoryPointHistoryCommand", 2, 1, typepoints.TerritoryPointChangeSourceLoss, -20, -20, 30).Return(nil)
 			return databaseMock
@@ -274,7 +274,7 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 		ExpectedPointsChangeSource: typepoints.TerritoryPointChangeSourceObtaining,
 	},
 	{
-		// Source is "other" with increase. Success — territory points are unaffected.
+		// Source is "other" with increase. Success — territory points are untouched and absent from the result.
 		Name:   "Other_Increase_Success",
 		UserId: 1,
 		Change: typepoints.TerritoryHourChange{ChangeSource: typepoints.TerritoryHourChangeSourceOther, DesiredChangeValue: 5},
@@ -282,17 +282,13 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetTerritoryHoursCommand", 1).Return(10, nil)
 			databaseMock.On("ChangeTerritoryHoursCommand", 1, 5).Return(nil)
-			databaseMock.On("GetTerritoryPointsCommand", 1).Return(30, nil)
 			return databaseMock
 		},
-		ExpectedActualHoursChange:  ptr(5),
-		ExpectedFinalHours:         ptr(15),
-		ExpectedActualPointsChange: ptr(0),
-		ExpectedFinalPoints:        ptr(30),
-		ExpectedPointsChangeSource: typepoints.TerritoryPointChangeSourceOther,
+		ExpectedActualHoursChange: ptr(5),
+		ExpectedFinalHours:        ptr(15),
 	},
 	{
-		// Source is "other" with decrease. Success — territory points are unaffected.
+		// Source is "other" with decrease. Success — territory points are untouched and absent from the result.
 		Name:   "Other_Decrease_Success",
 		UserId: 1,
 		Change: typepoints.TerritoryHourChange{ChangeSource: typepoints.TerritoryHourChangeSourceOther, DesiredChangeValue: -3},
@@ -300,17 +296,14 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetTerritoryHoursCommand", 1).Return(10, nil)
 			databaseMock.On("ChangeTerritoryHoursCommand", 1, -3).Return(nil)
-			databaseMock.On("GetTerritoryPointsCommand", 1).Return(30, nil)
 			return databaseMock
 		},
-		ExpectedActualHoursChange:  ptr(-3),
-		ExpectedFinalHours:         ptr(7),
-		ExpectedActualPointsChange: ptr(0),
-		ExpectedFinalPoints:        ptr(30),
-		ExpectedPointsChangeSource: typepoints.TerritoryPointChangeSourceOther,
+		ExpectedActualHoursChange: ptr(-3),
+		ExpectedFinalHours:        ptr(7),
 	},
 	{
-		// Source is "other", decrease exceeds current hours — clamped to zero. Territory points are unaffected.
+		// Source is "other", decrease exceeds current hours — clamped to zero. Territory points are untouched
+		// and absent from the result.
 		Name:   "Other_DecreaseClamped_Success",
 		UserId: 1,
 		Change: typepoints.TerritoryHourChange{ChangeSource: typepoints.TerritoryHourChangeSourceOther, DesiredChangeValue: -20},
@@ -318,14 +311,10 @@ var ChangeTerritoryHoursTestCases = []ChangeTerritoryHoursTestCase{
 			databaseMock := new(dbpointsmock.DatabaseMock)
 			databaseMock.On("GetTerritoryHoursCommand", 1).Return(5, nil)
 			databaseMock.On("ChangeTerritoryHoursCommand", 1, -5).Return(nil)
-			databaseMock.On("GetTerritoryPointsCommand", 1).Return(30, nil)
 			return databaseMock
 		},
-		ExpectedActualHoursChange:  ptr(-5),
-		ExpectedFinalHours:         ptr(0),
-		ExpectedActualPointsChange: ptr(0),
-		ExpectedFinalPoints:        ptr(30),
-		ExpectedPointsChangeSource: typepoints.TerritoryPointChangeSourceOther,
+		ExpectedActualHoursChange: ptr(-5),
+		ExpectedFinalHours:        ptr(0),
 	},
 }
 
@@ -356,12 +345,19 @@ func TestSrvPoints_ChangeTerritoryHours(test *testing.T) {
 			} else if testCase.ExpectedActualHoursChange != nil {
 				require.NoError(test, err)
 				hoursResult := findResultByType(result, typepoints.PointTypeTerritoryHours)
-				pointsResult := findResultByType(result, typepoints.PointTypeTerritoryPoints)
 				require.Equal(test, *testCase.ExpectedActualHoursChange, hoursResult.ActualChangeValue)
 				require.Equal(test, *testCase.ExpectedFinalHours, hoursResult.FinalValue)
-				require.Equal(test, *testCase.ExpectedActualPointsChange, pointsResult.ActualChangeValue)
-				require.Equal(test, *testCase.ExpectedFinalPoints, pointsResult.FinalValue)
-				require.Equal(test, testCase.ExpectedPointsChangeSource, pointsResult.ChangeSource)
+
+				if testCase.ExpectedActualPointsChange != nil {
+					pointsResult, ok := result[typepoints.PointTypeTerritoryPoints]
+					require.True(test, ok)
+					require.Equal(test, *testCase.ExpectedActualPointsChange, pointsResult.ActualChangeValue)
+					require.Equal(test, *testCase.ExpectedFinalPoints, pointsResult.FinalValue)
+					require.Equal(test, testCase.ExpectedPointsChangeSource, pointsResult.ChangeSource)
+				} else {
+					_, ok := result[typepoints.PointTypeTerritoryPoints]
+					require.False(test, ok)
+				}
 			} else {
 				require.Error(test, err)
 			}
