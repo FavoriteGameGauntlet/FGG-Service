@@ -141,6 +141,9 @@ type ServerInterface interface {
 	// (GET /wheel-effects/available/roll/last)
 	GetLastRolledWheelEffects(ctx echo.Context) error
 
+	// (POST /wheel-effects/available/roll/last/clear)
+	ClearLastRolledWheelEffects(ctx echo.Context) error
+
 	// (GET /wheel-effects/{login}/history)
 	GetUserWheelEffectHistory(ctx echo.Context, login Login) error
 }
@@ -195,6 +198,15 @@ func (w *ServerInterfaceWrapper) GetLastRolledWheelEffects(ctx echo.Context) err
 	return err
 }
 
+// ClearLastRolledWheelEffects converts echo context to params.
+func (w *ServerInterfaceWrapper) ClearLastRolledWheelEffects(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ClearLastRolledWheelEffects(ctx)
+	return err
+}
+
 // GetUserWheelEffectHistory converts echo context to params.
 func (w *ServerInterfaceWrapper) GetUserWheelEffectHistory(ctx echo.Context) error {
 	var err error
@@ -244,6 +256,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/wheel-effects/available/roll/apply", wrapper.ApplyAvailableWheelEffectRoll)
 	router.GET(baseURL+"/wheel-effects/available/roll/count", wrapper.GetAvailableWheelEffectRollsCount)
 	router.GET(baseURL+"/wheel-effects/available/roll/last", wrapper.GetLastRolledWheelEffects)
+	router.POST(baseURL+"/wheel-effects/available/roll/last/clear", wrapper.ClearLastRolledWheelEffects)
 	router.GET(baseURL+"/wheel-effects/:login/history", wrapper.GetUserWheelEffectHistory)
 
 }

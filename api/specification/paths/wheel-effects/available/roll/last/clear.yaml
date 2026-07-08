@@ -1,0 +1,10 @@
+post:
+  operationId: clearLastRolledWheelEffects
+  tags: [ WheelEffects ]
+  responses:
+    "204":
+      description: Success.
+    "401":
+      $ref: "../../../../../components/responses/ErrorResponse.yaml"
+    "500":
+      $ref: "../../../../../components/responses/ErrorResponse.yaml"

@@ -184,6 +184,23 @@ func convertRolledWheelEffectsToDto(effects typewheeleffects.RolledWheelEffects)
 	return effectsDto
 }
 
+// ClearLastRolledWheelEffects (POST /wheel-effects/available/roll/last/clear)
+func (c *Controller) ClearLastRolledWheelEffects(ctx echo.Context) error {
+	userId, err := c.AuthService.GetUserId(ctx)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	err = c.Service.ClearLastWheelEffects(userId)
+
+	if err != nil {
+		return common.SendJSONErrorResponse(ctx, err)
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
+}
+
 // GetAvailableWheelEffectRollsCount (GET /wheel-effects/available/roll/count)
 func (c *Controller) GetAvailableWheelEffectRollsCount(ctx echo.Context) error {
 	userId, err := c.AuthService.GetUserId(ctx)

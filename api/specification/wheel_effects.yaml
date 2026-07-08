@@ -77,6 +77,18 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
+  /wheel-effects/available/roll/last/clear:
+    post:
+      operationId: clearLastRolledWheelEffects
+      tags:
+        - WheelEffects
+      responses:
+        '204':
+          description: Success.
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
   /wheel-effects/available/roll/apply:
     post:
       operationId: applyAvailableWheelEffectRoll
