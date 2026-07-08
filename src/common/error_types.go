@@ -299,6 +299,19 @@ func NewNotEnoughCurrentPointsConflictError(changeSource string, requiredPoints 
 	}
 }
 
+func NewCannotTargetSelfConflictError(changeSource string) error {
+	message := fmt.Sprintf(
+		"The target login cannot be your own when doing '%s' change source.",
+		changeSource)
+
+	return &ConflictError{
+		&BaseError{
+			Code:    "CANNOT_TARGET_SELF",
+			Message: message,
+		},
+	}
+}
+
 type UnprocessableError struct {
 	*BaseError
 }
@@ -392,3 +405,17 @@ func NewWheelEffectNameRequiredUnprocessableError(changeSource string) error {
 		},
 	}
 }
+
+func NewTargetLoginRequiredUnprocessableError(changeSource string) error {
+	message := fmt.Sprintf(
+		"A target login is required to do '%s' change source when seizing someone else's territory.",
+		changeSource)
+
+	return &UnprocessableError{
+		&BaseError{
+			Code:    "TARGET_LOGIN_REQUIRED",
+			Message: message,
+		},
+	}
+}
+

@@ -5,5 +5,5 @@ items:
     login:
       $ref: "./Login.yaml"
     changeResult:
-      $ref: "./FreePointChangeResult.yaml"
+      $ref: "./PointChangeResult.yaml"
   required: [ login, changeResult ]

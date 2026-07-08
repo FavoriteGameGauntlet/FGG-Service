@@ -86,10 +86,8 @@ func convertDtoToPointChange(pointChangeDto genpoints.PointChange) typepoints.Po
 
 func convertChangeResultToDto(changeResult typepoints.PointChangeResult) genpoints.PointChangeResult {
 	return genpoints.PointChangeResult{
-		ActualChangeValue:  changeResult.ActualChangeValue,
-		ChangeSource:       changeResult.ChangeSource,
-		DesiredChangeValue: changeResult.DesiredChangeValue,
-		FinalValue:         changeResult.FinalValue,
+		ActualChangeValue: changeResult.ActualChangeValue,
+		FinalValue:        changeResult.FinalValue,
 	}
 }
 
@@ -135,7 +133,7 @@ func (c *Controller) ChangeFreePoints(ctx echo.Context, login genpoints.Login) e
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	changeResultDto := convertFreePointChangeResultToDto(changeResult)
+	changeResultDto := convertChangeResultToDto(changeResult)
 
 	return ctx.JSON(http.StatusOK, changeResultDto)
 }
@@ -145,15 +143,6 @@ func convertDtoToFreePointChange(sourceUserId int, pointChangeDto genpoints.Free
 		SourceUserId:       sourceUserId,
 		ChangeSource:       pointChangeDto.ChangeSource,
 		DesiredChangeValue: pointChangeDto.DesiredChangeValue,
-	}
-}
-
-func convertFreePointChangeResultToDto(changeResult typepoints.PointChangeResult) genpoints.FreePointChangeResult {
-	return genpoints.FreePointChangeResult{
-		ActualChangeValue:  changeResult.ActualChangeValue,
-		ChangeSource:       changeResult.ChangeSource,
-		DesiredChangeValue: changeResult.DesiredChangeValue,
-		FinalValue:         changeResult.FinalValue,
 	}
 }
 
@@ -403,15 +392,38 @@ func (c *Controller) ChangeTerritoryHours(ctx echo.Context) error {
 	}
 
 	pointChange := convertDtoToTerritoryHourChange(pointChangeDto)
-	changeResult, err := c.Service.ChangeTerritoryHours(userId, pointChange)
+
+	var targetUserId *int
+	if pointChangeDto.Login != nil && *pointChangeDto.Login != "" {
+		var id int
+		id, err = c.AuthService.GetUserIdByLogin(*pointChangeDto.Login)
+
+		if err != nil {
+			return common.SendJSONErrorResponse(ctx, err)
+		}
+
+		targetUserId = &id
+	}
+
+	changeResult, err := c.Service.ChangeTerritoryHours(userId, pointChange, targetUserId)
 
 	if err != nil {
 		return common.SendJSONErrorResponse(ctx, err)
 	}
 
-	changeResultDto := convertChangeResultToDto(changeResult)
+	changeResultDto := convertPointChangeResultByTypesToDto(changeResult)
 
 	return ctx.JSON(http.StatusOK, changeResultDto)
+}
+
+func convertPointChangeResultByTypesToDto(results typepoints.PointChangeResultByTypes) genpoints.PointChangeResultByTypes {
+	dto := make(genpoints.PointChangeResultByTypes, len(results))
+
+	for pointType, result := range results {
+		dto[pointType] = convertChangeResultToDto(result)
+	}
+
+	return dto
 }
 
 func convertDtoToTerritoryHourChange(dto genpoints.TerritoryHourChange) typepoints.TerritoryHourChange {

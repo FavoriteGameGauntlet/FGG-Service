@@ -40,6 +40,11 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 		SetupMock: func() *dbpointsmock.DatabaseMock {
 			return new(dbpointsmock.DatabaseMock)
 		},
+		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
+			spSvc := new(srvsysparamsmock.ServiceMock)
+			spSvc.On("GetInt", typesysparams.ParamFreePointChangeByBaseTeleport).Return(-5, nil)
+			return spSvc
+		},
 		ExpectedErrorCode: "WRONG_DESIRED_CHANGE_VALUE",
 	},
 	{
@@ -162,7 +167,11 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			databaseMock.On("AddFreePointHistoryCommand", 1, 0, typepoints.FreePointsChangeSourceBaseTeleport, -5, -5, 5, (*int)(nil)).Return(nil)
 			return databaseMock
 		},
-		SetupSysParams:       defaultFreePointMinimumSysParams,
+		SetupSysParams: func() *srvsysparamsmock.ServiceMock {
+			spSvc := defaultFreePointMinimumSysParams()
+			spSvc.On("GetInt", typesysparams.ParamFreePointChangeByBaseTeleport).Return(-5, nil)
+			return spSvc
+		},
 		ExpectedActualChange: ptr(-5),
 		ExpectedFinalValue:   ptr(5),
 	},
@@ -198,6 +207,7 @@ var ChangeFreePointsTestCases = []ChangeFreePointsTestCase{
 			spSvc := new(srvsysparamsmock.ServiceMock)
 			spSvc.On("GetInt", typesysparams.ParamFreePointsMinimum).Return(0, nil)
 			spSvc.On("GetBool", typesysparams.ParamShouldLimitFreePoints).Return(false, nil)
+			spSvc.On("GetInt", typesysparams.ParamFreePointChangeBySandstorm).Return(-20, nil)
 			return spSvc
 		},
 		ExpectedActualChange: ptr(-20),

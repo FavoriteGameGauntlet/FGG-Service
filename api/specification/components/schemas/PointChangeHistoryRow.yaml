@@ -1,0 +1,10 @@
+allOf:
+  - $ref: "./PointChange.yaml"
+  - type: object
+    properties:
+      actualChangeValue:
+        type: integer
+        format: int
+      finalValue:
+        $ref: "./Points.yaml"
+    required: [ actualChangeValue, finalValue ]

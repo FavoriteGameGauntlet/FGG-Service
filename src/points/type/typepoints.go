@@ -9,6 +9,8 @@ type PointChangeResult struct {
 	FinalValue         int
 }
 
+type PointChangeResultByTypes = map[string]PointChangeResult
+
 type PointChangeResultByUserId struct {
 	Login        string
 	UserId       int
@@ -82,6 +84,11 @@ type PointInfoByLogin struct {
 }
 
 type PointInfoByLogins = []PointInfoByLogin
+
+const (
+	PointTypeTerritoryHours  = "territoryHours"
+	PointTypeTerritoryPoints = "territoryPoints"
+)
 
 const (
 	ExperienceChangeSourceLevelUp = "level-up"

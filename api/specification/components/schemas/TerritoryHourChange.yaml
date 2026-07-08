@@ -5,3 +5,8 @@ allOf:
       isSomeones:
         type: boolean
         default: false
+      login:
+        nullable: true
+        example: null
+        allOf:
+          - $ref: "./Login.yaml"

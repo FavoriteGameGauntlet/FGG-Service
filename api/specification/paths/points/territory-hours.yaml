@@ -5,7 +5,7 @@ post:
     $ref: "../../components/requests/TerritoryHourChangeRequest.yaml"
   responses:
     "200":
-      $ref: "../../components/responses/PointChangeResultResponse.yaml"
+      $ref: "../../components/responses/PointChangeResultByTypesResponse.yaml"
     "401":
       $ref: "../../components/responses/ErrorResponse.yaml"
     "409":

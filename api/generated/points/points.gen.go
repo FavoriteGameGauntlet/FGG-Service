@@ -39,14 +39,6 @@ type FreePointChangeHistory struct {
 	WheelEffectName    *Name       `json:"wheelEffectName"`
 }
 
-// FreePointChangeResult defines model for FreePointChangeResult.
-type FreePointChangeResult struct {
-	ActualChangeValue  int         `json:"actualChangeValue"`
-	ChangeSource       interface{} `json:"changeSource"`
-	DesiredChangeValue int         `json:"desiredChangeValue"`
-	FinalValue         Points      `json:"finalValue"`
-}
-
 // Login defines model for Login.
 type Login = string
 
@@ -59,13 +51,22 @@ type PointChange struct {
 	DesiredChangeValue int    `json:"desiredChangeValue"`
 }
 
-// PointChangeResult defines model for PointChangeResult.
-type PointChangeResult struct {
+// PointChangeHistoryRow defines model for PointChangeHistoryRow.
+type PointChangeHistoryRow struct {
 	ActualChangeValue  int    `json:"actualChangeValue"`
 	ChangeSource       string `json:"changeSource"`
 	DesiredChangeValue int    `json:"desiredChangeValue"`
 	FinalValue         Points `json:"finalValue"`
 }
+
+// PointChangeResult defines model for PointChangeResult.
+type PointChangeResult struct {
+	ActualChangeValue int    `json:"actualChangeValue"`
+	FinalValue        Points `json:"finalValue"`
+}
+
+// PointChangeResultByTypes defines model for PointChangeResultByTypes.
+type PointChangeResultByTypes map[string]PointChangeResult
 
 // PointInfo defines model for PointInfo.
 type PointInfo struct {
@@ -87,6 +88,7 @@ type TerritoryHourChange struct {
 	ChangeSource       string `json:"changeSource"`
 	DesiredChangeValue int    `json:"desiredChangeValue"`
 	IsSomeones         *bool  `json:"isSomeones,omitempty"`
+	Login              *Login `json:"login"`
 }
 
 // TerritoryPointChangeHistories defines model for TerritoryPointChangeHistories.
@@ -102,14 +104,6 @@ type TerritoryPointChangeHistory struct {
 	SourceLogin        *Login      `json:"sourceLogin"`
 }
 
-// TerritoryPointChangeResult defines model for TerritoryPointChangeResult.
-type TerritoryPointChangeResult struct {
-	ActualChangeValue  int         `json:"actualChangeValue"`
-	ChangeSource       interface{} `json:"changeSource"`
-	DesiredChangeValue int         `json:"desiredChangeValue"`
-	FinalValue         Points      `json:"finalValue"`
-}
-
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse = Error
 
@@ -117,7 +111,10 @@ type ErrorResponse = Error
 type FreePointChangeHistoriesResponse = FreePointChangeHistories
 
 // FreePointChangeResultResponse defines model for FreePointChangeResultResponse.
-type FreePointChangeResultResponse = FreePointChangeResult
+type FreePointChangeResultResponse = PointChangeResult
+
+// PointChangeResultByTypesResponse defines model for PointChangeResultByTypesResponse.
+type PointChangeResultByTypesResponse = PointChangeResultByTypes
 
 // PointChangeResultResponse defines model for PointChangeResultResponse.
 type PointChangeResultResponse = PointChangeResult
@@ -135,7 +132,7 @@ type PointsResponse = Points
 type TerritoryPointChangeHistoriesResponse = TerritoryPointChangeHistories
 
 // TerritoryPointChangeResultResponse defines model for TerritoryPointChangeResultResponse.
-type TerritoryPointChangeResultResponse = TerritoryPointChangeResult
+type TerritoryPointChangeResultResponse = PointChangeResult
 
 // FreePointChangeRequest defines model for FreePointChangeRequest.
 type FreePointChangeRequest = FreePointChange

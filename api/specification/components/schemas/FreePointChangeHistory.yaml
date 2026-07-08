@@ -1,7 +1,9 @@
 allOf:
-  - $ref: "./FreePointChangeResult.yaml"
+  - $ref: "./PointChangeHistoryRow.yaml"
   - type: object
     properties:
+      changeSource:
+        enum: [ "wheel-effect", "quest", "base-teleport", "sandstorm", "other" ]
       changeDate:
         type: string
         format: date-time
@@ -17,8 +19,8 @@ allOf:
           - $ref: "./Name.yaml"
     required: [ changeDate ]
 example:
+  actualChangeValue: 2
   changeSource: quest
   desiredChangeValue: 2
-  actualChangeValue: 2
   finalValue: 12
   changeDate: "2026-06-07T08:09:10.123Z"
