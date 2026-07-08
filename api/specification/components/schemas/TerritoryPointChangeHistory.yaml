@@ -1,7 +1,9 @@
 allOf:
-  - $ref: "./TerritoryPointChangeResult.yaml"
+  - $ref: "./PointChangeHistoryRow.yaml"
   - type: object
     properties:
+      changeSource:
+        enum: [ "territory-obtaining", "territory-loss", "other" ]
       changeDate:
         type: string
         format: date-time

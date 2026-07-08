@@ -163,7 +163,7 @@ paths:
         $ref: '#/components/requestBodies/TerritoryHourChangeRequest'
       responses:
         '200':
-          $ref: '#/components/responses/PointChangeResultResponse'
+          $ref: '#/components/responses/PointChangeResultByTypesResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '409':
@@ -233,6 +233,17 @@ components:
         - changeSource
         - desiredChangeValue
     PointChangeResult:
+      type: object
+      properties:
+        actualChangeValue:
+          type: integer
+          format: int
+        finalValue:
+          $ref: '#/components/schemas/Points'
+      required:
+        - actualChangeValue
+        - finalValue
+    PointChangeHistoryRow:
       allOf:
         - $ref: '#/components/schemas/PointChange'
         - type: object
@@ -245,9 +256,9 @@ components:
           required:
             - actualChangeValue
             - finalValue
-    TerritoryPointChangeResult:
+    TerritoryPointChangeHistory:
       allOf:
-        - $ref: '#/components/schemas/PointChangeResult'
+        - $ref: '#/components/schemas/PointChangeHistoryRow'
         - type: object
           properties:
             changeSource:
@@ -255,11 +266,6 @@ components:
                 - territory-obtaining
                 - territory-loss
                 - other
-    TerritoryPointChangeHistory:
-      allOf:
-        - $ref: '#/components/schemas/TerritoryPointChangeResult'
-        - type: object
-          properties:
             changeDate:
               type: string
               format: date-time
@@ -295,9 +301,9 @@ components:
               example: null
               allOf:
                 - $ref: '#/components/schemas/Name'
-    FreePointChangeResult:
+    FreePointChangeHistory:
       allOf:
-        - $ref: '#/components/schemas/PointChangeResult'
+        - $ref: '#/components/schemas/PointChangeHistoryRow'
         - type: object
           properties:
             changeSource:
@@ -307,11 +313,6 @@ components:
                 - base-teleport
                 - sandstorm
                 - other
-    FreePointChangeHistory:
-      allOf:
-        - $ref: '#/components/schemas/FreePointChangeResult'
-        - type: object
-          properties:
             changeDate:
               type: string
               format: date-time
@@ -328,9 +329,9 @@ components:
           required:
             - changeDate
       example:
+        actualChangeValue: 2
         changeSource: quest
         desiredChangeValue: 2
-        actualChangeValue: 2
         finalValue: 12
         changeDate: '2026-06-07T08:09:10.123Z'
     FreePointChangeHistories:
@@ -345,6 +346,15 @@ components:
             isSomeones:
               type: boolean
               default: false
+            login:
+              nullable: true
+              example: null
+              allOf:
+                - $ref: '#/components/schemas/Login'
+    PointChangeResultByTypes:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/PointChangeResult'
   parameters:
     Login:
       name: login
@@ -382,7 +392,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/TerritoryPointChangeResult'
+            $ref: '#/components/schemas/PointChangeResult'
     TerritoryPointChangeHistoriesResponse:
       description: Success.
       content:
@@ -400,7 +410,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/FreePointChangeResult'
+            $ref: '#/components/schemas/PointChangeResult'
     FreePointChangeHistoriesResponse:
       description: Success.
       content:
@@ -419,6 +429,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PointChangeResult'
+    PointChangeResultByTypesResponse:
+      description: Success.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PointChangeResultByTypes'
   requestBodies:
     PointChangeRequest:
       content:

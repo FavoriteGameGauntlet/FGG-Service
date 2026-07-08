@@ -201,30 +201,16 @@ components:
         - wheelEffectName
         - pointChanges
     PointChangeResult:
-      allOf:
-        - $ref: '#/components/schemas/PointChange'
-        - type: object
-          properties:
-            actualChangeValue:
-              type: integer
-              format: int
-            finalValue:
-              $ref: '#/components/schemas/Points'
-          required:
-            - actualChangeValue
-            - finalValue
-    FreePointChangeResult:
-      allOf:
-        - $ref: '#/components/schemas/PointChangeResult'
-        - type: object
-          properties:
-            changeSource:
-              enum:
-                - wheel-effect
-                - quest
-                - base-teleport
-                - sandstorm
-                - other
+      type: object
+      properties:
+        actualChangeValue:
+          type: integer
+          format: int
+        finalValue:
+          $ref: '#/components/schemas/Points'
+      required:
+        - actualChangeValue
+        - finalValue
     FreePointChangeResultByLogins:
       type: array
       items:
@@ -233,7 +219,7 @@ components:
           login:
             $ref: '#/components/schemas/Login'
           changeResult:
-            $ref: '#/components/schemas/FreePointChangeResult'
+            $ref: '#/components/schemas/PointChangeResult'
         required:
           - login
           - changeResult

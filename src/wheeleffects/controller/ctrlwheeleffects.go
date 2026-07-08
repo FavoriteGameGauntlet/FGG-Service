@@ -130,11 +130,9 @@ func convertPointChangeResultsToDto(changeResults typepoints.PointChangeResultBy
 
 	for i, changeResult := range changeResults {
 		changeResultsDto[i].Login = changeResult.Login
-		changeResultsDto[i].ChangeResult = genwheeleffects.FreePointChangeResult{
-			ActualChangeValue:  changeResult.ChangeResult.ActualChangeValue,
-			ChangeSource:       changeResult.ChangeResult.ChangeSource,
-			DesiredChangeValue: changeResult.ChangeResult.DesiredChangeValue,
-			FinalValue:         changeResult.ChangeResult.FinalValue,
+		changeResultsDto[i].ChangeResult = genwheeleffects.PointChangeResult{
+			ActualChangeValue: changeResult.ChangeResult.ActualChangeValue,
+			FinalValue:        changeResult.ChangeResult.FinalValue,
 		}
 	}
 

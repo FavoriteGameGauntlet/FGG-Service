@@ -18,18 +18,10 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-// FreePointChangeResult defines model for FreePointChangeResult.
-type FreePointChangeResult struct {
-	ActualChangeValue  int         `json:"actualChangeValue"`
-	ChangeSource       interface{} `json:"changeSource"`
-	DesiredChangeValue int         `json:"desiredChangeValue"`
-	FinalValue         Points      `json:"finalValue"`
-}
-
 // FreePointChangeResultByLogins defines model for FreePointChangeResultByLogins.
 type FreePointChangeResultByLogins = []struct {
-	ChangeResult FreePointChangeResult `json:"changeResult"`
-	Login        Login                 `json:"login"`
+	ChangeResult PointChangeResult `json:"changeResult"`
+	Login        Login             `json:"login"`
 }
 
 // Login defines model for Login.
@@ -52,10 +44,8 @@ type PointChangeByLogins = []struct {
 
 // PointChangeResult defines model for PointChangeResult.
 type PointChangeResult struct {
-	ActualChangeValue  int    `json:"actualChangeValue"`
-	ChangeSource       string `json:"changeSource"`
-	DesiredChangeValue int    `json:"desiredChangeValue"`
-	FinalValue         Points `json:"finalValue"`
+	ActualChangeValue int    `json:"actualChangeValue"`
+	FinalValue        Points `json:"finalValue"`
 }
 
 // Points defines model for Points.

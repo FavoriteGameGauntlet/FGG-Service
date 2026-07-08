@@ -193,63 +193,235 @@ func validateSandstormChange(pointChange typepoints.FreePointChange, expectedCha
 	return nil
 }
 
-func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.TerritoryHourChange) (
-	changeResult typepoints.PointChangeResult, err error) {
+func (s *Service) ChangeTerritoryHours(userId int, pointChange typepoints.TerritoryHourChange, targetUserId *int) (
+	result typepoints.PointChangeResultByTypes, err error) {
 
 	if !slices.Contains(typepoints.TerritoryHourChangeSourceSlice, pointChange.ChangeSource) {
 		err = common.NewChangeSourceUnprocessableError(typepoints.TerritoryHourChangeSourceSlice)
 		return
 	}
 
-	if pointChange.ChangeSource == typepoints.TerritoryHourChangeSourceSeize {
-		var territoryHourChangeBySeizeSlice []int
-		territoryHourChangeBySeizeSlice, err = s.SysParamsService.GetIntSlice(typesysparams.ParamTerritoryHourChangeBySeizeSlice)
+	isSeize := pointChange.ChangeSource == typepoints.TerritoryHourChangeSourceSeize
 
-		if err != nil {
-			return
-		}
+	seizeIndex := -1
+	var territoryPointChangeBySeizeSlice []int
 
-		var seizePenaltyPoints int
-		seizePenaltyPoints, err = s.SysParamsService.GetInt(typesysparams.ParamSeizePenaltyPoints)
-
-		if err != nil {
-			return
-		}
-
-		err = validateSeizeChange(pointChange, territoryHourChangeBySeizeSlice, seizePenaltyPoints)
-
+	if isSeize {
+		seizeIndex, territoryPointChangeBySeizeSlice, err = s.resolveSeizeConversion(userId, pointChange, targetUserId)
 		if err != nil {
 			return
 		}
 	}
 
-	currentHours, err := s.Database.GetTerritoryHoursCommand(userId)
+	currentHours, actualHoursChange, err := s.getTerritoryHoursBalance(userId, pointChange, isSeize)
 	if err != nil {
 		return
 	}
 
-	if pointChange.ChangeSource == typepoints.TerritoryHourChangeSourceSeize {
-		if currentHours+pointChange.DesiredChangeValue < 0 {
+	currentPoints, territoryPointsGranted, targetCurrentPoints, err := s.resolveTerritoryPointsGrant(
+		userId,
+		targetUserId,
+		pointChange,
+		isSeize,
+		seizeIndex,
+		territoryPointChangeBySeizeSlice)
+
+	if err != nil {
+		return
+	}
+
+	err = s.Database.ChangeTerritoryHoursCommand(userId, actualHoursChange)
+	if err != nil {
+		return
+	}
+
+	pointsResult := typepoints.PointChangeResult{
+		ChangeSource: typepoints.TerritoryPointChangeSourceOther,
+		FinalValue:   currentPoints,
+	}
+
+	if isSeize {
+		pointsResult, err = s.applyTerritorySeize(
+			userId,
+			targetUserId,
+			pointChange,
+			currentPoints,
+			territoryPointsGranted,
+			targetCurrentPoints)
+
+		if err != nil {
+			return
+		}
+	}
+
+	result = typepoints.PointChangeResultByTypes{
+		typepoints.PointTypeTerritoryHours: typepoints.PointChangeResult{
+			ActualChangeValue:  actualHoursChange,
+			ChangeSource:       pointChange.ChangeSource,
+			DesiredChangeValue: pointChange.DesiredChangeValue,
+			FinalValue:         currentHours + actualHoursChange,
+		},
+		typepoints.PointTypeTerritoryPoints: pointsResult,
+	}
+
+	return
+}
+
+// resolveSeizeConversion validates the requested hour amount against the seize sysparams and
+// returns the matching index into, and value of, the territory-points-by-seize sysparam.
+func (s *Service) resolveSeizeConversion(userId int, pointChange typepoints.TerritoryHourChange, targetUserId *int) (
+	seizeIndex int, territoryPointChangeBySeizeSlice []int, err error) {
+
+	territoryHourChangeBySeizeSlice, err := s.SysParamsService.GetIntSlice(typesysparams.ParamTerritoryHourChangeBySeizeSlice)
+	if err != nil {
+		return
+	}
+
+	seizePenaltyPoints, err := s.SysParamsService.GetInt(typesysparams.ParamSeizePenaltyPoints)
+	if err != nil {
+		return
+	}
+
+	seizeIndex, err = validateSeizeChange(pointChange, territoryHourChangeBySeizeSlice, seizePenaltyPoints)
+	if err != nil {
+		return
+	}
+
+	if pointChange.IsSomeones && targetUserId == nil {
+		err = common.NewTargetLoginRequiredUnprocessableError(pointChange.ChangeSource)
+		return
+	}
+
+	if pointChange.IsSomeones && *targetUserId == userId {
+		err = common.NewCannotTargetSelfConflictError(pointChange.ChangeSource)
+		return
+	}
+
+	territoryPointChangeBySeizeSlice, err = s.SysParamsService.GetIntSlice(typesysparams.ParamTerritoryPointChangeBySeizeSlice)
+	if err != nil {
+		return
+	}
+
+	if seizeIndex >= len(territoryPointChangeBySeizeSlice) {
+		err = common.NewSystemParameterNotFoundError(typesysparams.ParamTerritoryPointChangeBySeizeSlice)
+		return
+	}
+
+	return
+}
+
+// getTerritoryHoursBalance fetches the user's current hours and, for seize, validates there are enough.
+func (s *Service) getTerritoryHoursBalance(userId int, pointChange typepoints.TerritoryHourChange, isSeize bool) (
+	currentHours, actualHoursChange int, err error) {
+
+	currentHours, err = s.Database.GetTerritoryHoursCommand(userId)
+	if err != nil {
+		return
+	}
+
+	if isSeize && currentHours+pointChange.DesiredChangeValue < 0 {
+		err = common.NewNotEnoughCurrentPointsConflictError(
+			pointChange.ChangeSource,
+			-pointChange.DesiredChangeValue)
+		return
+	}
+
+	actualHoursChange = max(pointChange.DesiredChangeValue, -currentHours)
+	return
+}
+
+// resolveTerritoryPointsGrant fetches the user's current points and, for seize, computes the granted
+// amount and validates the target has enough points to lose when seizing someone else's territory.
+func (s *Service) resolveTerritoryPointsGrant(
+	userId int, targetUserId *int, pointChange typepoints.TerritoryHourChange,
+	isSeize bool, seizeIndex int, territoryPointChangeBySeizeSlice []int) (
+	currentPoints, territoryPointsGranted, targetCurrentPoints int, err error) {
+
+	currentPoints, err = s.Database.GetTerritoryPointsCommand(userId)
+	if err != nil {
+		return
+	}
+
+	if !isSeize {
+		return
+	}
+
+	territoryPointsGranted = territoryPointChangeBySeizeSlice[seizeIndex]
+
+	if pointChange.IsSomeones {
+		targetCurrentPoints, err = s.Database.GetTerritoryPointsCommand(*targetUserId)
+		if err != nil {
+			return
+		}
+
+		if targetCurrentPoints < territoryPointsGranted {
 			err = common.NewNotEnoughCurrentPointsConflictError(
-				pointChange.ChangeSource,
-				-pointChange.DesiredChangeValue)
+				typepoints.TerritoryPointChangeSourceLoss,
+				territoryPointsGranted)
 			return
 		}
 	}
 
-	actualChangeValue := max(pointChange.DesiredChangeValue, -currentHours)
+	return
+}
 
-	err = s.Database.ChangeTerritoryHoursCommand(userId, actualChangeValue)
+// applyTerritorySeize writes the self points gain (and, when seizing someone else's territory, the
+// target's points loss) and returns the caller's territoryPoints result.
+func (s *Service) applyTerritorySeize(
+	userId int, targetUserId *int, pointChange typepoints.TerritoryHourChange,
+	currentPoints, territoryPointsGranted, targetCurrentPoints int) (
+	pointsResult typepoints.PointChangeResult, err error) {
 
+	newSelfFinal := currentPoints + territoryPointsGranted
+
+	err = s.Database.ChangeTerritoryPointsCommand(userId, territoryPointsGranted)
 	if err != nil {
 		return
 	}
 
-	changeResult = typepoints.PointChangeResult{
-		ActualChangeValue:  actualChangeValue,
-		ChangeSource:       pointChange.ChangeSource,
-		DesiredChangeValue: pointChange.DesiredChangeValue,
-		FinalValue:         currentHours + actualChangeValue,
+	gainSourceUserId := userId
+	if pointChange.IsSomeones {
+		gainSourceUserId = *targetUserId
+	}
+
+	err = s.Database.AddTerritoryPointHistoryCommand(
+		userId,
+		gainSourceUserId,
+		typepoints.TerritoryPointChangeSourceObtaining,
+		territoryPointsGranted,
+		territoryPointsGranted,
+		newSelfFinal)
+	if err != nil {
+		return
+	}
+
+	pointsResult = typepoints.PointChangeResult{
+		ActualChangeValue:  territoryPointsGranted,
+		ChangeSource:       typepoints.TerritoryPointChangeSourceObtaining,
+		DesiredChangeValue: territoryPointsGranted,
+		FinalValue:         newSelfFinal,
+	}
+
+	if !pointChange.IsSomeones {
+		return
+	}
+
+	targetFinal := targetCurrentPoints - territoryPointsGranted
+
+	err = s.Database.ChangeTerritoryPointsCommand(*targetUserId, -territoryPointsGranted)
+	if err != nil {
+		return
+	}
+
+	err = s.Database.AddTerritoryPointHistoryCommand(
+		*targetUserId,
+		userId,
+		typepoints.TerritoryPointChangeSourceLoss,
+		-territoryPointsGranted,
+		-territoryPointsGranted,
+		targetFinal)
+	if err != nil {
+		return
 	}
 
 	return
@@ -336,29 +508,34 @@ func validateTerritoryLossChange(pointChange typepoints.TerritoryPointChange) er
 	return nil
 }
 
-func validateSeizeChange(pointChange typepoints.TerritoryHourChange, seizeDecreaseSlice []int, penaltyPoints int) error {
+func validateSeizeChange(pointChange typepoints.TerritoryHourChange, seizeDecreaseSlice []int, penaltyPoints int) (index int, err error) {
+	index = -1
+
 	if pointChange.DesiredChangeValue > 0 {
-		return common.NewWrongDesiredChangeValueConflictError(
+		err = common.NewWrongDesiredChangeValueConflictError(
 			pointChange.ChangeSource,
 			common.ConstraintZeroOrLess)
+		return
 	}
 
 	if !pointChange.IsSomeones {
 		penaltyPoints = 0
 	}
 
-	if !slices.Contains(seizeDecreaseSlice, pointChange.DesiredChangeValue+penaltyPoints) {
+	index = slices.Index(seizeDecreaseSlice, pointChange.DesiredChangeValue+penaltyPoints)
+
+	if index == -1 {
 		decreaseSlice := make([]int, len(seizeDecreaseSlice))
 		for i, v := range seizeDecreaseSlice {
 			decreaseSlice[i] = v - penaltyPoints
 		}
 
-		return common.NewWrongDesiredChangeValueConflictError(
+		err = common.NewWrongDesiredChangeValueConflictError(
 			pointChange.ChangeSource,
 			"one of: "+common.ConvertIntSliceToString(decreaseSlice))
 	}
 
-	return nil
+	return
 }
 
 func (s *Service) ChangeExperiencePoints(userId int, pointChange typepoints.PointChange) (
