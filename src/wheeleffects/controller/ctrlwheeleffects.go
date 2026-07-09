@@ -106,7 +106,7 @@ func (c *Controller) ApplyAvailableWheelEffectRoll(ctx echo.Context) error {
 func (c *Controller) convertDtoToWheelEffectRollApply(sourceUserId int, rollApplyDto genwheeleffects.WheelEffectRollApply) (
 	rollApply typewheeleffects.WheelEffectRollApply, err error) {
 
-	pointChanges := make(typepoints.FreePointChangeByUserIds, len(rollApplyDto.PointChanges))
+	pointChanges := make(typepoints.PointChangeByUserIds, len(rollApplyDto.PointChanges))
 
 	for i, pointChangeByLogin := range rollApplyDto.PointChanges {
 		var userId int
@@ -116,14 +116,23 @@ func (c *Controller) convertDtoToWheelEffectRollApply(sourceUserId int, rollAppl
 			return
 		}
 
-		pointChanges[i] = typepoints.FreePointChangeByUserId{
+		var availableRollChange *typepoints.PointChange
+		if pointChangeByLogin.AvailableRollChange != nil {
+			availableRollChange = &typepoints.PointChange{
+				ChangeSource:       pointChangeByLogin.AvailableRollChange.ChangeSource,
+				DesiredChangeValue: pointChangeByLogin.AvailableRollChange.DesiredChangeValue,
+			}
+		}
+
+		pointChanges[i] = typepoints.PointChangeByUserId{
 			Login:  pointChangeByLogin.Login,
 			UserId: userId,
-			PointChange: typepoints.FreePointChange{
+			FreePointChange: typepoints.FreePointChange{
 				SourceUserId:       sourceUserId,
-				ChangeSource:       pointChangeByLogin.PointChange.ChangeSource,
-				DesiredChangeValue: pointChangeByLogin.PointChange.DesiredChangeValue,
+				ChangeSource:       pointChangeByLogin.FreePointChange.ChangeSource,
+				DesiredChangeValue: pointChangeByLogin.FreePointChange.DesiredChangeValue,
 			},
+			AvailableRollChange: availableRollChange,
 		}
 	}
 
@@ -135,14 +144,18 @@ func (c *Controller) convertDtoToWheelEffectRollApply(sourceUserId int, rollAppl
 	return
 }
 
-func convertPointChangeResultsToDto(changeResults typepoints.PointChangeResultByUserIds) genwheeleffects.FreePointChangeResultByLogins {
-	changeResultsDto := make(genwheeleffects.FreePointChangeResultByLogins, len(changeResults))
+func convertPointChangeResultsToDto(changeResults typepoints.PointChangeResultByUserIds) genwheeleffects.PointChangeResultByLogins {
+	changeResultsDto := make(genwheeleffects.PointChangeResultByLogins, len(changeResults))
 
 	for i, changeResult := range changeResults {
 		changeResultsDto[i].Login = changeResult.Login
-		changeResultsDto[i].ChangeResult = genwheeleffects.PointChangeResult{
-			ActualChangeValue: changeResult.ChangeResult.ActualChangeValue,
-			FinalValue:        changeResult.ChangeResult.FinalValue,
+		changeResultsDto[i].ChangeResults = make(genwheeleffects.PointChangeResultByTypes, len(changeResult.ChangeResults))
+
+		for pointType, result := range changeResult.ChangeResults {
+			changeResultsDto[i].ChangeResults[pointType] = genwheeleffects.PointChangeResult{
+				ActualChangeValue: result.ActualChangeValue,
+				FinalValue:        result.FinalValue,
+			}
 		}
 	}
 

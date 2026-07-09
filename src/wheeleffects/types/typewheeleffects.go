@@ -34,6 +34,6 @@ type RolledWheelEffectHistory struct {
 type RolledWheelEffectHistories = []RolledWheelEffectHistory
 
 type WheelEffectRollApply struct {
-	PointChangeByUserIds typepoints.FreePointChangeByUserIds
+	PointChangeByUserIds typepoints.PointChangeByUserIds
 	WheelEffectName      string
 }

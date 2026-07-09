@@ -98,7 +98,7 @@ paths:
         $ref: '#/components/requestBodies/WheelEffectRollApplyRequest'
       responses:
         '200':
-          $ref: '#/components/responses/FreePointChangeResultByLoginsResponse'
+          $ref: '#/components/responses/PointChangeResultByLoginsResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '404':
@@ -205,11 +205,13 @@ components:
         properties:
           login:
             $ref: '#/components/schemas/Login'
-          pointChange:
+          freePointChange:
+            $ref: '#/components/schemas/PointChange'
+          availableRollChange:
             $ref: '#/components/schemas/PointChange'
         required:
           - login
-          - pointChange
+          - freePointChange
     WheelEffectRollApply:
       type: object
       properties:
@@ -231,18 +233,22 @@ components:
       required:
         - actualChangeValue
         - finalValue
-    FreePointChangeResultByLogins:
+    PointChangeResultByTypes:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/PointChangeResult'
+    PointChangeResultByLogins:
       type: array
       items:
         type: object
         properties:
           login:
             $ref: '#/components/schemas/Login'
-          changeResult:
-            $ref: '#/components/schemas/PointChangeResult'
+          changeResults:
+            $ref: '#/components/schemas/PointChangeResultByTypes'
         required:
           - login
-          - changeResult
+          - changeResults
   parameters:
     Login:
       name: login
@@ -281,12 +287,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Points'
-    FreePointChangeResultByLoginsResponse:
+    PointChangeResultByLoginsResponse:
       description: Success.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/FreePointChangeResultByLogins'
+            $ref: '#/components/schemas/PointChangeResultByLogins'
   requestBodies:
     WheelEffectRollRequest:
       content:

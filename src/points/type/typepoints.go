@@ -12,9 +12,9 @@ type PointChangeResult struct {
 type PointChangeResultByTypes = map[string]PointChangeResult
 
 type PointChangeResultByUserId struct {
-	Login        string
-	UserId       int
-	ChangeResult PointChangeResult
+	Login         string
+	UserId        int
+	ChangeResults PointChangeResultByTypes
 }
 
 type PointChangeResultByUserIds = []PointChangeResultByUserId
@@ -36,13 +36,14 @@ type FreePointChange struct {
 	DesiredChangeValue int
 }
 
-type FreePointChangeByUserId struct {
-	Login       string
-	UserId      int
-	PointChange FreePointChange
+type PointChangeByUserId struct {
+	Login               string
+	UserId              int
+	FreePointChange     FreePointChange
+	AvailableRollChange *PointChange
 }
 
-type FreePointChangeByUserIds = []FreePointChangeByUserId
+type PointChangeByUserIds = []PointChangeByUserId
 
 type TerritoryPointChange struct {
 	SourceUserId       int
@@ -88,6 +89,8 @@ type PointInfoByLogins = []PointInfoByLogin
 const (
 	PointTypeTerritoryHours  = "territoryHours"
 	PointTypeTerritoryPoints = "territoryPoints"
+	PointTypeFreePoints      = "freePoints"
+	PointTypeAvailableRolls  = "availableRolls"
 )
 
 const (
