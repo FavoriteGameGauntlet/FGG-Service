@@ -18,12 +18,6 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-// FreePointChangeResultByLogins defines model for FreePointChangeResultByLogins.
-type FreePointChangeResultByLogins = []struct {
-	ChangeResult PointChangeResult `json:"changeResult"`
-	Login        Login             `json:"login"`
-}
-
 // Login defines model for Login.
 type Login = string
 
@@ -38,8 +32,9 @@ type PointChange struct {
 
 // PointChangeByLogins defines model for PointChangeByLogins.
 type PointChangeByLogins = []struct {
-	Login       Login       `json:"login"`
-	PointChange PointChange `json:"pointChange"`
+	AvailableRollChange *PointChange `json:"availableRollChange,omitempty"`
+	FreePointChange     PointChange  `json:"freePointChange"`
+	Login               Login        `json:"login"`
 }
 
 // PointChangeResult defines model for PointChangeResult.
@@ -47,6 +42,15 @@ type PointChangeResult struct {
 	ActualChangeValue int    `json:"actualChangeValue"`
 	FinalValue        Points `json:"finalValue"`
 }
+
+// PointChangeResultByLogins defines model for PointChangeResultByLogins.
+type PointChangeResultByLogins = []struct {
+	ChangeResults PointChangeResultByTypes `json:"changeResults"`
+	Login         Login                    `json:"login"`
+}
+
+// PointChangeResultByTypes defines model for PointChangeResultByTypes.
+type PointChangeResultByTypes map[string]PointChangeResult
 
 // Points defines model for Points.
 type Points = int
@@ -96,8 +100,8 @@ type WheelEffects = []WheelEffect
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse = Error
 
-// FreePointChangeResultByLoginsResponse defines model for FreePointChangeResultByLoginsResponse.
-type FreePointChangeResultByLoginsResponse = FreePointChangeResultByLogins
+// PointChangeResultByLoginsResponse defines model for PointChangeResultByLoginsResponse.
+type PointChangeResultByLoginsResponse = PointChangeResultByLogins
 
 // PointsResponse defines model for PointsResponse.
 type PointsResponse = Points

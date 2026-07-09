@@ -170,17 +170,50 @@ func (s *Service) ApplyWheelEffectRoll(userId int, rollApply typewheeleffects.Wh
 	results = make(typepoints.PointChangeResultByUserIds, len(rollApply.PointChangeByUserIds))
 
 	for i, pointChange := range rollApply.PointChangeByUserIds {
-		var changeResult typepoints.PointChangeResult
-		changeResult, err = s.PointService.ChangeFreePoints(pointChange.UserId, pointChange.PointChange, &historyId)
+		var freePointsResult typepoints.PointChangeResult
+		freePointsResult, err = s.PointService.ChangeFreePoints(pointChange.UserId, pointChange.FreePointChange, &historyId)
 
 		if err != nil {
 			return
 		}
 
+		changeResults := typepoints.PointChangeResultByTypes{
+			typepoints.PointTypeFreePoints: freePointsResult,
+		}
+
+		if pointChange.AvailableRollChange != nil {
+			if pointChange.AvailableRollChange.DesiredChangeValue < 0 {
+				err = common.NewWrongDesiredChangeValueConflictError(
+					pointChange.AvailableRollChange.ChangeSource,
+					common.ConstraintZeroOrMore)
+				return
+			}
+
+			var currentRolls int
+			currentRolls, err = s.Database.GetAvailableRollsCountCommand(pointChange.UserId)
+
+			if err != nil {
+				return
+			}
+
+			err = s.PointService.ChangeAvailableRolls(pointChange.UserId, pointChange.AvailableRollChange.DesiredChangeValue)
+
+			if err != nil {
+				return
+			}
+
+			changeResults[typepoints.PointTypeAvailableRolls] = typepoints.PointChangeResult{
+				ActualChangeValue:  pointChange.AvailableRollChange.DesiredChangeValue,
+				ChangeSource:       pointChange.AvailableRollChange.ChangeSource,
+				DesiredChangeValue: pointChange.AvailableRollChange.DesiredChangeValue,
+				FinalValue:         currentRolls + pointChange.AvailableRollChange.DesiredChangeValue,
+			}
+		}
+
 		results[i] = typepoints.PointChangeResultByUserId{
-			UserId:       pointChange.UserId,
-			Login:        pointChange.Login,
-			ChangeResult: changeResult,
+			UserId:        pointChange.UserId,
+			Login:         pointChange.Login,
+			ChangeResults: changeResults,
 		}
 	}
 

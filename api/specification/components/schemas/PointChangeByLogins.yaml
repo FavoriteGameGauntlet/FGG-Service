@@ -4,6 +4,8 @@ items:
   properties:
     login:
       $ref: "./Login.yaml"
-    pointChange:
+    freePointChange:
       $ref: "./PointChange.yaml"
-  required: [ login, pointChange ]
+    availableRollChange:
+      $ref: "./PointChange.yaml"
+  required: [ login, freePointChange ]
