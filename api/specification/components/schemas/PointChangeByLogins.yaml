@@ -8,4 +8,4 @@ items:
       $ref: "./PointChange.yaml"
     availableRollChange:
       $ref: "./PointChange.yaml"
-  required: [ login, freePointChange ]
+  required: [ login ]

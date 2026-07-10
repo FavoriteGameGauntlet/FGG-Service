@@ -124,14 +124,19 @@ func (c *Controller) convertDtoToWheelEffectRollApply(sourceUserId int, rollAppl
 			}
 		}
 
-		pointChanges[i] = typepoints.PointChangeByUserId{
-			Login:  pointChangeByLogin.Login,
-			UserId: userId,
-			FreePointChange: typepoints.FreePointChange{
+		var freePointChange *typepoints.FreePointChange
+		if pointChangeByLogin.FreePointChange != nil {
+			freePointChange = &typepoints.FreePointChange{
 				SourceUserId:       sourceUserId,
 				ChangeSource:       pointChangeByLogin.FreePointChange.ChangeSource,
 				DesiredChangeValue: pointChangeByLogin.FreePointChange.DesiredChangeValue,
-			},
+			}
+		}
+
+		pointChanges[i] = typepoints.PointChangeByUserId{
+			Login:               pointChangeByLogin.Login,
+			UserId:              userId,
+			FreePointChange:     freePointChange,
 			AvailableRollChange: availableRollChange,
 		}
 	}
