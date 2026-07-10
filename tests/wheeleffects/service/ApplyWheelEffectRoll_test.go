@@ -35,7 +35,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		RollApply: typewheeleffects.WheelEffectRollApply{
 			WheelEffectName: "unknown-effect",
 			PointChangeByUserIds: typepoints.PointChangeByUserIds{
-				{Login: "alice", UserId: 2, FreePointChange: typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}},
+				{Login: "alice", UserId: 2, FreePointChange: &typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}},
 			},
 		},
 		SetupWheelEffectMock: func() *dbwheeleffectsmock.DatabaseMock {
@@ -61,7 +61,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		RollApply: typewheeleffects.WheelEffectRollApply{
 			WheelEffectName: "test-effect",
 			PointChangeByUserIds: typepoints.PointChangeByUserIds{
-				{Login: "alice", UserId: 2, FreePointChange: typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}},
+				{Login: "alice", UserId: 2, FreePointChange: &typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}},
 			},
 		},
 		SetupWheelEffectMock: func() *dbwheeleffectsmock.DatabaseMock {
@@ -91,7 +91,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		RollApply: typewheeleffects.WheelEffectRollApply{
 			WheelEffectName: "test-effect",
 			PointChangeByUserIds: typepoints.PointChangeByUserIds{
-				{Login: "alice", UserId: 2, FreePointChange: typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}},
+				{Login: "alice", UserId: 2, FreePointChange: &typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}},
 			},
 		},
 		SetupWheelEffectMock: func() *dbwheeleffectsmock.DatabaseMock {
@@ -118,7 +118,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		RollApply: typewheeleffects.WheelEffectRollApply{
 			WheelEffectName: "test-effect",
 			PointChangeByUserIds: typepoints.PointChangeByUserIds{
-				{Login: "alice", UserId: 2, FreePointChange: typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}},
+				{Login: "alice", UserId: 2, FreePointChange: &typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}},
 			},
 		},
 		SetupWheelEffectMock: func() *dbwheeleffectsmock.DatabaseMock {
@@ -146,8 +146,8 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		RollApply: typewheeleffects.WheelEffectRollApply{
 			WheelEffectName: "test-effect",
 			PointChangeByUserIds: typepoints.PointChangeByUserIds{
-				{Login: "alice", UserId: 2, FreePointChange: typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}},
-				{Login: "bob", UserId: 3, FreePointChange: typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: -2}},
+				{Login: "alice", UserId: 2, FreePointChange: &typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}},
+				{Login: "bob", UserId: 3, FreePointChange: &typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: -2}},
 			},
 		},
 		SetupWheelEffectMock: func() *dbwheeleffectsmock.DatabaseMock {
@@ -195,8 +195,8 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		RollApply: typewheeleffects.WheelEffectRollApply{
 			WheelEffectName: "test-effect",
 			PointChangeByUserIds: typepoints.PointChangeByUserIds{
-				{Login: "alice", UserId: 2, FreePointChange: typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}, AvailableRollChange: &typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 1}},
-				{Login: "bob", UserId: 3, FreePointChange: typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: 0}, AvailableRollChange: &typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: 2}},
+				{Login: "alice", UserId: 2, FreePointChange: &typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 5}, AvailableRollChange: &typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceQuestCompletion, DesiredChangeValue: 1}},
+				{Login: "bob", UserId: 3, FreePointChange: &typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: 0}, AvailableRollChange: &typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: 2}},
 			},
 		},
 		SetupWheelEffectMock: func() *dbwheeleffectsmock.DatabaseMock {
@@ -250,7 +250,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		RollApply: typewheeleffects.WheelEffectRollApply{
 			WheelEffectName: "test-effect",
 			PointChangeByUserIds: typepoints.PointChangeByUserIds{
-				{Login: "alice", UserId: 2, FreePointChange: typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: 0}, AvailableRollChange: &typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: -1}},
+				{Login: "alice", UserId: 2, FreePointChange: &typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: 0}, AvailableRollChange: &typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: -1}},
 			},
 		},
 		SetupWheelEffectMock: func() *dbwheeleffectsmock.DatabaseMock {
@@ -288,7 +288,7 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 		RollApply: typewheeleffects.WheelEffectRollApply{
 			WheelEffectName: "test-effect",
 			PointChangeByUserIds: typepoints.PointChangeByUserIds{
-				{Login: "alice", UserId: 2, FreePointChange: typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: 0}, AvailableRollChange: &typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: 1}},
+				{Login: "alice", UserId: 2, FreePointChange: &typepoints.FreePointChange{SourceUserId: 1, ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: 0}, AvailableRollChange: &typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceOther, DesiredChangeValue: 1}},
 			},
 		},
 		SetupWheelEffectMock: func() *dbwheeleffectsmock.DatabaseMock {
@@ -320,6 +320,41 @@ var ApplyWheelEffectRollTestCases = []ApplyWheelEffectRollTestCase{
 			return spSvc
 		},
 		ExpectedError: dbError,
+	},
+	{
+		// A roll change with no free point change at all applies via ChangeAvailableRolls, and ChangeFreePoints is never called.
+		Name:   "Success_WithRollChangeOnly_NoFreePointChange",
+		UserId: 1,
+		RollApply: typewheeleffects.WheelEffectRollApply{
+			WheelEffectName: "test-effect",
+			PointChangeByUserIds: typepoints.PointChangeByUserIds{
+				{Login: "alice", UserId: 2, AvailableRollChange: &typepoints.PointChange{ChangeSource: typepoints.FreePointsChangeSourceWheelEffect, DesiredChangeValue: 1}},
+			},
+		},
+		SetupWheelEffectMock: func() *dbwheeleffectsmock.DatabaseMock {
+			databaseMock := new(dbwheeleffectsmock.DatabaseMock)
+
+			databaseMock.
+				On("GetLastRolledWheelEffectsCommand", 1).
+				Return(typewheeleffects.RolledWheelEffects{
+					{Id: 42, Name: "test-effect", IsApplied: false},
+				}, nil)
+			databaseMock.On("MarkLastWheelEffectAppliedCommand", 1, 42).Return(nil)
+			databaseMock.On("AddWheelEffectHistoryCommand", 1, 42).Return(100, nil)
+			databaseMock.On("GetAvailableRollsCountCommand", 2).Return(3, nil)
+
+			return databaseMock
+		},
+		SetupPointsMock: func() *dbpointsmock.DatabaseMock {
+			databaseMock := new(dbpointsmock.DatabaseMock)
+			databaseMock.On("ChangeAvailableRollsCommand", 2, 1).Return(nil)
+			return databaseMock
+		},
+		ExpectedResults: typepoints.PointChangeResultByUserIds{
+			{Login: "alice", UserId: 2, ChangeResults: typepoints.PointChangeResultByTypes{
+				typepoints.PointTypeAvailableRolls: {ActualChangeValue: 1, ChangeSource: typepoints.FreePointsChangeSourceWheelEffect, DesiredChangeValue: 1, FinalValue: 4},
+			}},
+		},
 	},
 }
 

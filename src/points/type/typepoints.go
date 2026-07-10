@@ -39,7 +39,7 @@ type FreePointChange struct {
 type PointChangeByUserId struct {
 	Login               string
 	UserId              int
-	FreePointChange     FreePointChange
+	FreePointChange     *FreePointChange
 	AvailableRollChange *PointChange
 }
 

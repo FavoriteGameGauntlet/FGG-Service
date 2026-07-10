@@ -33,7 +33,7 @@ type PointChange struct {
 // PointChangeByLogins defines model for PointChangeByLogins.
 type PointChangeByLogins = []struct {
 	AvailableRollChange *PointChange `json:"availableRollChange,omitempty"`
-	FreePointChange     PointChange  `json:"freePointChange"`
+	FreePointChange     *PointChange `json:"freePointChange,omitempty"`
 	Login               Login        `json:"login"`
 }
 

@@ -211,7 +211,6 @@ components:
             $ref: '#/components/schemas/PointChange'
         required:
           - login
-          - freePointChange
     WheelEffectRollApply:
       type: object
       properties:

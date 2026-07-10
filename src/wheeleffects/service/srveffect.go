@@ -170,15 +170,17 @@ func (s *Service) ApplyWheelEffectRoll(userId int, rollApply typewheeleffects.Wh
 	results = make(typepoints.PointChangeResultByUserIds, len(rollApply.PointChangeByUserIds))
 
 	for i, pointChange := range rollApply.PointChangeByUserIds {
-		var freePointsResult typepoints.PointChangeResult
-		freePointsResult, err = s.PointService.ChangeFreePoints(pointChange.UserId, pointChange.FreePointChange, &historyId)
+		changeResults := typepoints.PointChangeResultByTypes{}
 
-		if err != nil {
-			return
-		}
+		if pointChange.FreePointChange != nil {
+			var freePointsResult typepoints.PointChangeResult
+			freePointsResult, err = s.PointService.ChangeFreePoints(pointChange.UserId, *pointChange.FreePointChange, &historyId)
 
-		changeResults := typepoints.PointChangeResultByTypes{
-			typepoints.PointTypeFreePoints: freePointsResult,
+			if err != nil {
+				return
+			}
+
+			changeResults[typepoints.PointTypeFreePoints] = freePointsResult
 		}
 
 		if pointChange.AvailableRollChange != nil {
