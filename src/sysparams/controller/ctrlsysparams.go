@@ -91,12 +91,6 @@ func (c *Controller) ChangeAdminSystemParameter(ctx echo.Context, name gensyspar
 
 // GetAllAppSystemParameters (GET /system-parameters/app/all)
 func (c *Controller) GetAllAppSystemParameters(ctx echo.Context) error {
-	_, err := c.AuthService.GetUserId(ctx)
-
-	if err != nil {
-		return common.SendJSONErrorResponse(ctx, err)
-	}
-
 	parameters, err := c.Service.GetAllApp()
 
 	if err != nil {
@@ -108,12 +102,6 @@ func (c *Controller) GetAllAppSystemParameters(ctx echo.Context) error {
 
 // GetAppSystemParameter (GET /system-parameters/app/{name})
 func (c *Controller) GetAppSystemParameter(ctx echo.Context, name gensysparams.Name) error {
-	_, err := c.AuthService.GetUserId(ctx)
-
-	if err != nil {
-		return common.SendJSONErrorResponse(ctx, err)
-	}
-
 	parameter, err := c.Service.GetAppParameter(name)
 
 	if err != nil {

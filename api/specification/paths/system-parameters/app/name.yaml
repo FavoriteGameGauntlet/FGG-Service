@@ -8,8 +8,6 @@ get:
       $ref: "../../../components/responses/SystemParameterResponse.yaml"
     "400":
       $ref: "../../../components/responses/ErrorResponse.yaml"
-    "401":
-      $ref: "../../../components/responses/ErrorResponse.yaml"
     "404":
       $ref: "../../../components/responses/ErrorResponse.yaml"
     "500":

@@ -23,8 +23,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/SystemParametersResponse'
-        '401':
-          $ref: '#/components/responses/ErrorResponse'
         '500':
           $ref: '#/components/responses/ErrorResponse'
   /system-parameters/admin/{name}:
@@ -75,8 +73,6 @@ paths:
         '200':
           $ref: '#/components/responses/SystemParameterResponse'
         '400':
-          $ref: '#/components/responses/ErrorResponse'
-        '401':
           $ref: '#/components/responses/ErrorResponse'
         '404':
           $ref: '#/components/responses/ErrorResponse'
